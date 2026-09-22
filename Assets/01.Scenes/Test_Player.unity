@@ -128,7 +128,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 246569484}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Feet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -164,7 +164,7 @@ GameObject:
   - component: {fileID: 481382866}
   - component: {fileID: 481382871}
   - component: {fileID: 481382870}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -336,7 +336,8 @@ MonoBehaviour:
   _feetPosition: {fileID: 246569484}
   _checkRadius: 0.15
   _dodgeDistance: 10
-  _dodgeDuration: 0.25
+  _dodgeJumpForce: 3
+  _dodgeDuration: 0.5
   _dodgeCooldown: 1
   _dodgeSpeedCurve:
     serializedVersion: 2
