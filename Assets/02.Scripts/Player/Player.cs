@@ -26,6 +26,11 @@ public class Player : MonoBehaviour, IDamageable
             return false;
         }
 
-        return Health.TakeDamage(hitData.Damage);
+        return Health.TakeDamage(hitData);
+    }
+
+    public void SetInvincible(bool isInvincible)
+    {
+        _health.SetInvincible(isInvincible);
     }
 }
