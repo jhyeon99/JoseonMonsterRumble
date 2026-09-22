@@ -24,13 +24,14 @@ public class PlayerMovement : MonoBehaviour
 
     private SpriteRenderer _spriteRenderer;
     private Rigidbody2D _rigidbody2D;
+    private Player _player;
     private PlayerInputHandler _inputHandler;
-
 
     private void Awake()
     {
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
+        _player = GetComponent<Player>();
         _inputHandler = GetComponent<PlayerInputHandler>();
     }
 
@@ -88,7 +89,7 @@ public class PlayerMovement : MonoBehaviour
     {
         _isDodging = true;
         _canDodge = false;
-        SetInvincible(true);
+        _player.SetInvincible(true);
 
         float facingDirection = transform.localScale.x > 0 ? 1f : -1f;
         float backstepDirection = -facingDirection;
@@ -113,29 +114,11 @@ public class PlayerMovement : MonoBehaviour
 
         yield return new WaitUntil(() => IsGrounded());
 
-        SetInvincible(false);
+        _player.SetInvincible(false);
         _isDodging = false;
 
         yield return new WaitForSeconds(_dodgeCooldown);
 
         _canDodge = true;
-    }
-
-    private void SetInvincible(bool isInvincible)
-    {
-        int playerLayer = gameObject.layer;
-        int enemyLayer = Constants.Layers.Enemy;
-
-        if (enemyLayer != -1)
-        {
-            Physics2D.IgnoreLayerCollision(playerLayer, enemyLayer, isInvincible);
-        }
-
-        if (_spriteRenderer != null)
-        {
-            Color color = _spriteRenderer.color;
-            color.a = isInvincible ? 0.5f : 1.0f;
-            _spriteRenderer.color = color;
-        }
     }
 }
