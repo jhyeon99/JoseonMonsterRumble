@@ -110,10 +110,9 @@ public class PlayerMovement : MonoBehaviour
             yield return null;
         }
 
-        SetInvincible(false);
-
         yield return new WaitUntil(() => IsGrounded());
 
+        SetInvincible(false);
         _isDodging = false;
 
         yield return new WaitForSeconds(_dodgeCooldown);
