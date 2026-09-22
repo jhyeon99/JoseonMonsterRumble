@@ -12,6 +12,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Dodge Settings")]
     [SerializeField] private float _dodgeDistance;
 
+    [SerializeField] private float _dodgeJumpForce;
     [SerializeField] private float _dodgeDuration;
     [SerializeField] private float _dodgeCooldown;
     [SerializeField] private AnimationCurve _dodgeSpeedCurve;
@@ -91,6 +92,8 @@ public class PlayerMovement : MonoBehaviour
         float facingDirection = transform.localScale.x > 0 ? 1f : -1f;
         float backstepDirection = -facingDirection;
 
+        _rigidbody2D.linearVelocity = new Vector2(_rigidbody2D.linearVelocity.x, _dodgeJumpForce);
+
         float elapsedTime = 0f;
 
         while (elapsedTime < _dodgeDuration)
@@ -108,6 +111,9 @@ public class PlayerMovement : MonoBehaviour
         }
 
         SetInvincible(false);
+
+        yield return new WaitUntil(() => IsGrounded());
+
         _isDodging = false;
 
         yield return new WaitForSeconds(_dodgeCooldown);
@@ -118,7 +124,7 @@ public class PlayerMovement : MonoBehaviour
     private void SetInvincible(bool isInvincible)
     {
         int playerLayer = gameObject.layer;
-        int enemyLayer = LayerMask.NameToLayer("Enemy");
+        int enemyLayer = Constants.Layers.Enemy;
 
         if (enemyLayer != -1)
         {
