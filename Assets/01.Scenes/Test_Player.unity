@@ -164,6 +164,8 @@ GameObject:
   - component: {fileID: 481382866}
   - component: {fileID: 481382871}
   - component: {fileID: 481382870}
+  - component: {fileID: 481382873}
+  - component: {fileID: 481382872}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -336,8 +338,8 @@ MonoBehaviour:
   _feetPosition: {fileID: 246569484}
   _checkRadius: 0.15
   _dodgeDistance: 10
-  _dodgeJumpForce: 3
-  _dodgeDuration: 0.5
+  _dodgeJumpForce: 2
+  _dodgeDuration: 0.2
   _dodgeCooldown: 1
   _dodgeSpeedCurve:
     serializedVersion: 2
@@ -384,6 +386,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4721ce6c3c0526d48a12a4c3ebfa3630, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInputHandler
+--- !u!114 &481382872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 481382865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6393e59aa1c69aa4fba38db91be72562, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player
+--- !u!114 &481382873
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 481382865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 112e2c2fcacf8ce48b48b90ce0143d7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  _maxHealth: 100
+  _currentHealth: 0
 --- !u!1 &1215911936
 GameObject:
   m_ObjectHideFlags: 0

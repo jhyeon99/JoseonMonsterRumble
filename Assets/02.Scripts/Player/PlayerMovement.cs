@@ -19,6 +19,7 @@ public class PlayerMovement : MonoBehaviour
 
 
     private bool _isDodging;
+    public bool IsDodging => _isDodging;
     private bool _canDodge = true;
 
     private SpriteRenderer _spriteRenderer;
