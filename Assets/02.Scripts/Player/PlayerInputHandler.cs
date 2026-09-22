@@ -10,6 +10,8 @@ public class PlayerInputHandler : MonoBehaviour
     public bool IsJumpKeyDown => _isJumpKeyDown;
     private bool _isDodgeKeyDown;
     public bool IsDodgeKeyDown => _isDodgeKeyDown;
+    private bool _isAttackKeyDown;
+    public bool IsAttackKeyDown => _isAttackKeyDown;
 
     private void Update()
     {
@@ -20,6 +22,7 @@ public class PlayerInputHandler : MonoBehaviour
     {
         _moveInputX = Input.GetAxisRaw(Horizontal);
         _isJumpKeyDown = Input.GetKeyDown(KeyCode.Space);
-        _isDodgeKeyDown = Input.GetKey(KeyCode.Z);
+        _isDodgeKeyDown = Input.GetKeyDown(KeyCode.Z);
+        _isAttackKeyDown = Input.GetKeyDown(KeyCode.X);
     }
 }

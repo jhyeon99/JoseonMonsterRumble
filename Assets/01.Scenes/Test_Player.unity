@@ -166,6 +166,7 @@ GameObject:
   - component: {fileID: 481382870}
   - component: {fileID: 481382873}
   - component: {fileID: 481382872}
+  - component: {fileID: 481382874}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -412,6 +413,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   _maxHealth: 100
   _currentHealth: 0
+--- !u!114 &481382874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 481382865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa3393805f696bc48a12568cdd4f6b96, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAttack
+  _attackDataTableSo: {fileID: 11400000, guid: 7fbb6c0fc4433334f8dcad41dfd36426, type: 2}
+  _attackOrigin: {fileID: 481382869}
+  _enemyLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  _currentCombo: 0
 --- !u!1 &1215911936
 GameObject:
   m_ObjectHideFlags: 0
