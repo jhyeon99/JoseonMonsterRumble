@@ -28,7 +28,12 @@ public abstract class Enemy : MonoBehaviour, IDamageable
 
     protected virtual void Update()
     {
-        StateMachine.UpdateState();
+        StateMachine.Update();
+    }
+
+    protected void FixedUpdate()
+    {
+        StateMachine.FixedUpdate();
     }
 
     public bool TakeDamage(HitData hitData)

@@ -2,25 +2,33 @@ using UnityEngine;
 
 public class EnemyStateMachine
 {
-    private IEnemyState _currentState;
+    private EnemyState _currentState;
 
-    public void ChangeState(IEnemyState newState)
+    public void ChangeState(EnemyState newState)
     {
         if (_currentState != null)
         {
-            _currentState.ExitState();
+            _currentState.Exit();
         }
 
         _currentState = newState;
 
-        _currentState.EnterState();
+        _currentState.Enter();
     }
 
-    public void UpdateState()
+    public void Update()
     {
         if (_currentState != null)
         {
-            _currentState.UpdateState();
+            _currentState.Update();
+        }
+    }
+
+    public void FixedUpdate()
+    {
+        if (_currentState != null)
+        {
+            _currentState.FixedUpdate();
         }
     }
 }
