@@ -28,14 +28,20 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         CurrentHp = _data.MaxHp;
     }
 
+    protected virtual private void Start()
+    {
+        _stateMachine.ChangeState(new IdleState(this));
+    }
+
+
     protected virtual void Update()
     {
-        StateMachine.Update();
+        _stateMachine.Update();
     }
 
     protected void FixedUpdate()
     {
-        StateMachine.FixedUpdate();
+        _stateMachine.FixedUpdate();
     }
 
     public float GetDistanceToPlayer()
