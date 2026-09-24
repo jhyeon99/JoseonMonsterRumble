@@ -1,5 +1,5 @@
-using System.Collections;
 using UnityEngine;
+using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -20,29 +20,14 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _dodgeCooldown;
     [SerializeField] private AnimationCurve _dodgeSpeedCurve;
     public  AnimationCurve DodgeSpeedCurve => _dodgeSpeedCurve;
-
-    public bool IsDodging => _isDodging;
+    
+    private bool _canDodge = true;
 
     private Rigidbody2D _rigidbody2D;
-    private Player _player;
-    private PlayerInputHandler _inputHandler;
-
-    private Vector2 _playerVelocity;
-    private Vector2 _platformVelocity;
-
-    private bool _isDodging;
-    private bool _canDodge = true;
-    private bool _isJumpRequested;
-    private bool _isDodgeRequested;
-
-    private float _dodgeElapsedTime;
-    private float _dodgeDirection;
 
     private void Awake()
     {
         _rigidbody2D = GetComponent<Rigidbody2D>();
-        _player = GetComponent<Player>();
-        _inputHandler = GetComponent<PlayerInputHandler>();
     }
 
     public bool IsGrounded()
@@ -63,23 +48,6 @@ public class PlayerMovement : MonoBehaviour
         {
             transform.localScale = new Vector3(Mathf.Sign(x), 1, 1);
         }
-
-        if (_isDodgeRequested && _canDodge && isGrounded)
-        {
-            StartDodge();
-        }
-        else if (_isJumpRequested && isGrounded)
-        {
-            Jump();
-        }
-        else
-        {
-            UpdatePlatformVelocity(groundCollider, isGrounded);
-            MoveX();
-        }
-
-        ClearMovementRequests();
-        ApplyVelocity();
     }
 
     public void Jump()
@@ -97,45 +65,5 @@ public class PlayerMovement : MonoBehaviour
         _canDodge = false;
         yield return new WaitForSeconds(_dodgeCooldown);
         _canDodge = true;
-    }
-
-    private Collider2D GetGroundCollider()
-    {
-        return Physics2D.OverlapCircle(
-            _feetPosition.position,
-            _checkRadius,
-            Constants.Layers.GroundAllMask
-        );
-    }
-
-    private Vector2 GetPlatformVelocity(Collider2D groundCollider)
-    {
-        if (groundCollider == null)
-            return Vector2.zero;
-
-        MovingPlatform movingPlatform =
-            groundCollider.GetComponentInParent<MovingPlatform>();
-
-        return movingPlatform != null
-            ? movingPlatform.GetVelocity()
-            : Vector2.zero;
-    }
-
-    private bool IsGrounded(Collider2D groundCollider)
-    {
-        return groundCollider != null &&
-               _playerVelocity.y <= 0.01f;
-    }
-
-    private void ClearMovementRequests()
-    {
-        _isJumpRequested = false;
-        _isDodgeRequested = false;
-    }
-
-    private void ApplyVelocity()
-    {
-        _rigidbody2D.linearVelocity =
-            _playerVelocity + _platformVelocity;
     }
 }
