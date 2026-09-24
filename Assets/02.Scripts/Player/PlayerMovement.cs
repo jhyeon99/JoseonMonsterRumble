@@ -11,64 +11,33 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Dodge Settings")]
     [SerializeField] private float _dodgeDistance;
+    public float DodgeDistance => _dodgeDistance;
 
     [SerializeField] private float _dodgeJumpForce;
+    public float DodgeJumpForce => _dodgeJumpForce;
     [SerializeField] private float _dodgeDuration;
+    public float DodgeDuration => _dodgeDuration;
     [SerializeField] private float _dodgeCooldown;
     [SerializeField] private AnimationCurve _dodgeSpeedCurve;
+    public  AnimationCurve DodgeSpeedCurve => _dodgeSpeedCurve;
 
 
     private bool _isDodging;
     public bool IsDodging => _isDodging;
     private bool _canDodge = true;
 
-    private SpriteRenderer _spriteRenderer;
     private Rigidbody2D _rigidbody2D;
     private Player _player;
     private PlayerInputHandler _inputHandler;
 
     private void Awake()
     {
-        _spriteRenderer = GetComponent<SpriteRenderer>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _player = GetComponent<Player>();
         _inputHandler = GetComponent<PlayerInputHandler>();
     }
 
-    private void Update()
-    {
-        if (_isDodging) return;
-
-        if (IsGrounded())
-        {
-            if (_inputHandler.IsDodgeKeyDown && _canDodge)
-            {
-                Dodge();
-            }
-            else if (_inputHandler.IsJumpKeyDown)
-            {
-                _rigidbody2D.AddForce(Vector2.up * _jumpForce, ForceMode2D.Impulse);
-            }
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        if (_isDodging) return;
-
-        MoveX();
-    }
-
-    private void MoveX()
-    {
-        _rigidbody2D.linearVelocity = new Vector2(_inputHandler.MoveInputX * _speed, _rigidbody2D.linearVelocity.y);
-        if (Mathf.Abs(_inputHandler.MoveInputX) > 0.01f)
-        {
-            transform.localScale = new Vector3(Mathf.Sign(_inputHandler.MoveInputX), 1, 1);
-        }
-    }
-
-    private bool IsGrounded()
+    public bool IsGrounded()
     {
         bool isTouchingGround = Physics2D.OverlapCircle(
             _feetPosition.position,
@@ -79,46 +48,29 @@ public class PlayerMovement : MonoBehaviour
         return isTouchingGround && _rigidbody2D.linearVelocity.y <= 0.01f;
     }
 
-    private void Dodge()
+    public void MoveX(float x)
     {
-        _isDodging = true;
-        StartCoroutine(DodgeRoutine());
+        _rigidbody2D.linearVelocity = new Vector2(x * _speed, _rigidbody2D.linearVelocity.y);
+        if (Mathf.Abs(x) > 0.01f)
+        {
+            transform.localScale = new Vector3(Mathf.Sign(x), 1, 1);
+        }
     }
 
-    private IEnumerator DodgeRoutine()
+    public void Jump()
     {
-        _isDodging = true;
+        _rigidbody2D.AddForce(Vector2.up * _jumpForce, ForceMode2D.Impulse);
+    }
+
+    public void StartDodgeCooldown()
+    {
+        StartCoroutine(DodgeCooldownRoutine());
+    }
+
+    private IEnumerator DodgeCooldownRoutine()
+    {
         _canDodge = false;
-        _player.SetInvincible(true);
-
-        float facingDirection = transform.localScale.x > 0 ? 1f : -1f;
-        float backstepDirection = -facingDirection;
-
-        _rigidbody2D.linearVelocity = new Vector2(_rigidbody2D.linearVelocity.x, _dodgeJumpForce);
-
-        float elapsedTime = 0f;
-
-        while (elapsedTime < _dodgeDuration)
-        {
-            elapsedTime += Time.deltaTime;
-
-            float normalizedTime = Mathf.Clamp01(elapsedTime / _dodgeDuration);
-
-            float currentSpeedFactor = _dodgeSpeedCurve.Evaluate(normalizedTime);
-
-            float currentDodgeSpeed = backstepDirection * _dodgeDistance * currentSpeedFactor;
-            _rigidbody2D.linearVelocity = new Vector2(currentDodgeSpeed, _rigidbody2D.linearVelocity.y);
-
-            yield return null;
-        }
-
-        yield return new WaitUntil(() => IsGrounded());
-
-        _player.SetInvincible(false);
-        _isDodging = false;
-
         yield return new WaitForSeconds(_dodgeCooldown);
-
         _canDodge = true;
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerHealth))]
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(PlayerAttack))]
-public class Player : MonoBehaviour, IDamageable
+public class Player : MonoBehaviour
 {
     private StateMachine _stateMachine;
     public StateMachine StateMachine => _stateMachine;
@@ -27,6 +27,8 @@ public class Player : MonoBehaviour, IDamageable
     public PlayerMovement Movement => _movement;
     private PlayerAttack _attack;
     public PlayerAttack Attack => _attack;
+    
+    public bool IsGrounded => _movement != null && _movement.IsGrounded();
 
     private void Awake()
     {
@@ -61,20 +63,5 @@ public class Player : MonoBehaviour, IDamageable
         _attackState = new PlayerAttackState(this, _stateMachine);
         _dodgeState = new PlayerDodgeState(this, _stateMachine);
         _deadState = new PlayerDeadState(this, _stateMachine);
-    }
-
-    public bool TakeDamage(HitData hitData)
-    {
-        if (Movement != null && Movement.IsDodging)
-        {
-            return false;
-        }
-
-        return Health.TakeDamage(hitData);
-    }
-
-    public void SetInvincible(bool isInvincible)
-    {
-        _health.SetInvincible(isInvincible);
     }
 }

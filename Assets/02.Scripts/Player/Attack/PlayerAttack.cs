@@ -1,14 +1,33 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class PlayerAttack : MonoBehaviour
 {
-    [SerializeField] private AttackDataTableSO _attackDataTableSo;
+    [SerializeField] private AttackDataTableSO _attackDataTableSO;
     [SerializeField] private Transform _attackOrigin;
     [SerializeField] private LayerMask _enemyLayer;
 
 
     [SerializeField, ReadOnly] private int _currentCombo = 0;
+    public float CurrentAttackDuration
+    {
+        get
+        {
+            if (_currentCombo <= 0 || _attackDataTableSO == null)
+            {
+                return 0f;
+            }
+            
+            int index = _currentCombo - 1;
+            if (index >= _attackDataTableSO.Data.Length)
+            {
+                return 0f;
+            }
+
+            return _attackDataTableSO.Data[index].ActiveDuration;
+        }
+    }
     private Coroutine _comboResetCoroutine;
 
     private Animator _animator;
@@ -20,18 +39,10 @@ public class PlayerAttack : MonoBehaviour
         _inputHandler = GetComponent<PlayerInputHandler>();
     }
 
-    private void Update()
+    public void ExecuteAttack()
     {
-        if (_inputHandler.IsAttackKeyDown)
-        {
-            Attack();
-        }
-    }
-
-    private void Attack()
-    {
-        if (_attackDataTableSo == null || _attackDataTableSo.Data == null ||
-            _attackDataTableSo.Data.Length == 0)
+        if (_attackDataTableSO == null || _attackDataTableSO.Data == null ||
+            _attackDataTableSO.Data.Length == 0)
         {
             return;
         }
@@ -41,10 +52,10 @@ public class PlayerAttack : MonoBehaviour
             StopCoroutine(_comboResetCoroutine);
         }
 
-        _currentCombo %= _attackDataTableSo.Data.Length;
+        _currentCombo %= _attackDataTableSO.Data.Length;
         _currentCombo++;
 
-        AttackData currentAttack = _attackDataTableSo.Data[_currentCombo - 1];
+        AttackData currentAttack = _attackDataTableSO.Data[_currentCombo - 1];
 
         StartCoroutine(HitboxRoutine(currentAttack));
         _comboResetCoroutine = StartCoroutine(ResetComboCorutine());
@@ -78,21 +89,21 @@ public class PlayerAttack : MonoBehaviour
 
     private IEnumerator ResetComboCorutine()
     {
-        yield return new WaitForSeconds(_attackDataTableSo.ComboResetTime);
+        yield return new WaitForSeconds(_attackDataTableSO.ComboResetTime);
         _currentCombo = 0;
     }
 
     private void OnDrawGizmosSelected()
     {
-        if (_attackDataTableSo == null || _attackDataTableSo.Data == null ||
-            _attackDataTableSo.Data.Length == 0 || _attackOrigin == null)
+        if (_attackDataTableSO == null || _attackDataTableSO.Data == null ||
+            _attackDataTableSO.Data.Length == 0 || _attackOrigin == null)
         {
             return;
         }
 
         Gizmos.color = Color.red;
-        int previewIndex = Mathf.Clamp(_currentCombo - 1, 0, _attackDataTableSo.Data.Length - 1);
-        AttackData step = _attackDataTableSo.Data[previewIndex];
+        int previewIndex = Mathf.Clamp(_currentCombo - 1, 0, _attackDataTableSO.Data.Length - 1);
+        AttackData step = _attackDataTableSO.Data[previewIndex];
 
         Vector3 center = _attackOrigin.position + _attackOrigin.TransformDirection(step.HitboxOffset);
         Gizmos.DrawWireCube(center, step.HitboxSize);
