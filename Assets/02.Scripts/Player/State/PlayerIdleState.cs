@@ -5,12 +5,6 @@ public class PlayerIdleState : PlayerBaseState
     public PlayerIdleState(Player player, StateMachine stateMachine) 
         : base(player, stateMachine) { }
 
-    public override void Enter()
-    {
-        base.Enter();
-        _rigidbody2D.linearVelocity = new Vector2(0, _rigidbody2D.linearVelocity.y);
-    }
-
     public override void Execute()
     {
         base.Execute();
@@ -44,5 +38,20 @@ public class PlayerIdleState : PlayerBaseState
             _stateMachine.ChangeState(_player.MoveState);
             return;
         }
+    }
+
+    public override void PhysicsExecute()
+    {
+        base.PhysicsExecute();
+
+        float targetVelocityX = 0f;
+
+        if (_player.transform.parent != null && 
+            _player.transform.parent.TryGetComponent<MovingPlatform>(out var platform))
+        {
+            targetVelocityX = platform.Velocity.x;
+        }
+
+        _rigidbody2D.linearVelocity = new Vector2(targetVelocityX, _rigidbody2D.linearVelocity.y);
     }
 }

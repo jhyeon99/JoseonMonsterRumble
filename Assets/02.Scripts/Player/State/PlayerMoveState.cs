@@ -43,7 +43,15 @@ public class PlayerMoveState : PlayerBaseState
     public override void PhysicsExecute()
     {
         base.PhysicsExecute();
-        
-        _player.Movement.MoveX(_inputHandler.MoveInputX);
+
+        float platformVelocityX = 0f;
+
+        if (_player.transform.parent != null && 
+            _player.transform.parent.TryGetComponent<MovingPlatform>(out var platform))
+        {
+            platformVelocityX = platform.Velocity.x;
+        }
+
+        _player.Movement.MoveX(_inputHandler.MoveInputX, platformVelocityX);
     }
 }

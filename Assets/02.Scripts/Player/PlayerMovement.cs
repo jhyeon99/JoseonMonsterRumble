@@ -4,6 +4,7 @@ using System.Collections;
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private float _speed;
+    public float Speed => _speed;
     [SerializeField] private float _jumpForce;
 
     [SerializeField] private Transform _feetPosition;
@@ -38,12 +39,23 @@ public class PlayerMovement : MonoBehaviour
             Constants.Layers.GroundAllMask
         );
 
-        return isTouchingGround && _rigidbody2D.linearVelocity.y <= 0.01f;
+        if (!isTouchingGround) 
+            return false;
+
+        if (transform.parent != null && transform.parent.GetComponent<MovingPlatform>() != null)
+        {
+            return true;
+        }
+
+        return _rigidbody2D.linearVelocity.y <= 0.1f;
     }
 
-    public void MoveX(float x)
+    public void MoveX(float x, float additionalVelocityX = 0f)
     {
-        _rigidbody2D.linearVelocity = new Vector2(x * _speed, _rigidbody2D.linearVelocity.y);
+        float targetVelocityX = (x * _speed) + additionalVelocityX;
+
+        _rigidbody2D.linearVelocity = new Vector2(targetVelocityX, _rigidbody2D.linearVelocity.y);
+
         if (Mathf.Abs(x) > 0.01f)
         {
             transform.localScale = new Vector3(Mathf.Sign(x), 1, 1);
