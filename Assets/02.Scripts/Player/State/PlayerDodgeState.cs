@@ -6,7 +6,7 @@ public class PlayerDodgeState : PlayerBaseState
     private float _backstepDirection;
     private bool _isDodgeMovementFinished;
 
-    public PlayerDodgeState(Player player, StateMachine stateMachine) 
+    public PlayerDodgeState(Player player, StateMachine stateMachine)
         : base(player, stateMachine) { }
 
     public override void Enter()
