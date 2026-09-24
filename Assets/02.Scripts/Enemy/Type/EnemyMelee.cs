@@ -1,14 +1,12 @@
 using UnityEngine;
 
-public class EnemyMelee : MonoBehaviour
+public class EnemyMelee : Enemy
 {
     private void Start()
     {
-        
     }
 
     private void Update()
     {
-        
     }
 }

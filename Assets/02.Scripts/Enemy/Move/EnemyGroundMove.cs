@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class EnemyGroundMove : EnemyMove
+public class EnemyGroundMove : EnemyMoveType
 {
     public override void Move(Vector2 direction)
     {

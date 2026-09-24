@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public abstract class EnemyMove : MonoBehaviour
+public abstract class EnemyMoveType : MonoBehaviour
 {
     protected Enemy Enemy { get; private set; }
     protected Rigidbody2D Rigidbody { get; private set; }

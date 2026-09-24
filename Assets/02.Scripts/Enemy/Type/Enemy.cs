@@ -6,23 +6,25 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     [SerializeField] private EnemyData _data;
     public EnemyData Data => _data;
 
+    [SerializeField] private Transform _target;
+
     protected float CurrentHp { get; private set; }
     private EnemyStateMachine _stateMachine;
     private EnemyCombat _combat;
     private EnemyAnimation _animation;
-    private EnemyMove _move;
+    private EnemyMoveType _moveType;
 
     public EnemyStateMachine StateMachine => _stateMachine;
     public EnemyCombat Combat => _combat;
     public EnemyAnimation Animation => _animation;
-    public EnemyMove Move => _move;
+    public EnemyMoveType MoveType => _moveType;
 
     protected virtual void Awake()
     {
         _stateMachine = new EnemyStateMachine();
         _combat = GetComponent<EnemyCombat>();
         _animation = GetComponent<EnemyAnimation>();
-        _move = GetComponent<EnemyMove>();
+        _moveType = GetComponent<EnemyMoveType>();
         CurrentHp = _data.MaxHp;
     }
 
@@ -34,6 +36,16 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     protected void FixedUpdate()
     {
         StateMachine.FixedUpdate();
+    }
+
+    public float GetDistanceToPlayer()
+    {
+        return Vector2.Distance(transform.position, _target.position);
+    }
+
+    public Vector2 GetDirectionToPlayer()
+    {
+        return (_target.position - transform.position).normalized;
     }
 
     public bool TakeDamage(HitData hitData)
