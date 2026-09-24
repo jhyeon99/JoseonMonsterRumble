@@ -11,10 +11,15 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Dodge Settings")]
     [SerializeField] private float _dodgeDistance;
+    public float DodgeDistance => _dodgeDistance;
+
     [SerializeField] private float _dodgeJumpForce;
+    public float DodgeJumpForce => _dodgeJumpForce;
     [SerializeField] private float _dodgeDuration;
+    public float DodgeDuration => _dodgeDuration;
     [SerializeField] private float _dodgeCooldown;
     [SerializeField] private AnimationCurve _dodgeSpeedCurve;
+    public  AnimationCurve DodgeSpeedCurve => _dodgeSpeedCurve;
 
     public bool IsDodging => _isDodging;
 
@@ -40,27 +45,23 @@ public class PlayerMovement : MonoBehaviour
         _inputHandler = GetComponent<PlayerInputHandler>();
     }
 
-    private void Update()
+    public bool IsGrounded()
     {
-        if (_isDodging)
-            return;
+        bool isTouchingGround = Physics2D.OverlapCircle(
+            _feetPosition.position,
+            _checkRadius,
+            Constants.Layers.GroundAllMask
+        );
 
-        _isJumpRequested |= _inputHandler.IsJumpKeyDown;
-        _isDodgeRequested |= _inputHandler.IsDodgeKeyDown;
+        return isTouchingGround && _rigidbody2D.linearVelocity.y <= 0.01f;
     }
 
-    private void FixedUpdate()
+    public void MoveX(float x)
     {
-        UpdatePlayerVelocity();
-
-        Collider2D groundCollider = GetGroundCollider();
-        bool isGrounded = IsGrounded(groundCollider);
-
-        if (_isDodging)
+        _rigidbody2D.linearVelocity = new Vector2(x * _speed, _rigidbody2D.linearVelocity.y);
+        if (Mathf.Abs(x) > 0.01f)
         {
-            UpdateDodge(groundCollider, isGrounded);
-            ApplyVelocity();
-            return;
+            transform.localScale = new Vector3(Mathf.Sign(x), 1, 1);
         }
 
         if (_isDodgeRequested && _canDodge && isGrounded)
@@ -81,97 +82,19 @@ public class PlayerMovement : MonoBehaviour
         ApplyVelocity();
     }
 
-    private void UpdatePlayerVelocity()
+    public void Jump()
     {
-        _playerVelocity =
-            _rigidbody2D.linearVelocity - _platformVelocity;
+        _rigidbody2D.AddForce(Vector2.up * _jumpForce, ForceMode2D.Impulse);
     }
 
-    private void UpdatePlatformVelocity(
-        Collider2D groundCollider,
-        bool isGrounded
-    )
+    public void StartDodgeCooldown()
     {
-        _platformVelocity = isGrounded
-            ? GetPlatformVelocity(groundCollider)
-            : Vector2.zero;
-    }
-
-    private void MoveX()
-    {
-        float moveInputX = _inputHandler.MoveInputX;
-        _playerVelocity.x = moveInputX * _speed;
-
-        if (Mathf.Abs(moveInputX) <= 0.01f)
-            return;
-
-        transform.localScale = new Vector3(
-            Mathf.Sign(moveInputX),
-            1f,
-            1f
-        );
-    }
-
-    private void Jump()
-    {
-        _platformVelocity = Vector2.zero;
-        _playerVelocity.y += _jumpForce / _rigidbody2D.mass;
-    }
-
-    private void StartDodge()
-    {
-        _isDodging = true;
-        _canDodge = false;
-        _platformVelocity = Vector2.zero;
-        _dodgeElapsedTime = 0f;
-
-        float facingDirection = transform.localScale.x > 0f ? 1f : -1f;
-        _dodgeDirection = -facingDirection;
-
-        _playerVelocity.y = _dodgeJumpForce;
-        _player.SetInvincible(true);
-    }
-
-    private void UpdateDodge(
-        Collider2D groundCollider,
-        bool isGrounded
-    )
-    {
-        _platformVelocity = Vector2.zero;
-
-        if (_dodgeElapsedTime < _dodgeDuration)
-        {
-            _dodgeElapsedTime += Time.fixedDeltaTime;
-
-            float normalizedTime = Mathf.Clamp01(
-                _dodgeElapsedTime / _dodgeDuration
-            );
-
-            float speedFactor =
-                _dodgeSpeedCurve.Evaluate(normalizedTime);
-
-            _playerVelocity.x =
-                _dodgeDirection * _dodgeDistance * speedFactor;
-
-            return;
-        }
-
-        if (!isGrounded)
-            return;
-
-        StopDodge();
-        UpdatePlatformVelocity(groundCollider, true);
-    }
-
-    private void StopDodge()
-    {
-        _player.SetInvincible(false);
-        _isDodging = false;
         StartCoroutine(DodgeCooldownRoutine());
     }
 
     private IEnumerator DodgeCooldownRoutine()
     {
+        _canDodge = false;
         yield return new WaitForSeconds(_dodgeCooldown);
         _canDodge = true;
     }

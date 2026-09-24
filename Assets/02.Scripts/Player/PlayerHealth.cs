@@ -3,20 +3,26 @@ using System.Collections;
 using Unity.Collections;
 using UnityEngine;
 
-public class PlayerHealth : MonoBehaviour
+public class PlayerHealth : MonoBehaviour, IDamageable
 {
     [SerializeField] private float _maxHealth = 100f;
+    public float MaxHealth => _maxHealth;
     [SerializeField, ReadOnly] private float _currentHealth;
+    public float CurrentHealth => _currentHealth;
     [SerializeField] private float _invincibleTime = 1.0f;
 
     private bool _isDead;
+    public bool IsDead => _isDead;
+    
+    private bool _isInvincible;
+    public bool IsInvincible => _isInvincible;
+    
     private SpriteRenderer _spriteRenderer;
+    private Coroutine _invincibleRoutine;
 
     public event Action<float, float> OnHealthChanged;
+    public event Action OnDied;
 
-    public float CurrentHealth => _currentHealth;
-    public float MaxHealth => _maxHealth;
-    public bool IsDead => _isDead;
 
     private void Awake()
     {
@@ -31,7 +37,7 @@ public class PlayerHealth : MonoBehaviour
 
     public bool TakeDamage(HitData hitdata)
     {
-        if (IsDead) return false;
+        if (IsDead || _isInvincible) return false;
 
         _currentHealth = Mathf.Max(_currentHealth - hitdata.Damage, 0);
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
@@ -41,34 +47,15 @@ public class PlayerHealth : MonoBehaviour
         if (_currentHealth <= 0)
         {
             _isDead = true;
+            OnDied?.Invoke();
+            return true;   
         }
-
-        return true;
-    }
-
-    public bool TakeDamage(float damage)
-    {
-        if (IsDead) return false;
-
-        _currentHealth = Mathf.Max(_currentHealth - damage, 0);
-        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
-
-        StartCoroutine(InvincibleRoutine());
-
-        if (_currentHealth <= 0)
+        
+        if (_invincibleRoutine != null)
         {
-            _isDead = true;
+            StopCoroutine(_invincibleRoutine);
         }
-
-        return true;
-    }
-
-    public bool Heal(float amount)
-    {
-        if (IsDead || _currentHealth >= _maxHealth) return false;
-
-        _currentHealth = Mathf.Min(_currentHealth + amount, _maxHealth);
-        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+        _invincibleRoutine = StartCoroutine(InvincibleRoutine());
 
         return true;
     }
@@ -78,10 +65,13 @@ public class PlayerHealth : MonoBehaviour
         SetInvincible(true);
         yield return new WaitForSeconds(_invincibleTime);
         SetInvincible(false);
+        _invincibleRoutine = null;
     }
 
     public void SetInvincible(bool isInvincible)
     {
+        _isInvincible = isInvincible;
+        
         int playerLayer = gameObject.layer;
         int enemyLayer = Constants.Layers.Enemy;
 
@@ -95,6 +85,16 @@ public class PlayerHealth : MonoBehaviour
             Color color = _spriteRenderer.color;
             color.a = isInvincible ? 0.5f : 1.0f;
             _spriteRenderer.color = color;
+        }
+    }
+    
+    private void OnDisable()
+    {
+        int playerLayer = gameObject.layer;
+        int enemyLayer = Constants.Layers.Enemy;
+        if (enemyLayer != -1)
+        {
+            Physics2D.IgnoreLayerCollision(playerLayer, enemyLayer, false);
         }
     }
 }
