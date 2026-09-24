@@ -20,14 +20,14 @@ public class Player : MonoBehaviour
     public PlayerDodgeState DodgeState => _dodgeState;
     private PlayerDeadState _deadState;
     public PlayerDeadState DeadState => _deadState;
-    
+
     private PlayerHealth _health;
     public PlayerHealth Health => _health;
     private PlayerMovement _movement;
     public PlayerMovement Movement => _movement;
     private PlayerAttack _attack;
     public PlayerAttack Attack => _attack;
-    
+
     public bool IsGrounded => _movement != null && _movement.IsGrounded();
 
     private void Awake()
@@ -35,7 +35,7 @@ public class Player : MonoBehaviour
         _health = GetComponent<PlayerHealth>();
         _movement = GetComponent<PlayerMovement>();
         _attack = GetComponent<PlayerAttack>();
-        
+
         InitializeStates();
     }
 

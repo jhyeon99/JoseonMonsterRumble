@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerJumpState : PlayerBaseState
 {
-    public PlayerJumpState(Player player, StateMachine stateMachine) 
+    public PlayerJumpState(Player player, StateMachine stateMachine)
         : base(player, stateMachine) { }
 
     public override void Enter()
@@ -16,7 +16,7 @@ public class PlayerJumpState : PlayerBaseState
     public override void Execute()
     {
         base.Execute();
-        
+
         if (_player.IsGrounded && _rigidbody2D.linearVelocity.y <= 0.01f)
         {
             if (Mathf.Abs(_inputHandler.MoveInputX) > 0.01f)

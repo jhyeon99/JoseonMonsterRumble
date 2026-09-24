@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerDeadState : PlayerBaseState
 {
-    public PlayerDeadState(Player player, StateMachine stateMachine) 
+    public PlayerDeadState(Player player, StateMachine stateMachine)
         : base(player, stateMachine) { }
 
     public override void Enter()
