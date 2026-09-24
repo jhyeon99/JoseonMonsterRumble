@@ -7,17 +7,22 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     public EnemyData Data => _data;
 
     protected float CurrentHp { get; private set; }
-    protected EnemyStateMachine StateMachine { get; private set; }
-    protected EnemyCombat Combat { get; private set; }
-    protected EnemyAnimation Animation { get; private set; }
-    protected EnemyMove Move { get; private set; }
+    private EnemyStateMachine _stateMachine;
+    private EnemyCombat _combat;
+    private EnemyAnimation _animation;
+    private EnemyMove _move;
+
+    public EnemyStateMachine StateMachine => _stateMachine;
+    public EnemyCombat Combat => _combat;
+    public EnemyAnimation Animation => _animation;
+    public EnemyMove Move => _move;
 
     protected virtual void Awake()
     {
-        StateMachine = new EnemyStateMachine();
-        Combat = GetComponent<EnemyCombat>();
-        Animation = GetComponent<EnemyAnimation>();
-        Move = GetComponent<EnemyMove>();
+        _stateMachine = new EnemyStateMachine();
+        _combat = GetComponent<EnemyCombat>();
+        _animation = GetComponent<EnemyAnimation>();
+        _move = GetComponent<EnemyMove>();
         CurrentHp = _data.MaxHp;
     }
 
