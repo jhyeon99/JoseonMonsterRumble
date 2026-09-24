@@ -28,7 +28,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         CurrentHp = _data.MaxHp;
     }
 
-    protected virtual private void Start()
+    protected virtual void Start()
     {
         _stateMachine.ChangeState(new IdleState(this));
     }
