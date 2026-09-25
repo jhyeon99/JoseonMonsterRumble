@@ -18,7 +18,7 @@ public class PlayerAttack : MonoBehaviour
             {
                 return 0f;
             }
-            
+
             int index = _currentCombo - 1;
             if (index >= _attackDataTableSO.Data.Length)
             {

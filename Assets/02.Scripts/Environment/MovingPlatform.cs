@@ -92,10 +92,31 @@ public class MovingPlatform : MonoBehaviour
         _targetIndex += _direction;
     }
 
-    private bool IsValid()
+    private bool HasRequiredReferences()
     {
-        return _platformBody != null
-               && _points != null
-               && _points.Length >= 2;
+        if (_platformBody == null)
+        {
+            Debug.LogWarning($"{name}: Platform Body 참조가 없습니다.", this);
+            return false;
+        }
+
+        if (_points == null || _points.Length < 2)
+        {
+            Debug.LogWarning($"{name}: 이동 경로에는 Point가 2개 이상 필요합니다.", this);
+            return false;
+        }
+
+        for (int i = 0; i < _points.Length; i++)
+        {
+            if (_points[i] != null)
+            {
+                continue;
+            }
+
+            Debug.LogWarning($"{name}: Points의 {i}번 참조가 없습니다.", this);
+            return false;
+        }
+
+        return true;
     }
 }

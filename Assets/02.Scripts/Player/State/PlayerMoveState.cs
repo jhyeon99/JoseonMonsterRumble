@@ -2,13 +2,13 @@ using UnityEngine;
 
 public class PlayerMoveState : PlayerBaseState
 {
-    public PlayerMoveState(Player player, StateMachine stateMachine) 
+    public PlayerMoveState(Player player, StateMachine stateMachine)
         : base(player, stateMachine) { }
 
     public override void Execute()
     {
         base.Execute();
-        
+
         if (_player.Health != null && _player.Health.IsDead)
         {
             _stateMachine.ChangeState(_player.DeadState);

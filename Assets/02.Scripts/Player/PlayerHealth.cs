@@ -13,10 +13,10 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     private bool _isDead;
     public bool IsDead => _isDead;
-    
+
     private bool _isInvincible;
     public bool IsInvincible => _isInvincible;
-    
+
     private SpriteRenderer _spriteRenderer;
     private Coroutine _invincibleRoutine;
 
@@ -48,9 +48,9 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         {
             _isDead = true;
             OnDied?.Invoke();
-            return true;   
+            return true;
         }
-        
+
         if (_invincibleRoutine != null)
         {
             StopCoroutine(_invincibleRoutine);
@@ -71,7 +71,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     public void SetInvincible(bool isInvincible)
     {
         _isInvincible = isInvincible;
-        
+
         int playerLayer = gameObject.layer;
         int enemyLayer = Constants.Layers.Enemy;
 
@@ -87,7 +87,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             _spriteRenderer.color = color;
         }
     }
-    
+
     private void OnDisable()
     {
         int playerLayer = gameObject.layer;

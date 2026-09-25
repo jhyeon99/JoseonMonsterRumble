@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerIdleState : PlayerBaseState
 {
-    public PlayerIdleState(Player player, StateMachine stateMachine) 
+    public PlayerIdleState(Player player, StateMachine stateMachine)
         : base(player, stateMachine) { }
 
     public override void Execute()
@@ -32,7 +32,7 @@ public class PlayerIdleState : PlayerBaseState
             _stateMachine.ChangeState(_player.JumpState);
             return;
         }
-        
+
         if (Mathf.Abs(_inputHandler.MoveInputX) > 0.01f)
         {
             _stateMachine.ChangeState(_player.MoveState);

@@ -4,7 +4,7 @@ public abstract class PlayerBaseState : IState
 {
     protected Player _player;
     protected StateMachine _stateMachine;
-    
+
     protected PlayerInputHandler _inputHandler;
     protected Rigidbody2D _rigidbody2D;
     

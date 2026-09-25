@@ -8,7 +8,7 @@ public class PlayerDodgeState : PlayerBaseState
     
     public override PlatformInteractionMode PlatformMode => PlatformInteractionMode.ManualWithDelta;
 
-    public PlayerDodgeState(Player player, StateMachine stateMachine) 
+    public PlayerDodgeState(Player player, StateMachine stateMachine)
         : base(player, stateMachine) { }
 
     public override void Enter()
