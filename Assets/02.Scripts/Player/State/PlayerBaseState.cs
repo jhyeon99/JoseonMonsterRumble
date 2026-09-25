@@ -7,7 +7,7 @@ public abstract class PlayerBaseState : IState
 
     protected PlayerInputHandler _inputHandler;
     protected Rigidbody2D _rigidbody2D;
-    
+
     public virtual PlatformInteractionMode PlatformMode => PlatformInteractionMode.Carried;
 
     protected PlayerBaseState(Player player, StateMachine stateMachine)

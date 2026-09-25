@@ -64,7 +64,7 @@ public class MovingPlatform : MonoBehaviour
 
     public void OnPlatformCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.TryGetComponent<Player>(out var player))
+        if (collision.gameObject.TryGetComponent<Player>(out Player player))
         {
             ContactPoint2D contact = collision.GetContact(0);
             if (contact.normal.y < -0.5f)
@@ -76,7 +76,7 @@ public class MovingPlatform : MonoBehaviour
 
     public void OnPlatformCollisionExit2D(Collision2D collision)
     {
-        if (collision.gameObject.TryGetComponent<Player>(out var player))
+        if (collision.gameObject.TryGetComponent<Player>(out Player player))
         {
             player.Movement.SetMovingPlatform(null);
         }

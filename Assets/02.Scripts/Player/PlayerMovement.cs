@@ -19,7 +19,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _dodgeCooldown;
     [SerializeField] private AnimationCurve _dodgeSpeedCurve;
     public AnimationCurve DodgeSpeedCurve => _dodgeSpeedCurve;
-    
+
     private bool _canDodge = true;
     public bool CanDodge => _canDodge;
     private Rigidbody2D _rigidbody2D;
@@ -87,7 +87,7 @@ public class PlayerMovement : MonoBehaviour
     public void IntegrateMovement(PlatformInteractionMode mode)
     {
         if (mode != PlatformInteractionMode.Carried) return;
-    
+
         if (_currentPlatform == null) return;
 
         if (_rigidbody2D.linearVelocity.y < 0f)

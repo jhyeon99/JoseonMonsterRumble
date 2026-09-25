@@ -5,7 +5,7 @@ public class PlayerDodgeState : PlayerBaseState
     private float _elapsedTime;
     private float _dodgeDirection;
     private Vector2 _startPosition;
-    
+
     public override PlatformInteractionMode PlatformMode => PlatformInteractionMode.ManualWithDelta;
 
     public PlayerDodgeState(Player player, StateMachine stateMachine)
@@ -14,7 +14,7 @@ public class PlayerDodgeState : PlayerBaseState
     public override void Enter()
     {
         base.Enter();
-        
+
         _elapsedTime = 0f;
         _player.Health.SetInvincible(true);
 
@@ -53,14 +53,14 @@ public class PlayerDodgeState : PlayerBaseState
         float normalizedTime = Mathf.Clamp01(_elapsedTime / _player.Movement.DodgeDuration);
         float progress = _player.Movement.DodgeSpeedCurve.Evaluate(normalizedTime);
 
-        var platform = _player.Movement.CurrentPlatform;
+        MovingPlatform platform = _player.Movement.CurrentPlatform;
         if (platform != null)
         {
             _startPosition += platform.DeltaPosition;
         }
 
         float targetX = _startPosition.x + _dodgeDirection * _player.Movement.DodgeDistance * progress;
-        
+
         _rigidbody2D.MovePosition(new Vector2(targetX, _startPosition.y));
     }
 
