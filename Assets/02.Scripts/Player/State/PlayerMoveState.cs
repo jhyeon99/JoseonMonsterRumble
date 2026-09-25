@@ -21,7 +21,7 @@ public class PlayerMoveState : PlayerBaseState
             return;
         }
 
-        if (_inputHandler.IsDodgeKeyDown && _player.IsGrounded)
+        if (_inputHandler.IsDodgeKeyDown && _player.IsGrounded && _player.Movement.CanDodge)
         {
             _stateMachine.ChangeState(_player.DodgeState);
             return;
@@ -44,14 +44,6 @@ public class PlayerMoveState : PlayerBaseState
     {
         base.PhysicsExecute();
 
-        float platformVelocityX = 0f;
-
-        if (_player.transform.parent != null && 
-            _player.transform.parent.TryGetComponent<MovingPlatform>(out var platform))
-        {
-            platformVelocityX = platform.Velocity.x;
-        }
-
-        _player.Movement.MoveX(_inputHandler.MoveInputX, platformVelocityX);
+        _player.Movement.MoveX(_inputHandler.MoveInputX);
     }
 }

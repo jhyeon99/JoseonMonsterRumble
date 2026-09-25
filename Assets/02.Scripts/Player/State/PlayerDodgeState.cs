@@ -3,8 +3,10 @@ using UnityEngine;
 public class PlayerDodgeState : PlayerBaseState
 {
     private float _elapsedTime;
-    private float _backstepDirection;
-    private bool _isDodgeMovementFinished;
+    private float _dodgeDirection;
+    private Vector2 _startPosition;
+    
+    public override PlatformInteractionMode PlatformMode => PlatformInteractionMode.ManualWithDelta;
 
     public PlayerDodgeState(Player player, StateMachine stateMachine) 
         : base(player, stateMachine) { }
@@ -12,16 +14,16 @@ public class PlayerDodgeState : PlayerBaseState
     public override void Enter()
     {
         base.Enter();
-
+        
         _elapsedTime = 0f;
-        _isDodgeMovementFinished = false;
-
         _player.Health.SetInvincible(true);
 
         float facingDirection = _player.transform.localScale.x > 0 ? 1f : -1f;
-        _backstepDirection = -facingDirection;
+        _dodgeDirection = -facingDirection;
 
-        _rigidbody2D.linearVelocity = new Vector2(_rigidbody2D.linearVelocity.x, _player.Movement.DodgeJumpForce);
+        _startPosition = _rigidbody2D.position;
+
+        _rigidbody2D.linearVelocity = new Vector2(0f, _rigidbody2D.linearVelocity.y);
     }
 
     public override void Execute()
@@ -34,24 +36,13 @@ public class PlayerDodgeState : PlayerBaseState
             return;
         }
 
-        if (!_isDodgeMovementFinished)
-        {
-            _elapsedTime += Time.deltaTime;
-            if (_elapsedTime >= _player.Movement.DodgeDuration)
-            {
-                _isDodgeMovementFinished = true;
-            }
-        }
-        else if (_player.IsGrounded)
+        _elapsedTime += Time.deltaTime;
+        if (_elapsedTime >= _player.Movement.DodgeDuration)
         {
             if (Mathf.Abs(_inputHandler.MoveInputX) > 0.01f)
-            {
                 _stateMachine.ChangeState(_player.MoveState);
-            }
             else
-            {
                 _stateMachine.ChangeState(_player.IdleState);
-            }
         }
     }
 
@@ -59,14 +50,18 @@ public class PlayerDodgeState : PlayerBaseState
     {
         base.PhysicsExecute();
 
-        if (!_isDodgeMovementFinished)
-        {
-            float normalizedTime = Mathf.Clamp01(_elapsedTime / _player.Movement.DodgeDuration);
-            float currentSpeedFactor = _player.Movement.DodgeSpeedCurve.Evaluate(normalizedTime);
-            float currentDodgeSpeed = _backstepDirection * _player.Movement.DodgeDistance * currentSpeedFactor;
+        float normalizedTime = Mathf.Clamp01(_elapsedTime / _player.Movement.DodgeDuration);
+        float progress = _player.Movement.DodgeSpeedCurve.Evaluate(normalizedTime);
 
-            _rigidbody2D.linearVelocity = new Vector2(currentDodgeSpeed, _rigidbody2D.linearVelocity.y);
+        var platform = _player.Movement.CurrentPlatform;
+        if (platform != null)
+        {
+            _startPosition += platform.DeltaPosition;
         }
+
+        float targetX = _startPosition.x + _dodgeDirection * _player.Movement.DodgeDistance * progress;
+        
+        _rigidbody2D.MovePosition(new Vector2(targetX, _startPosition.y));
     }
 
     public override void Exit()

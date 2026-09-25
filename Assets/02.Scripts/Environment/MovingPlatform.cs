@@ -13,6 +13,9 @@ public class MovingPlatform : MonoBehaviour
     private int _targetIndex = 1;
     private int _direction = 1;
     private float _waitTimer = 0f;
+    
+    private Vector2 _deltaPosition;
+    public Vector2 DeltaPosition => _deltaPosition;
 
     private void Start()
     {
@@ -24,10 +27,10 @@ public class MovingPlatform : MonoBehaviour
     private void FixedUpdate()
     {
         _velocity = Vector2.zero;
+        _deltaPosition = Vector2.zero;
 
         if (!IsValid()) return;
 
-        // [추가] 대기 중일 때는 이동 연산 중단 (velocity = Vector2.zero)
         if (_waitTimer > 0f)
         {
             _waitTimer -= Time.fixedDeltaTime;
@@ -37,7 +40,6 @@ public class MovingPlatform : MonoBehaviour
         Vector2 currentPosition = _platformBody.position;
         Vector2 targetPosition = _points[_targetIndex].position;
 
-        // [수정] 이동 연산 전에 미리 도착 여부를 확인하여 targetPosition 및 대기 타이머 갱신
         if (Vector2.Distance(currentPosition, targetPosition) <= 0.01f)
         {
             UpdateTarget();
@@ -51,7 +53,8 @@ public class MovingPlatform : MonoBehaviour
             _speed * Time.fixedDeltaTime
         );
 
-        _velocity = (nextPosition - currentPosition) / Time.fixedDeltaTime;
+        _deltaPosition = nextPosition - currentPosition;
+        _velocity = _deltaPosition / Time.fixedDeltaTime;
         _platformBody.MovePosition(nextPosition);
     }
 
@@ -62,7 +65,7 @@ public class MovingPlatform : MonoBehaviour
             ContactPoint2D contact = collision.GetContact(0);
             if (contact.normal.y < -0.5f)
             {
-                player.transform.SetParent(transform);
+                player.Movement.SetMovingPlatform(this);
             }
         }
     }
@@ -71,7 +74,7 @@ public class MovingPlatform : MonoBehaviour
     {
         if (collision.gameObject.TryGetComponent<Player>(out var player))
         {
-            player.transform.SetParent(null);
+            player.Movement.SetMovingPlatform(null);
         }
     }
 

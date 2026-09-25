@@ -21,7 +21,7 @@ public class PlayerIdleState : PlayerBaseState
             return;
         }
 
-        if (_inputHandler.IsDodgeKeyDown && _player.IsGrounded)
+        if (_inputHandler.IsDodgeKeyDown && _player.IsGrounded && _player.Movement.CanDodge)
         {
             _stateMachine.ChangeState(_player.DodgeState);
             return;
@@ -44,14 +44,6 @@ public class PlayerIdleState : PlayerBaseState
     {
         base.PhysicsExecute();
 
-        float targetVelocityX = 0f;
-
-        if (_player.transform.parent != null && 
-            _player.transform.parent.TryGetComponent<MovingPlatform>(out var platform))
-        {
-            targetVelocityX = platform.Velocity.x;
-        }
-
-        _rigidbody2D.linearVelocity = new Vector2(targetVelocityX, _rigidbody2D.linearVelocity.y);
+        _player.Movement.MoveX(0f);
     }
 }

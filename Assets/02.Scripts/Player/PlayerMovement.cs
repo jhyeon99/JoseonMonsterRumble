@@ -14,21 +14,29 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _dodgeDistance;
     public float DodgeDistance => _dodgeDistance;
 
-    [SerializeField] private float _dodgeJumpForce;
-    public float DodgeJumpForce => _dodgeJumpForce;
     [SerializeField] private float _dodgeDuration;
     public float DodgeDuration => _dodgeDuration;
     [SerializeField] private float _dodgeCooldown;
     [SerializeField] private AnimationCurve _dodgeSpeedCurve;
-    public  AnimationCurve DodgeSpeedCurve => _dodgeSpeedCurve;
+    public AnimationCurve DodgeSpeedCurve => _dodgeSpeedCurve;
     
     private bool _canDodge = true;
-
+    public bool CanDodge => _canDodge;
     private Rigidbody2D _rigidbody2D;
+
+    private MovingPlatform _currentPlatform;
+    public MovingPlatform CurrentPlatform => _currentPlatform;
+
+    private bool _hasHorizontalInput;
 
     private void Awake()
     {
         _rigidbody2D = GetComponent<Rigidbody2D>();
+    }
+
+    public void SetMovingPlatform(MovingPlatform platform)
+    {
+        _currentPlatform = platform;
     }
 
     public bool IsGrounded()
@@ -39,24 +47,21 @@ public class PlayerMovement : MonoBehaviour
             Constants.Layers.GroundAllMask
         );
 
-        if (!isTouchingGround) 
-            return false;
+        if (!isTouchingGround) return false;
 
-        if (transform.parent != null && transform.parent.GetComponent<MovingPlatform>() != null)
-        {
-            return true;
-        }
+        if (_currentPlatform != null) return true;
 
         return _rigidbody2D.linearVelocity.y <= 0.1f;
     }
 
-    public void MoveX(float x, float additionalVelocityX = 0f)
+    public void MoveX(float x)
     {
-        float targetVelocityX = (x * _speed) + additionalVelocityX;
+        _hasHorizontalInput = Mathf.Abs(x) > 0.01f;
 
+        float targetVelocityX = x * _speed;
         _rigidbody2D.linearVelocity = new Vector2(targetVelocityX, _rigidbody2D.linearVelocity.y);
 
-        if (Mathf.Abs(x) > 0.01f)
+        if (_hasHorizontalInput)
         {
             transform.localScale = new Vector3(Mathf.Sign(x), 1, 1);
         }
@@ -77,5 +82,24 @@ public class PlayerMovement : MonoBehaviour
         _canDodge = false;
         yield return new WaitForSeconds(_dodgeCooldown);
         _canDodge = true;
+    }
+
+    public void IntegrateMovement(PlatformInteractionMode mode)
+    {
+        if (mode != PlatformInteractionMode.Carried) return;
+    
+        if (_currentPlatform == null) return;
+
+        if (_rigidbody2D.linearVelocity.y < 0f)
+        {
+            Vector2 v = _rigidbody2D.linearVelocity;
+            v.y = 0f;
+            _rigidbody2D.linearVelocity = v;
+        }
+
+        Vector2 displacement = _rigidbody2D.linearVelocity * Time.fixedDeltaTime;
+        displacement += _currentPlatform.DeltaPosition;
+
+        _rigidbody2D.MovePosition(_rigidbody2D.position + displacement);
     }
 }

@@ -52,6 +52,7 @@ public class Player : MonoBehaviour
     private void FixedUpdate()
     {
         _stateMachine.FixedUpdate();
+        Movement.IntegrateMovement(_stateMachine.CurrentState.PlatformMode);
     }
 
     private void InitializeStates()

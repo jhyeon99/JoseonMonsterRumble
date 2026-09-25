@@ -339,10 +339,9 @@ MonoBehaviour:
   _jumpForce: 7
   _feetPosition: {fileID: 246569484}
   _checkRadius: 0.15
-  _dodgeDistance: 10
-  _dodgeJumpForce: 2
+  _dodgeDistance: 2
   _dodgeDuration: 0.2
-  _dodgeCooldown: 1
+  _dodgeCooldown: 0
   _dodgeSpeedCurve:
     serializedVersion: 2
     m_Curve:
@@ -716,7 +715,7 @@ Transform:
   m_GameObject: {fileID: 1520364865}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 7, y: -3, z: 0}
+  m_LocalPosition: {x: 8, y: -3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1171,7 +1170,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 3, y: 0.1, z: 1}
+  m_LocalScale: {x: 6, y: 0.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1520364867}
