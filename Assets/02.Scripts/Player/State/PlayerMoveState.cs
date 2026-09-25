@@ -21,7 +21,7 @@ public class PlayerMoveState : PlayerBaseState
             return;
         }
 
-        if (_inputHandler.IsDodgeKeyDown && _player.IsGrounded)
+        if (_inputHandler.IsDodgeKeyDown && _player.IsGrounded && _player.Movement.CanDodge)
         {
             _stateMachine.ChangeState(_player.DodgeState);
             return;

@@ -7,7 +7,8 @@ public abstract class PlayerBaseState : IState
 
     protected PlayerInputHandler _inputHandler;
     protected Rigidbody2D _rigidbody2D;
-    protected SpriteRenderer _spriteRenderer;
+
+    public virtual PlatformInteractionMode PlatformMode => PlatformInteractionMode.Carried;
 
     protected PlayerBaseState(Player player, StateMachine stateMachine)
     {
@@ -16,7 +17,6 @@ public abstract class PlayerBaseState : IState
 
         _inputHandler = player.GetComponent<PlayerInputHandler>();
         _rigidbody2D = player.GetComponent<Rigidbody2D>();
-        _spriteRenderer = player.GetComponent<SpriteRenderer>();
     }
 
     /// <summary>

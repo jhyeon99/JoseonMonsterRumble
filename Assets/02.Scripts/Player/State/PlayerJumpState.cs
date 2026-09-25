@@ -5,11 +5,14 @@ public class PlayerJumpState : PlayerBaseState
     public PlayerJumpState(Player player, StateMachine stateMachine)
         : base(player, stateMachine) { }
 
+    public override PlatformInteractionMode PlatformMode => PlatformInteractionMode.FreeTrajectory;
+
     public override void Enter()
     {
         base.Enter();
 
         _rigidbody2D.linearVelocity = new Vector2(_rigidbody2D.linearVelocity.x, 0);
+        _player.Movement.SetMovingPlatform(null);
         _player.Movement.Jump();
     }
 

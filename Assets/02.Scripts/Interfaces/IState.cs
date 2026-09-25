@@ -19,4 +19,6 @@ public interface IState
     /// 다른 상태로 전환되어 현재 상태를 빠져나갈 때 1회 호출 (정리, 타이머 리셋 등)
     /// </summary>
     void Exit();
+
+    PlatformInteractionMode PlatformMode { get; }
 }

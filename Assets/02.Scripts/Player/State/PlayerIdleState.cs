@@ -5,12 +5,6 @@ public class PlayerIdleState : PlayerBaseState
     public PlayerIdleState(Player player, StateMachine stateMachine)
         : base(player, stateMachine) { }
 
-    public override void Enter()
-    {
-        base.Enter();
-        _rigidbody2D.linearVelocity = new Vector2(0, _rigidbody2D.linearVelocity.y);
-    }
-
     public override void Execute()
     {
         base.Execute();
@@ -27,7 +21,7 @@ public class PlayerIdleState : PlayerBaseState
             return;
         }
 
-        if (_inputHandler.IsDodgeKeyDown && _player.IsGrounded)
+        if (_inputHandler.IsDodgeKeyDown && _player.IsGrounded && _player.Movement.CanDodge)
         {
             _stateMachine.ChangeState(_player.DodgeState);
             return;
@@ -44,5 +38,12 @@ public class PlayerIdleState : PlayerBaseState
             _stateMachine.ChangeState(_player.MoveState);
             return;
         }
+    }
+
+    public override void PhysicsExecute()
+    {
+        base.PhysicsExecute();
+
+        _player.Movement.MoveX(0f);
     }
 }
