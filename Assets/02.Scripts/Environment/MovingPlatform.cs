@@ -13,13 +13,17 @@ public class MovingPlatform : MonoBehaviour
     private int _targetIndex = 1;
     private int _direction = 1;
     private float _waitTimer = 0f;
-    
+
     private Vector2 _deltaPosition;
     public Vector2 DeltaPosition => _deltaPosition;
 
+    private bool _isValid;
+
     private void Start()
     {
-        if (!IsValid()) return;
+        _isValid = HasRequiredReferences();
+
+        if (!_isValid) return;
 
         _platformBody.position = _points[0].position;
     }
@@ -29,7 +33,7 @@ public class MovingPlatform : MonoBehaviour
         _velocity = Vector2.zero;
         _deltaPosition = Vector2.zero;
 
-        if (!IsValid()) return;
+        if (!_isValid) return;
 
         if (_waitTimer > 0f)
         {
@@ -59,7 +63,7 @@ public class MovingPlatform : MonoBehaviour
     }
 
     public void OnPlatformCollisionEnter2D(Collision2D collision)
-    {   
+    {
         if (collision.gameObject.TryGetComponent<Player>(out var player))
         {
             ContactPoint2D contact = collision.GetContact(0);
