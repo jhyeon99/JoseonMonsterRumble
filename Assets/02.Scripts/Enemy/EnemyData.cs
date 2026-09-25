@@ -13,18 +13,22 @@ public class EnemyData : ScriptableObject
 
     [Space(50)]
     [Header("공격 능력치")]
-    [SerializeField] private float _attackDamage;
+    [SerializeField]
+    private float _attackDamage;
     [SerializeField] private float _attackDetectRange;
     [SerializeField] private float _attackPrepareTime;
+    [SerializeField] private float _attackDurationTime;
     [SerializeField] private float _attackRecoveryTime;
     public float AttackDamage => _attackDamage;
     public float AttackDetectRange => _attackDetectRange;
     public float AttackPrepareTime => _attackPrepareTime;
+    public float AttackDurationTime => _attackDurationTime;
     public float AttackRecoveryTime => _attackRecoveryTime;
 
     [Space(50)]
     [Header("원거리 탄막")]
-    [SerializeField] private float _projectileSpeed;
+    [SerializeField]
+    private float _projectileSpeed;
     [SerializeField] private int _projectileCount;
     [SerializeField] private float _projectileInterval;
     public float ProjectileSpeed => _projectileSpeed;
@@ -33,7 +37,8 @@ public class EnemyData : ScriptableObject
 
     [Space(50)]
     [Header("버프 능력치")]
-    [SerializeField] private float _attackBuffAmount;
+    [SerializeField]
+    private float _attackBuffAmount;
     [SerializeField] private float _buffRange;
     public float AttackBuffAmount => _attackBuffAmount;
     public float BuffRange => _buffRange;
