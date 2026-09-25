@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 
 public abstract class Enemy : MonoBehaviour, IDamageable
@@ -13,14 +14,17 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     private EnemyCombat _combat;
     private EnemyAnimation _animation;
     private EnemyMoveType _moveType;
+    private float _attackTime;
 
     public EnemyStateMachine StateMachine => _stateMachine;
     public EnemyCombat Combat => _combat;
     public EnemyAnimation Animation => _animation;
     public EnemyMoveType MoveType => _moveType;
+    public float AttackTime => _attackTime;
 
     protected virtual void Awake()
     {
+        _attackTime = _data.AttackPrepareTime + _data.AttackDurationTime + _data.AttackRecoveryTime;
         _stateMachine = new EnemyStateMachine();
         _combat = GetComponent<EnemyCombat>();
         _animation = GetComponent<EnemyAnimation>();
@@ -37,6 +41,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     protected virtual void Update()
     {
         _stateMachine.Update();
+        transform.localScale = GetDirectionToPlayer().x > 0 ? new Vector3(-1f, 1f, 1f) : new Vector3(1f, 1f, 1f);
     }
 
     protected void FixedUpdate()
@@ -59,11 +64,12 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         if (CurrentHp <= 0f) return false;
 
         CurrentHp -= hitData.Damage;
+        Debug.Log($"현재 체력 {CurrentHp}");
 
         if (CurrentHp <= 0f)
         {
             CurrentHp = 0f;
-            // StateMachine.ChangeState(new DeadState(this));
+            StateMachine.ChangeState(new DeadState(this));
             return true;
         }
 
