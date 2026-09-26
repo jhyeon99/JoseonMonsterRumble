@@ -8,7 +8,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _jumpForce;
 
     [SerializeField] private Transform _feetPosition;
-    [SerializeField] private float _checkRadius;
+    [SerializeField] private Vector2 _groundCheckSize = new Vector2(0.8f, 0.1f);
 
     [Header("Dodge Settings")]
     [SerializeField] private float _dodgeDistance;
@@ -65,9 +65,10 @@ public class PlayerMovement : MonoBehaviour
 
     public bool IsGrounded()
     {
-        bool isTouchingGround = Physics2D.OverlapCircle(
+        bool isTouchingGround = Physics2D.OverlapBox(
             _feetPosition.position,
-            _checkRadius,
+            _groundCheckSize,
+            0f,
             Constants.Layers.GroundAllMask
         );
 
