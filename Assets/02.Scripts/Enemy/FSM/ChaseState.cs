@@ -21,14 +21,21 @@ public class ChaseState : EnemyState
 
     public override void Update()
     {
-        if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
-        {
-            _enemy.StateMachine.ChangeState(new AttackState(_enemy));
-        }
-
         if (_enemy.GetDistanceToPlayer() >= _enemy.Data.DetectRange)
         {
             _enemy.StateMachine.ChangeState(new IdleState(_enemy));
+        }
+
+        if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
+        {
+            if (_enemy.MoveType is EnemyGroundMove)
+            {
+                _enemy.StateMachine.ChangeState(new AttackPrepareGroundState(_enemy));
+            }
+            else if (_enemy.MoveType is EnemyFlyingMove)
+            {
+                _enemy.StateMachine.ChangeState(new AttackPrepareFlyingState(_enemy));
+            }
         }
     }
 
