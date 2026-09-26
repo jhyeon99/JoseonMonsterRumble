@@ -22,6 +22,7 @@ public class AttackState : EnemyState
         _attackTimer -= Time.deltaTime;
         if (_attackTimer <= 0)
         {
+            _enemy.MoveType.StopMove();
             _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
         }
     }

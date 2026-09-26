@@ -93,6 +93,7 @@ GameObject:
   - component: {fileID: 305485781356309695}
   - component: {fileID: 3220603913955626752}
   - component: {fileID: 1334137726836670619}
+  - component: {fileID: 3961229803172469124}
   m_Layer: 7
   m_Name: EnemyMeleeGround
   m_TagString: Enemy
@@ -165,7 +166,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: -2000918682933864620, guid: ab0ae26abb5987b4e898c4b668ae96eb, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -213,7 +214,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 3.4, y: 3.4777777}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -287,3 +288,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMeleeCombat
   _attackCollider: {fileID: 1249033454365970758}
+--- !u!114 &3961229803172469124
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9071619103714574906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b006b25781441940837bbd81e618794, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyGroundReposition
+  _enemy: {fileID: 305485781356309695}

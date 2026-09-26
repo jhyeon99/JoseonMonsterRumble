@@ -24,7 +24,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
 
     protected virtual void Awake()
     {
-        _attackTime = _data.AttackPrepareTime + _data.AttackDurationTime + _data.AttackRecoveryTime;
+        _attackTime = _data.AttackDurationTime + _data.AttackRecoveryTime;
         _stateMachine = new EnemyStateMachine();
         _combat = GetComponent<EnemyCombat>();
         _animation = GetComponent<EnemyAnimation>();
@@ -41,7 +41,6 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     protected virtual void Update()
     {
         _stateMachine.Update();
-        transform.localScale = GetDirectionToPlayer().x > 0 ? new Vector3(-1f, 1f, 1f) : new Vector3(1f, 1f, 1f);
     }
 
     protected void FixedUpdate()

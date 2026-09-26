@@ -15,11 +15,13 @@ public class EnemyData : ScriptableObject
     [Header("공격 능력치")]
     [SerializeField]
     private float _attackDamage;
+    [SerializeField] private float _chargeSpeed;
     [SerializeField] private float _attackDetectRange;
     [SerializeField] private float _attackPrepareTime;
     [SerializeField] private float _attackDurationTime;
     [SerializeField] private float _attackRecoveryTime;
     public float AttackDamage => _attackDamage;
+    public float ChargeSpeed => _chargeSpeed;
     public float AttackDetectRange => _attackDetectRange;
     public float AttackPrepareTime => _attackPrepareTime;
     public float AttackDurationTime => _attackDurationTime;
