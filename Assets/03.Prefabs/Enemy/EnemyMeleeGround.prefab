@@ -93,7 +93,7 @@ GameObject:
   - component: {fileID: 305485781356309695}
   - component: {fileID: 3220603913955626752}
   - component: {fileID: 1334137726836670619}
-  - component: {fileID: 3961229803172469124}
+  - component: {fileID: 7165762390576756721}
   m_Layer: 7
   m_Name: EnemyMeleeGround
   m_TagString: Enemy
@@ -288,7 +288,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMeleeCombat
   _attackCollider: {fileID: 1249033454365970758}
---- !u!114 &3961229803172469124
+--- !u!114 &7165762390576756721
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -297,7 +297,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 9071619103714574906}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b006b25781441940837bbd81e618794, type: 3}
+  m_Script: {fileID: 11500000, guid: 3caeca020f324ca8b16f9518517457e2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyGroundReposition
-  _enemy: {fileID: 305485781356309695}
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyFlipGround
