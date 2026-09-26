@@ -15,19 +15,19 @@ public class PlayerIdleState : PlayerBaseState
             return;
         }
 
-        if (_inputHandler.IsAttackKeyDown)
+        if (_inputHandler.TryUseAttackInput())
         {
             _stateMachine.ChangeState(_player.AttackState);
             return;
         }
 
-        if (_inputHandler.IsDodgeKeyDown && _player.IsGrounded && _player.Movement.CanDodge)
+        if (_inputHandler.TryUseDodgeInput() && _player.IsGrounded && _player.Movement.CanDodge)
         {
             _stateMachine.ChangeState(_player.DodgeState);
             return;
         }
 
-        if (_inputHandler.IsJumpKeyDown && _player.Movement.CanJump)
+        if (_inputHandler.TryUseJumpInput() && _player.Movement.CanJump)
         {
             _stateMachine.ChangeState(_player.JumpState);
             return;
