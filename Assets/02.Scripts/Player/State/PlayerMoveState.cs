@@ -27,7 +27,7 @@ public class PlayerMoveState : PlayerBaseState
             return;
         }
 
-        if (_inputHandler.IsJumpKeyDown && _player.IsGrounded)
+        if (_inputHandler.IsJumpKeyDown && _player.Movement.CanJump)
         {
             _stateMachine.ChangeState(_player.JumpState);
             return;

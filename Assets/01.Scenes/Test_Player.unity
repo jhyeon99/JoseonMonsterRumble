@@ -366,6 +366,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  _coyoteTime: 1
+  _groundCheckLockout: 0.1
 --- !u!114 &481382871
 MonoBehaviour:
   m_ObjectHideFlags: 0

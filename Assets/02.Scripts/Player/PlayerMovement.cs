@@ -19,6 +19,10 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _dodgeCooldown;
     [SerializeField] private AnimationCurve _dodgeSpeedCurve;
     public AnimationCurve DodgeSpeedCurve => _dodgeSpeedCurve;
+    
+    [Header("Jump Assist")]
+    [SerializeField] private float _coyoteTime = 0.1f;
+    [SerializeField] private float _groundCheckLockout = 0.1f;
 
     private bool _canDodge = true;
     public bool CanDodge => _canDodge;
@@ -29,11 +33,31 @@ public class PlayerMovement : MonoBehaviour
 
     private bool _hasHorizontalInput;
 
+    private float _coyoteTimer;
+    private float _lockoutTimer;
+
+    public bool CanJump => _coyoteTimer > 0f;
+
     private void Awake()
     {
         _rigidbody2D = GetComponent<Rigidbody2D>();
     }
 
+    private void Update()
+    {
+        if (_lockoutTimer > 0f)
+        {
+            _lockoutTimer -= Time.deltaTime;
+            _coyoteTimer = 0f;
+            return;
+        }
+
+        if (IsGrounded())
+            _coyoteTimer = _coyoteTime;
+        else
+            _coyoteTimer -= Time.deltaTime;
+    }
+    
     public void SetMovingPlatform(MovingPlatform platform)
     {
         _currentPlatform = platform;
@@ -69,7 +93,12 @@ public class PlayerMovement : MonoBehaviour
 
     public void Jump()
     {
-        _rigidbody2D.AddForce(Vector2.up * _jumpForce, ForceMode2D.Impulse);
+        Vector2 v = _rigidbody2D.linearVelocity;
+        v.y = _jumpForce / _rigidbody2D.mass;
+        _rigidbody2D.linearVelocity = v;
+
+        _coyoteTimer = 0f;
+        _lockoutTimer = _groundCheckLockout;
     }
 
     public void StartDodgeCooldown()
