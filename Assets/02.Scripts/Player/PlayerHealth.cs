@@ -3,7 +3,7 @@ using System.Collections;
 using Unity.Collections;
 using UnityEngine;
 
-public class PlayerHealth : MonoBehaviour, IDamageable
+public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 {
     [SerializeField] private float _maxHealth = 100f;
     public float MaxHealth => _maxHealth;
@@ -39,25 +39,42 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         if (IsDead || _isInvincible) return false;
 
-        _currentHealth = Mathf.Max(_currentHealth - hitdata.Damage, 0);
+        _currentHealth = Mathf.Max(_currentHealth - hitdata.Damage, 0f);
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
 
-        StartCoroutine(InvincibleRoutine());
-
-        if (_currentHealth <= 0)
+        if (_currentHealth <= 0f)
         {
-            _isDead = true;
-            OnDied?.Invoke();
+            Die();
             return true;
         }
 
+        StartInvincible();
+        return true;
+    }
+    
+    public void Kill()
+    {
+        if (_isDead) return;
+
+        _currentHealth = 0f;
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+
+        Die();
+    }
+
+    private void Die()
+    {
+        _isDead = true;
+        OnDied?.Invoke();
+    }
+    
+    private void StartInvincible()
+    {
         if (_invincibleRoutine != null)
         {
             StopCoroutine(_invincibleRoutine);
         }
         _invincibleRoutine = StartCoroutine(InvincibleRoutine());
-
-        return true;
     }
 
     private IEnumerator InvincibleRoutine()
