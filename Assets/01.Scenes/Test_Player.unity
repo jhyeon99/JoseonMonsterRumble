@@ -338,7 +338,7 @@ MonoBehaviour:
   _speed: 5
   _jumpForce: 7
   _feetPosition: {fileID: 246569484}
-  _checkRadius: 0.15
+  _groundCheckSize: {x: 1, y: 0.1}
   _dodgeDistance: 2
   _dodgeDuration: 0.2
   _dodgeCooldown: 0
@@ -366,6 +366,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  _coyoteTime: 0.1
+  _groundCheckLockout: 0.1
 --- !u!114 &481382871
 MonoBehaviour:
   m_ObjectHideFlags: 0
