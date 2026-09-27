@@ -20,6 +20,12 @@ public class PlayerJumpState : PlayerBaseState
     {
         base.Execute();
 
+        if (_player.Health != null && _player.Health.IsDead)
+        {
+            _stateMachine.ChangeState(_player.DeadState);
+            return;
+        }
+
         if (_player.IsGrounded && _rigidbody2D.linearVelocity.y <= 0.01f)
         {
             if (Mathf.Abs(_inputHandler.MoveInputX) > 0.01f)
