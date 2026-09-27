@@ -12,6 +12,7 @@ public class ChaseState : EnemyState
     public override void Enter()
     {
         Debug.Log("추적 시작");
+        _enemy.DirectionLock.UnlockDirection();
     }
 
     public override void FixedUpdate()

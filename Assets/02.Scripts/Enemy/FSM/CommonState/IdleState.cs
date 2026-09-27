@@ -12,6 +12,7 @@ public class IdleState : EnemyState
     public override void Enter()
     {
         Debug.Log("Idle 시작");
+        _enemy.DirectionLock.LockDirection();
     }
 
     public override void Update()

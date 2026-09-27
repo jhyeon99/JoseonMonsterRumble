@@ -14,21 +14,21 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     private EnemyCombat _combat;
     private EnemyAnimation _animation;
     private EnemyMoveType _moveType;
-    private float _attackTime;
+    private IAttackDirectionLock _directionLock;
 
     public EnemyStateMachine StateMachine => _stateMachine;
     public EnemyCombat Combat => _combat;
     public EnemyAnimation Animation => _animation;
     public EnemyMoveType MoveType => _moveType;
-    public float AttackTime => _attackTime;
+    public IAttackDirectionLock DirectionLock => _directionLock;
 
     protected virtual void Awake()
     {
-        _attackTime = _data.AttackDurationTime + _data.AttackRecoveryTime;
         _stateMachine = new EnemyStateMachine();
         _combat = GetComponent<EnemyCombat>();
         _animation = GetComponent<EnemyAnimation>();
         _moveType = GetComponent<EnemyMoveType>();
+        _directionLock = GetComponent<IAttackDirectionLock>();
         CurrentHp = _data.MaxHp;
     }
 

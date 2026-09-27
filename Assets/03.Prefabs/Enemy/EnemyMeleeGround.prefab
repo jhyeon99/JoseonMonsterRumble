@@ -94,6 +94,7 @@ GameObject:
   - component: {fileID: 3220603913955626752}
   - component: {fileID: 1334137726836670619}
   - component: {fileID: 7165762390576756721}
+  - component: {fileID: 7719512815199251269}
   m_Layer: 7
   m_Name: EnemyMeleeGround
   m_TagString: Enemy
@@ -110,7 +111,7 @@ Transform:
   m_GameObject: {fileID: 9071619103714574906}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.20227, y: 0.05656, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -214,7 +215,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 3.4, y: 3.4777777}
+    oldSize: {x: 1.53, y: 1.565}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -300,3 +301,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3caeca020f324ca8b16f9518517457e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyFlipGround
+--- !u!114 &7719512815199251269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9071619103714574906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17cea9572b5c478fb3829a51b9130a3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GroundDirectionLock
+  _flip: {fileID: 7165762390576756721}

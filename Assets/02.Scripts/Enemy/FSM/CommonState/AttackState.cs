@@ -13,7 +13,8 @@ public class AttackState : EnemyState
     public override void Enter()
     {
         Debug.Log("공격 시작");
-        _attackTimer = _enemy.AttackTime;
+        _enemy.DirectionLock.LockDirection();
+        _attackTimer = _enemy.Data.AttackDurationTime;
         _enemy.Combat.Attack();
     }
 
@@ -23,7 +24,7 @@ public class AttackState : EnemyState
         if (_attackTimer <= 0)
         {
             _enemy.MoveType.StopMove();
-            _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
+            _enemy.StateMachine.ChangeState(new AttackRecoveryState(_enemy));
         }
     }
 
