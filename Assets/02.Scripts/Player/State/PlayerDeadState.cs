@@ -10,9 +10,4 @@ public class PlayerDeadState : PlayerBaseState
         base.Enter();
         _rigidbody2D.linearVelocity = Vector2.zero;
     }
-
-    public override void Execute()
-    {
-        base.Exit();
-    }
 }
