@@ -3,6 +3,7 @@ using UnityEngine;
 public class EnemyStateMachine
 {
     private EnemyState _currentState;
+    public EnemyState CurrentState;
 
     public void ChangeState(EnemyState newState)
     {

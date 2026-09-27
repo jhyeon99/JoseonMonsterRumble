@@ -96,6 +96,7 @@ GameObject:
   - component: {fileID: 8097650395703628782}
   - component: {fileID: 3555837305171706846}
   - component: {fileID: -6285746008215813451}
+  - component: {fileID: 1465709224609016256}
   m_Layer: 7
   m_Name: EnemyMeleeFlying
   m_TagString: Enemy
@@ -328,3 +329,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FlyingDirectionLock
   _flip: {fileID: 3555837305171706846}
   _rotation: {fileID: 8097650395703628782}
+--- !u!114 &1465709224609016256
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2319009342568745602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 728a422b81f2dc84abbffee7b8ef4ec0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth

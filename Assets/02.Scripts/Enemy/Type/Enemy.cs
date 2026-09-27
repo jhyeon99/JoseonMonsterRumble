@@ -2,14 +2,12 @@ using System;
 using TMPro;
 using UnityEngine;
 
-public abstract class Enemy : MonoBehaviour, IDamageable
+public abstract class Enemy : MonoBehaviour
 {
     [SerializeField] private EnemyData _data;
     public EnemyData Data => _data;
 
     [SerializeField] private Transform _target;
-
-    protected float CurrentHp { get; private set; }
     private EnemyStateMachine _stateMachine;
     private EnemyCombat _combat;
     private EnemyAnimation _animation;
@@ -29,7 +27,6 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         _animation = GetComponent<EnemyAnimation>();
         _moveType = GetComponent<EnemyMoveType>();
         _directionLock = GetComponent<IAttackDirectionLock>();
-        CurrentHp = _data.MaxHp;
     }
 
     protected virtual void Start()
@@ -56,23 +53,5 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     public Vector2 GetDirectionToPlayer()
     {
         return (_target.position - transform.position).normalized;
-    }
-
-    public bool TakeDamage(HitData hitData)
-    {
-        if (CurrentHp <= 0f) return false;
-
-        CurrentHp -= hitData.Damage;
-        Debug.Log($"현재 체력 {CurrentHp}");
-
-        if (CurrentHp <= 0f)
-        {
-            CurrentHp = 0f;
-            StateMachine.ChangeState(new DeadState(this));
-            return true;
-        }
-
-        // StateMachine.ChangeState(new HitState(this));
-        return true;
     }
 }
