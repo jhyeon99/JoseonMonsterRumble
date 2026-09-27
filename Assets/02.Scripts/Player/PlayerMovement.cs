@@ -19,6 +19,10 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _dodgeCooldown;
     [SerializeField] private AnimationCurve _dodgeSpeedCurve;
     public AnimationCurve DodgeSpeedCurve => _dodgeSpeedCurve;
+    
+    [Header("Jump Assist")]
+    [SerializeField] private float _coyoteTime = 0.1f;
+    [SerializeField] private float _groundCheckLockout = 0.1f;
 
     [Header("Jump Assist")]
     [SerializeField] private float _coyoteTime = 0.1f;
