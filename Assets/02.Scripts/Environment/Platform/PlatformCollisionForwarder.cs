@@ -6,8 +6,12 @@ public class PlatformCollisionForwarder : MonoBehaviour
 
     private void Awake()
     {
-        // 부모 오브젝트의 MovingPlatform 스크립트 참조
         _parentPlatform = GetComponentInParent<MovingPlatform>();
+
+        if (_parentPlatform == null)
+        {
+            Debug.LogWarning($"{name}: Moving Platform 참조가 없습니다.", this);
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
