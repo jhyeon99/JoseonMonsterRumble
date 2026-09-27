@@ -51,7 +51,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         StartInvincible();
         return true;
     }
-    
+
     public void Kill()
     {
         if (_isDead) return;
@@ -67,7 +67,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         _isDead = true;
         OnDied?.Invoke();
     }
-    
+
     private void StartInvincible()
     {
         if (_invincibleRoutine != null)

@@ -24,6 +24,10 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _coyoteTime = 0.1f;
     [SerializeField] private float _groundCheckLockout = 0.1f;
 
+    [Header("Jump Assist")]
+    [SerializeField] private float _coyoteTime = 0.1f;
+    [SerializeField] private float _groundCheckLockout = 0.1f;
+
     private bool _canDodge = true;
     public bool CanDodge => _canDodge;
     private Rigidbody2D _rigidbody2D;
@@ -57,7 +61,7 @@ public class PlayerMovement : MonoBehaviour
         else
             _coyoteTimer -= Time.deltaTime;
     }
-    
+
     public void SetMovingPlatform(MovingPlatform platform)
     {
         _currentPlatform = platform;
