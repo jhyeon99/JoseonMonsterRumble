@@ -380,6 +380,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4721ce6c3c0526d48a12a4c3ebfa3630, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInputHandler
+  _jumpBuffer:
+    _bufferTime: 0.1
+  _dodgeBuffer:
+    _bufferTime: 0.1
+  _attackBuffer:
+    _bufferTime: 0.1
 --- !u!114 &481382872
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -706,8 +712,10 @@ MonoBehaviour:
   _points:
   - {fileID: 495867755}
   - {fileID: 1268453948}
+  _mode: 0
   _speed: 2
   _waitTime: 0.1
+  _state: 0
 --- !u!4 &1520364867
 Transform:
   m_ObjectHideFlags: 0
