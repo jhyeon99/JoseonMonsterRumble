@@ -31,5 +31,6 @@ public class AttackState : EnemyState
     public override void Exit()
     {
         Debug.Log("공격 종료");
+        _enemy.DirectionLock.UnlockDirection();
     }
 }
