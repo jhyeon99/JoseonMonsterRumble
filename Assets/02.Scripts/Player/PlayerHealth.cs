@@ -39,23 +39,16 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     {
         if (IsDead || _isInvincible) return false;
 
-        _currentHealth = Mathf.Max(_currentHealth - hitdata.Damage, 0);
+        _currentHealth = Mathf.Max(_currentHealth - hitdata.Damage, 0f);
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
 
-        StartCoroutine(InvincibleRoutine());
-
-        if (_currentHealth <= 0)
+        if (_currentHealth <= 0f)
         {
             Die();
             return true;
         }
 
-        if (_invincibleRoutine != null)
-        {
-            StopCoroutine(_invincibleRoutine);
-        }
-        _invincibleRoutine = StartCoroutine(InvincibleRoutine());
-
+        StartInvincible();
         return true;
     }
     
@@ -73,6 +66,15 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     {
         _isDead = true;
         OnDied?.Invoke();
+    }
+    
+    private void StartInvincible()
+    {
+        if (_invincibleRoutine != null)
+        {
+            StopCoroutine(_invincibleRoutine);
+        }
+        _invincibleRoutine = StartCoroutine(InvincibleRoutine());
     }
 
     private IEnumerator InvincibleRoutine()
