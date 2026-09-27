@@ -31,7 +31,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
             return true;
         }
 
-        if (_enemy.StateMachine.CurrentState is AttackPrepareGroundState ||
+        if (_enemy.StateMachine.CurrentState is AttackPrepareState ||
             _enemy.StateMachine.CurrentState is AttackState) return false;
 
         _currentHp -= hitData.Damage;
