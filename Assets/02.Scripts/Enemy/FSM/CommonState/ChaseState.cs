@@ -12,6 +12,7 @@ public class ChaseState : EnemyState
     public override void Enter()
     {
         Debug.Log("추적 시작");
+        _enemy.DirectionLock.UnlockDirection();
     }
 
     public override void FixedUpdate()
@@ -24,6 +25,18 @@ public class ChaseState : EnemyState
         if (_enemy.GetDistanceToPlayer() >= _enemy.Data.DetectRange)
         {
             _enemy.StateMachine.ChangeState(new IdleState(_enemy));
+        }
+
+        if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
+        {
+            if (_enemy.MoveType is EnemyGroundMove)
+            {
+                _enemy.StateMachine.ChangeState(new AttackPrepareGroundState(_enemy));
+            }
+            else if (_enemy.MoveType is EnemyFlyingMove)
+            {
+                _enemy.StateMachine.ChangeState(new AttackPrepareFlyingState(_enemy));
+            }
         }
     }
 

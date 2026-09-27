@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 
 public abstract class Enemy : MonoBehaviour, IDamageable
@@ -13,11 +14,13 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     private EnemyCombat _combat;
     private EnemyAnimation _animation;
     private EnemyMoveType _moveType;
+    private IAttackDirectionLock _directionLock;
 
     public EnemyStateMachine StateMachine => _stateMachine;
     public EnemyCombat Combat => _combat;
     public EnemyAnimation Animation => _animation;
     public EnemyMoveType MoveType => _moveType;
+    public IAttackDirectionLock DirectionLock => _directionLock;
 
     protected virtual void Awake()
     {
@@ -25,6 +28,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         _combat = GetComponent<EnemyCombat>();
         _animation = GetComponent<EnemyAnimation>();
         _moveType = GetComponent<EnemyMoveType>();
+        _directionLock = GetComponent<IAttackDirectionLock>();
         CurrentHp = _data.MaxHp;
     }
 
@@ -59,11 +63,12 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         if (CurrentHp <= 0f) return false;
 
         CurrentHp -= hitData.Damage;
+        Debug.Log($"현재 체력 {CurrentHp}");
 
         if (CurrentHp <= 0f)
         {
             CurrentHp = 0f;
-            // StateMachine.ChangeState(new DeadState(this));
+            StateMachine.ChangeState(new DeadState(this));
             return true;
         }
 
