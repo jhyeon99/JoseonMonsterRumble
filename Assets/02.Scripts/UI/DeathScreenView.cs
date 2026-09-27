@@ -4,7 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(CanvasGroup))]
 public sealed class DeathScreenView : MonoBehaviour
 {
-    [SerializeField, Min(0f)] private float _fadeDuration = 0.35f;
+    [SerializeField, Min(0f)] private float _fadeInDuration = 0.35f;
 
     private CanvasGroup _canvasGroup;
 
@@ -22,8 +22,8 @@ public sealed class DeathScreenView : MonoBehaviour
 
     public IEnumerator FadeOut()
     {
-        yield return FadeTo(0f);
-        _canvasGroup.blocksRaycasts = false;
+        HideImmediate();
+        yield break;
     }
 
     public void HideImmediate()
@@ -40,7 +40,7 @@ public sealed class DeathScreenView : MonoBehaviour
 
     private IEnumerator FadeTo(float targetAlpha)
     {
-        if (_fadeDuration <= 0f)
+        if (_fadeInDuration <= 0f)
         {
             _canvasGroup.alpha = targetAlpha;
             yield break;
@@ -49,13 +49,13 @@ public sealed class DeathScreenView : MonoBehaviour
         float startAlpha = _canvasGroup.alpha;
         float elapsedTime = 0f;
 
-        while (elapsedTime < _fadeDuration)
+        while (elapsedTime < _fadeInDuration)
         {
             elapsedTime += Time.unscaledDeltaTime;
             _canvasGroup.alpha = Mathf.Lerp(
                 startAlpha,
                 targetAlpha,
-                elapsedTime / _fadeDuration
+                elapsedTime / _fadeInDuration
             );
             yield return null;
         }
