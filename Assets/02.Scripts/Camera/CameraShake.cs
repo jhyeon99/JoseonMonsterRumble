@@ -14,6 +14,8 @@ public class CameraShake : MonoBehaviour
     private void OnEnable() => GameEvents.OnPlayerHit += PlayerHitCameraShake;
     private void OnDisable() => GameEvents.OnPlayerHit -= PlayerHitCameraShake;
 
+    private Coroutine _cameraShakeRoutine;
+
     private void LateUpdate()
     {
         if (_shakeOffset != Vector3.zero)
@@ -25,7 +27,12 @@ public class CameraShake : MonoBehaviour
     private void PlayerHitCameraShake(HitData hitData)
     {
         float magnitude = Mathf.Min(hitData.Damage * _damageMultiplier, _maxMagnitude);
-        StartCoroutine(DoShake(_duration, magnitude));
+        if (_cameraShakeRoutine != null)
+        {
+            StopCoroutine(_cameraShakeRoutine);
+        }
+
+        _cameraShakeRoutine = StartCoroutine(DoShake(_duration, magnitude));
     }
 
     private IEnumerator DoShake(float duration, float magnitude)

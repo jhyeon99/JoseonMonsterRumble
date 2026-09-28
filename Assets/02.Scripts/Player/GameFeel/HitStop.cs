@@ -8,10 +8,17 @@ public class HitStop : MonoBehaviour
     private void OnEnable() => GameEvents.OnPlayerHit += PlayerHitStop;
     private void OnDisable() => GameEvents.OnPlayerHit -= PlayerHitStop;
 
+    private Coroutine _hitStopRoutine;
+
     private void PlayerHitStop(HitData hitData)
     {
         float duration = _baseDuration + (hitData.Damage * 0.005f);
-        StartCoroutine(DoHitStop(duration));
+        if (_hitStopRoutine != null)
+        {
+            StopCoroutine(_hitStopRoutine);
+        }
+
+        _hitStopRoutine = StartCoroutine(DoHitStop(duration));
     }
 
     private IEnumerator DoHitStop(float duration)
