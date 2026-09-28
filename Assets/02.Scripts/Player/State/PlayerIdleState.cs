@@ -3,17 +3,13 @@ using UnityEngine;
 public class PlayerIdleState : PlayerBaseState
 {
     public PlayerIdleState(Player player, StateMachine stateMachine)
-        : base(player, stateMachine) { }
+        : base(player, stateMachine)
+    {
+    }
 
     public override void Execute()
     {
         base.Execute();
-
-        if (_player.Health != null && _player.Health.IsDead)
-        {
-            _stateMachine.ChangeState(_player.DeadState);
-            return;
-        }
 
         if (_inputHandler.TryUseAttackInput())
         {

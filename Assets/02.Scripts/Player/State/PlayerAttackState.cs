@@ -3,8 +3,11 @@ using UnityEngine;
 public class PlayerAttackState : PlayerBaseState
 {
     private float _attackTimer;
+
     public PlayerAttackState(Player player, StateMachine stateMachine)
-        : base(player, stateMachine) { }
+        : base(player, stateMachine)
+    {
+    }
 
     public override void Enter()
     {
@@ -20,12 +23,6 @@ public class PlayerAttackState : PlayerBaseState
     public override void Execute()
     {
         base.Execute();
-
-        if (_player.Health != null && _player.Health.IsDead)
-        {
-            _stateMachine.ChangeState(_player.DeadState);
-            return;
-        }
 
         _attackTimer -= Time.deltaTime;
         if (_attackTimer <= 0f)

@@ -32,7 +32,6 @@ public class EnemyMeleeCombat : EnemyCombat
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.TryGetComponent<IDamageable>(out IDamageable damageable)) return;
-
         HitData hitData = new HitData(
             Enemy.Data.MeleeAttackDamage,
             0f,

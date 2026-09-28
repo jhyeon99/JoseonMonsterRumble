@@ -9,7 +9,9 @@ public class PlayerDodgeState : PlayerBaseState
     public override PlatformInteractionMode PlatformMode => PlatformInteractionMode.ManualWithDelta;
 
     public PlayerDodgeState(Player player, StateMachine stateMachine)
-        : base(player, stateMachine) { }
+        : base(player, stateMachine)
+    {
+    }
 
     public override void Enter()
     {
@@ -29,12 +31,6 @@ public class PlayerDodgeState : PlayerBaseState
     public override void Execute()
     {
         base.Execute();
-
-        if (_player.Health != null && _player.Health.IsDead)
-        {
-            _stateMachine.ChangeState(_player.DeadState);
-            return;
-        }
 
         _elapsedTime += Time.deltaTime;
         if (_elapsedTime >= _player.Movement.DodgeDuration)

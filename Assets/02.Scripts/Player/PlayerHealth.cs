@@ -3,6 +3,7 @@ using System.Collections;
 using Unity.Collections;
 using UnityEngine;
 
+[RequireComponent(typeof(HitFlash))]
 public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 {
     [SerializeField] private float _maxHealth = 100f;
@@ -39,6 +40,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     {
         if (IsDead || _isInvincible) return false;
 
+        GameEvents.TriggerPlayerHit(hitdata);
         _currentHealth = Mathf.Max(_currentHealth - hitdata.Damage, 0f);
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
 
@@ -46,6 +48,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         {
             Die();
             return true;
+        }
+
+        if (TryGetComponent<HitFlash>(out HitFlash flash))
+        {
+            flash.Flash();
         }
 
         StartInvincible();
@@ -74,6 +81,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         {
             StopCoroutine(_invincibleRoutine);
         }
+
         _invincibleRoutine = StartCoroutine(InvincibleRoutine());
     }
 
