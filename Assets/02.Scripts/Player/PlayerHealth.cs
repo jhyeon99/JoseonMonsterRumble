@@ -62,6 +62,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     public void Heal(float amount)
     {
         _currentHealth = Mathf.Min(_currentHealth + amount, _maxHealth);
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
     }
 
     public void Kill()
