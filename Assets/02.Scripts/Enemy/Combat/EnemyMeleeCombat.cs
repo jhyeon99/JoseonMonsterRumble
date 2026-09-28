@@ -32,16 +32,14 @@ public class EnemyMeleeCombat : EnemyCombat
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.TryGetComponent<IDamageable>(out IDamageable damageable)) return;
-
-        var hitData = new HitData(
-            Enemy.Data.AttackDamage,
+        HitData hitData = new HitData(
+            Enemy.Data.MeleeAttackDamage,
             0f,
             Vector2.zero,
-            Enemy.GetDirectionToPlayer()
+            Vector2.zero
         );
 
         damageable.TakeDamage(hitData);
-        Debug.Log($"플레이어에게{Enemy.Data.AttackDamage}만큼 피해를 입힘.");
-        Debug.Log($"플레이어에게 {Enemy.GetDirectionToPlayer()}방향으로 넉백.");
+        Debug.Log($"플레이어에게 근접공격으로 {Enemy.Data.MeleeAttackDamage}만큼 피해를 입힘.");
     }
 }

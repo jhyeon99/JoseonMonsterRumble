@@ -15,14 +15,11 @@ MonoBehaviour:
   _maxHp: 100
   _moveSpeed: 3
   _detectRange: 4
-  _attackDamage: 10
-  _chargeSpeed: 2
+  _meleeAttackDamage: 10
+  _chargeSpeed: 5
   _attackDetectRange: 2
   _attackPrepareTime: 1
   _attackDurationTime: 1
   _attackRecoveryTime: 1
-  _projectileSpeed: 0
-  _projectileCount: 0
-  _projectileInterval: 0
   _attackBuffAmount: 0
   _buffRange: 0

@@ -12,15 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0acbf576c0c037642807f92438aa2cd4, type: 3}
   m_Name: SO_RangedFlyingEnemyData
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
-  MaxHp: 0
-  MoveSpeed: 0
-  DetectRange: 0
-  AttackDamage: 0
-  AttackDetectRange: 0
-  AttackPrepareTime: 0
-  AttackRecoveryTime: 0
-  ProjectileSpeed: 0
-  ProjectileCount: 0
-  ProjectileInterval: 0
-  AttackBuffAmount: 0
-  BuffRange: 0
+  _maxHp: 100
+  _moveSpeed: 3
+  _detectRange: 6
+  _meleeAttackDamage: 0
+  _chargeSpeed: 0
+  _attackDetectRange: 4
+  _attackPrepareTime: 1
+  _attackDurationTime: 1
+  _attackRecoveryTime: 1
+  _attackBuffAmount: 0
+  _buffRange: 0

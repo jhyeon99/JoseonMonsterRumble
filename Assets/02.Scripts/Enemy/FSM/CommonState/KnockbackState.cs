@@ -3,10 +3,12 @@
 public class KnockbackState : EnemyState
 {
     private readonly Enemy _enemy;
+    private HitData _hitData;
 
-    public KnockbackState(Enemy enemy)
+    public KnockbackState(Enemy enemy, HitData hitData)
     {
         _enemy = enemy;
+        _hitData = hitData;
     }
 
     public override void Enter()
