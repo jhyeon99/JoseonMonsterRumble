@@ -30,7 +30,7 @@ public abstract class Projectile : MonoBehaviour
         gameObject.SetActive(false);
         if (!other.TryGetComponent<IDamageable>(out IDamageable damageable)) return;
 
-        HitData hitData = new HitData(
+        var hitData = new HitData(
             _data.ProjectileDamage,
             0f,
             Vector2.zero,
