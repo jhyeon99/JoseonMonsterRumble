@@ -98,7 +98,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         _isInvincible = isInvincible;
 
         int playerLayer = gameObject.layer;
-        int enemyLayer = Constants.Layers.Enemy;
+        int enemyLayer = Constants.Layers.EnemyAttack;
 
         if (enemyLayer != -1)
         {
