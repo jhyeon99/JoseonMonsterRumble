@@ -59,6 +59,12 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         return true;
     }
 
+    public void Heal(float amount)
+    {
+        _currentHealth = Mathf.Min(_currentHealth + amount, _maxHealth);
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+    }
+
     public void Kill()
     {
         if (_isDead) return;
@@ -98,7 +104,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         _isInvincible = isInvincible;
 
         int playerLayer = gameObject.layer;
-        int enemyLayer = Constants.Layers.Enemy;
+        int enemyLayer = Constants.Layers.EnemyAttack;
 
         if (enemyLayer != -1)
         {
@@ -116,7 +122,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     private void OnDisable()
     {
         int playerLayer = gameObject.layer;
-        int enemyLayer = Constants.Layers.Enemy;
+        int enemyLayer = Constants.Layers.EnemyAttack;
         if (enemyLayer != -1)
         {
             Physics2D.IgnoreLayerCollision(playerLayer, enemyLayer, false);
