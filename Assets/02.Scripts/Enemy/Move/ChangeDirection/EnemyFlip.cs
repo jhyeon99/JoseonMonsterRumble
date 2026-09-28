@@ -17,9 +17,4 @@ public abstract class EnemyFlip : MonoBehaviour
     }
 
     protected abstract void Flip();
-
-    private void OnTriggerEnter2D(Collider2D collider)
-    {
-        Debug.Log($"발사체가 {collider.gameObject.name}에 충돌함.");
-    }
 }
