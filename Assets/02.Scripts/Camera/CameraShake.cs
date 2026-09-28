@@ -13,7 +13,12 @@ public class CameraShake : MonoBehaviour
     private Vector3 _shakeOffset = Vector3.zero;
 
     private void OnEnable() => GameEvents.OnPlayerHit += PlayerHitCameraShake;
-    private void OnDisable() => GameEvents.OnPlayerHit -= PlayerHitCameraShake;
+
+    private void OnDisable()
+    {
+        GameEvents.OnPlayerHit -= PlayerHitCameraShake;
+        ResetShake();
+    }
 
     private Coroutine _cameraShakeRoutine;
 
@@ -52,5 +57,14 @@ public class CameraShake : MonoBehaviour
         }
 
         _shakeOffset = Vector3.zero;
+    }
+
+    private void ResetShake()
+    {
+        if (_cameraShakeRoutine != null)
+        {
+            _shakeOffset = Vector3.zero;
+            _cameraShakeRoutine = null;
+        }
     }
 }
