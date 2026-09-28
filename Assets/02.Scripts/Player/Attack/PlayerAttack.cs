@@ -1,6 +1,6 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Serialization;
+using System.Collections.Generic;
 
 public class PlayerAttack : MonoBehaviour
 {
@@ -10,6 +10,7 @@ public class PlayerAttack : MonoBehaviour
 
 
     [SerializeField, ReadOnly] private int _currentCombo = 0;
+
     public float CurrentAttackDuration
     {
         get
@@ -28,6 +29,7 @@ public class PlayerAttack : MonoBehaviour
             return _attackDataTableSO.Data[index].ActiveDuration;
         }
     }
+
     private Coroutine _comboResetCoroutine;
 
     private Animator _animator;
@@ -65,6 +67,8 @@ public class PlayerAttack : MonoBehaviour
     {
         float elapsedTime = 0f;
 
+        var hitTargets = new HashSet<IDamageable>();
+
         while (elapsedTime < step.ActiveDuration)
         {
             Vector3 center = _attackOrigin.position + _attackOrigin.TransformDirection(step.HitboxOffset);
@@ -74,6 +78,9 @@ public class PlayerAttack : MonoBehaviour
             {
                 if (hit.TryGetComponent<IDamageable>(out IDamageable damageable))
                 {
+                    if (hitTargets.Contains(damageable)) continue;
+                    hitTargets.Add(damageable);
+
                     Vector3 hitPoint = hit.bounds.ClosestPoint(center);
                     Vector3 attackDir = (hit.transform.position - transform.position).normalized;
 
