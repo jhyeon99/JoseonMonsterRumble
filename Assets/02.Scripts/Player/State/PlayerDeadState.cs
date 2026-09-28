@@ -3,11 +3,7 @@ using UnityEngine;
 public class PlayerDeadState : PlayerBaseState
 {
     public PlayerDeadState(Player player, StateMachine stateMachine)
-        : base(player, stateMachine) { }
-
-    public override void Enter()
+        : base(player, stateMachine)
     {
-        base.Enter();
-        _rigidbody2D.linearVelocity = Vector2.zero;
     }
 }
