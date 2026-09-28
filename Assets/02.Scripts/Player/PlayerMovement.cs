@@ -12,6 +12,7 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Dodge Settings")]
     [SerializeField] private float _dodgeDistance;
+
     public float DodgeDistance => _dodgeDistance;
 
     [SerializeField] private float _dodgeDuration;
@@ -19,9 +20,10 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _dodgeCooldown;
     [SerializeField] private AnimationCurve _dodgeSpeedCurve;
     public AnimationCurve DodgeSpeedCurve => _dodgeSpeedCurve;
-    
+
     [Header("Jump Assist")]
     [SerializeField] private float _coyoteTime = 0.1f;
+
     [SerializeField] private float _groundCheckLockout = 0.1f;
 
     private bool _canDodge = true;

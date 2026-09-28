@@ -33,7 +33,7 @@ public class EnemyMeleeCombat : EnemyCombat
     {
         if (!other.TryGetComponent<IDamageable>(out IDamageable damageable)) return;
 
-        HitData hitData = new HitData(
+        var hitData = new HitData(
             Enemy.Data.AttackDamage,
             0f,
             Vector2.zero,
