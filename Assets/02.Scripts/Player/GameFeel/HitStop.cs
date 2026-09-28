@@ -3,10 +3,16 @@ using System.Collections;
 
 public class HitStop : MonoBehaviour
 {
-    [SerializeField] private float _baseDuration = 0.1f;
+    [SerializeField] private float _baseDuration = 0.05f;
+    [SerializeField] private float _hitStopTimeScale = 0.02f;
 
     private void OnEnable() => GameEvents.OnPlayerHit += PlayerHitStop;
-    private void OnDisable() => GameEvents.OnPlayerHit -= PlayerHitStop;
+
+    private void OnDisable()
+    {
+        GameEvents.OnPlayerHit -= PlayerHitStop;
+        RestoreTimeScale();
+    }
 
     private Coroutine _hitStopRoutine;
 
@@ -26,5 +32,14 @@ public class HitStop : MonoBehaviour
         Time.timeScale = 0;
         yield return new WaitForSecondsRealtime(duration);
         Time.timeScale = 1f;
+    }
+
+    private void RestoreTimeScale()
+    {
+        if (_hitStopRoutine != null)
+        {
+            Time.timeScale = 1f;
+            _hitStopRoutine = null;
+        }
     }
 }
