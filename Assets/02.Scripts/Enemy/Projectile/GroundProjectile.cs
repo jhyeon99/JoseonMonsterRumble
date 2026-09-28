@@ -9,6 +9,13 @@ public class GroundProjectile : Projectile
         _t = Mathf.Clamp01(_t);
         Vector2 currentPosition = CalculationBezierPoint(MuzzlePosition, ControlPoint, PlayerPosition, _t);
 
+        Vector2 direction = currentPosition - PlayerPosition;
+        if (direction != Vector2.zero)
+        {
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.Euler(0f, 0f, angle);
+        }
+
         transform.position = currentPosition;
 
         if (_t >= 1f)
