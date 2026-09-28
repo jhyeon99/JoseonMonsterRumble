@@ -3,7 +3,9 @@ using UnityEngine;
 public class PlayerJumpState : PlayerBaseState
 {
     public PlayerJumpState(Player player, StateMachine stateMachine)
-        : base(player, stateMachine) { }
+        : base(player, stateMachine)
+    {
+    }
 
     public override PlatformInteractionMode PlatformMode => PlatformInteractionMode.FreeTrajectory;
 
@@ -19,12 +21,6 @@ public class PlayerJumpState : PlayerBaseState
     public override void Execute()
     {
         base.Execute();
-
-        if (_player.Health != null && _player.Health.IsDead)
-        {
-            _stateMachine.ChangeState(_player.DeadState);
-            return;
-        }
 
         if (_player.IsGrounded && _rigidbody2D.linearVelocity.y <= 0.01f)
         {
