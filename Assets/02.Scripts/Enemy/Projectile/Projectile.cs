@@ -5,11 +5,15 @@ public abstract class Projectile : MonoBehaviour
 {
     [SerializeField] private ProjectileData _data;
     [SerializeField] private ProjectileType _type;
+    [SerializeField] private float _curveHeight = 5f;
     private Transform _playerPosition;
     public ProjectileType Type => _type;
     protected float Speed { get; private set; }
-    protected Vector3 MuzzlePosition { get; private set; }
-    protected Vector3 PlayerPosition { get; private set; }
+    protected Vector2 ControlPoint { get; private set; }
+    protected Vector2 MuzzlePosition { get; private set; }
+    protected Vector2 PlayerPosition { get; private set; }
+    protected float _t;
+    protected bool _isLaunching = false;
 
 
     private void Awake()
@@ -27,6 +31,9 @@ public abstract class Projectile : MonoBehaviour
     {
         MuzzlePosition = muzzlePoint.position;
         PlayerPosition = _playerPosition.position;
+        ControlPoint = (MuzzlePosition + PlayerPosition) / 2f + new Vector2(0f, _curveHeight);
+        _t = 0f;
+        _isLaunching = true;
     }
 
     protected abstract void Fire();

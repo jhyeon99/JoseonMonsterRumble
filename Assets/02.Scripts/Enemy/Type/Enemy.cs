@@ -14,6 +14,7 @@ public abstract class Enemy : MonoBehaviour
     private EnemyMoveType _moveType;
     private IAttackDirectionLock _directionLock;
 
+    public Transform Target => _target;
     public EnemyStateMachine StateMachine => _stateMachine;
     public EnemyCombat Combat => _combat;
     public EnemyAnimation Animation => _animation;
