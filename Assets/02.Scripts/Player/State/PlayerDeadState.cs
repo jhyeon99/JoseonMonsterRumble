@@ -6,4 +6,10 @@ public class PlayerDeadState : PlayerBaseState
         : base(player, stateMachine)
     {
     }
+
+    public override void Enter()
+    {
+        base.Enter();
+        _rigidbody2D.linearVelocity = Vector2.zero;
+    }
 }
