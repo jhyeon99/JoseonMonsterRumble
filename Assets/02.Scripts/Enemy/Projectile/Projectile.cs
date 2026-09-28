@@ -18,6 +18,10 @@ public abstract class Projectile : MonoBehaviour
         Fire();
     }
 
+    public void OnSpawn()
+    {
+    }
+
     protected abstract void Fire();
 
     private void OnTriggerEnter2D(Collider2D other)

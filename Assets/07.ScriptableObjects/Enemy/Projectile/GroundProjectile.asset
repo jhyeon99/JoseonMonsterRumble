@@ -12,6 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02781ee4206785a47bc916a2daba9fc2, type: 3}
   m_Name: GroundProjectile
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileData
-  _projectileSpeed: 0
-  _projectileCount: 0
-  _projectileInterval: 0
+  _projectileDamage: 10
+  _projectileSpeed: 3
