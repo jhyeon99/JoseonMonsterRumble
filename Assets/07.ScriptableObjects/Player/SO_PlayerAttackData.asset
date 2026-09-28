@@ -13,17 +13,17 @@ MonoBehaviour:
   m_Name: SO_PlayerAttackData
   m_EditorClassIdentifier: Assembly-CSharp::AttackDataTableSO
   Data:
-  - Damage: 1
+  - Damage: 10
     ActiveDuration: 0.25
     KnockbackForce: 0
     HitboxOffset: {x: 0, y: 0}
     HitboxSize: {x: 1, y: 1}
-  - Damage: 1
+  - Damage: 10
     ActiveDuration: 0.25
     KnockbackForce: 0
     HitboxOffset: {x: 0, y: 0}
     HitboxSize: {x: 1, y: 1}
-  - Damage: 1
+  - Damage: 20
     ActiveDuration: 0.5
     KnockbackForce: 1
     HitboxOffset: {x: 0, y: 0}

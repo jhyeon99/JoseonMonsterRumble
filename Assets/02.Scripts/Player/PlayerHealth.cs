@@ -59,6 +59,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         return true;
     }
 
+    public void Heal(float amount)
+    {
+        _currentHealth = Mathf.Min(_currentHealth + amount, _maxHealth);
+    }
+
     public void Kill()
     {
         if (_isDead) return;
