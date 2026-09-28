@@ -122,7 +122,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     private void OnDisable()
     {
         int playerLayer = gameObject.layer;
-        int enemyLayer = Constants.Layers.Enemy;
+        int enemyLayer = Constants.Layers.EnemyAttack;
         if (enemyLayer != -1)
         {
             Physics2D.IgnoreLayerCollision(playerLayer, enemyLayer, false);
