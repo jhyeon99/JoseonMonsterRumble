@@ -29,7 +29,7 @@ public class HitStop : MonoBehaviour
 
     private IEnumerator DoHitStop(float duration)
     {
-        Time.timeScale = 0;
+        Time.timeScale = _hitStopTimeScale;
         yield return new WaitForSecondsRealtime(duration);
         Time.timeScale = 1f;
     }
