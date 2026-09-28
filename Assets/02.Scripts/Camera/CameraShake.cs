@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
+[DefaultExecutionOrder(10)]
 public class CameraShake : MonoBehaviour
 {
     [Header("Settings")]
