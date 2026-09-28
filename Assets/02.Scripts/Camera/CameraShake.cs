@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
+[DefaultExecutionOrder(10)]
 public class CameraShake : MonoBehaviour
 {
     [Header("Settings")]
@@ -12,7 +13,14 @@ public class CameraShake : MonoBehaviour
     private Vector3 _shakeOffset = Vector3.zero;
 
     private void OnEnable() => GameEvents.OnPlayerHit += PlayerHitCameraShake;
-    private void OnDisable() => GameEvents.OnPlayerHit -= PlayerHitCameraShake;
+
+    private void OnDisable()
+    {
+        GameEvents.OnPlayerHit -= PlayerHitCameraShake;
+        ResetShake();
+    }
+
+    private Coroutine _cameraShakeRoutine;
 
     private void LateUpdate()
     {
@@ -25,7 +33,12 @@ public class CameraShake : MonoBehaviour
     private void PlayerHitCameraShake(HitData hitData)
     {
         float magnitude = Mathf.Min(hitData.Damage * _damageMultiplier, _maxMagnitude);
-        StartCoroutine(DoShake(_duration, magnitude));
+        if (_cameraShakeRoutine != null)
+        {
+            StopCoroutine(_cameraShakeRoutine);
+        }
+
+        _cameraShakeRoutine = StartCoroutine(DoShake(_duration, magnitude));
     }
 
     private IEnumerator DoShake(float duration, float magnitude)
@@ -44,5 +57,14 @@ public class CameraShake : MonoBehaviour
         }
 
         _shakeOffset = Vector3.zero;
+    }
+
+    private void ResetShake()
+    {
+        if (_cameraShakeRoutine != null)
+        {
+            _shakeOffset = Vector3.zero;
+            _cameraShakeRoutine = null;
+        }
     }
 }
