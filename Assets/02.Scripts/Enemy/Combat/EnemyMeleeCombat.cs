@@ -34,13 +34,13 @@ public class EnemyMeleeCombat : EnemyCombat
         if (!other.TryGetComponent<IDamageable>(out IDamageable damageable)) return;
 
         HitData hitData = new HitData(
-            Enemy.Data.AttackDamage,
+            Enemy.Data.MeleeAttackDamage,
             0f,
             Vector2.zero,
             Vector2.zero
         );
 
         damageable.TakeDamage(hitData);
-        Debug.Log($"플레이어에게 근접공격으로 {Enemy.Data.AttackDamage}만큼 피해를 입힘.");
+        Debug.Log($"플레이어에게 근접공격으로 {Enemy.Data.MeleeAttackDamage}만큼 피해를 입힘.");
     }
 }
