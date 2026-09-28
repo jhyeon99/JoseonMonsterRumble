@@ -39,6 +39,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     {
         if (IsDead || _isInvincible) return false;
 
+        GameEvents.TriggerPlayerHit(hitdata);
         _currentHealth = Mathf.Max(_currentHealth - hitdata.Damage, 0f);
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
 
@@ -74,6 +75,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         {
             StopCoroutine(_invincibleRoutine);
         }
+
         _invincibleRoutine = StartCoroutine(InvincibleRoutine());
     }
 
