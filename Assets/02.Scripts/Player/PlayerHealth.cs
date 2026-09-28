@@ -3,6 +3,7 @@ using System.Collections;
 using Unity.Collections;
 using UnityEngine;
 
+[RequireComponent(typeof(HitFlash))]
 public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 {
     [SerializeField] private float _maxHealth = 100f;
@@ -47,6 +48,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         {
             Die();
             return true;
+        }
+
+        if (TryGetComponent<HitFlash>(out HitFlash flash))
+        {
+            flash.Flash();
         }
 
         StartInvincible();

@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(PlayerInputHandler))]
 [RequireComponent(typeof(PlayerHealth))]
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(PlayerAttack))]
