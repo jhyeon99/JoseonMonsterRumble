@@ -7,7 +7,7 @@ public abstract class Enemy : MonoBehaviour
     [SerializeField] private EnemyData _data;
     public EnemyData Data => _data;
 
-    [SerializeField] private Transform _target;
+    private Transform _target;
     private EnemyStateMachine _stateMachine;
     private EnemyCombat _combat;
     private EnemyAnimation _animation;
@@ -22,6 +22,7 @@ public abstract class Enemy : MonoBehaviour
 
     protected virtual void Awake()
     {
+        _target = FindFirstObjectByType<Player>().transform;
         _stateMachine = new EnemyStateMachine();
         _combat = GetComponent<EnemyCombat>();
         _animation = GetComponent<EnemyAnimation>();

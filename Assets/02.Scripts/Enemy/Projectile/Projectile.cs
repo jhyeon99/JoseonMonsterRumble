@@ -5,11 +5,16 @@ public abstract class Projectile : MonoBehaviour
 {
     [SerializeField] private ProjectileData _data;
     [SerializeField] private ProjectileType _type;
+    private Transform _playerPosition;
     public ProjectileType Type => _type;
     protected float Speed { get; private set; }
+    protected Vector3 MuzzlePosition { get; private set; }
+    protected Vector3 PlayerPosition { get; private set; }
+
 
     private void Awake()
     {
+        _playerPosition = FindFirstObjectByType<Player>().transform;
         Speed = _data.ProjectileSpeed;
     }
 
@@ -18,8 +23,10 @@ public abstract class Projectile : MonoBehaviour
         Fire();
     }
 
-    public void OnSpawn()
+    public void OnSpawn(Transform muzzlePoint)
     {
+        MuzzlePosition = muzzlePoint.position;
+        PlayerPosition = _playerPosition.position;
     }
 
     protected abstract void Fire();
