@@ -13,6 +13,10 @@ public class AttackPrepareFlyingState : AttackPrepareState
         {
             _enemy.MoveType.BackMove(_enemy.GetDirectionToPlayer());
         }
+        else
+        {
+            _enemy.MoveType.StopMove();
+        }
     }
 
     public override void Update()

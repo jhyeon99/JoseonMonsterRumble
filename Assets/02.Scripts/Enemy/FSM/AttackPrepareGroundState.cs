@@ -15,6 +15,10 @@ public class AttackPrepareGroundState : AttackPrepareState
             {
                 _enemy.MoveType.BackMove(_enemy.GetDirectionToPlayer());
             }
+            else
+            {
+                _enemy.MoveType.StopMove();
+            }
         }
     }
 

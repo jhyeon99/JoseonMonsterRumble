@@ -44,6 +44,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         {
             _currentHp = 0f;
             _enemy.StateMachine.ChangeState(new DeadState(_enemy));
+            return true;
         }
 
         Debug.Log($"현재 체력 {_currentHp}");

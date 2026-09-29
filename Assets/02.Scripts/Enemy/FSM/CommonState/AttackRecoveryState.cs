@@ -22,6 +22,10 @@ public class AttackRecoveryState : EnemyState
         {
             _enemy.MoveType.BackMove(_enemy.GetDirectionToPlayer());
         }
+        else
+        {
+            _enemy.MoveType.StopMove();
+        }
     }
 
     public override void Update()
