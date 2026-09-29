@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8133574184006609915}
   - component: {fileID: 5928031591981940563}
   - component: {fileID: 3602155716578811774}
+  - component: {fileID: -5447551169932222938}
   m_Layer: 17
   m_Name: Soul
   m_TagString: Untagged
@@ -156,3 +157,16 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &-5447551169932222938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2312709573893721992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26219dacbd3adbf45ab184085ea3a60f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SoulItem
+  _soulAmount: 5
