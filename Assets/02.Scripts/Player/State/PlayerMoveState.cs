@@ -3,31 +3,27 @@ using UnityEngine;
 public class PlayerMoveState : PlayerBaseState
 {
     public PlayerMoveState(Player player, StateMachine stateMachine)
-        : base(player, stateMachine) { }
+        : base(player, stateMachine)
+    {
+    }
 
     public override void Execute()
     {
         base.Execute();
 
-        if (_player.Health != null && _player.Health.IsDead)
-        {
-            _stateMachine.ChangeState(_player.DeadState);
-            return;
-        }
-
-        if (_inputHandler.IsAttackKeyDown)
+        if (_inputHandler.TryUseAttackInput())
         {
             _stateMachine.ChangeState(_player.AttackState);
             return;
         }
 
-        if (_inputHandler.IsDodgeKeyDown && _player.IsGrounded && _player.Movement.CanDodge)
+        if (_inputHandler.TryUseDodgeInput() && _player.IsGrounded && _player.Movement.CanDodge)
         {
             _stateMachine.ChangeState(_player.DodgeState);
             return;
         }
 
-        if (_inputHandler.IsJumpKeyDown && _player.IsGrounded)
+        if (_inputHandler.TryUseJumpInput() && _player.Movement.CanJump)
         {
             _stateMachine.ChangeState(_player.JumpState);
             return;

@@ -1,23 +1,24 @@
 using System;
+using TMPro;
 using UnityEngine;
 
-public abstract class Enemy : MonoBehaviour, IDamageable
+public abstract class Enemy : MonoBehaviour
 {
     [SerializeField] private EnemyData _data;
     public EnemyData Data => _data;
 
     [SerializeField] private Transform _target;
-
-    protected float CurrentHp { get; private set; }
     private EnemyStateMachine _stateMachine;
     private EnemyCombat _combat;
     private EnemyAnimation _animation;
     private EnemyMoveType _moveType;
+    private IAttackDirectionLock _directionLock;
 
     public EnemyStateMachine StateMachine => _stateMachine;
     public EnemyCombat Combat => _combat;
     public EnemyAnimation Animation => _animation;
     public EnemyMoveType MoveType => _moveType;
+    public IAttackDirectionLock DirectionLock => _directionLock;
 
     protected virtual void Awake()
     {
@@ -25,7 +26,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         _combat = GetComponent<EnemyCombat>();
         _animation = GetComponent<EnemyAnimation>();
         _moveType = GetComponent<EnemyMoveType>();
-        CurrentHp = _data.MaxHp;
+        _directionLock = GetComponent<IAttackDirectionLock>();
     }
 
     protected virtual void Start()
@@ -52,22 +53,5 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     public Vector2 GetDirectionToPlayer()
     {
         return (_target.position - transform.position).normalized;
-    }
-
-    public bool TakeDamage(HitData hitData)
-    {
-        if (CurrentHp <= 0f) return false;
-
-        CurrentHp -= hitData.Damage;
-
-        if (CurrentHp <= 0f)
-        {
-            CurrentHp = 0f;
-            // StateMachine.ChangeState(new DeadState(this));
-            return true;
-        }
-
-        // StateMachine.ChangeState(new HitState(this));
-        return true;
     }
 }

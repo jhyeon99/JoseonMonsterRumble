@@ -3,7 +3,8 @@ using System.Collections;
 using Unity.Collections;
 using UnityEngine;
 
-public class PlayerHealth : MonoBehaviour, IDamageable
+[RequireComponent(typeof(HitFlash))]
+public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 {
     [SerializeField] private float _maxHealth = 100f;
     public float MaxHealth => _maxHealth;
@@ -39,25 +40,55 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         if (IsDead || _isInvincible) return false;
 
-        _currentHealth = Mathf.Max(_currentHealth - hitdata.Damage, 0);
+        GameEvents.TriggerPlayerHit(hitdata);
+        _currentHealth = Mathf.Max(_currentHealth - hitdata.Damage, 0f);
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
 
-        StartCoroutine(InvincibleRoutine());
-
-        if (_currentHealth <= 0)
+        if (_currentHealth <= 0f)
         {
-            _isDead = true;
-            OnDied?.Invoke();
+            Die();
             return true;
         }
 
+        if (TryGetComponent<HitFlash>(out HitFlash flash))
+        {
+            flash.Flash();
+        }
+
+        StartInvincible();
+        return true;
+    }
+
+    public void Heal(float amount)
+    {
+        _currentHealth = Mathf.Min(_currentHealth + amount, _maxHealth);
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+    }
+
+    public void Kill()
+    {
+        if (_isDead) return;
+
+        _currentHealth = 0f;
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+
+        Die();
+    }
+
+    private void Die()
+    {
+        _isDead = true;
+        OnDied?.Invoke();
+    }
+
+    private void StartInvincible()
+    {
         if (_invincibleRoutine != null)
         {
             StopCoroutine(_invincibleRoutine);
         }
-        _invincibleRoutine = StartCoroutine(InvincibleRoutine());
 
-        return true;
+        _invincibleRoutine = StartCoroutine(InvincibleRoutine());
     }
 
     private IEnumerator InvincibleRoutine()
@@ -73,7 +104,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         _isInvincible = isInvincible;
 
         int playerLayer = gameObject.layer;
-        int enemyLayer = Constants.Layers.Enemy;
+        int enemyLayer = Constants.Layers.EnemyAttack;
 
         if (enemyLayer != -1)
         {
@@ -91,7 +122,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     private void OnDisable()
     {
         int playerLayer = gameObject.layer;
-        int enemyLayer = Constants.Layers.Enemy;
+        int enemyLayer = Constants.Layers.EnemyAttack;
         if (enemyLayer != -1)
         {
             Physics2D.IgnoreLayerCollision(playerLayer, enemyLayer, false);

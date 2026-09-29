@@ -3,7 +3,9 @@ using UnityEngine;
 public class PlayerJumpState : PlayerBaseState
 {
     public PlayerJumpState(Player player, StateMachine stateMachine)
-        : base(player, stateMachine) { }
+        : base(player, stateMachine)
+    {
+    }
 
     public override PlatformInteractionMode PlatformMode => PlatformInteractionMode.FreeTrajectory;
 

@@ -1,8 +1,11 @@
+using System;
 using UnityEngine;
 
+[RequireComponent(typeof(PlayerInputHandler))]
 [RequireComponent(typeof(PlayerHealth))]
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(PlayerAttack))]
+[RequireComponent(typeof(PlayerSoul))]
 public class Player : MonoBehaviour
 {
     private StateMachine _stateMachine;
@@ -27,14 +30,20 @@ public class Player : MonoBehaviour
     public PlayerMovement Movement => _movement;
     private PlayerAttack _attack;
     public PlayerAttack Attack => _attack;
+    private PlayerSoul _soul;
+    public PlayerSoul Soul => _soul;
 
     public bool IsGrounded => _movement != null && _movement.IsGrounded();
+
+    private void OnEnable() => Health.OnDied += HandleDeath;
+    private void OnDisable() => Health.OnDied -= HandleDeath;
 
     private void Awake()
     {
         _health = GetComponent<PlayerHealth>();
         _movement = GetComponent<PlayerMovement>();
         _attack = GetComponent<PlayerAttack>();
+        _soul = GetComponent<PlayerSoul>();
 
         InitializeStates();
     }
@@ -64,5 +73,10 @@ public class Player : MonoBehaviour
         _attackState = new PlayerAttackState(this, _stateMachine);
         _dodgeState = new PlayerDodgeState(this, _stateMachine);
         _deadState = new PlayerDeadState(this, _stateMachine);
+    }
+
+    private void HandleDeath()
+    {
+        StateMachine.ChangeState(DeadState);
     }
 }
