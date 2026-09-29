@@ -12,6 +12,6 @@ public class DeadState : EnemyState
     public override void Enter()
     {
         Debug.Log("적 사망!");
-        Enemy.Destroy(_enemy.gameObject);
+        _enemy.gameObject.SetActive(false);
     }
 }

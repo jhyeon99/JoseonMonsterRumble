@@ -27,6 +27,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
                 return true;
             }
 
+            _enemy.HitFlash.Flash();
             _enemy.StateMachine.ChangeState(new KnockbackState(_enemy, hitData));
             return true;
         }
@@ -39,13 +40,14 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
         _currentHp -= hitData.Damage;
 
-        Debug.Log($"현재 체력 {_currentHp}");
-
         if (_currentHp <= 0f)
         {
             _currentHp = 0f;
             _enemy.StateMachine.ChangeState(new DeadState(_enemy));
         }
+
+        Debug.Log($"현재 체력 {_currentHp}");
+        _enemy.HitFlash.Flash();
 
         return true;
     }

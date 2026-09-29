@@ -11,14 +11,6 @@ public class AttackPrepareState : EnemyState
         _attackPrepareTimer = _enemy.Data.AttackPrepareTime;
     }
 
-    public override void FixedUpdate()
-    {
-        if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
-        {
-            _enemy.MoveType.BackMove(_enemy.GetDirectionToPlayer());
-        }
-    }
-
     public override void Exit()
     {
         Debug.Log("적 공격 준비 완료");
