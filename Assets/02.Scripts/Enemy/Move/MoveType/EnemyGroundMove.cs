@@ -6,4 +6,9 @@ public class EnemyGroundMove : EnemyMoveType
     {
         Rigidbody.linearVelocity = new Vector2(direction.x * Enemy.Data.MoveSpeed, Rigidbody.linearVelocity.y);
     }
+
+    public override void BackMove(Vector2 direction)
+    {
+        Rigidbody.linearVelocity = new Vector2(-direction.x * Enemy.Data.MoveSpeed, Rigidbody.linearVelocity.y);
+    }
 }

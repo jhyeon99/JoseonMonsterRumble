@@ -8,7 +8,7 @@ public class EnemyRangedCombat : EnemyCombat
 
     public override void Attack()
     {
-        Projectile projectile = ProjectilePool.Instance.GetProjectile(_type);
+        Projectile projectile = ProjectilePool.Instance.GetProjectile(_type, _muzzlePoint);
         projectile.transform.position = _muzzlePoint.position;
         projectile.transform.rotation = _muzzlePoint.rotation;
     }

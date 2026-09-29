@@ -4,7 +4,6 @@ public class AttackState : EnemyState
 {
     private readonly Enemy _enemy;
     private float _attackTimer = 0;
-    private Vector3 _direction;
 
     public AttackState(Enemy enemy)
     {
@@ -15,7 +14,6 @@ public class AttackState : EnemyState
     {
         Debug.Log("공격 시작");
         _enemy.DirectionLock.LockDirection();
-        _direction = _enemy.GetDirectionToPlayer();
         _attackTimer = _enemy.Data.AttackDurationTime;
         _enemy.Combat.Attack();
     }

@@ -4,6 +4,11 @@ public class EnemyFlyingMove : EnemyMoveType
 {
     public override void Move(Vector2 direction)
     {
-        Rigidbody.linearVelocity = new Vector2(direction.x * Enemy.Data.MoveSpeed, direction.y * Enemy.Data.MoveSpeed);
+        Rigidbody.linearVelocity = direction * Enemy.Data.MoveSpeed;
+    }
+
+    public override void BackMove(Vector2 direction)
+    {
+        Rigidbody.linearVelocity = -(direction * Enemy.Data.MoveSpeed);
     }
 }

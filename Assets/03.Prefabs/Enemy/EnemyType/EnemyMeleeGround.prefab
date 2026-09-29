@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 4754600020612061745}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.01, y: 0, z: 0}
+  m_LocalPosition: {x: 1.032, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -96,6 +96,7 @@ GameObject:
   - component: {fileID: 7165762390576756721}
   - component: {fileID: 7719512815199251269}
   - component: {fileID: -3618497924999448453}
+  - component: {fileID: 5526695924598419246}
   m_Layer: 7
   m_Name: EnemyMeleeGround
   m_TagString: Enemy
@@ -113,7 +114,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: -1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3294475548909027574}
@@ -168,7 +169,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -2000918682933864620, guid: ab0ae26abb5987b4e898c4b668ae96eb, type: 3}
+  m_Sprite: {fileID: 7222972360661586856, guid: e196ab6200712a446b8ddad0f4edb9ac, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -216,7 +217,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.53, y: 1.565}
+    oldSize: {x: 2.13, y: 1.82}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -264,7 +265,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMelee
   _data: {fileID: 11400000, guid: f4217fc77f1358841b50a1d8c7548fd4, type: 2}
-  _target: {fileID: 0}
 --- !u!114 &3220603913955626752
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -327,3 +327,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 728a422b81f2dc84abbffee7b8ef4ec0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+--- !u!114 &5526695924598419246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9071619103714574906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e950c96884d53654e965e9f8e0aed5dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HitFlash
+  _flashColor: {r: 1, g: 0, b: 0, a: 1}
+  _flashDuration: 0.1
