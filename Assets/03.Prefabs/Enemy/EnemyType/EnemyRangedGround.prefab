@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 1610590074761746436}
   - component: {fileID: 6911014025144076320}
   - component: {fileID: 6519422917448066109}
-  - component: {fileID: 7761371777495982822}
+  - component: {fileID: 6652200852635488951}
   - component: {fileID: 3806303243162154410}
   - component: {fileID: 5196533112076596322}
   - component: {fileID: 7041289475213341505}
@@ -204,7 +204,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!114 &7761371777495982822
+--- !u!114 &6652200852635488951
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -213,9 +213,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 4049497279173087227}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 640e5cb9584fe0541b4d899443f34632, type: 3}
+  m_Script: {fileID: 11500000, guid: bd19472239a593843990a9339450c262, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyRanged
+  m_EditorClassIdentifier: Assembly-CSharp::AttackEnemy
   _data: {fileID: 11400000, guid: 96783a2229c6e2542b8f9e15db95f4ef, type: 2}
 --- !u!114 &3806303243162154410
 MonoBehaviour:
