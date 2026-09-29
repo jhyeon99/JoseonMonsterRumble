@@ -79,9 +79,11 @@ GameObject:
   - component: {fileID: 365867655040168542}
   - component: {fileID: 5657429629367741161}
   - component: {fileID: 1415879628628384941}
+  - component: {fileID: 3796107861466377163}
+  - component: {fileID: 2334017650200013127}
   m_Layer: 6
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -343,3 +345,31 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   _currentCombo: 0
+--- !u!114 &3796107861466377163
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6341260774974200273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e950c96884d53654e965e9f8e0aed5dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HitFlash
+  _flashColor: {r: 1, g: 0, b: 0, a: 1}
+  _flashDuration: 0.1
+--- !u!114 &2334017650200013127
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6341260774974200273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37e39b864c21b784fab69a9562c65b3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSoul
+  _maxSoul: 5
+  _currentSoul: 0

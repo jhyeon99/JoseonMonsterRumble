@@ -11,4 +11,9 @@ public class EnemyGroundMove : EnemyMoveType
     {
         Rigidbody.linearVelocity = new Vector2(-direction.x * Enemy.Data.MoveSpeed, Rigidbody.linearVelocity.y);
     }
+
+    public override void StopMove()
+    {
+        Rigidbody.linearVelocity = new Vector2(0f, Rigidbody.linearVelocity.y);
+    }
 }
