@@ -1,6 +1,21 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
+# 0-1. merge / rebase / cherry-pick / revert 진행 중이면 검사 생략
+if [ -f "$GIT_DIR/MERGE_HEAD" ] \
+   || [ -d "$GIT_DIR/rebase-merge" ] || [ -d "$GIT_DIR/rebase-apply" ] \
+   || [ -f "$GIT_DIR/CHERRY_PICK_HEAD" ] || [ -f "$GIT_DIR/REVERT_HEAD" ]; then
+    exit 0
+fi
+
+# 0-2. Git이 자동 생성한 메시지면 검사 생략
+first_line=$(head -n 1 "$1")
+case "$first_line" in
+    "Merge "*|"Revert \""*|"fixup! "*|"squash! "*|"amend! "*)
+        exit 0
+        ;;
+esac
+
 # 1. 커밋 제목 형식 검사 (type: 설명)
 if ! head -n 1 "$1" | grep -qE '^(asset|design|build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\(.+\))?!?: .+'; then
     echo "\n[Git Hook Error] 커밋 메시지 제목은 'type: 설명' 또는 'type(scope): 설명' 형식이어야 합니다."
