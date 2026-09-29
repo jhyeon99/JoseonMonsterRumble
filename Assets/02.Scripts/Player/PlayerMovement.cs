@@ -15,9 +15,9 @@ public class PlayerMovement : MonoBehaviour
 
     public float DodgeDistance => _dodgeDistance;
 
-    [SerializeField] private float _dodgeDuration;
+    [SerializeField] private float _dodgeDuration = 0.3f;
     public float DodgeDuration => _dodgeDuration;
-    [SerializeField] private float _dodgeCooldown;
+    [SerializeField] private float _dodgeCooldown = 0f;
     [SerializeField] private AnimationCurve _dodgeSpeedCurve;
     public AnimationCurve DodgeSpeedCurve => _dodgeSpeedCurve;
 

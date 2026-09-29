@@ -24,6 +24,14 @@ public class Player : MonoBehaviour
     public PlayerDodgeState DodgeState => _dodgeState;
     private PlayerDeadState _deadState;
     public PlayerDeadState DeadState => _deadState;
+    private PlayerHitState _hitState;
+    public PlayerHitState HitState => _hitState;
+
+    [Header("Motion Data")]
+    [SerializeField] private ActionMotionData _hitMotion = new ActionMotionData();
+    public ActionMotionData HitMotion => _hitMotion;
+    [SerializeField] private ActionMotionData _dodgeMotion = new ActionMotionData();
+    public ActionMotionData DodgeMotion => _dodgeMotion;
 
     private PlayerHealth _health;
     public PlayerHealth Health => _health;
@@ -38,6 +46,9 @@ public class Player : MonoBehaviour
     public Animator Animator => _animator;
     private static readonly int AnimParamIsRunning = Animator.StringToHash("isRunning");
     private static readonly int AnimParamIsGrounded = Animator.StringToHash("isGrounded");
+    private static readonly int AnimParamHit = Animator.StringToHash("hit");
+    private static readonly int AnimParamDie = Animator.StringToHash("die");
+    private static readonly int AnimParamDodge = Animator.StringToHash("dodge");
 
     private CapsuleCollider2D _capsuleCollider;
     private Transform _feetTransform;
@@ -52,8 +63,17 @@ public class Player : MonoBehaviour
 
     public bool IsGrounded => _movement != null && _movement.IsGrounded();
 
-    private void OnEnable() => Health.OnDied += HandleDeath;
-    private void OnDisable() => Health.OnDied -= HandleDeath;
+    private void OnEnable()
+    {
+        Health.OnDied += HandleDeath;
+        Health.OnHit += HandleHit;
+    }
+
+    private void OnDisable()
+    {
+        Health.OnDied -= HandleDeath;
+        Health.OnHit -= HandleHit;
+    }
 
     private void Awake()
     {
@@ -79,6 +99,26 @@ public class Player : MonoBehaviour
         }
 
         InitializeStates();
+        InitializeMotionData();
+    }
+
+    private void InitializeMotionData()
+    {
+        if (_animator != null && _animator.runtimeAnimatorController != null)
+        {
+            AnimationClip[] clips = _animator.runtimeAnimatorController.animationClips;
+            for (int i = 0; i < clips.Length; i++)
+            {
+                if (clips[i].name == "Player_Hit")
+                {
+                    _hitMotion.BindClipIfEmpty(clips[i], 1.5f);
+                }
+                else if (clips[i].name == "Player_dodge")
+                {
+                    _dodgeMotion.BindClipIfEmpty(clips[i], 1.5f);
+                }
+            }
+        }
     }
 
     private void Start()
@@ -107,6 +147,7 @@ public class Player : MonoBehaviour
         _attackState = new PlayerAttackState(this, _stateMachine);
         _dodgeState = new PlayerDodgeState(this, _stateMachine);
         _deadState = new PlayerDeadState(this, _stateMachine);
+        _hitState = new PlayerHitState(this, _stateMachine);
     }
 
     public void SetRunning(bool isRunning)
@@ -175,6 +216,40 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(ColliderRestoreDelay);
         SetAirCollider(false);
         _restoreColliderRoutine = null;
+    }
+
+    public void TriggerHit()
+    {
+        if (_animator != null)
+        {
+            _animator.SetTrigger(AnimParamHit);
+        }
+    }
+
+    public void TriggerDie()
+    {
+        if (_animator != null)
+        {
+            _animator.SetTrigger(AnimParamDie);
+        }
+    }
+
+    public void TriggerDodge()
+    {
+        if (_animator != null)
+        {
+            _animator.SetTrigger(AnimParamDodge);
+        }
+    }
+
+    private void HandleHit()
+    {
+        if (StateMachine.CurrentState == DeadState)
+        {
+            return;
+        }
+
+        StateMachine.ChangeState(HitState);
     }
 
     private void HandleDeath()
