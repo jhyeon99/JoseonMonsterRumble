@@ -44,6 +44,15 @@ public class SoulItem : Item
         var b = Vector3.Lerp(p1, p2, t);
         return Vector3.Lerp(a, b, t);
     }
+
+    public override void OnSpawn()
+    {
+        _playerTransform = FindAnyObjectByType<Player>().transform;
+        _isWaiting = true;
+        _absorbTimer = 0;
+        StartCoroutine(WaitRoutine(_waitTime));
+    }
+
     public override void OnCollect(Player player)
     {
         player.Soul.AddSoul(_soulAmount);
