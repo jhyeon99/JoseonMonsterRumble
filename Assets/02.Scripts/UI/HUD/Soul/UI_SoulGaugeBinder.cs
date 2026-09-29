@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class UI_SoulGaugeBinder : MonoBehaviour
 {
-    [SerializeField] private MonoBehaviour _soulSourceComponent;
+    [SerializeField] private PlayerSoul _soulSourceComponent;
     [SerializeField] private UI_SoulGauge _soulGauge;
 
     private ISoulSource _soulSource;
