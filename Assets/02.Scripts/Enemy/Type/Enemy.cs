@@ -38,7 +38,7 @@ public abstract class Enemy : MonoBehaviour
 
     protected virtual void Start()
     {
-        _target = FindFirstObjectByType<Player>().transform;
+        _target = GameObject.FindWithTag(Constants.Tags.Player).transform;
         _stateMachine.ChangeState(new IdleState(this));
     }
 

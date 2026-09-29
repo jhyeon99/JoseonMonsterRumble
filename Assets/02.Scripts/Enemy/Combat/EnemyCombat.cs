@@ -10,5 +10,4 @@ public abstract class EnemyCombat : MonoBehaviour
     }
 
     public abstract void Attack();
-
 }

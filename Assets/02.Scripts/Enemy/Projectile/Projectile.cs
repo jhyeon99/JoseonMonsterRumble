@@ -25,10 +25,10 @@ public abstract class Projectile : MonoBehaviour
         Fire();
     }
 
-    public void OnSpawn(Transform muzzlePoint)
+    public void OnSpawn(Transform muzzlePoint, Transform playerPoint)
     {
         MuzzlePosition = muzzlePoint.position;
-        Transform player = FindFirstObjectByType<Player>().transform;
+        Transform player = playerPoint;
 
         if (player != null)
         {
