@@ -26,7 +26,7 @@ public class KnockbackState : EnemyState
         _knockbackTimer -= Time.deltaTime;
         if (_knockbackTimer <= 0f)
         {
-            _enemy.StateMachine.ChangeState(new IdleState(_enemy));
+            _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
         }
     }
 

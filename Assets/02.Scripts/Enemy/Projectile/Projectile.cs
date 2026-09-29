@@ -18,8 +18,12 @@ public abstract class Projectile : MonoBehaviour
 
     private void Awake()
     {
-        _playerPosition = FindFirstObjectByType<Player>().transform;
         Speed = _data.ProjectileSpeed;
+    }
+
+    private void Start()
+    {
+        _playerPosition = FindFirstObjectByType<Player>().transform;
     }
 
     private void Update()
