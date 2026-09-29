@@ -7,6 +7,12 @@ public class PlayerMoveState : PlayerBaseState
     {
     }
 
+    public override void Enter()
+    {
+        base.Enter();
+        _player.SetRunning(true);
+    }
+
     public override void Execute()
     {
         base.Execute();

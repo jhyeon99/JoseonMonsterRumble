@@ -7,6 +7,12 @@ public class PlayerIdleState : PlayerBaseState
     {
     }
 
+    public override void Enter()
+    {
+        base.Enter();
+        _player.SetRunning(false);
+    }
+
     public override void Execute()
     {
         base.Execute();
