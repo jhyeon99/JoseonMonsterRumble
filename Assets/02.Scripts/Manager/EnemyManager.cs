@@ -10,6 +10,7 @@ public class EnemyManager : MonoBehaviour
         if (_instance != null)
         {
             Destroy(gameObject);
+            return;
         }
 
         _instance = this;
