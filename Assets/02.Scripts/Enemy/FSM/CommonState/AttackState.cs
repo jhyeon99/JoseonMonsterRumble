@@ -4,7 +4,6 @@ public class AttackState : EnemyState
 {
     private readonly Enemy _enemy;
     private float _attackTimer = 0;
-    private Vector3 _direction;
 
     public AttackState(Enemy enemy)
     {

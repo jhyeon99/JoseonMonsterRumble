@@ -5,7 +5,7 @@ public class KnockbackState : EnemyState
     private readonly Enemy _enemy;
     private HitData _hitData;
     private float _knockbackTimer = 0;
-    [SerializeField] private float _knockbackTime = 1.5f;
+    private float _knockbackTime = 1.5f;
 
     public KnockbackState(Enemy enemy, HitData hitData)
     {
