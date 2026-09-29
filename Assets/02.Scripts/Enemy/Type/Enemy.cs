@@ -27,7 +27,6 @@ public abstract class Enemy : MonoBehaviour
 
     protected virtual void Awake()
     {
-        _target = FindFirstObjectByType<Player>().transform;
         _stateMachine = new EnemyStateMachine();
         _combat = GetComponent<EnemyCombat>();
         _animation = GetComponent<EnemyAnimation>();
@@ -39,6 +38,7 @@ public abstract class Enemy : MonoBehaviour
 
     protected virtual void Start()
     {
+        _target = FindFirstObjectByType<Player>().transform;
         _stateMachine.ChangeState(new IdleState(this));
     }
 
