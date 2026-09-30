@@ -135,7 +135,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (_currentPlatform == null) return;
 
-        if (_rigidbody2D.linearVelocity.y < 0f)
+        if (_rigidbody2D.linearVelocity.y != 0f)
         {
             Vector2 v = _rigidbody2D.linearVelocity;
             v.y = 0f;
