@@ -111,6 +111,11 @@ public class PlayerMovement : MonoBehaviour
         _isJumping = true;
         Vector2 v = _rigidbody2D.linearVelocity;
         v.y = _jumpForce / _rigidbody2D.mass;
+        if (_currentPlatform != null)
+        {
+            v.y += _currentPlatform.Velocity.y;
+        }
+
         _rigidbody2D.linearVelocity = v;
 
         _coyoteTimer = 0f;
