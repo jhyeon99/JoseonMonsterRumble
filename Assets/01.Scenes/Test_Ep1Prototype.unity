@@ -617,6 +617,7 @@ MonoBehaviour:
   _topPoint: {fileID: 548374631}
   _bottomPoint: {fileID: 384829662}
   _topExitPoint: {fileID: 1589406400}
+  _topPlatformCollider: {fileID: 0}
 --- !u!61 &61951241
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3782,6 +3783,16 @@ MonoBehaviour:
   _smoothTime: 1
   _minX: -10
   _maxX: 300
+  _yZones:
+  - minY: 0
+    maxY: 0
+    fixedY: 0
+  - minY: 0
+    maxY: 0
+    fixedY: 0
+  - minY: 0
+    maxY: 0
+    fixedY: 0
 --- !u!4 &391005230 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4035448178900987341, guid: f828e01d28b5ee54dab6913ff4409d1c, type: 3}
