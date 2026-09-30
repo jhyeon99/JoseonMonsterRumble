@@ -10,6 +10,7 @@ public class PlayerDeadState : PlayerBaseState
     public override void Enter()
     {
         base.Enter();
-        _rigidbody2D.linearVelocity = Vector2.zero;
+        _rigidbody2D.linearVelocity = new Vector2(0, _rigidbody2D.linearVelocity.y);
+        _player.TriggerDie();
     }
 }

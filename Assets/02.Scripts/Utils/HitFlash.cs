@@ -11,16 +11,18 @@ public class HitFlash : MonoBehaviour
 
     private void Awake()
     {
-        _spriteRenderer = GetComponent<SpriteRenderer>();
+        _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
 
     public void Flash()
     {
+        if (_spriteRenderer == null) return;
         StartCoroutine(FlashCoroutine());
     }
 
     private IEnumerator FlashCoroutine()
     {
+        if (_spriteRenderer == null) yield break;
         Color originalColor = _spriteRenderer.color;
         Color flashColor = _flashColor;
         flashColor.a = originalColor.a;

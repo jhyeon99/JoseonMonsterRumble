@@ -23,12 +23,13 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     public event Action<float, float> OnHealthChanged;
     public event Action OnDied;
+    public event Action OnHit;
 
 
     private void Awake()
     {
         _currentHealth = _maxHealth;
-        _spriteRenderer = GetComponent<SpriteRenderer>();
+        _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
 
     private void Start()
@@ -49,6 +50,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
             Die();
             return true;
         }
+
+        OnHit?.Invoke();
 
         if (TryGetComponent<HitFlash>(out HitFlash flash))
         {
@@ -104,7 +107,13 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         _isInvincible = isInvincible;
 
         int playerLayer = gameObject.layer;
-        int enemyLayer = Constants.Layers.EnemyAttack;
+        int enemyAttackLayer = Constants.Layers.EnemyAttack;
+        int enemyLayer = Constants.Layers.Enemy;
+
+        if (enemyAttackLayer != -1)
+        {
+            Physics2D.IgnoreLayerCollision(playerLayer, enemyAttackLayer, isInvincible);
+        }
 
         if (enemyLayer != -1)
         {
