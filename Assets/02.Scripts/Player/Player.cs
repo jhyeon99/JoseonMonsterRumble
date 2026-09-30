@@ -165,7 +165,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    public void SetGrounded(bool isGrounded)
+    private void SetGrounded(bool isGrounded)
     {
         if (_animator != null)
         {
@@ -178,7 +178,7 @@ public class Player : MonoBehaviour
         if (_isAirColliderApplied == isAir) return;
         _isAirColliderApplied = isAir;
 
-        Vector3 offsetChange = (Vector3)_airOffset;
+        var offsetChange = (Vector3)_airOffset;
         if (!isAir)
         {
             offsetChange = -offsetChange;
