@@ -7,18 +7,23 @@ public abstract class Enemy : MonoBehaviour
     [SerializeField] private EnemyData _data;
     public EnemyData Data => _data;
 
-    [SerializeField] private Transform _target;
+    private Transform _target;
     private EnemyStateMachine _stateMachine;
     private EnemyCombat _combat;
     private EnemyAnimation _animation;
     private EnemyMoveType _moveType;
     private IAttackDirectionLock _directionLock;
+    private Rigidbody2D _enemyRb;
+    private HitFlash _hitFlash;
 
+    public Transform Target => _target;
     public EnemyStateMachine StateMachine => _stateMachine;
     public EnemyCombat Combat => _combat;
     public EnemyAnimation Animation => _animation;
     public EnemyMoveType MoveType => _moveType;
     public IAttackDirectionLock DirectionLock => _directionLock;
+    public Rigidbody2D EnemyRb => _enemyRb;
+    public HitFlash HitFlash => _hitFlash;
 
     protected virtual void Awake()
     {
@@ -27,10 +32,13 @@ public abstract class Enemy : MonoBehaviour
         _animation = GetComponent<EnemyAnimation>();
         _moveType = GetComponent<EnemyMoveType>();
         _directionLock = GetComponent<IAttackDirectionLock>();
+        _enemyRb = GetComponent<Rigidbody2D>();
+        _hitFlash = GetComponent<HitFlash>();
     }
 
     protected virtual void Start()
     {
+        _target = FindFirstObjectByType<Player>().transform;
         _stateMachine.ChangeState(new IdleState(this));
     }
 

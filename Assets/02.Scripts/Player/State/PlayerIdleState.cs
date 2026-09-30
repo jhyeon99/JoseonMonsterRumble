@@ -7,17 +7,17 @@ public class PlayerIdleState : PlayerBaseState
     {
     }
 
+    public override void Enter()
+    {
+        base.Enter();
+        _player.SetRunning(false);
+    }
+
     public override void Execute()
     {
         base.Execute();
 
-        if (_player.CanStartClimb(_inputHandler.MoveInputX, _inputHandler.MoveInputY))
-        {
-            _stateMachine.ChangeState(_player.ClimbState);
-            return;
-        }
-
-        if (_inputHandler.TryUseAttackInput())
+        if (_inputHandler.TryUseAttackInput() && _player.IsGrounded)
         {
             _stateMachine.ChangeState(_player.AttackState);
             return;

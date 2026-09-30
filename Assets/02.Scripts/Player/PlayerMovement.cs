@@ -8,16 +8,16 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _jumpForce;
 
     [SerializeField] private Transform _feetPosition;
-    [SerializeField] private Vector2 _groundCheckSize = new Vector2(0.8f, 0.1f);
+    [SerializeField] private Vector2 _groundCheckSize = new Vector2(0.65f, 0.1f);
 
     [Header("Dodge Settings")]
     [SerializeField] private float _dodgeDistance;
 
     public float DodgeDistance => _dodgeDistance;
 
-    [SerializeField] private float _dodgeDuration;
+    [SerializeField] private float _dodgeDuration = 0.3f;
     public float DodgeDuration => _dodgeDuration;
-    [SerializeField] private float _dodgeCooldown;
+    [SerializeField] private float _dodgeCooldown = 0f;
     [SerializeField] private AnimationCurve _dodgeSpeedCurve;
     public AnimationCurve DodgeSpeedCurve => _dodgeSpeedCurve;
 
@@ -44,8 +44,15 @@ public class PlayerMovement : MonoBehaviour
 
     private float _coyoteTimer;
     private float _lockoutTimer;
+    private bool _isJumping;
 
-    public bool CanJump => _coyoteTimer > 0f;
+    public bool CanJump => !_isJumping && _coyoteTimer > 0f;
+
+    public void OnLanded()
+    {
+        _isJumping = false;
+        _coyoteTimer = _coyoteTime;
+    }
 
     private void Awake()
     {
@@ -63,9 +70,14 @@ public class PlayerMovement : MonoBehaviour
         }
 
         if (IsGrounded())
+        {
             _coyoteTimer = _coyoteTime;
+            _isJumping = false;
+        }
         else
+        {
             _coyoteTimer -= Time.deltaTime;
+        }
     }
 
     public void SetMovingPlatform(MovingPlatform platform)
@@ -104,6 +116,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void Jump()
     {
+        _isJumping = true;
         Vector2 v = _rigidbody2D.linearVelocity;
         v.y = _jumpForce / _rigidbody2D.mass;
         _rigidbody2D.linearVelocity = v;
@@ -153,7 +166,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (_currentPlatform == null) return;
 
-        if (_rigidbody2D.linearVelocity.y < 0f)
+        if (_rigidbody2D.linearVelocity.y != 0f)
         {
             Vector2 v = _rigidbody2D.linearVelocity;
             v.y = 0f;

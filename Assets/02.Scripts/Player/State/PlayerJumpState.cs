@@ -16,24 +16,38 @@ public class PlayerJumpState : PlayerBaseState
         _rigidbody2D.linearVelocity = new Vector2(_rigidbody2D.linearVelocity.x, 0);
         _player.Movement.SetMovingPlatform(null);
         _player.Movement.Jump();
+        _player.SetAirCollider(true);
+    }
+
+    public override void Exit()
+    {
+        base.Exit();
+
+        _player.RestoreGroundColliderDelayed();
+        _player.Movement.OnLanded();
     }
 
     public override void Execute()
     {
         base.Execute();
 
-        if (_player.CanStartClimb(_inputHandler.MoveInputX, _inputHandler.MoveInputY))
-        {
-            _stateMachine.ChangeState(_player.ClimbState);
-            return;
-        }
+        float platformVelocityY =
+            _player.Movement.CurrentPlatform != null ? _player.Movement.CurrentPlatform.Velocity.y : 0f;
 
-        if (_player.IsGrounded && _rigidbody2D.linearVelocity.y <= 0.01f)
+        float relativeVelocityY = _rigidbody2D.linearVelocity.y - platformVelocityY;
+
+        if (_player.IsGrounded && relativeVelocityY <= 0.1f)
         {
+            _player.Movement.OnLanded();
+
             if (Mathf.Abs(_inputHandler.MoveInputX) > 0.01f)
+            {
                 _stateMachine.ChangeState(_player.MoveState);
+            }
             else
+            {
                 _stateMachine.ChangeState(_player.IdleState);
+            }
         }
     }
 

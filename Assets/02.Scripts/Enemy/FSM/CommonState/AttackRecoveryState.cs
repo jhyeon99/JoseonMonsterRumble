@@ -16,6 +16,18 @@ public class AttackRecoveryState : EnemyState
         _recoveryTimer = _enemy.Data.AttackRecoveryTime;
     }
 
+    public override void FixedUpdate()
+    {
+        if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
+        {
+            _enemy.MoveType.BackMove(_enemy.GetDirectionToPlayer());
+        }
+        else
+        {
+            _enemy.MoveType.StopMove();
+        }
+    }
+
     public override void Update()
     {
         _recoveryTimer -= Time.deltaTime;
