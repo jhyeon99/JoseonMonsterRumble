@@ -7,6 +7,18 @@ public class AttackPrepareFlyingState : AttackPrepareState
         _enemy = enemy;
     }
 
+    public override void FixedUpdate()
+    {
+        if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
+        {
+            _enemy.MoveType.BackMove(_enemy.GetDirectionToPlayer());
+        }
+        else
+        {
+            _enemy.MoveType.StopMove();
+        }
+    }
+
     public override void Update()
     {
         _attackPrepareTimer -= Time.deltaTime;

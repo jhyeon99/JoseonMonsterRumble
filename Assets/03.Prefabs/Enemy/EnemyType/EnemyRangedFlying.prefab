@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 2673438376458182690}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.66, y: 0.04, z: 0}
+  m_LocalPosition: {x: 1.18, y: -0.49, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -43,13 +43,14 @@ GameObject:
   - component: {fileID: 1277560087535518828}
   - component: {fileID: 534773569445820332}
   - component: {fileID: 5391187945754487503}
-  - component: {fileID: 3273773987739494396}
+  - component: {fileID: 5597864527246663243}
   - component: {fileID: 6212770104530728967}
   - component: {fileID: 1498950873411210498}
   - component: {fileID: 4524897786918831374}
   - component: {fileID: 5490915983162045863}
   - component: {fileID: 8691898222471691913}
   - component: {fileID: 7463444152510674417}
+  - component: {fileID: 406499295818711419}
   m_Layer: 7
   m_Name: EnemyRangedFlying
   m_TagString: Enemy
@@ -67,7 +68,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: -1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3292567938427824021}
@@ -122,7 +123,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -2000918682933864620, guid: ab0ae26abb5987b4e898c4b668ae96eb, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 46b53708190990845826fc4d48f9f1a2, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -170,7 +171,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.53, y: 1.565}
+    oldSize: {x: 4.8, y: 2.7}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -205,7 +206,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!114 &3273773987739494396
+--- !u!114 &5597864527246663243
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -214,11 +215,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 7004840251579652640}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 640e5cb9584fe0541b4d899443f34632, type: 3}
+  m_Script: {fileID: 11500000, guid: bd19472239a593843990a9339450c262, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyRanged
+  m_EditorClassIdentifier: Assembly-CSharp::AttackEnemy
   _data: {fileID: 11400000, guid: aff7ebcefb6489249b9ebd1eb94baae2, type: 2}
-  _target: {fileID: 0}
 --- !u!114 &6212770104530728967
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -295,3 +295,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 728a422b81f2dc84abbffee7b8ef4ec0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+--- !u!114 &406499295818711419
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7004840251579652640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e950c96884d53654e965e9f8e0aed5dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HitFlash
+  _flashColor: {r: 1, g: 0, b: 0, a: 1}
+  _flashDuration: 0.1

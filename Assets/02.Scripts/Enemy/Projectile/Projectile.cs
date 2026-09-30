@@ -5,8 +5,15 @@ public abstract class Projectile : MonoBehaviour
 {
     [SerializeField] private ProjectileData _data;
     [SerializeField] private ProjectileType _type;
+    [SerializeField] private float _curveHeight = 5f;
     public ProjectileType Type => _type;
     protected float Speed { get; private set; }
+    protected Vector2 ControlPoint { get; private set; }
+    protected Vector2 MuzzlePosition { get; private set; }
+    protected Vector2 PlayerPosition { get; private set; }
+    protected float _t;
+    protected bool _isLaunching = false;
+
 
     private void Awake()
     {
@@ -18,8 +25,19 @@ public abstract class Projectile : MonoBehaviour
         Fire();
     }
 
-    public void OnSpawn()
+    public void OnSpawn(Transform muzzlePoint)
     {
+        MuzzlePosition = muzzlePoint.position;
+        Transform player = FindFirstObjectByType<Player>().transform;
+
+        if (player != null)
+        {
+            PlayerPosition = player.position;
+        }
+
+        ControlPoint = (MuzzlePosition + PlayerPosition) / 2f + new Vector2(0f, _curveHeight);
+        _t = 0f;
+        _isLaunching = true;
     }
 
     protected abstract void Fire();

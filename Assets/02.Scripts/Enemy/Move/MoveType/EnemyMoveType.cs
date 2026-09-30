@@ -12,9 +12,11 @@ public abstract class EnemyMoveType : MonoBehaviour
     }
 
     public abstract void Move(Vector2 direction);
+    public abstract void BackMove(Vector2 direction);
 
     public void ChargeMove(Vector2 direction)
     {
+        Rigidbody.linearVelocity = Vector2.zero;
         Rigidbody.linearVelocity = direction * Enemy.Data.ChargeSpeed;
     }
 

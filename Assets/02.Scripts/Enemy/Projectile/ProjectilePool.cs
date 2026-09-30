@@ -37,7 +37,7 @@ public class ProjectilePool : MonoBehaviour
         }
     }
 
-    public Projectile GetProjectile(ProjectileType projectiletype)
+    public Projectile GetProjectile(ProjectileType projectiletype, Transform muzzlePoint)
     {
         for (int i = 0; i < _pool.GetLength(0); i++)
         {
@@ -53,7 +53,7 @@ public class ProjectilePool : MonoBehaviour
                 if (projectile.gameObject.activeSelf == false)
                 {
                     projectile.gameObject.SetActive(true);
-                    projectile.OnSpawn();
+                    projectile.OnSpawn(muzzlePoint);
                     return projectile;
                 }
             }
