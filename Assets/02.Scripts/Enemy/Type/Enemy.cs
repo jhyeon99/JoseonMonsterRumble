@@ -20,6 +20,7 @@ public abstract class Enemy : MonoBehaviour
     private EnemyCombat _combat;
     private EnemyAnimation _animation;
     private EnemyMoveType _moveType;
+    private EnemyHealth _health;
     private IAttackDirectionLock _directionLock;
     private Rigidbody2D _enemyRb;
     private HitFlash _hitFlash;
@@ -29,13 +30,14 @@ public abstract class Enemy : MonoBehaviour
     public EnemyCombat Combat => _combat;
     public EnemyAnimation Animation => _animation;
     public EnemyMoveType MoveType => _moveType;
+    public EnemyHealth Health => _health;
     public IAttackDirectionLock DirectionLock => _directionLock;
     public Rigidbody2D EnemyRb => _enemyRb;
     public HitFlash HitFlash => _hitFlash;
 
-    private void OnDisable()
+    protected virtual void OnDisable()
     {
-        EnemyManager.Instance?.RemoveEnemy(this);
+        EnemyManager.Instance.RemoveEnemy(this);
     }
 
     protected virtual void Awake()
@@ -44,6 +46,7 @@ public abstract class Enemy : MonoBehaviour
         _combat = GetComponent<EnemyCombat>();
         _animation = GetComponent<EnemyAnimation>();
         _moveType = GetComponent<EnemyMoveType>();
+        _health = GetComponent<EnemyHealth>();
         _directionLock = GetComponent<IAttackDirectionLock>();
         _enemyRb = GetComponent<Rigidbody2D>();
         _hitFlash = GetComponent<HitFlash>();
@@ -51,9 +54,12 @@ public abstract class Enemy : MonoBehaviour
 
     protected virtual void Start()
     {
-        EnemyManager.Instance?.AddEnemy(this);
+        EnemyManager.Instance.AddEnemy(this);
         _target = GameObject.FindWithTag(Constants.Tags.Player).transform;
-        _stateMachine.ChangeState(new IdleState(this));
+    }
+
+    public virtual void FindNewTarget()
+    {
     }
 
 

@@ -8,7 +8,7 @@ public class EnemyManager : MonoBehaviour
     public static EnemyManager Instance => _instance;
     public List<Enemy> ActiveEnemies { get; private set; } = new List<Enemy>();
 
-    public event Action OnAttackersKilled;
+    public event Action OnAllAttackersKilled;
 
     private void Awake()
     {
@@ -35,17 +35,27 @@ public class EnemyManager : MonoBehaviour
         if (ActiveEnemies.Contains(enemy))
         {
             ActiveEnemies.Remove(enemy);
-            CheckRemainingAttackers();
+            CheckAttackersLive();
         }
     }
 
-    private void CheckRemainingAttackers()
+    public Enemy SelectRandomAttacker()
+    {
+        List<Enemy> attackers = ActiveEnemies.FindAll(CheckAttackerType);
+
+        if (attackers.Count == 0) return null;
+
+        int randomIndex = UnityEngine.Random.Range(0, attackers.Count);
+        return attackers[randomIndex];
+    }
+
+    private void CheckAttackersLive()
     {
         bool hasAttacker = ActiveEnemies.Exists(CheckAttackerType);
 
         if (!hasAttacker)
         {
-            OnAttackersKilled?.Invoke();
+            OnAllAttackersKilled?.Invoke();
         }
     }
 
