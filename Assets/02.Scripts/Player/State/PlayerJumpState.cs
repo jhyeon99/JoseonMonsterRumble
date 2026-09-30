@@ -14,8 +14,8 @@ public class PlayerJumpState : PlayerBaseState
         base.Enter();
 
         _rigidbody2D.linearVelocity = new Vector2(_rigidbody2D.linearVelocity.x, 0);
-        _player.Movement.SetMovingPlatform(null);
         _player.Movement.Jump();
+        _player.Movement.SetMovingPlatform(null);
         _player.SetAirCollider(true);
     }
 

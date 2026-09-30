@@ -5,7 +5,7 @@ public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private float _speed;
     public float Speed => _speed;
-    [SerializeField] private float _jumpForce;
+    [SerializeField] private float _jumpHeight;
 
     [SerializeField] private Transform _feetPosition;
     [SerializeField] private Vector2 _groundCheckSize = new Vector2(0.65f, 0.1f);
@@ -25,6 +25,13 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _coyoteTime = 0.1f;
 
     [SerializeField] private float _groundCheckLockout = 0.1f;
+
+    [SerializeField] private float _fallGravityMultiplier = 2f;
+    [SerializeField] private float _lowJumpGravityMultiplier = 2f;
+    [SerializeField] private float _maxFallSpeed = 15f;
+    [SerializeField, Range(0f, 1f)] private float _addPlatformVelocityMultiplier = 1f;
+
+    private float _baseGravityScale;
 
     private bool _canDodge = true;
     public bool CanDodge => _canDodge;
@@ -50,6 +57,7 @@ public class PlayerMovement : MonoBehaviour
     private void Awake()
     {
         _rigidbody2D = GetComponent<Rigidbody2D>();
+        _baseGravityScale = _rigidbody2D.gravityScale;
     }
 
     private void Update()
@@ -69,6 +77,30 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             _coyoteTimer -= Time.deltaTime;
+        }
+    }
+
+    public void ApplyGravity(bool isJumpHeld)
+    {
+        Vector2 v = _rigidbody2D.linearVelocity;
+
+        float multiplier = 1f;
+
+        if (v.y < 0f)
+        {
+            multiplier = _fallGravityMultiplier;
+        }
+        else if (_isJumping && !isJumpHeld)
+        {
+            multiplier = _lowJumpGravityMultiplier;
+        }
+
+        _rigidbody2D.gravityScale = _baseGravityScale * multiplier;
+
+        if (v.y < -_maxFallSpeed)
+        {
+            v.y = -_maxFallSpeed;
+            _rigidbody2D.linearVelocity = v;
         }
     }
 
@@ -109,8 +141,19 @@ public class PlayerMovement : MonoBehaviour
     public void Jump()
     {
         _isJumping = true;
+
+        float gravity = Mathf.Abs(Physics2D.gravity.y) * _baseGravityScale;
+        float jumpVelocity = Mathf.Sqrt(2f * gravity * _jumpHeight);
+
         Vector2 v = _rigidbody2D.linearVelocity;
-        v.y = _jumpForce / _rigidbody2D.mass;
+
+        v.y = jumpVelocity;
+
+        if (_currentPlatform != null)
+        {
+            v.y += _currentPlatform.Velocity.y * _addPlatformVelocityMultiplier;
+        }
+
         _rigidbody2D.linearVelocity = v;
 
         _coyoteTimer = 0f;
