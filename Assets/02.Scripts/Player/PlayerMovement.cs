@@ -26,6 +26,10 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] private float _groundCheckLockout = 0.1f;
 
+    [SerializeField] private float _fallGravityMultiplier = 2f;
+
+    private float _baseGravityScale;
+
     private bool _canDodge = true;
     public bool CanDodge => _canDodge;
     private Rigidbody2D _rigidbody2D;
@@ -50,6 +54,7 @@ public class PlayerMovement : MonoBehaviour
     private void Awake()
     {
         _rigidbody2D = GetComponent<Rigidbody2D>();
+        _baseGravityScale = _rigidbody2D.gravityScale;
     }
 
     private void Update()
@@ -70,6 +75,12 @@ public class PlayerMovement : MonoBehaviour
         {
             _coyoteTimer -= Time.deltaTime;
         }
+    }
+
+    public void ApplyGravity()
+    {
+        bool isFalling = _rigidbody2D.linearVelocity.y < 0f;
+        _rigidbody2D.gravityScale = isFalling ? _baseGravityScale * _fallGravityMultiplier : _baseGravityScale;
     }
 
     public void SetMovingPlatform(MovingPlatform platform)
