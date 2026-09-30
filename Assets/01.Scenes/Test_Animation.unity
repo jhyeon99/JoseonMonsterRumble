@@ -746,7 +746,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6393e59aa1c69aa4fba38db91be72562, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
-  _hitStunDuration: 0.2
+  _hitMotion:
+    _clip: {fileID: 0}
+    _animatorSpeed: 1
+    _cancelRatio: 0.8
+    _fallbackDuration: 0.6
+  _dodgeMotion:
+    _clip: {fileID: 0}
+    _animatorSpeed: 1
+    _cancelRatio: 0.8
+    _fallbackDuration: 0.6
   _animator: {fileID: 0}
 --- !u!4 &647909957474401887
 Transform:
@@ -757,7 +766,7 @@ Transform:
   m_GameObject: {fileID: 5354305599220771868}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0, z: 0}
+  m_LocalPosition: {x: 0.35, y: 0.63, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -883,7 +892,7 @@ Transform:
   m_GameObject: {fileID: 6500282078561561487}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.5, z: 0}
+  m_LocalPosition: {x: -0.13, y: -0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1020,7 +1029,7 @@ MonoBehaviour:
   _feetPosition: {fileID: 3436934513427620939}
   _groundCheckSize: {x: 1, y: 0.1}
   _dodgeDistance: 2
-  _dodgeDuration: 0.3
+  _dodgeDuration: 0.2
   _dodgeCooldown: 0
   _dodgeSpeedCurve:
     serializedVersion: 2
@@ -1304,7 +1313,7 @@ MonoBehaviour:
   _attackOrigin: {fileID: 647909957474401887}
   _enemyLayer:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 512
   _currentCombo: 0
 --- !u!61 &6785555885066334151
 BoxCollider2D:

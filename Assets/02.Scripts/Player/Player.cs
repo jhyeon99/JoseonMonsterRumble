@@ -32,6 +32,8 @@ public class Player : MonoBehaviour
     public ActionMotionData HitMotion => _hitMotion;
     [SerializeField] private ActionMotionData _dodgeMotion = new ActionMotionData();
     public ActionMotionData DodgeMotion => _dodgeMotion;
+    [SerializeField] private ActionMotionData _attackMotion = new ActionMotionData();
+    public ActionMotionData AttackMotion => _attackMotion;
 
     private PlayerHealth _health;
     public PlayerHealth Health => _health;
@@ -49,6 +51,7 @@ public class Player : MonoBehaviour
     private static readonly int AnimParamHit = Animator.StringToHash("hit");
     private static readonly int AnimParamDie = Animator.StringToHash("die");
     private static readonly int AnimParamDodge = Animator.StringToHash("dodge");
+    private static readonly int AnimParamAttack = Animator.StringToHash("attack");
 
     private CapsuleCollider2D _capsuleCollider;
     private Transform _feetTransform;
@@ -116,6 +119,10 @@ public class Player : MonoBehaviour
                 else if (clips[i].name == "Player_dodge")
                 {
                     _dodgeMotion.BindClipIfEmpty(clips[i], 1.5f);
+                }
+                else if (clips[i].name == "Player_Attack")
+                {
+                    _attackMotion.BindClipIfEmpty(clips[i], 1.0f);
                 }
             }
         }
@@ -239,6 +246,14 @@ public class Player : MonoBehaviour
         if (_animator != null)
         {
             _animator.SetTrigger(AnimParamDodge);
+        }
+    }
+
+    public void TriggerAttack()
+    {
+        if (_animator != null)
+        {
+            _animator.SetTrigger(AnimParamAttack);
         }
     }
 
