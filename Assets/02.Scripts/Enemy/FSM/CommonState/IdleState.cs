@@ -13,6 +13,7 @@ public class IdleState : EnemyState
     {
         Debug.Log("Idle 시작");
         _enemy.DirectionLock.LockDirection();
+        _enemy.MoveType.StopMove();
     }
 
     public override void Update()

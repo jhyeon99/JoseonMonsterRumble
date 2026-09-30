@@ -5,6 +5,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 {
     private Enemy _enemy;
     private float _currentHp;
+    public event Action OnDeath;
 
     private void Awake()
     {
@@ -24,6 +25,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
             if (_currentHp <= 0f)
             {
                 _currentHp = 0f;
+                OnDeath?.Invoke();
                 _enemy.StateMachine.ChangeState(new DeadState(_enemy));
                 return true;
             }
@@ -44,6 +46,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         if (_currentHp <= 0f)
         {
             _currentHp = 0f;
+            OnDeath?.Invoke();
             _enemy.StateMachine.ChangeState(new DeadState(_enemy));
             return true;
         }

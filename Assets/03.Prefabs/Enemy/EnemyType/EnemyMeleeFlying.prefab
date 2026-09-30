@@ -98,6 +98,7 @@ GameObject:
   - component: {fileID: -6285746008215813451}
   - component: {fileID: 1465709224609016256}
   - component: {fileID: 4112317450272578094}
+  - component: {fileID: -8411095045714158178}
   m_Layer: 7
   m_Name: EnemyMeleeFlying
   m_TagString: Enemy
@@ -265,6 +266,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd19472239a593843990a9339450c262, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMelee
+  _enemyType: 0
   _data: {fileID: 11400000, guid: be312a2b163f26e41a8bfcf4f1c01ef4, type: 2}
 --- !u!114 &690807154908407570
 MonoBehaviour:
@@ -355,3 +357,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HitFlash
   _flashColor: {r: 1, g: 0, b: 0, a: 1}
   _flashDuration: 0.1
+--- !u!114 &-8411095045714158178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2319009342568745602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e34f270a66f14f9449d441ce020b0af0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyMoveArea
+  centerOffset: {x: 0, y: 0}
+  areaSize: {x: 5, y: 5}
+  areaColor: {r: 0, g: 1, b: 0, a: 0.3}
