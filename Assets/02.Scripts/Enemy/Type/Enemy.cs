@@ -25,6 +25,11 @@ public abstract class Enemy : MonoBehaviour
     public Rigidbody2D EnemyRb => _enemyRb;
     public HitFlash HitFlash => _hitFlash;
 
+    private void OnEnable()
+    {
+        EnemyManager.Instance.AddEnemy(this);
+    }
+
     protected virtual void Awake()
     {
         _stateMachine = new EnemyStateMachine();
