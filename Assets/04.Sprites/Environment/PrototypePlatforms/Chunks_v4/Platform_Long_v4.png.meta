@@ -1,10 +1,19 @@
 fileFormatVersion: 2
-guid: 54a2ea3408db45e896cff89400000003
+guid: 3b08b3372d3b1194b8d99a09df722b36
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 21300000
-    second: Platform_Long_v4
+      213: 6170239188539011379
+    second: Platform_Long_v4_0
+  - first:
+      213: -7926734703525637591
+    second: Platform_Long_v4_1
+  - first:
+      213: 3557296272631975113
+    second: Platform_Long_v4_2
+  - first:
+      213: -6590384391247598400
+    second: Platform_Long_v4_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -34,7 +43,7 @@ TextureImporter:
   cubemapConvolution: 0
   seamlessCubemap: 0
   textureFormat: 1
-  maxTextureSize: 4096
+  maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
     filterMode: 1
@@ -48,12 +57,12 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 254.3750
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spriteGenerateFallbackPhysicsShape: 0
+  spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
   spriteTessellationDetail: -1
@@ -72,10 +81,10 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 4096
+    maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -85,7 +94,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: Standalone
-    maxTextureSize: 4096
+    maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -98,7 +107,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: Android
-    maxTextureSize: 4096
+    maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -111,7 +120,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: WebGL
-    maxTextureSize: 4096
+    maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -126,45 +135,113 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Platform_Long_v4
+      name: Platform_Long_v4_0
       rect:
         serializedVersion: 2
-        x: 54
-        y: 162
-        width: 2068
-        height: 328
-      alignment: 9
-      pivot: {x: 0.5, y: 0.804878}
+        x: 62
+        y: 87
+        width: 2047
+        height: 520
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData:
+      customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 934cea3408db45e896cff89400000003
-      internalID: 21300000
+      spriteID: 331ff04c9d711a550800000000000000
+      internalID: 6170239188539011379
       vertices: []
-      indices:
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Platform_Long_v4_1
+      rect:
+        serializedVersion: 2
+        x: 1166
+        y: 594
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 922d797e8c49ef190800000000000000
+      internalID: -7926734703525637591
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Platform_Long_v4_2
+      rect:
+        serializedVersion: 2
+        x: 1520
+        y: 112
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9cccc03dc1e0e5130800000000000000
+      internalID: 3557296272631975113
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Platform_Long_v4_3
+      rect:
+        serializedVersion: 2
+        x: 1520
+        y: 89
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0cc686240504a84a0800000000000000
+      internalID: -6590384391247598400
+      vertices: []
+      indices: 
       edges: []
       weights: []
     outline: []
-    customData:
+    customData: 
     physicsShape: []
     bones: []
-    spriteID:
+    spriteID: 
     internalID: 0
     vertices: []
-    indices:
+    indices: 
     edges: []
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Platform_Long_v4: 21300000
-  mipmapLimitGroupName:
+      Platform_Long_v4_0: 6170239188539011379
+      Platform_Long_v4_1: -7926734703525637591
+      Platform_Long_v4_2: 3557296272631975113
+      Platform_Long_v4_3: -6590384391247598400
+  mipmapLimitGroupName: 
   pSDRemoveMatte: 0
-  userData:
-  assetBundleName:
-  assetBundleVariant:
-
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
