@@ -1,4 +1,4 @@
-using UnityEngine;
+/*using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D))]
 public class ClimbableRope : MonoBehaviour
@@ -130,3 +130,4 @@ public class ClimbableRope : MonoBehaviour
             0.15f);
     }
 }
+*/

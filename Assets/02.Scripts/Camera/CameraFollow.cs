@@ -1,13 +1,5 @@
 using UnityEngine;
 
-[System.Serializable]
-public struct CameraYZone
-{
-    public float minY;
-    public float maxY;
-    public float fixedY;
-}
-
 [DefaultExecutionOrder(1)]
 public class CameraFollow : MonoBehaviour
 {
@@ -19,9 +11,7 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] private float _minX = -10f;
 
     [SerializeField] private float _maxX = 10f;
-
-    [SerializeField] private CameraYZone[] _yZones;
-
+    [SerializeField] private float _fixedY = 0;
 
     private Vector3 _velocity = Vector3.zero;
 
@@ -34,14 +24,7 @@ public class CameraFollow : MonoBehaviour
         var realOffset = new Vector3(signX * _offset.x, 0, _offset.z);
         Vector3 targetPosition = _target.position + realOffset;
         targetPosition.x = Mathf.Clamp(targetPosition.x, _minX, _maxX);
-
-        foreach (var yZone in _yZones)
-        {
-            if (yZone.maxY >= targetPosition.y && yZone.minY <= targetPosition.y)
-            {
-                targetPosition.y = yZone.fixedY;
-            }
-        }
+        targetPosition.y = _fixedY;
 
         transform.position =
             Vector3.SmoothDamp(transform.position, targetPosition, ref _velocity, _smoothTime);

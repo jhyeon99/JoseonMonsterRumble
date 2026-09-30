@@ -16,32 +16,34 @@ public class ParallaxManager : MonoBehaviour
         [Range(0f, 1f)]
         [SerializeField] private float _horizontalStrength;
 
+        [Header("세로 패럴렉스 강도")]
+        [Range(0f, 1f)]
+        [SerializeField] private float _verticalStrength = 0f;
+
         private Vector3 _startPosition;
 
         public void Initialize()
         {
-            if (_layer == null)
-            {
-                return;
-            }
+            if (_layer == null) return;
 
             _startPosition = _layer.position;
         }
 
         public void Move(Vector3 cameraMovement)
         {
-            if (_layer == null)
-            {
-                return;
-            }
+            if (_layer == null) return;
 
             float followX =
                 cameraMovement.x * (1f - _horizontalStrength);
 
+            float followY =
+                cameraMovement.y * (1f - _verticalStrength);
+
             _layer.position = new Vector3(
                 _startPosition.x + followX,
-                _startPosition.y,
-                _startPosition.z);
+                _startPosition.y + followY,
+                _startPosition.z
+            );
         }
     }
 
@@ -66,7 +68,8 @@ public class ParallaxManager : MonoBehaviour
         {
             Debug.LogError(
                 "ParallaxManager: Target Camera를 연결하세요.",
-                this);
+                this
+            );
 
             enabled = false;
             return;

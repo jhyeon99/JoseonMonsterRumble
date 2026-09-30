@@ -1,4 +1,4 @@
-using UnityEngine;
+/*using UnityEngine;
 
 public class PlayerClimbState : PlayerBaseState
 {
@@ -125,3 +125,4 @@ public class PlayerClimbState : PlayerBaseState
         _stateMachine.ChangeState(_player.JumpState);
     }
 }
+*/

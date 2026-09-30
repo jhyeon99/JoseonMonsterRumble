@@ -61,7 +61,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -144,10 +144,10 @@ TextureImporter:
       name: MT2_0
       rect:
         serializedVersion: 2
-        x: 548
-        y: 757
-        width: 13
-        height: 11
+        x: 0
+        y: 0
+        width: 2048
+        height: 649
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -162,121 +162,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: MT2_1
-      rect:
-        serializedVersion: 2
-        x: 776
-        y: 675
-        width: 87
-        height: 85
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f6dc583ab680bd5e0800000000000000
-      internalID: -1883902760726442641
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: MT2_2
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 2048
-        height: 750
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4ca86dafdc0c54fc0800000000000000
-      internalID: -3511188343556240700
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: MT2_3
-      rect:
-        serializedVersion: 2
-        x: 312
-        y: 728
-        width: 7
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ba3dff471f29cbc10800000000000000
-      internalID: 2070691494431282091
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: MT2_4
-      rect:
-        serializedVersion: 2
-        x: 860
-        y: 673
-        width: 17
-        height: 29
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e28fdd9927899f7d0800000000000000
-      internalID: -2884106468378937298
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: MT2_5
-      rect:
-        serializedVersion: 2
-        x: 1406
-        y: 622
-        width: 17
-        height: 23
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f6ea836e95e1aa810800000000000000
-      internalID: 1777266374414478959
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 754df3475bc94544da666f0d8e9d4ebc
     internalID: 0
     vertices: []
     indices: 
@@ -292,6 +182,7 @@ TextureImporter:
       MT2_3: 2070691494431282091
       MT2_4: -2884106468378937298
       MT2_5: 1777266374414478959
+      MT2_6: -339168850
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
