@@ -59,10 +59,10 @@ public class Player : MonoBehaviour
     private BoxCollider2D _boxCollider;
     private Transform _feetTransform;
     [SerializeField] private Vector2 _airOffset;
-
     [SerializeField] private float _colliderRestoreDelay = 0.1f;
-    private bool _isAirColliderApplied;
 
+    private Vector2 _baseColliderOffset;
+    private Vector3 _baseFeetLocalPosition;
     private Coroutine _restoreColliderRoutine;
 
     public bool IsGrounded => _movement != null && _movement.IsGrounded();
@@ -92,15 +92,18 @@ public class Player : MonoBehaviour
             _animator = GetComponentInChildren<Animator>();
         }
 
-        if (_boxCollider == null)
+        _boxCollider = GetComponent<BoxCollider2D>();
+        Transform feetObj = transform.Find("Feet");
+        if (feetObj != null) _feetTransform = feetObj;
+
+        if (_boxCollider != null)
         {
-            _boxCollider = GetComponent<BoxCollider2D>();
+            _baseColliderOffset = _boxCollider.offset;
         }
 
-        if (_feetTransform == null)
+        if (_feetTransform != null)
         {
-            Transform feetObj = transform.Find("Feet");
-            if (feetObj != null) _feetTransform = feetObj;
+            _baseFeetLocalPosition = _feetTransform.localPosition;
         }
 
         InitializeStates();
@@ -178,23 +181,24 @@ public class Player : MonoBehaviour
 
     public void SetAirCollider(bool isAir)
     {
-        if (_isAirColliderApplied == isAir) return;
-        _isAirColliderApplied = isAir;
-
-        var offsetChange = (Vector3)_airOffset;
-        if (!isAir)
+        if (isAir && _restoreColliderRoutine != null)
         {
-            offsetChange = -offsetChange;
+            StopCoroutine(_restoreColliderRoutine);
+            _restoreColliderRoutine = null;
         }
 
+        Vector2 offset = isAir ? _airOffset : Vector2.zero;
+
+
+        Debug.Log(offset);
         if (_boxCollider != null)
         {
-            _boxCollider.offset += (Vector2)offsetChange;
+            _boxCollider.offset = _baseColliderOffset + offset;
         }
 
         if (_feetTransform != null)
         {
-            _feetTransform.localPosition += offsetChange;
+            _feetTransform.localPosition = _baseFeetLocalPosition + (Vector3)offset;
         }
     }
 
