@@ -27,6 +27,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _groundCheckLockout = 0.1f;
 
     [SerializeField] private float _fallGravityMultiplier = 2f;
+    [SerializeField] private float _maxFallSpeed = 15f;
 
     private float _baseGravityScale;
 
@@ -79,8 +80,17 @@ public class PlayerMovement : MonoBehaviour
 
     public void ApplyGravity()
     {
-        bool isFalling = _rigidbody2D.linearVelocity.y < 0f;
-        _rigidbody2D.gravityScale = isFalling ? _baseGravityScale * _fallGravityMultiplier : _baseGravityScale;
+        Vector2 v = _rigidbody2D.linearVelocity;
+
+        _rigidbody2D.gravityScale = v.y < 0f
+            ? _baseGravityScale * _fallGravityMultiplier
+            : _baseGravityScale;
+
+        if (v.y < -_maxFallSpeed)
+        {
+            v.y = -_maxFallSpeed;
+            _rigidbody2D.linearVelocity = v;
+        }
     }
 
     public void SetMovingPlatform(MovingPlatform platform)
