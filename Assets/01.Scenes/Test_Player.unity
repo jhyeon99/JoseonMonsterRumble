@@ -315,6 +315,10 @@ PrefabInstance:
       value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 712705037745635573, guid: 5e9ff94f0bf453b49b01f3070ec2f99e, type: 3}
+      propertyPath: _jumpHeight
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 712705037745635573, guid: 5e9ff94f0bf453b49b01f3070ec2f99e, type: 3}
       propertyPath: _groundCheckSize.x
       value: 0.7
       objectReference: {fileID: 0}

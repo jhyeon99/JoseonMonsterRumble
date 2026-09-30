@@ -7,11 +7,14 @@ public class PlayerInputHandler : MonoBehaviour
     private float _moveInputX;
     public float MoveInputX => _moveInputX;
     private bool _isJumpKeyDown;
+    private bool _isJumpKey;
+    public bool IsJumpKey => _isJumpKey;
     private bool _isDodgeKeyDown;
     private bool _isAttackKeyDown;
 
     [Header("Input Buffer")]
     [SerializeField] private InputBuffer _jumpBuffer = new InputBuffer(0.1f);
+
     [SerializeField] private InputBuffer _dodgeBuffer = new InputBuffer(0.1f);
     [SerializeField] private InputBuffer _attackBuffer = new InputBuffer(0.1f);
 
@@ -28,6 +31,7 @@ public class PlayerInputHandler : MonoBehaviour
     {
         _moveInputX = Input.GetAxis(Horizontal);
         _isJumpKeyDown = Input.GetKeyDown(KeyCode.Space);
+        _isJumpKey = Input.GetKey(KeyCode.Space);
         _isDodgeKeyDown = Input.GetKeyDown(KeyCode.Z);
         _isAttackKeyDown = Input.GetKeyDown(KeyCode.X);
 

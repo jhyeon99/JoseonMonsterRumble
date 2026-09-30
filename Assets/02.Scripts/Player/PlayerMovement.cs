@@ -5,7 +5,7 @@ public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private float _speed;
     public float Speed => _speed;
-    [SerializeField] private float _jumpForce;
+    [SerializeField] private float _jumpHeight;
 
     [SerializeField] private Transform _feetPosition;
     [SerializeField] private Vector2 _groundCheckSize = new Vector2(0.65f, 0.1f);
@@ -27,6 +27,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _groundCheckLockout = 0.1f;
 
     [SerializeField] private float _fallGravityMultiplier = 2f;
+    [SerializeField] private float _lowJumpGravityMultiplier = 2f;
     [SerializeField] private float _maxFallSpeed = 15f;
 
     private float _baseGravityScale;
@@ -78,13 +79,22 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public void ApplyGravity()
+    public void ApplyGravity(bool isJumpHeld)
     {
         Vector2 v = _rigidbody2D.linearVelocity;
 
-        _rigidbody2D.gravityScale = v.y < 0f
-            ? _baseGravityScale * _fallGravityMultiplier
-            : _baseGravityScale;
+        float multiplier = 1f;
+
+        if (v.y < 0f)
+        {
+            multiplier = _fallGravityMultiplier;
+        }
+        else if (_isJumping && !isJumpHeld)
+        {
+            multiplier = _lowJumpGravityMultiplier;
+        }
+
+        _rigidbody2D.gravityScale = _baseGravityScale * multiplier;
 
         if (v.y < -_maxFallSpeed)
         {
@@ -130,8 +140,14 @@ public class PlayerMovement : MonoBehaviour
     public void Jump()
     {
         _isJumping = true;
+
+        float gravity = Mathf.Abs(Physics2D.gravity.y) * _baseGravityScale;
+        float jumpVelocity = Mathf.Sqrt(2f * gravity * _jumpHeight);
+
         Vector2 v = _rigidbody2D.linearVelocity;
-        v.y = _jumpForce / _rigidbody2D.mass;
+
+        v.y = jumpVelocity;
+
         if (_currentPlatform != null)
         {
             v.y += _currentPlatform.Velocity.y;

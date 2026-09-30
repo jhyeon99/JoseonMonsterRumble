@@ -37,6 +37,7 @@ public class Player : MonoBehaviour
     [SerializeField] private ActionMotionData _attackMotion = new ActionMotionData();
     public ActionMotionData AttackMotion => _attackMotion;
 
+    private PlayerInputHandler _inputHandler;
     private PlayerHealth _health;
     public PlayerHealth Health => _health;
     private PlayerMovement _movement;
@@ -80,6 +81,7 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
+        _inputHandler = GetComponent<PlayerInputHandler>();
         _health = GetComponent<PlayerHealth>();
         _movement = GetComponent<PlayerMovement>();
         _attack = GetComponent<PlayerAttack>();
@@ -142,7 +144,7 @@ public class Player : MonoBehaviour
     private void FixedUpdate()
     {
         _stateMachine.FixedUpdate();
-        Movement.ApplyGravity();
+        Movement.ApplyGravity(_inputHandler.IsJumpKey);
         Movement.IntegrateMovement(_stateMachine.CurrentState.PlatformMode);
     }
 
