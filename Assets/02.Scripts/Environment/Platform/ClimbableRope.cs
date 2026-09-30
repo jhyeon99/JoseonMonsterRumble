@@ -10,6 +10,9 @@ public class ClimbableRope : MonoBehaviour
     [Header("상단 도착 위치")]
     [SerializeField] private Transform _topExitPoint;
 
+    [Header("상단 발판")]
+    [SerializeField] private Collider2D _topPlatformCollider;
+
     public float CenterX => transform.position.x;
     public float TopY => _topPoint.position.y;
     public float BottomY => _bottomPoint.position.y;
@@ -41,14 +44,29 @@ public class ClimbableRope : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Player player = other.GetComponentInParent<Player>();
+        RegisterPlayer(other);
+    }
 
-        if (player == null)
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        RegisterPlayer(other);
+    }
+
+    private void RegisterPlayer(Collider2D other)
+    {
+        if (!isActiveAndEnabled || _topPoint == null)
         {
             return;
         }
 
-        player.EnterRopeRange(this);
+        Player player = other.GetComponentInParent<Player>();
+
+        if (player == null || player.Movement.FeetPosition.y >= TopY)
+        {
+            return;
+        }
+
+        player.EnterRope(this);
     }
 
     private void OnTriggerExit2D(Collider2D other)
@@ -60,7 +78,21 @@ public class ClimbableRope : MonoBehaviour
             return;
         }
 
-        player.ExitRopeRange(this);
+        player.ExitRope(this);
+    }
+
+    public void SetTopPlatformCollision(Player player, bool ignore)
+    {
+        if (_topPlatformCollider == null)
+        {
+            return;
+        }
+
+        Collider2D playerCollider = player.GetComponent<Collider2D>();
+        if (playerCollider != null)
+        {
+            Physics2D.IgnoreCollision(playerCollider, _topPlatformCollider, ignore);
+        }
     }
 
     private void Reset()

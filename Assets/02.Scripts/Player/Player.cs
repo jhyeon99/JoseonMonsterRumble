@@ -23,6 +23,8 @@ public class Player : MonoBehaviour
     public PlayerDodgeState DodgeState => _dodgeState;
     private PlayerDeadState _deadState;
     public PlayerDeadState DeadState => _deadState;
+    private PlayerClimbState _climbState;
+    public PlayerClimbState ClimbState => _climbState;
 
     private PlayerHealth _health;
     public PlayerHealth Health => _health;
@@ -32,6 +34,9 @@ public class Player : MonoBehaviour
     public PlayerAttack Attack => _attack;
     private PlayerSoul _soul;
     public PlayerSoul Soul => _soul;
+    private ClimbableRope _currentRope;
+    public ClimbableRope CurrentRope => _currentRope;
+    private bool _ropeRegrabBlocked;
 
     public bool IsGrounded => _movement != null && _movement.IsGrounded();
 
@@ -73,10 +78,53 @@ public class Player : MonoBehaviour
         _attackState = new PlayerAttackState(this, _stateMachine);
         _dodgeState = new PlayerDodgeState(this, _stateMachine);
         _deadState = new PlayerDeadState(this, _stateMachine);
+        _climbState = new PlayerClimbState(this, _stateMachine);
     }
 
     private void HandleDeath()
     {
         StateMachine.ChangeState(DeadState);
+    }
+    public void EnterRope(ClimbableRope rope)
+    {
+        if (rope == null)
+        {
+            return;
+        }
+
+        _currentRope = rope;
+    }
+
+    public void ExitRope(ClimbableRope rope)
+    {
+        if (_currentRope != rope)
+        {
+            return;
+        }
+
+        _currentRope = null;
+    }
+
+    public bool CanStartClimb(float horizontalInput, float verticalInput)
+    {
+        if (Mathf.Abs(verticalInput) <= 0.01f)
+        {
+            _ropeRegrabBlocked = false;
+            return false;
+        }
+
+        if (_ropeRegrabBlocked || _currentRope == null || Mathf.Abs(horizontalInput) > 0.01f)
+        {
+            return false;
+        }
+
+        float feetY = Movement.FeetPosition.y;
+        return (verticalInput > 0.01f && feetY < _currentRope.TopY) ||
+               (verticalInput < -0.01f && feetY > _currentRope.BottomY);
+    }
+
+    public void BlockRopeRegrabUntilVerticalRelease()
+    {
+        _ropeRegrabBlocked = true;
     }
 }

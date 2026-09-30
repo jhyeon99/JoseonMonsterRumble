@@ -22,6 +22,12 @@ public class PlayerJumpState : PlayerBaseState
     {
         base.Execute();
 
+        if (_player.CanStartClimb(_inputHandler.MoveInputX, _inputHandler.MoveInputY))
+        {
+            _stateMachine.ChangeState(_player.ClimbState);
+            return;
+        }
+
         if (_player.IsGrounded && _rigidbody2D.linearVelocity.y <= 0.01f)
         {
             if (Mathf.Abs(_inputHandler.MoveInputX) > 0.01f)

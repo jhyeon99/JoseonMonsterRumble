@@ -11,6 +11,12 @@ public class PlayerMoveState : PlayerBaseState
     {
         base.Execute();
 
+        if (_player.CanStartClimb(_inputHandler.MoveInputX, _inputHandler.MoveInputY))
+        {
+            _stateMachine.ChangeState(_player.ClimbState);
+            return;
+        }
+
         if (_inputHandler.TryUseAttackInput())
         {
             _stateMachine.ChangeState(_player.AttackState);

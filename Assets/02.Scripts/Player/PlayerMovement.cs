@@ -26,9 +26,16 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] private float _groundCheckLockout = 0.1f;
 
+    [Header("Climb Settings")]
+    [SerializeField] private float _climbSpeed = 3f;
+
     private bool _canDodge = true;
     public bool CanDodge => _canDodge;
     private Rigidbody2D _rigidbody2D;
+    private float _defaultGravityScale;
+    public Vector2 Position => _rigidbody2D.position;
+    private Vector2 FeetOffset => (Vector2)_feetPosition.position - (Vector2)transform.position;
+    public Vector2 FeetPosition => _rigidbody2D.position + FeetOffset;
 
     private MovingPlatform _currentPlatform;
     public MovingPlatform CurrentPlatform => _currentPlatform;
@@ -43,6 +50,7 @@ public class PlayerMovement : MonoBehaviour
     private void Awake()
     {
         _rigidbody2D = GetComponent<Rigidbody2D>();
+        _defaultGravityScale = _rigidbody2D.gravityScale;
     }
 
     private void Update()
@@ -102,6 +110,29 @@ public class PlayerMovement : MonoBehaviour
 
         _coyoteTimer = 0f;
         _lockoutTimer = _groundCheckLockout;
+    }
+
+    public void StartClimb()
+    {
+        _rigidbody2D.gravityScale = 0f;
+        _rigidbody2D.linearVelocity = Vector2.zero;
+    }
+
+    public void Climb(float x, float y)
+    {
+        _rigidbody2D.position = new Vector2(x, _rigidbody2D.position.y);
+        _rigidbody2D.linearVelocity = new Vector2(0f, y * _climbSpeed);
+    }
+
+    public void StopClimb()
+    {
+        _rigidbody2D.gravityScale = _defaultGravityScale;
+        _rigidbody2D.linearVelocity = Vector2.zero;
+    }
+
+    public void SetFeetPosition(Vector2 position)
+    {
+        _rigidbody2D.position = position - FeetOffset;
     }
 
     public void StartDodgeCooldown()

@@ -1,57 +1,50 @@
 using UnityEngine;
-using Core.Interfaces;
-using Core.FSM;
 
-public class PlayerClimbState : IState
+public class PlayerClimbState : PlayerBaseState
 {
-    private readonly Player _player;
-    private readonly StateMachine _stateMachine;
-    private readonly PlayerMovement _movement;
-    private readonly PlayerInputHandler _input;
+    private ClimbableRope _climbingRope;
 
-    private float _previousGravityScale;
+    public override PlatformInteractionMode PlatformMode => PlatformInteractionMode.FreeTrajectory;
 
-    public PlayerClimbState(
-        Player player,
-        StateMachine stateMachine,
-        PlayerMovement movement,
-        PlayerInputHandler input)
+    public PlayerClimbState(Player player, StateMachine stateMachine)
+        : base(player, stateMachine)
     {
-        _player = player;
-        _stateMachine = stateMachine;
-        _movement = movement;
-        _input = input;
     }
 
-    public void Enter()
+    public override void Enter()
     {
-        if (_player.CurrentRope == null)
+        _climbingRope = _player.CurrentRope;
+        if (_climbingRope == null)
         {
-            _stateMachine.ChangeState(_player.JumpState);
+            LeaveRope();
             return;
         }
 
-        _previousGravityScale = _movement.GravityScale;
-
-        _movement.SetGravityScale(0f);
-        _movement.StopVelocity();
+        _climbingRope.SetTopPlatformCollision(_player, true);
+        _player.Movement.StartClimb();
     }
 
-    public void Update()
+    public override void Execute()
     {
         if (_player.CurrentRope == null)
         {
-            ExitRope();
+            LeaveRope();
             return;
         }
 
-        if (_input.ClimbExitPressed)
+        if (_inputHandler.TryUseJumpInput())
         {
-            ExitRope();
+            JumpOffRope();
+            return;
+        }
+
+        if (Mathf.Abs(_inputHandler.MoveInputX) > 0.01f)
+        {
+            LeaveRope();
         }
     }
 
-    public void PhysicsUpdate()
+    public override void PhysicsExecute()
     {
         ClimbableRope rope = _player.CurrentRope;
 
@@ -62,36 +55,41 @@ public class PlayerClimbState : IState
 
         CheckRopeEnd(rope);
 
-        if (_player.CurrentRope == null)
+        if (_stateMachine.CurrentState != this || _player.CurrentRope == null)
         {
             return;
         }
 
-        _movement.Climb(
+        _player.Movement.Climb(
             rope.CenterX,
-            _input.VerticalInput);
+            _inputHandler.MoveInputY);
     }
 
-    public void Exit()
+    public override void Exit()
     {
-        _movement.SetGravityScale(_previousGravityScale);
+        _player.Movement.StopClimb();
+        if (_climbingRope != null)
+        {
+            _climbingRope.SetTopPlatformCollision(_player, false);
+            _climbingRope = null;
+        }
     }
 
     private void CheckRopeEnd(ClimbableRope rope)
     {
-        Vector2 position = _movement.Position;
+        Vector2 feetPosition = _player.Movement.FeetPosition;
 
-        if (_input.VerticalInput > 0f &&
-            position.y >= rope.TopY)
+        if (_inputHandler.MoveInputY > 0f &&
+            feetPosition.y >= rope.TopY)
         {
             ReachTop(rope);
             return;
         }
 
-        if (_input.VerticalInput < 0f &&
-            position.y <= rope.BottomY)
+        if (_inputHandler.MoveInputY <= 0f &&
+            feetPosition.y <= rope.BottomY)
         {
-            ExitRope();
+            LeaveRope();
         }
     }
 
@@ -99,14 +97,31 @@ public class PlayerClimbState : IState
     {
         Vector2 exitPosition = rope.TopExitPosition;
 
-        _movement.SetPosition(exitPosition);
-        _movement.StopVelocity();
+        _player.Movement.SetFeetPosition(exitPosition);
+        _player.BlockRopeRegrabUntilVerticalRelease();
+        _player.ExitRope(rope);
 
         _stateMachine.ChangeState(_player.IdleState);
     }
 
-    private void ExitRope()
+    private void LeaveRope()
     {
+        _player.BlockRopeRegrabUntilVerticalRelease();
+        _player.ExitRope(_player.CurrentRope);
+
+        if (Mathf.Abs(_inputHandler.MoveInputX) > 0.01f)
+        {
+            _stateMachine.ChangeState(_player.MoveState);
+            return;
+        }
+
+        _stateMachine.ChangeState(_player.IdleState);
+    }
+
+    private void JumpOffRope()
+    {
+        _player.BlockRopeRegrabUntilVerticalRelease();
+        _player.ExitRope(_player.CurrentRope);
         _stateMachine.ChangeState(_player.JumpState);
     }
 }
