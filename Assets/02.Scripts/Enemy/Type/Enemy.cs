@@ -33,14 +33,9 @@ public abstract class Enemy : MonoBehaviour
     public Rigidbody2D EnemyRb => _enemyRb;
     public HitFlash HitFlash => _hitFlash;
 
-    private void OnEnable()
-    {
-        EnemyManager.Instance.AddEnemy(this);
-    }
-
     private void OnDisable()
     {
-        EnemyManager.Instance.RemoveEnemy(this);
+        EnemyManager.Instance?.RemoveEnemy(this);
     }
 
     protected virtual void Awake()
@@ -56,6 +51,7 @@ public abstract class Enemy : MonoBehaviour
 
     protected virtual void Start()
     {
+        EnemyManager.Instance?.AddEnemy(this);
         _target = GameObject.FindWithTag(Constants.Tags.Player).transform;
         _stateMachine.ChangeState(new IdleState(this));
     }
