@@ -29,6 +29,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _fallGravityMultiplier = 2f;
     [SerializeField] private float _lowJumpGravityMultiplier = 2f;
     [SerializeField] private float _maxFallSpeed = 15f;
+    [SerializeField, Range(0f, 1f)] private float _addPlatformVelocityMultiplier = 1f;
 
     private float _baseGravityScale;
 
@@ -150,7 +151,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (_currentPlatform != null)
         {
-            v.y += _currentPlatform.Velocity.y;
+            v.y += _currentPlatform.Velocity.y * _addPlatformVelocityMultiplier;
         }
 
         _rigidbody2D.linearVelocity = v;
