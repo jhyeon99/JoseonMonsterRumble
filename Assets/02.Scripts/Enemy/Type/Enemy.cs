@@ -2,8 +2,16 @@ using System;
 using TMPro;
 using UnityEngine;
 
+public enum EnemyType
+{
+    Attacker,
+    Buffer
+}
+
 public abstract class Enemy : MonoBehaviour
 {
+    [SerializeField] private EnemyType _enemyType;
+    public EnemyType Type => _enemyType;
     [SerializeField] private EnemyData _data;
     public EnemyData Data => _data;
 
@@ -28,6 +36,11 @@ public abstract class Enemy : MonoBehaviour
     private void OnEnable()
     {
         EnemyManager.Instance.AddEnemy(this);
+    }
+
+    private void OnDisable()
+    {
+        EnemyManager.Instance.RemoveEnemy(this);
     }
 
     protected virtual void Awake()
