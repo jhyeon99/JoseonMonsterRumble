@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(PlayerInputHandler))]
 [RequireComponent(typeof(PlayerHealth))]
@@ -56,6 +57,12 @@ public class Player : MonoBehaviour
 
     private BoxCollider2D _boxCollider;
     private Transform _feetTransform;
+    [SerializeField] private Vector2 _airOffset;
+
+    [SerializeField] private float _colliderRestoreDelay = 0.1f;
+    private bool _isAirColliderApplied;
+
+    private Coroutine _restoreColliderRoutine;
 
     public bool IsGrounded => _movement != null && _movement.IsGrounded();
 
@@ -158,12 +165,51 @@ public class Player : MonoBehaviour
         }
     }
 
-    public void SetGrounded(bool isGrounded)
+    private void SetGrounded(bool isGrounded)
     {
         if (_animator != null)
         {
             _animator.SetBool(AnimParamIsGrounded, isGrounded);
         }
+    }
+
+    public void SetAirCollider(bool isAir)
+    {
+        if (_isAirColliderApplied == isAir) return;
+        _isAirColliderApplied = isAir;
+
+        var offsetChange = (Vector3)_airOffset;
+        if (!isAir)
+        {
+            offsetChange = -offsetChange;
+        }
+
+        if (_boxCollider != null)
+        {
+            _boxCollider.offset += (Vector2)offsetChange;
+        }
+
+        if (_feetTransform != null)
+        {
+            _feetTransform.localPosition += offsetChange;
+        }
+    }
+
+    public void RestoreGroundColliderDelayed()
+    {
+        if (_restoreColliderRoutine != null)
+        {
+            StopCoroutine(_restoreColliderRoutine);
+        }
+
+        _restoreColliderRoutine = StartCoroutine(RestoreGroundColliderRoutine());
+    }
+
+    private IEnumerator RestoreGroundColliderRoutine()
+    {
+        yield return new WaitForSeconds(_colliderRestoreDelay);
+        SetAirCollider(false);
+        _restoreColliderRoutine = null;
     }
 
     public void TriggerHit()

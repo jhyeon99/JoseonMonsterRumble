@@ -362,6 +362,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 8028572942937571325, guid: 5e9ff94f0bf453b49b01f3070ec2f99e, type: 3}
+      propertyPath: _airOffset.y
+      value: 0.3
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 4227031811822195185, guid: 5e9ff94f0bf453b49b01f3070ec2f99e, type: 3}
     m_RemovedGameObjects: []
@@ -420,8 +424,8 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.8, y: 2.2}
-  m_EdgeRadius: 0.05
+  m_Size: {x: 0.5, y: 1.8}
+  m_EdgeRadius: 0.2
 --- !u!1001 &901357404
 PrefabInstance:
   m_ObjectHideFlags: 0
