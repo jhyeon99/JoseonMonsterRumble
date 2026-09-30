@@ -58,6 +58,7 @@ public class Player : MonoBehaviour
     private BoxCollider2D _boxCollider;
     private Transform _feetTransform;
     [SerializeField] private Vector2 _airOffset;
+
     [SerializeField] private float _colliderRestoreDelay = 0.1f;
     private bool _isAirColliderApplied;
 
@@ -177,7 +178,7 @@ public class Player : MonoBehaviour
         if (_isAirColliderApplied == isAir) return;
         _isAirColliderApplied = isAir;
 
-        var offsetChange = (Vector3)_airOffset;
+        Vector3 offsetChange = (Vector3)_airOffset;
         if (!isAir)
         {
             offsetChange = -offsetChange;
