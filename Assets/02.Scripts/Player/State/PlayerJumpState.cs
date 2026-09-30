@@ -24,14 +24,17 @@ public class PlayerJumpState : PlayerBaseState
         base.Exit();
 
         _player.RestoreGroundColliderDelayed();
+        _player.Movement.OnLanded();
     }
 
     public override void Execute()
     {
         base.Execute();
 
-        if (_player.IsGrounded && _rigidbody2D.linearVelocity.y <= 0.01f)
+        if (_player.IsGrounded && _rigidbody2D.linearVelocity.y <= 0.1f)
         {
+            _player.Movement.OnLanded();
+
             if (Mathf.Abs(_inputHandler.MoveInputX) > 0.01f)
                 _stateMachine.ChangeState(_player.MoveState);
             else

@@ -17,7 +17,7 @@ public class PlayerMoveState : PlayerBaseState
     {
         base.Execute();
 
-        if (_inputHandler.TryUseAttackInput())
+        if (_inputHandler.TryUseAttackInput() && _player.IsGrounded)
         {
             _stateMachine.ChangeState(_player.AttackState);
             return;

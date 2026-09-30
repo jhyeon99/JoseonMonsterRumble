@@ -39,7 +39,13 @@ public class PlayerMovement : MonoBehaviour
     private float _lockoutTimer;
     private bool _isJumping;
 
-    public bool CanJump => !_isJumping && IsGrounded() && _coyoteTimer > 0f;
+    public bool CanJump => !_isJumping && _coyoteTimer > 0f;
+
+    public void OnLanded()
+    {
+        _isJumping = false;
+        _coyoteTimer = _coyoteTime;
+    }
 
     private void Awake()
     {
