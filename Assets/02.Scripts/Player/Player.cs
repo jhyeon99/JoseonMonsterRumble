@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(PlayerInputHandler))]
 [RequireComponent(typeof(PlayerHealth))]
@@ -29,6 +30,7 @@ public class Player : MonoBehaviour
 
     [Header("Motion Data")]
     [SerializeField] private ActionMotionData _hitMotion = new ActionMotionData();
+
     public ActionMotionData HitMotion => _hitMotion;
     [SerializeField] private ActionMotionData _dodgeMotion = new ActionMotionData();
     public ActionMotionData DodgeMotion => _dodgeMotion;
@@ -53,15 +55,12 @@ public class Player : MonoBehaviour
     private static readonly int AnimParamDodge = Animator.StringToHash("dodge");
     private static readonly int AnimParamAttack = Animator.StringToHash("attack");
 
-    private CapsuleCollider2D _capsuleCollider;
+    private BoxCollider2D _boxCollider;
     private Transform _feetTransform;
-    private readonly Vector2 _groundColliderSize = new Vector2(0.68f, 2.16f);
-    private readonly Vector2 _groundColliderOffset = new Vector2(-0.13f, 0.63f);
-    private readonly Vector2 _airColliderSize = new Vector2(0.68f, 1.91f);
-    private readonly Vector2 _airColliderOffset = new Vector2(-0.13f, 0.755f);
-    private readonly Vector3 _groundFeetLocalPos = new Vector3(0f, -0.5f, 0f);
-    private readonly Vector3 _airFeetLocalPos = new Vector3(0f, -0.2f, 0f);
-    private const float ColliderRestoreDelay = 0.1f;
+    [SerializeField] private Vector2 _airOffset;
+    [SerializeField] private float _colliderRestoreDelay = 0.1f;
+    private bool _isAirColliderApplied;
+
     private Coroutine _restoreColliderRoutine;
 
     public bool IsGrounded => _movement != null && _movement.IsGrounded();
@@ -90,9 +89,9 @@ public class Player : MonoBehaviour
             _animator = GetComponentInChildren<Animator>();
         }
 
-        if (_capsuleCollider == null)
+        if (_boxCollider == null)
         {
-            _capsuleCollider = GetComponent<CapsuleCollider2D>();
+            _boxCollider = GetComponent<BoxCollider2D>();
         }
 
         if (_feetTransform == null)
@@ -175,37 +174,23 @@ public class Player : MonoBehaviour
 
     public void SetAirCollider(bool isAir)
     {
-        if (isAir)
+        if (_isAirColliderApplied == isAir) return;
+        _isAirColliderApplied = isAir;
+
+        var offsetChange = (Vector3)_airOffset;
+        if (!isAir)
         {
-            if (_restoreColliderRoutine != null)
-            {
-                StopCoroutine(_restoreColliderRoutine);
-                _restoreColliderRoutine = null;
-            }
-
-            if (_capsuleCollider != null)
-            {
-                _capsuleCollider.size = _airColliderSize;
-                _capsuleCollider.offset = _airColliderOffset;
-            }
-
-            if (_feetTransform != null)
-            {
-                _feetTransform.localPosition = _airFeetLocalPos;
-            }
+            offsetChange = -offsetChange;
         }
-        else
-        {
-            if (_capsuleCollider != null)
-            {
-                _capsuleCollider.size = _groundColliderSize;
-                _capsuleCollider.offset = _groundColliderOffset;
-            }
 
-            if (_feetTransform != null)
-            {
-                _feetTransform.localPosition = _groundFeetLocalPos;
-            }
+        if (_boxCollider != null)
+        {
+            _boxCollider.offset += (Vector2)offsetChange;
+        }
+
+        if (_feetTransform != null)
+        {
+            _feetTransform.localPosition += offsetChange;
         }
     }
 
@@ -215,12 +200,13 @@ public class Player : MonoBehaviour
         {
             StopCoroutine(_restoreColliderRoutine);
         }
+
         _restoreColliderRoutine = StartCoroutine(RestoreGroundColliderRoutine());
     }
 
     private IEnumerator RestoreGroundColliderRoutine()
     {
-        yield return new WaitForSeconds(ColliderRestoreDelay);
+        yield return new WaitForSeconds(_colliderRestoreDelay);
         SetAirCollider(false);
         _restoreColliderRoutine = null;
     }
