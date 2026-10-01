@@ -31,6 +31,7 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
     [SerializeField] private AudioClip _hoverSound;
     [SerializeField] private float _hoverVolume = 1f;
     [SerializeField] private GameObject _hoverVfx;
+    [SerializeField] private GameObject _hoverVfx2;
 
     [Header("효과음 및 액션 설정")]
     [SerializeField] private AudioClip _clickSound;
@@ -128,6 +129,7 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
 
         if (_selectFrame != null) _selectFrame.SetActive(isSelected);
         if (_hoverVfx != null) _hoverVfx.SetActive(isSelected);
+        if (_hoverVfx != null) _hoverVfx2.SetActive(isSelected);
         if (_buttonImage != null)
             _buttonImage.sprite = isSelected && _selectedSprite != null ? _selectedSprite : _normalSprite;
 
