@@ -129,15 +129,6 @@ public class PlayerMovement : MonoBehaviour
 
     public bool IsGrounded()
     {
-        if (!HasGroundContact()) return false;
-
-        if (_currentPlatform != null) return true;
-
-        return _rigidbody2D.linearVelocity.y <= 0.1f;
-    }
-
-    private bool HasGroundContact()
-    {
         int count = _rigidbody2D.GetContacts(_groundFilter, _groundContacts);
         for (int i = 0; i < count; i++)
         {
