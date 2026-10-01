@@ -1,0 +1,637 @@
+fileFormatVersion: 2
+guid: c432cb653c3b33747bf22abd0773a9e6
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2768050848511674605
+    second: dojeonbok_Die_00038_0
+  - first:
+      213: -6554615144045892573
+    second: dojeonbok_Die_00038_1
+  - first:
+      213: -3691917324824573498
+    second: dojeonbok_Die_00038_2
+  - first:
+      213: 3781571379723061803
+    second: dojeonbok_Die_00038_3
+  - first:
+      213: -5606351178763901763
+    second: dojeonbok_Die_00038_4
+  - first:
+      213: -2891435790219786321
+    second: dojeonbok_Die_00038_5
+  - first:
+      213: -1040122496046210512
+    second: dojeonbok_Die_00038_6
+  - first:
+      213: -2857034043600190305
+    second: dojeonbok_Die_00038_7
+  - first:
+      213: -3512830117904666337
+    second: dojeonbok_Die_00038_8
+  - first:
+      213: 8889852981515674640
+    second: dojeonbok_Die_00038_9
+  - first:
+      213: 1202136069057028856
+    second: dojeonbok_Die_00038_10
+  - first:
+      213: 8552345564912787724
+    second: dojeonbok_Die_00038_11
+  - first:
+      213: 8092317016696938587
+    second: dojeonbok_Die_00038_12
+  - first:
+      213: 6020494207432876832
+    second: dojeonbok_Die_00038_13
+  - first:
+      213: -6184565180154878655
+    second: dojeonbok_Die_00038_14
+  - first:
+      213: -8583232126341299416
+    second: dojeonbok_Die_00038_15
+  - first:
+      213: -3518957201247561143
+    second: dojeonbok_Die_00038_16
+  - first:
+      213: 598117449724114960
+    second: dojeonbok_Die_00038_17
+  - first:
+      213: -4961401546721689350
+    second: dojeonbok_Die_00038_18
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 7
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 200
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_0
+      rect:
+        serializedVersion: 2
+        x: 674
+        y: 595
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3173e364b68e599d0800000000000000
+      internalID: -2768050848511674605
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_1
+      rect:
+        serializedVersion: 2
+        x: 226
+        y: 573
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32cafbb11445905a0800000000000000
+      internalID: -6554615144045892573
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_2
+      rect:
+        serializedVersion: 2
+        x: 613
+        y: 580
+        width: 19
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c988b1f0cca3ccc0800000000000000
+      internalID: -3691917324824573498
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_3
+      rect:
+        serializedVersion: 2
+        x: 451
+        y: 84
+        width: 368
+        height: 495
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2a4d2d5227da7430800000000000000
+      internalID: 3781571379723061803
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_4
+      rect:
+        serializedVersion: 2
+        x: 766
+        y: 507
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db46faf7e4d3232b0800000000000000
+      internalID: -5606351178763901763
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_5
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 461
+        width: 19
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fa74911e77e8fd7d0800000000000000
+      internalID: -2891435790219786321
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_6
+      rect:
+        serializedVersion: 2
+        x: 1069
+        y: 452
+        width: 11
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 032e544c91eb091f0800000000000000
+      internalID: -1040122496046210512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_7
+      rect:
+        serializedVersion: 2
+        x: 203
+        y: 391
+        width: 11
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f944300bca6c958d0800000000000000
+      internalID: -2857034043600190305
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_8
+      rect:
+        serializedVersion: 2
+        x: 391
+        y: 367
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f11bff99e9bef3fc0800000000000000
+      internalID: -3512830117904666337
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_9
+      rect:
+        serializedVersion: 2
+        x: 796
+        y: 367
+        width: 15
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01460bcaf2a1f5b70800000000000000
+      internalID: 8889852981515674640
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_10
+      rect:
+        serializedVersion: 2
+        x: 832
+        y: 325
+        width: 98
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f224d7b268dea010800000000000000
+      internalID: 1202136069057028856
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_11
+      rect:
+        serializedVersion: 2
+        x: 247
+        y: 310
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c01a301aaf800b670800000000000000
+      internalID: 8552345564912787724
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_12
+      rect:
+        serializedVersion: 2
+        x: 439
+        y: 309
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b50e116a37fad4070800000000000000
+      internalID: 8092317016696938587
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_13
+      rect:
+        serializedVersion: 2
+        x: 1071
+        y: 313
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 023655e65971d8350800000000000000
+      internalID: 6020494207432876832
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_14
+      rect:
+        serializedVersion: 2
+        x: 247
+        y: 262
+        width: 80
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1456e926cb20c2aa0800000000000000
+      internalID: -6184565180154878655
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_15
+      rect:
+        serializedVersion: 2
+        x: 810
+        y: 259
+        width: 51
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 823c4b46bdb32e880800000000000000
+      internalID: -8583232126341299416
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_16
+      rect:
+        serializedVersion: 2
+        x: 929
+        y: 199
+        width: 34
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94a16d7d1172a2fc0800000000000000
+      internalID: -3518957201247561143
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_17
+      rect:
+        serializedVersion: 2
+        x: 790
+        y: 227
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 018b4ccc6a0fc4800800000000000000
+      internalID: 598117449724114960
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dojeonbok_Die_00038_18
+      rect:
+        serializedVersion: 2
+        x: 609
+        y: 78
+        width: 12
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af08493749f852bb0800000000000000
+      internalID: -4961401546721689350
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      dojeonbok_Die_00038_0: -2768050848511674605
+      dojeonbok_Die_00038_1: -6554615144045892573
+      dojeonbok_Die_00038_10: 1202136069057028856
+      dojeonbok_Die_00038_11: 8552345564912787724
+      dojeonbok_Die_00038_12: 8092317016696938587
+      dojeonbok_Die_00038_13: 6020494207432876832
+      dojeonbok_Die_00038_14: -6184565180154878655
+      dojeonbok_Die_00038_15: -8583232126341299416
+      dojeonbok_Die_00038_16: -3518957201247561143
+      dojeonbok_Die_00038_17: 598117449724114960
+      dojeonbok_Die_00038_18: -4961401546721689350
+      dojeonbok_Die_00038_2: -3691917324824573498
+      dojeonbok_Die_00038_3: 3781571379723061803
+      dojeonbok_Die_00038_4: -5606351178763901763
+      dojeonbok_Die_00038_5: -2891435790219786321
+      dojeonbok_Die_00038_6: -1040122496046210512
+      dojeonbok_Die_00038_7: -2857034043600190305
+      dojeonbok_Die_00038_8: -3512830117904666337
+      dojeonbok_Die_00038_9: 8889852981515674640
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

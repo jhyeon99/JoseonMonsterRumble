@@ -14,16 +14,14 @@ public class PlayerJumpState : PlayerBaseState
         base.Enter();
 
         _rigidbody2D.linearVelocity = new Vector2(_rigidbody2D.linearVelocity.x, 0);
-        _player.Movement.SetMovingPlatform(null);
         _player.Movement.Jump();
-        _player.SetAirCollider(true);
+        _player.Movement.SetMovingPlatform(null);
     }
 
     public override void Exit()
     {
         base.Exit();
 
-        _player.RestoreGroundColliderDelayed();
         _player.Movement.OnLanded();
     }
 

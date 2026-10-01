@@ -41,7 +41,6 @@ public class ItemPool : MonoBehaviour
             _potionPool[i] = potionItem;
         }
 
-        _instance = this;
         _soulPool = new SoulItem[_soulPoolSize];
 
         for (int i = 0; i < _soulPoolSize; i++)

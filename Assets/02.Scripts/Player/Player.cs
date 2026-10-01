@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(PlayerInputHandler))]
 [RequireComponent(typeof(PlayerHealth))]
@@ -29,12 +30,14 @@ public class Player : MonoBehaviour
 
     [Header("Motion Data")]
     [SerializeField] private ActionMotionData _hitMotion = new ActionMotionData();
+
     public ActionMotionData HitMotion => _hitMotion;
     [SerializeField] private ActionMotionData _dodgeMotion = new ActionMotionData();
     public ActionMotionData DodgeMotion => _dodgeMotion;
     [SerializeField] private ActionMotionData _attackMotion = new ActionMotionData();
     public ActionMotionData AttackMotion => _attackMotion;
 
+    private PlayerInputHandler _inputHandler;
     private PlayerHealth _health;
     public PlayerHealth Health => _health;
     private PlayerMovement _movement;
@@ -53,15 +56,7 @@ public class Player : MonoBehaviour
     private static readonly int AnimParamDodge = Animator.StringToHash("dodge");
     private static readonly int AnimParamAttack = Animator.StringToHash("attack");
 
-    private CapsuleCollider2D _capsuleCollider;
-    private Transform _feetTransform;
-    private readonly Vector2 _groundColliderSize = new Vector2(0.68f, 2.16f);
-    private readonly Vector2 _groundColliderOffset = new Vector2(-0.13f, 0.63f);
-    private readonly Vector2 _airColliderSize = new Vector2(0.68f, 1.91f);
-    private readonly Vector2 _airColliderOffset = new Vector2(-0.13f, 0.755f);
-    private readonly Vector3 _groundFeetLocalPos = new Vector3(0f, -0.5f, 0f);
-    private readonly Vector3 _airFeetLocalPos = new Vector3(0f, -0.2f, 0f);
-    private const float ColliderRestoreDelay = 0.1f;
+    private Vector2 _baseColliderOffset;
     private Coroutine _restoreColliderRoutine;
 
     public bool IsGrounded => _movement != null && _movement.IsGrounded();
@@ -80,6 +75,7 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
+        _inputHandler = GetComponent<PlayerInputHandler>();
         _health = GetComponent<PlayerHealth>();
         _movement = GetComponent<PlayerMovement>();
         _attack = GetComponent<PlayerAttack>();
@@ -88,17 +84,6 @@ public class Player : MonoBehaviour
         if (_animator == null)
         {
             _animator = GetComponentInChildren<Animator>();
-        }
-
-        if (_capsuleCollider == null)
-        {
-            _capsuleCollider = GetComponent<CapsuleCollider2D>();
-        }
-
-        if (_feetTransform == null)
-        {
-            Transform feetObj = transform.Find("Feet");
-            if (feetObj != null) _feetTransform = feetObj;
         }
 
         InitializeStates();
@@ -142,6 +127,7 @@ public class Player : MonoBehaviour
     private void FixedUpdate()
     {
         _stateMachine.FixedUpdate();
+        Movement.ApplyGravity(_inputHandler.IsJumpKey);
         Movement.IntegrateMovement(_stateMachine.CurrentState.PlatformMode);
     }
 
@@ -165,64 +151,12 @@ public class Player : MonoBehaviour
         }
     }
 
-    public void SetGrounded(bool isGrounded)
+    private void SetGrounded(bool isGrounded)
     {
         if (_animator != null)
         {
             _animator.SetBool(AnimParamIsGrounded, isGrounded);
         }
-    }
-
-    public void SetAirCollider(bool isAir)
-    {
-        if (isAir)
-        {
-            if (_restoreColliderRoutine != null)
-            {
-                StopCoroutine(_restoreColliderRoutine);
-                _restoreColliderRoutine = null;
-            }
-
-            if (_capsuleCollider != null)
-            {
-                _capsuleCollider.size = _airColliderSize;
-                _capsuleCollider.offset = _airColliderOffset;
-            }
-
-            if (_feetTransform != null)
-            {
-                _feetTransform.localPosition = _airFeetLocalPos;
-            }
-        }
-        else
-        {
-            if (_capsuleCollider != null)
-            {
-                _capsuleCollider.size = _groundColliderSize;
-                _capsuleCollider.offset = _groundColliderOffset;
-            }
-
-            if (_feetTransform != null)
-            {
-                _feetTransform.localPosition = _groundFeetLocalPos;
-            }
-        }
-    }
-
-    public void RestoreGroundColliderDelayed()
-    {
-        if (_restoreColliderRoutine != null)
-        {
-            StopCoroutine(_restoreColliderRoutine);
-        }
-        _restoreColliderRoutine = StartCoroutine(RestoreGroundColliderRoutine());
-    }
-
-    private IEnumerator RestoreGroundColliderRoutine()
-    {
-        yield return new WaitForSeconds(ColliderRestoreDelay);
-        SetAirCollider(false);
-        _restoreColliderRoutine = null;
     }
 
     public void TriggerHit()
