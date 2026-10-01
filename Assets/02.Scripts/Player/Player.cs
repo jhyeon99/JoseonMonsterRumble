@@ -56,7 +56,6 @@ public class Player : MonoBehaviour
     private static readonly int AnimParamDodge = Animator.StringToHash("dodge");
     private static readonly int AnimParamAttack = Animator.StringToHash("attack");
 
-    private Vector2 _baseColliderOffset;
     private Coroutine _restoreColliderRoutine;
 
     public bool IsGrounded => _movement != null && _movement.IsGrounded();
