@@ -27,6 +27,12 @@ public class KnockbackState : EnemyState
         if (_knockbackTimer <= 0f)
         {
             _enemy.MoveType.StopMove();
+            if (_enemy.Type == EnemyType.Buffer)
+            {
+                _enemy.StateMachine.ChangeState(new FindEnemyState(_enemy));
+                return;
+            }
+
             _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
         }
     }

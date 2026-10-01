@@ -2,17 +2,18 @@ using UnityEngine;
 
 public class ChaseEnemyState : EnemyState
 {
-    private readonly BuffEnemy _enemy;
-    private readonly Transform _target;
+    private readonly Enemy _enemy;
+    private readonly Transform _targetEnemy;
 
-    public ChaseEnemyState(BuffEnemy enemy, Transform target)
+    public ChaseEnemyState(Enemy enemy, Transform target)
     {
         _enemy = enemy;
-        _target = target;
+        _targetEnemy = target;
     }
 
     public override void FixedUpdate()
     {
-        _enemy.BuffMove.Move(_target);
+        Vector2 direction = (_targetEnemy.position - _enemy.transform.position).normalized;
+        _enemy.MoveType.Move(direction);
     }
 }

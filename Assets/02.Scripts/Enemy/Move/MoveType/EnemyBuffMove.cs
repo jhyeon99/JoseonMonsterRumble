@@ -1,31 +1,18 @@
 using UnityEngine;
 
-public class EnemyBuffMove : MonoBehaviour
+public class EnemyBuffMove : EnemyMoveType
 {
-    private BuffEnemy _buffEnemy;
-    private Enemy _enemy;
-    private Rigidbody2D _rigidbody;
-    private Vector2 _direction;
-
-    private void Awake()
+    public override void Move(Vector2 direction)
     {
-        _buffEnemy = GetComponent<BuffEnemy>();
-        _enemy = GetComponent<Enemy>();
-        _rigidbody = GetComponent<Rigidbody2D>();
+        Rigidbody.linearVelocity = direction * Enemy.Data.MoveSpeed;
     }
 
-    public void Move(Transform target)
-    {
-        _direction = target.position - transform.position;
-        _rigidbody.linearVelocity = _direction * _enemy.Data.MoveSpeed;
-    }
-
-    public void HoverMove()
+    public override void BackMove(Vector2 direction)
     {
     }
 
-    public void StopMove()
+    public override void StopMove()
     {
-        _rigidbody.linearVelocity = Vector3.zero;
+        Rigidbody.linearVelocity = Vector2.zero;
     }
 }

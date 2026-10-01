@@ -39,6 +39,7 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
+    [ContextMenu("Test Select Random Attacker")]
     public Enemy SelectRandomAttacker()
     {
         List<Enemy> attackers = ActiveEnemies.FindAll(CheckAttackerType);

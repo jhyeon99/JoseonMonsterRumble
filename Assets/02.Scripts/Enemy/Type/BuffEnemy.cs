@@ -4,15 +4,7 @@ using System.Collections;
 public class BuffEnemy : Enemy
 {
     private Enemy _targetAttacker;
-    private EnemyBuffMove _buffMove;
-    public EnemyBuffMove BuffMove => _buffMove;
     public Enemy TargetAttacker => _targetAttacker;
-
-    protected override void Awake()
-    {
-        base.Awake();
-        _buffMove = GetComponent<EnemyBuffMove>();
-    }
 
     protected override void Start()
     {
@@ -27,6 +19,7 @@ public class BuffEnemy : Enemy
         EnemyManager.Instance.OnAllAttackersKilled -= HandleAllAttackersKilled;
     }
 
+    [ContextMenu("Test FindNewTarget")]
     public override void FindNewTarget()
     {
         _targetAttacker = EnemyManager.Instance.SelectRandomAttacker();
@@ -38,7 +31,7 @@ public class BuffEnemy : Enemy
         }
 
         _targetAttacker.Health.OnDeath += HandleTargetDeath;
-        StateMachine.ChangeState(new ChaseEnemyState(this, TargetAttacker.transform));
+        StateMachine.ChangeState(new ChaseEnemyState(this, _targetAttacker.transform));
     }
 
     private void HandleAllAttackersKilled()
