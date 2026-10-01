@@ -51,7 +51,7 @@ GameObject:
   - component: {fileID: 2723758708734217559}
   m_Layer: 6
   m_Name: PF_Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -126,7 +126,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 1.5
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -169,7 +169,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   _speed: 5
-  _jumpHeight: 0
+  _jumpHeight: 2.2
   _dodgeDistance: 2
   _dodgeDuration: 0.2
   _dodgeCooldown: 0
@@ -204,6 +204,8 @@ MonoBehaviour:
   _maxFallSpeed: 15
   _addPlatformVelocityMultiplier: 1
   _landingJumpDelay: 0.1
+  _noFrictionMaterial: {fileID: 6200000, guid: d54feeb55de6b3340b6241b7545274e9, type: 2}
+  _highFrictionMaterial: {fileID: 6200000, guid: 290f25763082c5a4e8d926772da6ad59, type: 2}
 --- !u!114 &3611217571140197611
 MonoBehaviour:
   m_ObjectHideFlags: 0
