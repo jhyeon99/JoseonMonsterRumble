@@ -193,11 +193,11 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 416
+        y: 673
         width: 360
-        height: 468
+        height: 196
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -219,7 +219,7 @@ TextureImporter:
         width: 251
         height: 217
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -236,12 +236,12 @@ TextureImporter:
       name: Prototype_PlatformKit_01_2
       rect:
         serializedVersion: 2
-        x: 363
-        y: 362
-        width: 1371
-        height: 494
+        x: 365
+        y: 686
+        width: 249
+        height: 123
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -263,7 +263,7 @@ TextureImporter:
         width: 259
         height: 227
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -285,7 +285,7 @@ TextureImporter:
         width: 219
         height: 170
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -302,12 +302,12 @@ TextureImporter:
       name: Prototype_PlatformKit_01_5
       rect:
         serializedVersion: 2
-        x: 62
-        y: 202
-        width: 296
-        height: 187
+        x: 92
+        y: 237
+        width: 267
+        height: 147
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -324,12 +324,12 @@ TextureImporter:
       name: Prototype_PlatformKit_01_6
       rect:
         serializedVersion: 2
-        x: 401
+        x: 453
         y: 229
-        width: 461
+        width: 410
         height: 156
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -343,37 +343,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Prototype_PlatformKit_01_7
-      rect:
-        serializedVersion: 2
-        x: 443
-        y: 274
-        width: 8
-        height: 6
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: bbe3bdc3ee0408ef0800000000000000
-      internalID: -108014999089496389
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: Prototype_PlatformKit_01_8
       rect:
         serializedVersion: 2
-        x: 881
-        y: 168
-        width: 846
-        height: 221
+        x: 963
+        y: 196
+        width: 720
+        height: 194
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -387,28 +365,6 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Prototype_PlatformKit_01_9
-      rect:
-        serializedVersion: 2
-        x: 387
-        y: 241
-        width: 15
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 927a6221ddf4b0980800000000000000
-      internalID: -8571669654858717399
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: Prototype_PlatformKit_01_10
       rect:
         serializedVersion: 2
@@ -417,7 +373,7 @@ TextureImporter:
         width: 377
         height: 205
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -431,37 +387,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Prototype_PlatformKit_01_11
-      rect:
-        serializedVersion: 2
-        x: 933
-        y: 217
-        width: 13
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: edb302124cde3fc50800000000000000
-      internalID: 6697958497455193054
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: Prototype_PlatformKit_01_12
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
+        y: 17
         width: 451
-        height: 188
+        height: 171
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -475,72 +409,6 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Prototype_PlatformKit_01_13
-      rect:
-        serializedVersion: 2
-        x: 943
-        y: 180
-        width: 9
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 8560c4950362ad970800000000000000
-      internalID: 8780372412610643544
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Prototype_PlatformKit_01_14
-      rect:
-        serializedVersion: 2
-        x: 951
-        y: 163
-        width: 16
-        height: 22
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0a5407a37f8c62f70800000000000000
-      internalID: 9162231456094766496
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Prototype_PlatformKit_01_15
-      rect:
-        serializedVersion: 2
-        x: 960
-        y: 168
-        width: 7
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 07ba8f47a359ffb80800000000000000
-      internalID: -8358798305073255568
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: Prototype_PlatformKit_01_16
       rect:
         serializedVersion: 2
@@ -549,7 +417,7 @@ TextureImporter:
         width: 164
         height: 136
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -571,7 +439,7 @@ TextureImporter:
         width: 126
         height: 81
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -593,7 +461,7 @@ TextureImporter:
         width: 185
         height: 144
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -615,7 +483,7 @@ TextureImporter:
         width: 193
         height: 146
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -637,7 +505,7 @@ TextureImporter:
         width: 161
         height: 132
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -659,7 +527,7 @@ TextureImporter:
         width: 16
         height: 13
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -672,11 +540,187 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Prototype_PlatformKit_01_22
+      rect:
+        serializedVersion: 2
+        x: 624
+        y: 692
+        width: 256
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5deafff3e303e5547a225efd992f4bf4
+      internalID: 1057382445
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Prototype_PlatformKit_01_23
+      rect:
+        serializedVersion: 2
+        x: 889
+        y: 692
+        width: 251
+        height: 116
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 09b861b7c1b67064ca5c7d34196dc5ab
+      internalID: -1908452831
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Prototype_PlatformKit_01_24
+      rect:
+        serializedVersion: 2
+        x: 1154
+        y: 693
+        width: 249
+        height: 122
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9894c6eb1db63a744ad8eb120651ef7a
+      internalID: 1612181584
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Prototype_PlatformKit_01_25
+      rect:
+        serializedVersion: 2
+        x: 1419
+        y: 678
+        width: 318
+        height: 179
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ff9d8680032435e42a88e71bb723b25e
+      internalID: -1899888006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Prototype_PlatformKit_01_26
+      rect:
+        serializedVersion: 2
+        x: 1312
+        y: 417
+        width: 198
+        height: 157
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d6350dd4dbffec5458711a1f89916038
+      internalID: -300741835
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Prototype_PlatformKit_01_27
+      rect:
+        serializedVersion: 2
+        x: 1094
+        y: 415
+        width: 188
+        height: 268
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 96d8ecc5099949949a5a15c4847bfe2d
+      internalID: -297778240
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Prototype_PlatformKit_01_28
+      rect:
+        serializedVersion: 2
+        x: 811
+        y: 417
+        width: 243
+        height: 220
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a0e20346c7c9e3846bdf29d7cbd5b637
+      internalID: -1450676564
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Prototype_PlatformKit_01_29
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 420
+        width: 180
+        height: 252
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 151519df33efe1b4c981368c70b1f715
+      internalID: 1063275717
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 42279bc6aa0561e4ea3002bd53d4b8a0
     internalID: 0
     vertices: []
     indices: 
@@ -701,6 +745,14 @@ TextureImporter:
       Prototype_PlatformKit_01_2: -3195209511483202598
       Prototype_PlatformKit_01_20: 8568813769239606504
       Prototype_PlatformKit_01_21: -707166070907824543
+      Prototype_PlatformKit_01_22: 1057382445
+      Prototype_PlatformKit_01_23: -1908452831
+      Prototype_PlatformKit_01_24: 1612181584
+      Prototype_PlatformKit_01_25: -1899888006
+      Prototype_PlatformKit_01_26: -300741835
+      Prototype_PlatformKit_01_27: -297778240
+      Prototype_PlatformKit_01_28: -1450676564
+      Prototype_PlatformKit_01_29: 1063275717
       Prototype_PlatformKit_01_3: -4982659618977301040
       Prototype_PlatformKit_01_4: -405011993565592661
       Prototype_PlatformKit_01_5: -57565297688288126

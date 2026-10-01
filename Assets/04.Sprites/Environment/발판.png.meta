@@ -55,7 +55,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -141,9 +141,9 @@ TextureImporter:
         x: 0
         y: 144
         width: 371
-        height: 404
+        height: 292
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -160,12 +160,12 @@ TextureImporter:
       name: "\uBC1C\uD310_1"
       rect:
         serializedVersion: 2
-        x: 370
-        y: 23
-        width: 741
-        height: 534
+        x: 403
+        y: 79
+        width: 712
+        height: 360
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -183,11 +183,11 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 1154
-        y: 19
+        y: 50
         width: 1013
-        height: 570
+        height: 386
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -196,28 +196,6 @@ TextureImporter:
       bones: []
       spriteID: f2d5a743f48186aa0800000000000000
       internalID: -6167652961221976785
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: "\uBC1C\uD310_3"
-      rect:
-        serializedVersion: 2
-        x: 2124
-        y: 476
-        width: 7
-        height: 15
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: fc5d67abe4a028f60800000000000000
-      internalID: 8034996018434463183
       vertices: []
       indices: 
       edges: []
