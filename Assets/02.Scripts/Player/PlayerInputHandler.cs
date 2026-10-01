@@ -30,8 +30,8 @@ public class PlayerInputHandler : MonoBehaviour
     private void GetKeyInput()
     {
         _moveInputX = Input.GetAxis(Horizontal);
-        _isJumpKeyDown = Input.GetKeyDown(KeyCode.Space);
-        _isJumpKey = Input.GetKey(KeyCode.Space);
+        _isJumpKeyDown = Input.GetKeyDown(KeyCode.C);
+        _isJumpKey = Input.GetKey(KeyCode.C);
         _isDodgeKeyDown = Input.GetKeyDown(KeyCode.Z);
         _isAttackKeyDown = Input.GetKeyDown(KeyCode.X);
 
