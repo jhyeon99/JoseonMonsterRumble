@@ -23,7 +23,7 @@ public class CameraFollow : MonoBehaviour
 
         int signX = _target.localScale.x > 0 ? 1 : -1;
 
-        var realOffset = new Vector3(signX * _offset.x, 0, _offset.z);
+        var realOffset = new Vector3(signX * _offset.x, _offset.y, _offset.z);
         Vector3 targetPosition = _target.position + realOffset;
         targetPosition.x = Mathf.Clamp(targetPosition.x, _minX, _maxX);
         targetPosition.y = Mathf.Clamp(targetPosition.y, _minY, _maxY);
