@@ -28,6 +28,9 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] private float _landingJumpDelay = 0.1f;
 
+    [SerializeField] private PhysicsMaterial2D _noFrictionMaterial;
+    [SerializeField] private PhysicsMaterial2D _highFrictionMaterial;
+
     private float _baseGravityScale;
 
     private bool _canDodge = true;
@@ -98,25 +101,16 @@ public class PlayerMovement : MonoBehaviour
 
     public void ApplyGravity(bool isJumpHeld)
     {
-        // 바닥에 서 있고 이동 입력이 없으면 중력을 꺼서 경사로 미끄러짐 방지
-        if (!_isJumping && !_hasHorizontalInput && IsGrounded())
-        {
-            _rigidbody2D.gravityScale = 0f;
-            return;
-        }
+        bool idleOnGround = !_isJumping && !_hasHorizontalInput && IsGrounded();
+        _rigidbody2D.sharedMaterial = idleOnGround ? _highFrictionMaterial : _noFrictionMaterial;
 
         Vector2 v = _rigidbody2D.linearVelocity;
-
         float multiplier = 1f;
 
         if (v.y < 0f)
-        {
             multiplier = _fallGravityMultiplier;
-        }
         else if (_isJumping && !isJumpHeld)
-        {
             multiplier = _lowJumpGravityMultiplier;
-        }
 
         _rigidbody2D.gravityScale = _baseGravityScale * multiplier;
 
