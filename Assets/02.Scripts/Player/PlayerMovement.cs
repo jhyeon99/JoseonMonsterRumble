@@ -125,29 +125,6 @@ public class PlayerMovement : MonoBehaviour
         _lockoutTimer = _groundCheckLockout;
     }
 
-    public void StartClimb()
-    {
-        _rigidbody2D.gravityScale = 0f;
-        _rigidbody2D.linearVelocity = Vector2.zero;
-    }
-
-    public void Climb(float x, float y)
-    {
-        _rigidbody2D.position = new Vector2(x, _rigidbody2D.position.y);
-        _rigidbody2D.linearVelocity = new Vector2(0f, y * _climbSpeed);
-    }
-
-    public void StopClimb()
-    {
-        _rigidbody2D.gravityScale = _defaultGravityScale;
-        _rigidbody2D.linearVelocity = Vector2.zero;
-    }
-
-    public void SetFeetPosition(Vector2 position)
-    {
-        _rigidbody2D.position = position - FeetOffset;
-    }
-
     public void StartDodgeCooldown()
     {
         StartCoroutine(DodgeCooldownRoutine());
