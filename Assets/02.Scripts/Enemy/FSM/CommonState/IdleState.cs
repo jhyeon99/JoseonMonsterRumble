@@ -16,11 +16,26 @@ public class IdleState : EnemyState
         _enemy.MoveType.StopMove();
     }
 
+    public override void FixedUpdate()
+    {
+        if (_enemy.MoveType is EnemyGroundMove groundMove)
+        {
+            groundMove.PatrolIdleMove();
+        }
+        else if (_enemy.MoveType is EnemyFlyingMove flyingMove)
+        {
+            flyingMove.PatrolIdleMove();
+        }
+    }
+
     public override void Update()
     {
-        if (_enemy.GetDistanceToPlayer() <= _enemy.Data.DetectRange)
+        if (_enemy.MoveArea != null && _enemy.Target != null)
         {
-            _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
+            if (_enemy.MoveArea.IsPositionInArea(_enemy.Target.position))
+            {
+                _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
+            }
         }
     }
 

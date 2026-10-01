@@ -14,7 +14,7 @@ public class FindEnemyState : EnemyState
     public override void Enter()
     {
         _findTimer = _findTime;
-        Debug.Log("상태 등장");
+        Debug.Log("아군 탐색");
         _enemy.MoveType.StopMove();
     }
 

@@ -60,7 +60,7 @@ public abstract class Projectile : MonoBehaviour
         );
 
         damageable.TakeDamage(hitData);
-        Debug.Log($"플레이어에게 원거리공격으로 {_data.ProjectileDamage}만큼 피해를 입힘.");
+        Debug.Log($"플레이어에게 원거리공격으로 {_projectileDamage}만큼 피해를 입힘.");
     }
 
     public void IncreaseDamage(float percentage)

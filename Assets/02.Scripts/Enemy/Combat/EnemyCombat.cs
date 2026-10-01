@@ -12,7 +12,7 @@ public abstract class EnemyCombat : MonoBehaviour
 
     public abstract void Attack();
 
-    public void IncreaseDamge(float increaseValue)
+    public void IncreaseDamage(float increaseValue)
     {
         DamageIncreaseValue = increaseValue;
     }
