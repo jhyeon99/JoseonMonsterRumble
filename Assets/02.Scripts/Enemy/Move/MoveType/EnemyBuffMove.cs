@@ -9,10 +9,6 @@ public class EnemyBuffMove : EnemyMoveType
     public override void Move(Vector2 direction)
     {
         Rigidbody.linearVelocity = direction * Enemy.Data.MoveSpeed;
-        if (Enemy.GetDistanceToPlayer() < Enemy.Data.AttackDetectRange)
-        {
-            Rigidbody.linearVelocity = Vector2.zero;
-        }
     }
 
     public override void BackMove(Vector2 direction)

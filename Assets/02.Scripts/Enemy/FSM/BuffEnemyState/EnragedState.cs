@@ -17,9 +17,10 @@ public class EnragedState : EnemyState
     public override void FixedUpdate()
     {
         _enemy.MoveType.Move(_enemy.GetDirectionToPlayer());
-    }
-
-    public override void Update()
-    {
+        if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
+        {
+            _enemy.Combat.Attack();
+            _enemy.MoveType.StopMove();
+        }
     }
 }
