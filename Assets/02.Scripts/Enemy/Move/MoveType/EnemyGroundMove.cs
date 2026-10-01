@@ -29,15 +29,11 @@ public class EnemyGroundMove : EnemyMoveType
         Rigidbody.MovePosition(nextPos);
     }
 
-    public override bool IsArrivedAtStart()
-    {
-        Vector2 startPos = Enemy.MoveArea.StartPosition;
-        return Vector2.Distance(Rigidbody.position, startPos) < 0.1f;
-    }
-
     public override void MoveToInitialPosition()
     {
         Vector2 startPos = Enemy.MoveArea.StartPosition;
+        float directionX = startPos.x - Rigidbody.position.x;
+        HandleFlip(directionX);
         var nextPos = Vector2.MoveTowards(Rigidbody.position, startPos, Enemy.Data.MoveSpeed * Time.fixedDeltaTime);
         Rigidbody.MovePosition(nextPos);
     }

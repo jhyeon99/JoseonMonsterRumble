@@ -31,9 +31,10 @@ public abstract class EnemyMoveType : MonoBehaviour
     {
     }
 
-    public virtual bool IsArrivedAtStart()
+    public bool IsArrivedAtStart()
     {
-        return false;
+        Vector2 startPos = Enemy.MoveArea.StartPosition;
+        return Vector2.Distance(Rigidbody.position, startPos) < 0.1f;
     }
 
     public void ChargeMove(Vector2 direction)

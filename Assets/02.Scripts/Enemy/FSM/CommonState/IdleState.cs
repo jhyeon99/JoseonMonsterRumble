@@ -22,6 +22,10 @@ public class IdleState : EnemyState
         {
             groundMove.PatrolIdleMove();
         }
+        else if (_enemy.MoveType is EnemyFlyingMove flyingMove)
+        {
+            flyingMove.PatrolIdleMove();
+        }
     }
 
     public override void Update()
