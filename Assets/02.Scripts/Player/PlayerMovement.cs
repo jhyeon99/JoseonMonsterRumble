@@ -7,9 +7,6 @@ public class PlayerMovement : MonoBehaviour
     public float Speed => _speed;
     [SerializeField] private float _jumpHeight;
 
-    [SerializeField] private Transform _feetPosition;
-    [SerializeField] private Vector2 _groundCheckSize = new Vector2(0.65f, 0.1f);
-
     [Header("Dodge Settings")]
     [SerializeField] private float _dodgeDistance;
 
@@ -48,6 +45,10 @@ public class PlayerMovement : MonoBehaviour
 
     public bool CanJump => !_isJumping && _coyoteTimer > 0f;
 
+    private readonly ContactPoint2D[] _groundContacts = new ContactPoint2D[8];
+    private ContactFilter2D _groundFilter;
+    private const float GroundNormalThreshold = 0.7f;
+
     public void OnLanded()
     {
         _isJumping = false;
@@ -58,6 +59,9 @@ public class PlayerMovement : MonoBehaviour
     {
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _baseGravityScale = _rigidbody2D.gravityScale;
+
+        _groundFilter.SetLayerMask(Constants.Layers.GroundAllMask);
+        _groundFilter.useTriggers = false;
     }
 
     private void Update()
@@ -111,18 +115,28 @@ public class PlayerMovement : MonoBehaviour
 
     public bool IsGrounded()
     {
-        bool isTouchingGround = Physics2D.OverlapBox(
-            _feetPosition.position,
-            _groundCheckSize,
-            0f,
-            Constants.Layers.GroundAllMask
-        );
-
-        if (!isTouchingGround) return false;
+        if (!HasGroundContact()) return false;
 
         if (_currentPlatform != null) return true;
 
         return _rigidbody2D.linearVelocity.y <= 0.1f;
+    }
+
+    private bool HasGroundContact()
+    {
+        int count = _rigidbody2D.GetContacts(_groundFilter, _groundContacts);
+        for (int i = 0; i < count; i++)
+        {
+            ContactPoint2D contact = _groundContacts[i];
+            // enabled: 원웨이 이펙터가 무시한 접촉 제외
+            // normal.y: 벽, 천장 접촉 제외
+            if (contact.enabled && contact.normal.y > GroundNormalThreshold)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void MoveX(float x)

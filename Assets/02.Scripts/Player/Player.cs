@@ -57,12 +57,10 @@ public class Player : MonoBehaviour
     private static readonly int AnimParamAttack = Animator.StringToHash("attack");
 
     private BoxCollider2D _boxCollider;
-    private Transform _feetTransform;
     [SerializeField] private Vector2 _airOffset;
     [SerializeField] private float _colliderRestoreDelay = 0.1f;
 
     private Vector2 _baseColliderOffset;
-    private Vector3 _baseFeetLocalPosition;
     private Coroutine _restoreColliderRoutine;
 
     public bool IsGrounded => _movement != null && _movement.IsGrounded();
@@ -93,17 +91,10 @@ public class Player : MonoBehaviour
         }
 
         _boxCollider = GetComponent<BoxCollider2D>();
-        Transform feetObj = transform.Find("Feet");
-        if (feetObj != null) _feetTransform = feetObj;
 
         if (_boxCollider != null)
         {
             _baseColliderOffset = _boxCollider.offset;
-        }
-
-        if (_feetTransform != null)
-        {
-            _baseFeetLocalPosition = _feetTransform.localPosition;
         }
 
         InitializeStates();
@@ -194,11 +185,6 @@ public class Player : MonoBehaviour
         if (_boxCollider != null)
         {
             _boxCollider.offset = _baseColliderOffset + offset;
-        }
-
-        if (_feetTransform != null)
-        {
-            _feetTransform.localPosition = _baseFeetLocalPosition + (Vector3)offset;
         }
     }
 
