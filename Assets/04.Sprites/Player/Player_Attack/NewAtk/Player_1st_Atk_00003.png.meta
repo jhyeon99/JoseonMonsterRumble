@@ -1,10 +1,19 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/04.Sprites/Player/Player_Attack/NewAtk/Player_1st_Atk_00003.png.meta
 guid: b5cad5be804bf81429379d17f2559533
 TextureImporter:
   internalIDToNameTable:
   - first:
       213: 3206645614909703071
     second: Player_1st_Atk_00003_0
+========
+guid: 5f59564e4e3a5d246bef8a8f67588cb8
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5473333189070231627
+    second: Player_Jump_Start_00010_0
+>>>>>>>> develop:Assets/04.Sprites/Player/PlayerJump/JumpStart/Player_Jump_Start_00010.png.meta
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -75,7 +84,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -126,6 +135,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
+<<<<<<<< HEAD:Assets/04.Sprites/Player/Player_Attack/NewAtk/Player_1st_Atk_00003.png.meta
       name: Player_1st_Atk_00003_0
       rect:
         serializedVersion: 2
@@ -133,6 +143,15 @@ TextureImporter:
         y: 0
         width: 399
         height: 511
+========
+      name: Player_Jump_Start_00010_0
+      rect:
+        serializedVersion: 2
+        x: 470
+        y: 22
+        width: 399
+        height: 532
+>>>>>>>> develop:Assets/04.Sprites/Player/PlayerJump/JumpStart/Player_Jump_Start_00010.png.meta
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +160,13 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
+<<<<<<<< HEAD:Assets/04.Sprites/Player/Player_Attack/NewAtk/Player_1st_Atk_00003.png.meta
       spriteID: f93c14d723b408c20800000000000000
       internalID: 3206645614909703071
+========
+      spriteID: 5b7ec18a670da04b0800000000000000
+      internalID: -5473333189070231627
+>>>>>>>> develop:Assets/04.Sprites/Player/PlayerJump/JumpStart/Player_Jump_Start_00010.png.meta
       vertices: []
       indices: 
       edges: []
@@ -161,7 +185,11 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
+<<<<<<<< HEAD:Assets/04.Sprites/Player/Player_Attack/NewAtk/Player_1st_Atk_00003.png.meta
       Player_1st_Atk_00003_0: 3206645614909703071
+========
+      Player_Jump_Start_00010_0: -5473333189070231627
+>>>>>>>> develop:Assets/04.Sprites/Player/PlayerJump/JumpStart/Player_Jump_Start_00010.png.meta
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

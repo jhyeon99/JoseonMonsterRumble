@@ -11,7 +11,9 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] private float _minX = -10f;
 
     [SerializeField] private float _maxX = 10f;
-    [SerializeField] private float _fixedY = 0;
+    [SerializeField] private float _minY = -10f;
+    [SerializeField] private float _maxY = 10f;
+
 
     private Vector3 _velocity = Vector3.zero;
 
@@ -21,10 +23,10 @@ public class CameraFollow : MonoBehaviour
 
         int signX = _target.localScale.x > 0 ? 1 : -1;
 
-        var realOffset = new Vector3(signX * _offset.x, 0, _offset.z);
+        var realOffset = new Vector3(signX * _offset.x, _offset.y, _offset.z);
         Vector3 targetPosition = _target.position + realOffset;
         targetPosition.x = Mathf.Clamp(targetPosition.x, _minX, _maxX);
-        targetPosition.y = _fixedY;
+        targetPosition.y = Mathf.Clamp(targetPosition.y, _minY, _maxY);
 
         transform.position =
             Vector3.SmoothDamp(transform.position, targetPosition, ref _velocity, _smoothTime);

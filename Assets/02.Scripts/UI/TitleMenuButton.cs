@@ -1,53 +1,64 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
-using TMPro;
+using UnityEngine.UI;
 
-public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler, ISubmitHandler
+public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointerEnterHandler,
+    IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler, ISubmitHandler
 {
     [SerializeField] private GameObject _selectFrame;
     [SerializeField] private TextMeshProUGUI _buttonText;
+    [SerializeField] private Image _buttonImage;
+    [SerializeField] private Sprite _normalSprite;
+    [SerializeField] private Sprite _selectedSprite;
+    [SerializeField] private bool _confirmOnSecondClick;
 
     [Header("색상 설정")]
     [SerializeField] private Color _selectedTextColor = new Color(1f, 0.98f, 0.9f, 1f);
+
     [SerializeField] private Color _normalTextColor = new Color(0.55f, 0.55f, 0.58f, 0.8f);
     [SerializeField] private Color _pressedTextColor = new Color(0.4f, 0.38f, 0.35f, 1f);
 
     [Header("폰트 크기 설정")]
     [SerializeField] private float _selectedFontSize = 30f;
+
     [SerializeField] private float _normalFontSize = 26f;
 
     [Header("누름 연출 설정")]
     [SerializeField] private float _pressedScaleRatio = 0.9f;
+
     [SerializeField] private float _actionDelay = 0.1f;
 
     [Header("호버 연출 설정")]
     [SerializeField] private AudioClip _hoverSound;
+
     [SerializeField] private float _hoverVolume = 1f;
     [SerializeField] private GameObject _hoverVfx;
 
     [Header("효과음 및 액션 설정")]
     [SerializeField] private AudioClip _clickSound;
+
     [SerializeField] private float _clickVolume = 1f;
     [SerializeField] private UnityEvent _onClickAction;
 
-    [SerializeField] private bool _isDefaultSelected = false;
-    [SerializeField] private bool _isSelected = false;
-    [SerializeField] private bool _isPressed = false;
+    [SerializeField] private bool _isDefaultSelected;
+    [SerializeField] private bool _isSelected;
+    [SerializeField] private bool _isPressed;
     [SerializeField] private bool _isInteractable = true;
 
-    private static bool _isAnyButtonClicked = false;
-
+    private static bool _isAnyButtonClicked;
+    private bool _armedByFirstClick;
+    private Vector3 _originalScale;
     private Coroutine _clickActionCoroutine;
 
-    public GameObject SelectFrame => _selectFrame;
-    public TextMeshProUGUI ButtonText => _buttonText;
-    public bool IsDefaultSelected => _isDefaultSelected;
+    public UnityEvent OnClickAction => _onClickAction;
 
     private void Awake()
     {
-        if (_buttonText == null)
+        _originalScale = transform.localScale;
+        if (_buttonText == null && !_confirmOnSecondClick)
         {
             _buttonText = GetComponentInChildren<TextMeshProUGUI>();
         }
@@ -55,7 +66,7 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
 
     private void Start()
     {
-        ApplyHighlight(_isDefaultSelected);
+        ApplyHighlight(!_confirmOnSecondClick && _isDefaultSelected);
     }
 
     private void OnDisable()
@@ -67,24 +78,30 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
             _isAnyButtonClicked = false;
         }
 
+        _armedByFirstClick = false;
         _isInteractable = true;
         ApplyPress(false);
+        ApplyHighlight(false);
     }
 
     public void OnSelect(BaseEventData eventData)
     {
         if (!_isInteractable || _isAnyButtonClicked) return;
-        ApplyHighlight(true);
+        if (!_confirmOnSecondClick || _armedByFirstClick)
+        {
+            ApplyHighlight(true);
+        }
     }
 
     public void OnDeselect(BaseEventData eventData)
     {
+        _armedByFirstClick = false;
         ApplyHighlight(false);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (!_isInteractable || _isAnyButtonClicked) return;
+        if (!_isInteractable || _isAnyButtonClicked || _confirmOnSecondClick) return;
 
         if (EventSystem.current != null)
         {
@@ -103,7 +120,8 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
             ApplyPress(false);
         }
 
-        if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject != gameObject)
+        if (!_confirmOnSecondClick && EventSystem.current != null &&
+            EventSystem.current.currentSelectedGameObject != gameObject)
         {
             ApplyHighlight(false);
         }
@@ -112,7 +130,10 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
     public void OnPointerDown(PointerEventData eventData)
     {
         if (!_isInteractable || _isAnyButtonClicked) return;
-        ApplyPress(true);
+        if (!_confirmOnSecondClick || _armedByFirstClick)
+        {
+            ApplyPress(true);
+        }
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -121,15 +142,8 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
         ApplyPress(false);
     }
 
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        HandleClick();
-    }
-
-    public void OnSubmit(BaseEventData eventData)
-    {
-        HandleClick();
-    }
+    public void OnPointerClick(PointerEventData eventData) => HandleClick();
+    public void OnSubmit(BaseEventData eventData) => HandleClick();
 
     public void ApplyHighlight(bool isSelected)
     {
@@ -150,6 +164,11 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
             _hoverVfx.SetActive(isSelected);
         }
 
+        if (_buttonImage != null)
+        {
+            _buttonImage.sprite = isSelected && _selectedSprite != null ? _selectedSprite : _normalSprite;
+        }
+
         if (_buttonText != null && !_isPressed)
         {
             _buttonText.color = isSelected ? _selectedTextColor : _normalTextColor;
@@ -161,9 +180,7 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
     public void ApplyPress(bool isPressed)
     {
         _isPressed = isPressed;
-
-        transform.localScale = isPressed ? (Vector3.one * _pressedScaleRatio) : Vector3.one;
-
+        transform.localScale = isPressed ? _originalScale * _pressedScaleRatio : _originalScale;
         if (_buttonText != null)
         {
             _buttonText.color = isPressed ? _pressedTextColor : (_isSelected ? _selectedTextColor : _normalTextColor);
@@ -172,16 +189,20 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
 
     private void HandleClick()
     {
-        if (!_isInteractable)
+        if (!_isInteractable || _isAnyButtonClicked) return;
+
+        if (_confirmOnSecondClick && !_armedByFirstClick)
         {
+            _armedByFirstClick = true;
+            if (EventSystem.current != null)
+            {
+                EventSystem.current.SetSelectedGameObject(gameObject);
+            }
+
+            ApplyHighlight(true);
             return;
         }
 
-        StartClickAction();
-    }
-
-    private void StartClickAction()
-    {
         if (_clickActionCoroutine != null)
         {
             StopCoroutine(_clickActionCoroutine);
@@ -208,23 +229,15 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
 
     private void PlayClickSound()
     {
-        if (_clickSound == null)
-        {
-            return;
-        }
-
-        Vector3 soundPosition = Camera.main != null ? Camera.main.transform.position : transform.position;
-        AudioSource.PlayClipAtPoint(_clickSound, soundPosition, _clickVolume);
+        if (_clickSound == null) return;
+        Vector3 position = Camera.main != null ? Camera.main.transform.position : transform.position;
+        AudioSource.PlayClipAtPoint(_clickSound, position, _clickVolume);
     }
 
     private void PlayHoverSound()
     {
-        if (_hoverSound == null)
-        {
-            return;
-        }
-
-        Vector3 soundPosition = Camera.main != null ? Camera.main.transform.position : transform.position;
-        AudioSource.PlayClipAtPoint(_hoverSound, soundPosition, _hoverVolume);
+        if (_hoverSound == null) return;
+        Vector3 position = Camera.main != null ? Camera.main.transform.position : transform.position;
+        AudioSource.PlayClipAtPoint(_hoverSound, position, _hoverVolume);
     }
 }
