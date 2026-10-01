@@ -18,4 +18,8 @@ public class EnragedState : EnemyState
     {
         _enemy.MoveType.Move(_enemy.GetDirectionToPlayer());
     }
+
+    public override void Update()
+    {
+    }
 }

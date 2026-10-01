@@ -212,6 +212,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed296843e3aee6440b2adb41c250ddd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBuffMove
+  _radius: 2
+  _lerpValue: 5
+  MaxAngle: 90
 --- !u!114 &6900135879620250934
 MonoBehaviour:
   m_ObjectHideFlags: 0
