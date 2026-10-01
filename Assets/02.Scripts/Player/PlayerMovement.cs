@@ -7,7 +7,6 @@ public class PlayerMovement : MonoBehaviour
     public float Speed => _speed;
     [SerializeField] private float _jumpHeight;
 
-    [Header("Dodge Settings")]
     [SerializeField] private float _dodgeDistance;
 
     public float DodgeDistance => _dodgeDistance;
@@ -18,7 +17,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private AnimationCurve _dodgeSpeedCurve;
     public AnimationCurve DodgeSpeedCurve => _dodgeSpeedCurve;
 
-    [Header("Jump Assist")]
     [SerializeField] private float _coyoteTime = 0.1f;
 
     [SerializeField] private float _groundCheckLockout = 0.1f;
@@ -100,6 +98,13 @@ public class PlayerMovement : MonoBehaviour
 
     public void ApplyGravity(bool isJumpHeld)
     {
+        // 바닥에 서 있고 이동 입력이 없으면 중력을 꺼서 경사로 미끄러짐 방지
+        if (!_isJumping && !_hasHorizontalInput && IsGrounded())
+        {
+            _rigidbody2D.gravityScale = 0f;
+            return;
+        }
+
         Vector2 v = _rigidbody2D.linearVelocity;
 
         float multiplier = 1f;
