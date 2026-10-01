@@ -108,16 +108,10 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
         int playerLayer = gameObject.layer;
         int enemyAttackLayer = Constants.Layers.EnemyAttack;
-        int enemyLayer = Constants.Layers.Enemy;
 
         if (enemyAttackLayer != -1)
         {
             Physics2D.IgnoreLayerCollision(playerLayer, enemyAttackLayer, isInvincible);
-        }
-
-        if (enemyLayer != -1)
-        {
-            Physics2D.IgnoreLayerCollision(playerLayer, enemyLayer, isInvincible);
         }
 
         if (_spriteRenderer != null)
