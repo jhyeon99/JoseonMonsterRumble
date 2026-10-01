@@ -7,6 +7,8 @@ public class PlayerMovement : MonoBehaviour
     public float Speed => _speed;
     [SerializeField] private float _jumpHeight;
 
+    [SerializeField] private Transform _feetPosition;
+
     [Header("Dodge Settings")]
     [SerializeField] private float _dodgeDistance;
 
@@ -35,6 +37,11 @@ public class PlayerMovement : MonoBehaviour
     private bool _canDodge = true;
     public bool CanDodge => _canDodge;
     private Rigidbody2D _rigidbody2D;
+    public Vector2 Position => _rigidbody2D.position;
+    private Vector2 FeetOffset => _feetPosition != null
+        ? (Vector2)_feetPosition.position - (Vector2)transform.position
+        : Vector2.zero;
+    public Vector2 FeetPosition => _rigidbody2D.position + FeetOffset;
 
     private MovingPlatform _currentPlatform;
     public MovingPlatform CurrentPlatform => _currentPlatform;
