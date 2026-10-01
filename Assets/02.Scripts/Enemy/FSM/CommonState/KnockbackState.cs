@@ -17,7 +17,7 @@ public class KnockbackState : EnemyState
     {
         _knockbackTimer = _knockbackTime;
         Debug.Log("적 넉백!");
-        _enemy.EnemyRb.linearVelocity = Vector3.zero;
+        _enemy.MoveType.StopMove();
         _enemy.EnemyRb.AddForce(_hitData.AttackDirection * _hitData.KnockbackForce, ForceMode2D.Impulse);
     }
 
@@ -26,6 +26,13 @@ public class KnockbackState : EnemyState
         _knockbackTimer -= Time.deltaTime;
         if (_knockbackTimer <= 0f)
         {
+            _enemy.MoveType.StopMove();
+            if (_enemy.Type == EnemyType.Buffer)
+            {
+                _enemy.StateMachine.ChangeState(new FindEnemyState(_enemy));
+                return;
+            }
+
             _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
         }
     }

@@ -3,6 +3,7 @@ using UnityEngine;
 public abstract class EnemyCombat : MonoBehaviour
 {
     protected Enemy Enemy { get; private set; }
+    protected float DamageIncreaseValue { get; private set; }
 
     protected virtual void Awake()
     {
@@ -11,4 +12,13 @@ public abstract class EnemyCombat : MonoBehaviour
 
     public abstract void Attack();
 
+    public void IncreaseDamge(float increaseValue)
+    {
+        DamageIncreaseValue = increaseValue;
+    }
+
+    public void NormalDamage()
+    {
+        DamageIncreaseValue = 0f;
+    }
 }

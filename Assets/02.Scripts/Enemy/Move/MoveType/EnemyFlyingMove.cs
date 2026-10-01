@@ -11,4 +11,9 @@ public class EnemyFlyingMove : EnemyMoveType
     {
         Rigidbody.linearVelocity = -(direction * Enemy.Data.MoveSpeed);
     }
+
+    public override void StopMove()
+    {
+        Rigidbody.linearVelocity = Vector2.zero;
+    }
 }
