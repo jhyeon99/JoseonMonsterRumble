@@ -155,20 +155,21 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
 
         _isSelected = isSelected;
 
-if (_selectFrame != null)
-{
-    _selectFrame.SetActive(isSelected);
-}
+        if (_selectFrame != null)
+        {
+            _selectFrame.SetActive(isSelected);
+        }
 
-if (_hoverVfx != null)
-{
-    _hoverVfx.SetActive(isSelected);
-}
+        if (_hoverVfx != null)
+        {
+            _hoverVfx.SetActive(isSelected);
+        }
 
-if (_hoverVfx2 != null)
-{
-    _hoverVfx2.SetActive(isSelected);
-}
+        if (_hoverVfx2 != null)
+        {
+            _hoverVfx2.SetActive(isSelected);
+        }
+
         if (_buttonImage != null)
         {
             _buttonImage.sprite = isSelected && _selectedSprite != null ? _selectedSprite : _normalSprite;
