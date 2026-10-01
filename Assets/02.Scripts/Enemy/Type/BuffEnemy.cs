@@ -17,6 +17,7 @@ public class BuffEnemy : Enemy
     {
         base.OnDisable();
         EnemyManager.Instance.OnAllAttackersKilled -= HandleAllAttackersKilled;
+        UnsubscribeTarget();
     }
 
     [ContextMenu("Test FindNewTarget")]
