@@ -39,7 +39,5 @@ public class EnemyData : ScriptableObject
 
     [SerializeField]
     private float _attackBuffAmount;
-    [SerializeField] private float _buffRange;
     public float AttackBuffAmount => _attackBuffAmount;
-    public float BuffRange => _buffRange;
 }

@@ -5,6 +5,8 @@ public class EnemyMeleeCombat : EnemyCombat
 {
     [SerializeField] private Collider2D _attackCollider;
     private Coroutine _attackCoroutine;
+    private float _currentDamage;
+    public float CurrentDamage => _currentDamage;
 
     protected override void Awake()
     {
@@ -15,6 +17,7 @@ public class EnemyMeleeCombat : EnemyCombat
     public override void Attack()
     {
         if (_attackCoroutine != null) return;
+        CalculateDamage(DamageIncreaseValue);
 
         _attackCoroutine = StartCoroutine(AttackRoutine());
     }
@@ -33,7 +36,7 @@ public class EnemyMeleeCombat : EnemyCombat
     {
         if (!other.TryGetComponent<IDamageable>(out IDamageable damageable)) return;
         var hitData = new HitData(
-            Enemy.Data.MeleeAttackDamage,
+            _currentDamage,
             0f,
             Vector2.zero,
             Vector2.zero
@@ -41,5 +44,10 @@ public class EnemyMeleeCombat : EnemyCombat
 
         damageable.TakeDamage(hitData);
         Debug.Log($"플레이어에게 근접공격으로 {Enemy.Data.MeleeAttackDamage}만큼 피해를 입힘.");
+    }
+
+    public void CalculateDamage(float percentage)
+    {
+        _currentDamage = Enemy.Data.MeleeAttackDamage * (1 + (percentage / 100f));
     }
 }
