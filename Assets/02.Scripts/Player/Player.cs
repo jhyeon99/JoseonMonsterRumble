@@ -56,10 +56,6 @@ public class Player : MonoBehaviour
     private static readonly int AnimParamDodge = Animator.StringToHash("dodge");
     private static readonly int AnimParamAttack = Animator.StringToHash("attack");
 
-    private BoxCollider2D _boxCollider;
-    [SerializeField] private Vector2 _airOffset;
-    [SerializeField] private float _colliderRestoreDelay = 0.1f;
-
     private Vector2 _baseColliderOffset;
     private Coroutine _restoreColliderRoutine;
 
@@ -88,13 +84,6 @@ public class Player : MonoBehaviour
         if (_animator == null)
         {
             _animator = GetComponentInChildren<Animator>();
-        }
-
-        _boxCollider = GetComponent<BoxCollider2D>();
-
-        if (_boxCollider != null)
-        {
-            _baseColliderOffset = _boxCollider.offset;
         }
 
         InitializeStates();
@@ -168,41 +157,6 @@ public class Player : MonoBehaviour
         {
             _animator.SetBool(AnimParamIsGrounded, isGrounded);
         }
-    }
-
-    public void SetAirCollider(bool isAir)
-    {
-        if (isAir && _restoreColliderRoutine != null)
-        {
-            StopCoroutine(_restoreColliderRoutine);
-            _restoreColliderRoutine = null;
-        }
-
-        Vector2 offset = isAir ? _airOffset : Vector2.zero;
-
-
-        Debug.Log(offset);
-        if (_boxCollider != null)
-        {
-            _boxCollider.offset = _baseColliderOffset + offset;
-        }
-    }
-
-    public void RestoreGroundColliderDelayed()
-    {
-        if (_restoreColliderRoutine != null)
-        {
-            StopCoroutine(_restoreColliderRoutine);
-        }
-
-        _restoreColliderRoutine = StartCoroutine(RestoreGroundColliderRoutine());
-    }
-
-    private IEnumerator RestoreGroundColliderRoutine()
-    {
-        yield return new WaitForSeconds(_colliderRestoreDelay);
-        SetAirCollider(false);
-        _restoreColliderRoutine = null;
     }
 
     public void TriggerHit()

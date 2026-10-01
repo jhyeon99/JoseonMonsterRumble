@@ -28,6 +28,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _maxFallSpeed = 15f;
     [SerializeField, Range(0f, 1f)] private float _addPlatformVelocityMultiplier = 1f;
 
+    [SerializeField] private float _landingJumpDelay = 0.1f;
+
     private float _baseGravityScale;
 
     private bool _canDodge = true;
@@ -41,18 +43,21 @@ public class PlayerMovement : MonoBehaviour
 
     private float _coyoteTimer;
     private float _lockoutTimer;
+    private float _landingJumpTimer;
     private bool _isJumping;
 
-    public bool CanJump => !_isJumping && _coyoteTimer > 0f;
+    public bool CanJump => !_isJumping && _coyoteTimer > 0f && _landingJumpTimer == 0f;
 
     private readonly ContactPoint2D[] _groundContacts = new ContactPoint2D[8];
     private ContactFilter2D _groundFilter;
     private const float GroundNormalThreshold = 0.7f;
+    private const float FootContactTolerance = 0.05f;
 
     public void OnLanded()
     {
         _isJumping = false;
         _coyoteTimer = _coyoteTime;
+        _landingJumpTimer = _landingJumpDelay;
     }
 
     private void Awake()
@@ -66,11 +71,22 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        bool grounded = IsGrounded();
+
         if (_lockoutTimer > 0f)
         {
             _lockoutTimer -= Time.deltaTime;
             _coyoteTimer = 0f;
             return;
+        }
+
+        if (_landingJumpTimer > 0f)
+        {
+            _landingJumpTimer -= Time.deltaTime;
+            if (_landingJumpTimer < 0f)
+            {
+                _landingJumpTimer = 0f;
+            }
         }
 
         if (IsGrounded())
@@ -128,12 +144,13 @@ public class PlayerMovement : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             ContactPoint2D contact = _groundContacts[i];
-            // enabled: 원웨이 이펙터가 무시한 접촉 제외
-            // normal.y: 벽, 천장 접촉 제외
-            if (contact.enabled && contact.normal.y > GroundNormalThreshold)
-            {
-                return true;
-            }
+
+            if (contact.normal.y <= GroundNormalThreshold) continue;
+
+            // 물리가 실제로 위로 받쳐준 접촉만
+            if (contact.normalImpulse <= 0f) continue;
+
+            return true;
         }
 
         return false;
