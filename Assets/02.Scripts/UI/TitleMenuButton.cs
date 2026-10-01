@@ -5,7 +5,8 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler, ISubmitHandler
+public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointerEnterHandler,
+    IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler, ISubmitHandler
 {
     [SerializeField] private GameObject _selectFrame;
     [SerializeField] private TextMeshProUGUI _buttonText;
@@ -16,24 +17,29 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
 
     [Header("색상 설정")]
     [SerializeField] private Color _selectedTextColor = new Color(1f, 0.98f, 0.9f, 1f);
+
     [SerializeField] private Color _normalTextColor = new Color(0.55f, 0.55f, 0.58f, 0.8f);
     [SerializeField] private Color _pressedTextColor = new Color(0.4f, 0.38f, 0.35f, 1f);
 
     [Header("폰트 크기 설정")]
     [SerializeField] private float _selectedFontSize = 30f;
+
     [SerializeField] private float _normalFontSize = 26f;
 
     [Header("누름 연출 설정")]
     [SerializeField] private float _pressedScaleRatio = 0.9f;
+
     [SerializeField] private float _actionDelay = 0.1f;
 
     [Header("호버 연출 설정")]
     [SerializeField] private AudioClip _hoverSound;
+
     [SerializeField] private float _hoverVolume = 1f;
     [SerializeField] private GameObject _hoverVfx;
 
     [Header("효과음 및 액션 설정")]
     [SerializeField] private AudioClip _clickSound;
+
     [SerializeField] private float _clickVolume = 1f;
     [SerializeField] private UnityEvent _onClickAction;
 
@@ -53,7 +59,9 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
     {
         _originalScale = transform.localScale;
         if (_buttonText == null && !_confirmOnSecondClick)
+        {
             _buttonText = GetComponentInChildren<TextMeshProUGUI>();
+        }
     }
 
     private void Start()
@@ -79,7 +87,10 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
     public void OnSelect(BaseEventData eventData)
     {
         if (!_isInteractable || _isAnyButtonClicked) return;
-        if (!_confirmOnSecondClick || _armedByFirstClick) ApplyHighlight(true);
+        if (!_confirmOnSecondClick || _armedByFirstClick)
+        {
+            ApplyHighlight(true);
+        }
     }
 
     public void OnDeselect(BaseEventData eventData)
@@ -93,23 +104,36 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
         if (!_isInteractable || _isAnyButtonClicked || _confirmOnSecondClick) return;
 
         if (EventSystem.current != null)
+        {
             EventSystem.current.SetSelectedGameObject(gameObject);
+        }
         else
+        {
             ApplyHighlight(true);
+        }
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        if (_isPressed) ApplyPress(false);
+        if (_isPressed)
+        {
+            ApplyPress(false);
+        }
+
         if (!_confirmOnSecondClick && EventSystem.current != null &&
             EventSystem.current.currentSelectedGameObject != gameObject)
+        {
             ApplyHighlight(false);
+        }
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
         if (!_isInteractable || _isAnyButtonClicked) return;
-        if (!_confirmOnSecondClick || _armedByFirstClick) ApplyPress(true);
+        if (!_confirmOnSecondClick || _armedByFirstClick)
+        {
+            ApplyPress(true);
+        }
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -123,13 +147,27 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
 
     public void ApplyHighlight(bool isSelected)
     {
-        if (!_isSelected && isSelected) PlayHoverSound();
+        if (!_isSelected && isSelected)
+        {
+            PlayHoverSound();
+        }
+
         _isSelected = isSelected;
 
-        if (_selectFrame != null) _selectFrame.SetActive(isSelected);
-        if (_hoverVfx != null) _hoverVfx.SetActive(isSelected);
+        if (_selectFrame != null)
+        {
+            _selectFrame.SetActive(isSelected);
+        }
+
+        if (_hoverVfx != null)
+        {
+            _hoverVfx.SetActive(isSelected);
+        }
+
         if (_buttonImage != null)
+        {
             _buttonImage.sprite = isSelected && _selectedSprite != null ? _selectedSprite : _normalSprite;
+        }
 
         if (_buttonText != null && !_isPressed)
         {
@@ -144,8 +182,9 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
         _isPressed = isPressed;
         transform.localScale = isPressed ? _originalScale * _pressedScaleRatio : _originalScale;
         if (_buttonText != null)
-            _buttonText.color = isPressed ? _pressedTextColor :
-                (_isSelected ? _selectedTextColor : _normalTextColor);
+        {
+            _buttonText.color = isPressed ? _pressedTextColor : (_isSelected ? _selectedTextColor : _normalTextColor);
+        }
     }
 
     private void HandleClick()
@@ -156,12 +195,19 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
         {
             _armedByFirstClick = true;
             if (EventSystem.current != null)
+            {
                 EventSystem.current.SetSelectedGameObject(gameObject);
+            }
+
             ApplyHighlight(true);
             return;
         }
 
-        if (_clickActionCoroutine != null) StopCoroutine(_clickActionCoroutine);
+        if (_clickActionCoroutine != null)
+        {
+            StopCoroutine(_clickActionCoroutine);
+        }
+
         _clickActionCoroutine = StartCoroutine(ClickActionRoutine());
     }
 
