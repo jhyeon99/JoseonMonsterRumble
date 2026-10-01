@@ -17,9 +17,8 @@ MonoBehaviour:
   _detectRange: 0
   _meleeAttackDamage: 0
   _chargeSpeed: 0
-  _attackDetectRange: 0
+  _attackDetectRange: 1
   _attackPrepareTime: 0
   _attackDurationTime: 0
   _attackRecoveryTime: 0
-  _attackBuffAmount: 0
-  _buffRange: 2
+  _attackBuffAmount: 30

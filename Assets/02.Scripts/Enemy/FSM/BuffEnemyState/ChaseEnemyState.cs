@@ -13,7 +13,11 @@ public class ChaseEnemyState : EnemyState
 
     public override void FixedUpdate()
     {
-        Vector2 direction = (_targetEnemy.position - _enemy.transform.position).normalized;
-        _enemy.MoveType.Move(direction);
+        _enemy.MoveType.MoveToStartPosition(_targetEnemy);
+    }
+
+    public override void Exit()
+    {
+        _enemy.MoveType.StopMove();
     }
 }

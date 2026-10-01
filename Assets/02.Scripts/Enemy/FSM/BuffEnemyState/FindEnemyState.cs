@@ -4,7 +4,7 @@ public class FindEnemyState : EnemyState
 {
     private readonly Enemy _enemy;
     private float _findTimer = 0f;
-    private float _findTime = 2.0f;
+    private float _findTime = 1.0f;
 
     public FindEnemyState(Enemy enemy)
     {
@@ -15,6 +15,7 @@ public class FindEnemyState : EnemyState
     {
         _findTimer = _findTime;
         Debug.Log("상태 등장");
+        _enemy.MoveType.StopMove();
     }
 
     public override void Update()

@@ -13,11 +13,14 @@ public abstract class Projectile : MonoBehaviour
     protected Vector2 PlayerPosition { get; private set; }
     protected float _t;
     protected bool _isLaunching = false;
+    private float _projectileDamage;
+    public float ProjectileDamage => _projectileDamage;
 
 
     private void Awake()
     {
         Speed = _data.ProjectileSpeed;
+        _projectileDamage = _data.ProjectileDamage;
     }
 
     private void Update()
@@ -25,7 +28,7 @@ public abstract class Projectile : MonoBehaviour
         Fire();
     }
 
-    public void OnSpawn(Transform muzzlePoint, Transform playerPoint)
+    public void OnSpawn(Transform muzzlePoint, Transform playerPoint, float damageIncreaseValue)
     {
         MuzzlePosition = muzzlePoint.position;
         Transform player = playerPoint;
@@ -38,6 +41,7 @@ public abstract class Projectile : MonoBehaviour
         ControlPoint = (MuzzlePosition + PlayerPosition) / 2f + new Vector2(0f, _curveHeight);
         _t = 0f;
         _isLaunching = true;
+        IncreaseDamage(damageIncreaseValue);
     }
 
     protected abstract void Fire();
@@ -49,7 +53,7 @@ public abstract class Projectile : MonoBehaviour
         if (!other.TryGetComponent<IDamageable>(out IDamageable damageable)) return;
 
         var hitData = new HitData(
-            _data.ProjectileDamage,
+            _projectileDamage,
             0f,
             Vector2.zero,
             Vector2.zero
@@ -57,5 +61,10 @@ public abstract class Projectile : MonoBehaviour
 
         damageable.TakeDamage(hitData);
         Debug.Log($"플레이어에게 원거리공격으로 {_data.ProjectileDamage}만큼 피해를 입힘.");
+    }
+
+    public void IncreaseDamage(float percentage)
+    {
+        _projectileDamage = _data.ProjectileDamage * (1 + (percentage / 100f));
     }
 }
