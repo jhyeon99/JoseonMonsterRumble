@@ -12,7 +12,7 @@ public class ExplosionAttack : MonoBehaviour
         _currentDamage = _enemy.Data.MeleeAttackDamage;
     }
 
-    private void OnTriggerStay2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.TryGetComponent<IDamageable>(out IDamageable damageable)) return;
         var hitData = new HitData(
@@ -23,7 +23,7 @@ public class ExplosionAttack : MonoBehaviour
         );
 
         damageable.TakeDamage(hitData);
-        _enemy.StateMachine.ChangeState(new DeadState(_enemy));
+        _enemy.gameObject.SetActive(false);
         Debug.Log($"플레이어에게 폭파공격으로 {_currentDamage}만큼 피해를 입힘.");
     }
 }
