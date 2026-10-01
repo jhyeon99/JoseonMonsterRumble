@@ -30,7 +30,8 @@ public class EnemyBuffMove : EnemyMoveType
     {
         Vector2 startWorldPos = GetChaseStartPosition(target);
 
-        var smoothPos = Vector2.Lerp(Rigidbody.position, startWorldPos, _lerpValue * Time.fixedDeltaTime);
+        var smoothPos =
+            Vector2.MoveTowards(Rigidbody.position, startWorldPos, Enemy.Data.MoveSpeed * Time.fixedDeltaTime);
         Rigidbody.MovePosition(smoothPos);
         if (Vector2.Distance(Rigidbody.position, startWorldPos) < 0.1f)
         {

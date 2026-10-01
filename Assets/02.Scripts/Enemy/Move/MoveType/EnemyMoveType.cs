@@ -23,6 +23,19 @@ public abstract class EnemyMoveType : MonoBehaviour
     {
     }
 
+    public virtual void PatrolIdleMove()
+    {
+    }
+
+    public virtual void MoveToInitialPosition()
+    {
+    }
+
+    public virtual bool IsArrivedAtStart()
+    {
+        return false;
+    }
+
     public void ChargeMove(Vector2 direction)
     {
         Rigidbody.linearVelocity = Vector2.zero;
