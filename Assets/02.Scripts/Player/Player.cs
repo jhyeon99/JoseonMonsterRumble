@@ -136,6 +136,11 @@ public class Player : MonoBehaviour
         _stateMachine.Update();
         HandleRangedAttack();
         SetGrounded(IsGrounded);
+
+        if (_inputHandler.IsPotionKeyDown)
+        {
+            _health.TryUsePotion();
+        }
     }
 
     private void FixedUpdate()
