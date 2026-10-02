@@ -15,6 +15,7 @@ public abstract class Projectile : MonoBehaviour
     protected Vector2 PlayerPosition { get; private set; }
     protected float _t;
     protected bool _isLaunching = false;
+    private Vector2 _toPlayerDirection;
     private float _projectileDamage;
     public float ProjectileDamage => _projectileDamage;
 
@@ -34,6 +35,7 @@ public abstract class Projectile : MonoBehaviour
     {
         MuzzlePosition = muzzlePoint.position;
         Transform player = playerPoint;
+        _toPlayerDirection = (player.position - transform.position).normalized;
 
         if (player != null)
         {
@@ -51,19 +53,24 @@ public abstract class Projectile : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         Debug.Log("투사체가 부딪혔다.");
+        Vector2 hitPoint = other.ClosestPoint(transform.position);
+
+        if (other.TryGetComponent<IDamageable>(out IDamageable damageable))
+        {
+            var hitData = new HitData(
+                _projectileDamage,
+                _data.KnockbackForce,
+                hitPoint,
+                _toPlayerDirection
+            );
+
+            damageable.TakeDamage(hitData);
+            Debug.Log($"플레이어에게 원거리공격으로 {_projectileDamage}만큼 피해를 입힘.");
+        }
+
         gameObject.SetActive(false);
-        if (!other.TryGetComponent<IDamageable>(out IDamageable damageable)) return;
-
-        var hitData = new HitData(
-            _projectileDamage,
-            0f,
-            Vector2.zero,
-            Vector2.zero
-        );
-
-        damageable.TakeDamage(hitData);
-        Debug.Log($"플레이어에게 원거리공격으로 {_projectileDamage}만큼 피해를 입힘.");
     }
+
 
     public void IncreaseDamage(float percentage)
     {
