@@ -6,9 +6,7 @@ public abstract class Projectile : MonoBehaviour
     [SerializeField] private ProjectileData _data;
     [SerializeField] private ProjectileType _type;
     [SerializeField] private float _curveHeight = 5f;
-    [SerializeField] private float _destroyY = -10f;
     public ProjectileType Type => _type;
-    public float DestroyY => _destroyY;
     protected float Speed { get; private set; }
     protected Vector2 ControlPoint { get; private set; }
     protected Vector2 MuzzlePosition { get; private set; }
@@ -35,11 +33,11 @@ public abstract class Projectile : MonoBehaviour
     {
         MuzzlePosition = muzzlePoint.position;
         Transform player = playerPoint;
-        _toPlayerDirection = (player.position - transform.position).normalized;
 
         if (player != null)
         {
             PlayerPosition = player.position;
+            _toPlayerDirection = (player.position - transform.position).normalized;
         }
 
         ControlPoint = (MuzzlePosition + PlayerPosition) / 2f + new Vector2(0f, _curveHeight);
