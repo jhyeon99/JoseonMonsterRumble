@@ -178,7 +178,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 2.8, y: 2.5}
   m_EdgeRadius: 0
 --- !u!50 &5391187945754487503
 Rigidbody2D:
@@ -324,5 +324,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMoveArea
   CenterOffset: {x: 0, y: 0}
-  AreaSize: {x: 3, y: 3}
+  AreaSize: {x: 7, y: 7}
   AreaColor: {r: 0, g: 1, b: 0, a: 0.3}
