@@ -14,6 +14,7 @@ public class PlayerInputHandler : MonoBehaviour
     private bool _isAttackKeyDown;
     private bool _isRangedAttackKeyDown;
     private bool _isRangedAttackKey;
+    public bool IsRangedAttackKey => _isRangedAttackKey;
 
 
     [Header("Input Buffer")]

@@ -411,9 +411,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68c736923ac769b46835243da22562ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerRangedAttack
-  _muzzle: {fileID: 893085922}
-  _cooldown: 0.5
   _flipTarget: {fileID: 893085922}
+  _talismanPrefab: {fileID: 731719100070620148, guid: f3451da9fd85ca246ad1cb820b0ec053,
+    type: 3}
+  _slotCount: 5
+  _centerOffset: {x: 0, y: 1.2}
+  _radius: 0.8
+  _spreadAngle: 120
+  _idleColor: {r: 1, g: 1, b: 1, a: 0.35}
+  _activeColor: {r: 1, g: 1, b: 1, a: 1}
+  _chargeInterval: 0.4
+  _soulCostPerTalisman: 1
   _damageIncreasePercent: 0
 --- !u!1001 &901357404
 PrefabInstance:
@@ -557,6 +565,12 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5431849209313763743, guid: 818abaceb3b40254890c5d36f057ec60,
+        type: 3}
+      propertyPath: _talismanPrefab
+      value: 
+      objectReference: {fileID: 731719100070620148, guid: f3451da9fd85ca246ad1cb820b0ec053,
+        type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -696,7 +710,7 @@ PlatformEffector2D:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1215911936}
   m_Enabled: 1
-  m_UseColliderMask: 1
+  m_UseColliderMask: 0
   m_ColliderMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -1038,7 +1052,7 @@ PlatformEffector2D:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1870017733}
   m_Enabled: 1
-  m_UseColliderMask: 1
+  m_UseColliderMask: 0
   m_ColliderMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -1477,6 +1491,11 @@ PrefabInstance:
     - target: {fileID: 6152308952384263181, guid: 0724e02a57a092c49b39a4533524c6a8,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7089175931450711136, guid: 0724e02a57a092c49b39a4533524c6a8,
+        type: 3}
+      propertyPath: m_UseColliderMask
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9190201481308136048, guid: 0724e02a57a092c49b39a4533524c6a8,
