@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 2673438376458182690}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.18, y: -0.49, z: 0}
+  m_LocalPosition: {x: 1.42, y: -0.43, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -52,6 +52,7 @@ GameObject:
   - component: {fileID: 7463444152510674417}
   - component: {fileID: 406499295818711419}
   - component: {fileID: -4974254676742620378}
+  - component: {fileID: 4360668265649180081}
   m_Layer: 7
   m_Name: EnemyRangedFlying
   m_TagString: Enemy
@@ -124,7 +125,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -6571245240742730394, guid: 7ba388026850f5440a8d277a19c982ec, type: 3}
+  m_Sprite: {fileID: 21300000, guid: fcab76b4197ffc04c97f0ecac5586291, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -168,17 +169,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0, y: -0.1}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.87, y: 2.39}
+    oldSize: {x: 6.4, y: 3.6}
     newSize: {x: 2.87, y: 2.39}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.8, y: 2.5}
+  m_Size: {x: 3.88, y: 3.1}
   m_EdgeRadius: 0
 --- !u!50 &5391187945754487503
 Rigidbody2D:
@@ -324,5 +325,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMoveArea
   CenterOffset: {x: 0, y: 0}
-  AreaSize: {x: 7, y: 7}
+  AreaSize: {x: 10, y: 10}
   AreaColor: {r: 0, g: 1, b: 0, a: 0.3}
+--- !u!95 &4360668265649180081
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7004840251579652640}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: b46ab4d15d0da88479e2c12421ec060a, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
