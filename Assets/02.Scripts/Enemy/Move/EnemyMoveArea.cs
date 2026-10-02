@@ -12,27 +12,24 @@ public class EnemyMoveArea : MonoBehaviour
     public Color AreaColor = new Color(0f, 1f, 0f, 0.3f);
 
     private Vector2 _startPosition;
+    public Vector2 StartPosition => _startPosition;
 
     private void Awake()
     {
         _startPosition = transform.position;
     }
 
-    private void Update()
+    public bool IsPositionInArea(Vector2 targetPosition)
     {
-        ClampPosition();
-    }
+        Vector2 basePos = Application.isPlaying ? _startPosition : (Vector2)transform.position;
+        Vector2 center = basePos + CenterOffset;
+        Vector2 halfSize = AreaSize * 0.5f;
 
-    private void ClampPosition()
-    {
-        Vector2 center = _startPosition + CenterOffset;
-        Vector2 minBounds = center - (AreaSize * 0.5f);
-        Vector2 maxBounds = center + (AreaSize * 0.5f);
+        Vector2 minBounds = center - halfSize;
+        Vector2 maxBounds = center + halfSize;
 
-        float clampedX = Mathf.Clamp(transform.position.x, minBounds.x, maxBounds.x);
-        float clampedY = Mathf.Clamp(transform.position.y, minBounds.y, maxBounds.y);
-
-        transform.position = new Vector3(clampedX, clampedY, transform.position.z);
+        return targetPosition.x >= minBounds.x && targetPosition.x <= maxBounds.x &&
+               targetPosition.y >= minBounds.y && targetPosition.y <= maxBounds.y;
     }
 
     private void OnDrawGizmos()

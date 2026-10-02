@@ -7,10 +7,8 @@ public class EnemyData : ScriptableObject
 
     [SerializeField] private float _maxHp;
     [SerializeField] private float _moveSpeed;
-    [SerializeField] private float _detectRange;
     public float MaxHp => _maxHp;
     public float MoveSpeed => _moveSpeed;
-    public float DetectRange => _detectRange;
 
     [Space(50)]
     [Header("근접 적 능력치")]

@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 public class TitleMenuActions : MonoBehaviour
 {
-    [SerializeField] private string _gameSceneName = "Test_CanvasStructure";
+    [SerializeField] private string _gameSceneName = "Test_Ep1Prototype";
 
     public void StartGame()
     {
@@ -13,6 +13,7 @@ public class TitleMenuActions : MonoBehaviour
             return;
         }
 
+        Debug.Log($"실제로 로드하는 씬: {_gameSceneName}", this);
         SceneManager.LoadScene(_gameSceneName);
     }
 

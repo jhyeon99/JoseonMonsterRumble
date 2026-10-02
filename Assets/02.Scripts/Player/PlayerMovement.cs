@@ -7,7 +7,6 @@ public class PlayerMovement : MonoBehaviour
     public float Speed => _speed;
     [SerializeField] private float _jumpHeight;
 
-    [Header("Dodge Settings")]
     [SerializeField] private float _dodgeDistance;
 
     public float DodgeDistance => _dodgeDistance;
@@ -18,7 +17,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private AnimationCurve _dodgeSpeedCurve;
     public AnimationCurve DodgeSpeedCurve => _dodgeSpeedCurve;
 
-    [Header("Jump Assist")]
     [SerializeField] private float _coyoteTime = 0.1f;
 
     [SerializeField] private float _groundCheckLockout = 0.1f;
@@ -29,6 +27,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float _addPlatformVelocityMultiplier = 1f;
 
     [SerializeField] private float _landingJumpDelay = 0.1f;
+
+    [SerializeField] private PhysicsMaterial2D _noFrictionMaterial;
+    [SerializeField] private PhysicsMaterial2D _highFrictionMaterial;
 
     private float _baseGravityScale;
 
@@ -100,18 +101,16 @@ public class PlayerMovement : MonoBehaviour
 
     public void ApplyGravity(bool isJumpHeld)
     {
-        Vector2 v = _rigidbody2D.linearVelocity;
+        bool idleOnGround = !_isJumping && !_hasHorizontalInput && IsGrounded();
+        _rigidbody2D.sharedMaterial = idleOnGround ? _highFrictionMaterial : _noFrictionMaterial;
 
+        Vector2 v = _rigidbody2D.linearVelocity;
         float multiplier = 1f;
 
         if (v.y < 0f)
-        {
             multiplier = _fallGravityMultiplier;
-        }
         else if (_isJumping && !isJumpHeld)
-        {
             multiplier = _lowJumpGravityMultiplier;
-        }
 
         _rigidbody2D.gravityScale = _baseGravityScale * multiplier;
 
@@ -128,15 +127,6 @@ public class PlayerMovement : MonoBehaviour
     }
 
     public bool IsGrounded()
-    {
-        if (!HasGroundContact()) return false;
-
-        if (_currentPlatform != null) return true;
-
-        return _rigidbody2D.linearVelocity.y <= 0.1f;
-    }
-
-    private bool HasGroundContact()
     {
         int count = _rigidbody2D.GetContacts(_groundFilter, _groundContacts);
         for (int i = 0; i < count; i++)

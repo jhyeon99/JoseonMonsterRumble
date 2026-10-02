@@ -16,4 +16,13 @@ public class PlayerSoul : MonoBehaviour, ISoulSource
         _currentSoul = Mathf.Min(_currentSoul + amount, _maxSoul);
         OnSoulChanged?.Invoke(_currentSoul, _maxSoul);
     }
+
+    public bool TryUseSoul(float amount)
+    {
+        if (_currentSoul < amount) return false;
+
+        _currentSoul -= amount;
+        OnSoulChanged?.Invoke(_currentSoul, _maxSoul);
+        return true;
+    }
 }

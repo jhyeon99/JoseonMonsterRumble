@@ -43,7 +43,7 @@ public class EnemyMeleeCombat : EnemyCombat
         );
 
         damageable.TakeDamage(hitData);
-        Debug.Log($"플레이어에게 근접공격으로 {Enemy.Data.MeleeAttackDamage}만큼 피해를 입힘.");
+        Debug.Log($"플레이어에게 근접공격으로 {_currentDamage}만큼 피해를 입힘.");
     }
 
     public void CalculateDamage(float percentage)

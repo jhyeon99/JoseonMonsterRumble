@@ -24,6 +24,7 @@ public abstract class Enemy : MonoBehaviour
     private IAttackDirectionLock _directionLock;
     private Rigidbody2D _enemyRb;
     private HitFlash _hitFlash;
+    private EnemyMoveArea _moveArea;
 
     public Transform Target => _target;
     public EnemyStateMachine StateMachine => _stateMachine;
@@ -34,6 +35,7 @@ public abstract class Enemy : MonoBehaviour
     public IAttackDirectionLock DirectionLock => _directionLock;
     public Rigidbody2D EnemyRb => _enemyRb;
     public HitFlash HitFlash => _hitFlash;
+    public EnemyMoveArea MoveArea => _moveArea;
 
     protected virtual void OnDisable()
     {
@@ -50,6 +52,7 @@ public abstract class Enemy : MonoBehaviour
         _directionLock = GetComponent<IAttackDirectionLock>();
         _enemyRb = GetComponent<Rigidbody2D>();
         _hitFlash = GetComponent<HitFlash>();
+        _moveArea = GetComponent<EnemyMoveArea>();
     }
 
     protected virtual void Start()

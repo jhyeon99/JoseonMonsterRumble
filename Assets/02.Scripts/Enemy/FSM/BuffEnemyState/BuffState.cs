@@ -16,7 +16,7 @@ public class BuffState : EnemyState
     {
         Debug.Log("버프 상태 진입!");
         _target = _targetEnemy.GetComponent<Enemy>();
-        _target.Combat.IncreaseDamge(_enemy.Data.AttackBuffAmount);
+        _target.Combat.IncreaseDamage(_enemy.Data.AttackBuffAmount);
     }
 
     public override void FixedUpdate()

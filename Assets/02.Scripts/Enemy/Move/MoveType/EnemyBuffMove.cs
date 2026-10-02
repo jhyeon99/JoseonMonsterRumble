@@ -9,10 +9,6 @@ public class EnemyBuffMove : EnemyMoveType
     public override void Move(Vector2 direction)
     {
         Rigidbody.linearVelocity = direction * Enemy.Data.MoveSpeed;
-        if (Enemy.GetDistanceToPlayer() < Enemy.Data.AttackDetectRange)
-        {
-            Rigidbody.linearVelocity = Vector2.zero;
-        }
     }
 
     public override void BackMove(Vector2 direction)
@@ -34,7 +30,8 @@ public class EnemyBuffMove : EnemyMoveType
     {
         Vector2 startWorldPos = GetChaseStartPosition(target);
 
-        var smoothPos = Vector2.Lerp(Rigidbody.position, startWorldPos, _lerpValue * Time.fixedDeltaTime);
+        var smoothPos =
+            Vector2.MoveTowards(Rigidbody.position, startWorldPos, Enemy.Data.MoveSpeed * Time.fixedDeltaTime);
         Rigidbody.MovePosition(smoothPos);
         if (Vector2.Distance(Rigidbody.position, startWorldPos) < 0.1f)
         {
