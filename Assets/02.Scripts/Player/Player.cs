@@ -46,6 +46,8 @@ public class Player : MonoBehaviour
     public PlayerAttack Attack => _attack;
     private PlayerSoul _soul;
     public PlayerSoul Soul => _soul;
+    private PlayerRangedAttack _rangedAttack;
+    public PlayerRangedAttack RangedAttack => _rangedAttack;
 
     [SerializeField] private Animator _animator;
     public Animator Animator => _animator;
@@ -79,6 +81,7 @@ public class Player : MonoBehaviour
         _movement = GetComponent<PlayerMovement>();
         _attack = GetComponent<PlayerAttack>();
         _soul = GetComponent<PlayerSoul>();
+        _rangedAttack = GetComponent<PlayerRangedAttack>();
 
         if (_animator == null)
         {
@@ -121,6 +124,11 @@ public class Player : MonoBehaviour
     {
         _stateMachine.Update();
         SetGrounded(IsGrounded);
+
+        if (_inputHandler.TryUseRangedAttackInput())
+        {
+            _rangedAttack.TryFire();
+        }
     }
 
     private void FixedUpdate()
