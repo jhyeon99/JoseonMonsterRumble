@@ -19,23 +19,6 @@ public class EnemyMoveArea : MonoBehaviour
         _startPosition = transform.position;
     }
 
-    private void Update()
-    {
-        ClampPosition();
-    }
-
-    private void ClampPosition()
-    {
-        Vector2 center = _startPosition + CenterOffset;
-        Vector2 minBounds = center - (AreaSize * 0.5f);
-        Vector2 maxBounds = center + (AreaSize * 0.5f);
-
-        float clampedX = Mathf.Clamp(transform.position.x, minBounds.x, maxBounds.x);
-        float clampedY = Mathf.Clamp(transform.position.y, minBounds.y, maxBounds.y);
-
-        transform.position = new Vector3(clampedX, clampedY, transform.position.z);
-    }
-
     public bool IsPositionInArea(Vector2 targetPosition)
     {
         Vector2 basePos = Application.isPlaying ? _startPosition : (Vector2)transform.position;
