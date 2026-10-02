@@ -15,6 +15,8 @@ public class PlayerInputHandler : MonoBehaviour
     private bool _isRangedAttackKeyDown;
     private bool _isRangedAttackKey;
     public bool IsRangedAttackKey => _isRangedAttackKey;
+    private bool _isPotionKeyDown;
+    public bool IsPotionKeyDown => _isPotionKeyDown;
 
 
     [Header("Input Buffer")]
@@ -42,8 +44,10 @@ public class PlayerInputHandler : MonoBehaviour
         _isJumpKey = Input.GetKey(KeyCode.C);
         _isDodgeKeyDown = Input.GetKeyDown(KeyCode.Z);
         _isAttackKeyDown = Input.GetKeyDown(KeyCode.X);
-        _isRangedAttackKeyDown = Input.GetKeyDown(KeyCode.LeftShift);
-        _isRangedAttackKey = Input.GetKey(KeyCode.LeftShift);
+        _isRangedAttackKeyDown = Input.GetKeyDown(KeyCode.V);
+        _isRangedAttackKey = Input.GetKey(KeyCode.V);
+        _isPotionKeyDown = Input.GetKeyDown(KeyCode.B);
+
 
         if (_isJumpKeyDown) _jumpBuffer.Press();
         if (_isDodgeKeyDown) _dodgeBuffer.Press();
