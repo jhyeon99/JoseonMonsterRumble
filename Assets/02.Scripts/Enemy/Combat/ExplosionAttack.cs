@@ -15,11 +15,12 @@ public class ExplosionAttack : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.TryGetComponent<IDamageable>(out IDamageable damageable)) return;
+        Vector2 hitPoint = other.ClosestPoint(transform.position);
         var hitData = new HitData(
             _currentDamage,
-            0f,
-            Vector2.zero,
-            Vector2.zero
+            _enemy.Data.KnockbackForce,
+            hitPoint,
+            _enemy.GetDirectionToPlayer()
         );
 
         damageable.TakeDamage(hitData);
