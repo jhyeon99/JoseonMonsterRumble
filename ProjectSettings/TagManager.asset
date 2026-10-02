@@ -2,12 +2,12 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 3
+  serializedVersion: 2
   tags:
-  - Enemy
-  - CheckPoint
-  - Interactable
-  - Hazard
+  - LevelBounds
+  - Music
+  - Background
+  - NoMask
   layers:
   - Default
   - TransparentFX
@@ -15,53 +15,54 @@ TagManager:
   - 
   - Water
   - UI
+  - 
+  - 
+  - Platforms
   - Player
-  - Enemy
-  - PlayerAttack
-  - EnemyAttack
-  - PlayerProjectile
-  - EnemyProjectile
-  - Ground
-  - OneWayPlatform
-  - Hazard
-  - Interactable
-  - Trigger
-  - Item
+  - Volumes
+  - OneWayPlatforms
+  - Projectiles
+  - Enemies
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Ladders
+  - PlayerProjectiles
+  - MovingObjects
+  - MovingPlatforms
+  - Foreground
+  - MovingOneWayPlatforms
+  - NoCollision
+  - Background
+  - Friendlies
+  - Invulnerable
+  - PlatformsPlayerOnly
+  - MidHeightOneWayPlatforms
+  - Pushables
+  - Stairs
   - 
   - 
   - 
   m_SortingLayers:
+  - name: Background
+    uniqueID: 2674791413
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Background
-    uniqueID: 2453439131
+  - name: Between
+    uniqueID: 606350985
     locked: 0
-  - name: EnvironmentBack
-    uniqueID: 1334980413
+  - name: Player
+    uniqueID: 2666359821
     locked: 0
-  - name: Character
-    uniqueID: 1918527705
+  - name: Platforms
+    uniqueID: 600026165
     locked: 0
-  - name: Effect
-    uniqueID: 2468278681
+  - name: Foreground
+    uniqueID: 1795597123
     locked: 0
-  - name: EnvironmentFront
-    uniqueID: 2474048271
+  - name: VisibleParticles
+    uniqueID: 940224915
     locked: 0
   - name: UI
-    uniqueID: 2420769363
+    uniqueID: 3241408355
     locked: 0
-  m_RenderingLayers:
-  - Default
