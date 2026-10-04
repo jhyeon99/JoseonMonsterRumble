@@ -239,13 +239,30 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void HandleHit()
+    public void TriggerAttack2()
+    {
+        if (_animator != null)
+        {
+            _animator.SetTrigger(AnimParamAttack2);
+        }
+    }
+
+    public void TriggerAttack3()
+    {
+        if (_animator != null)
+        {
+            _animator.SetTrigger(AnimParamAttack3);
+        }
+    }
+
+    private void HandleHit(HitData hitData)
     {
         if (StateMachine.CurrentState == DeadState)
         {
             return;
         }
 
+        HitState.SetHitData(hitData);
         StateMachine.ChangeState(HitState);
     }
 
