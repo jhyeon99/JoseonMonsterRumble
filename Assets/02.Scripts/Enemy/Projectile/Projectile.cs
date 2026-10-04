@@ -57,6 +57,7 @@ public abstract class Projectile : MonoBehaviour
         ControlPoint = (MuzzlePosition + PlayerPosition) / 2f + new Vector2(0f, _curveHeight);
         _t = 0f;
         _isLaunching = true;
+        _returnPoolTime = _returnPoolTimer;
         IncreaseDamage(damageIncreaseValue);
     }
 
