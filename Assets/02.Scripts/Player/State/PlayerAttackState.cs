@@ -5,34 +5,24 @@ public class PlayerAttackState : PlayerBaseState
     private float _elapsedTime;
     private float _comboElapsedTime;
     private int _currentComboIndex;
-    private RigidbodyConstraints2D _originalConstraints;
     private bool _hasEnteredAttackAnimation;
 
     private bool _hasForwardMotion;
-    private bool _useDisplacementCurve;
     private AnimationCurve _forwardDisplacementCurve;
-    private float _readyDurationRatio;
+    private float _stepDuration;
     private float _prevDisplacement;
     private bool _hasSyncedInitialDisplacement;
     private bool _isGroundedAtStart;
-    private float _forwardDelay;
-    private float _forwardSpeed;
-    private float _forwardDuration;
     private float _forwardDirection;
-    private bool _isForwarding;
     private bool _forwardCompleted;
+    private bool _hasBufferedAttackInput;
 
-    private readonly RaycastHit2D[] _wallHitResults = new RaycastHit2D[4];
-    private ContactFilter2D _wallContactFilter;
     private Collider2D _playerCollider;
 
     public PlayerAttackState(Player player, StateMachine stateMachine)
         : base(player, stateMachine)
     {
         _playerCollider = _player.GetComponent<Collider2D>();
-        _wallContactFilter = new ContactFilter2D();
-        _wallContactFilter.useTriggers = false;
-        _wallContactFilter.SetLayerMask(Constants.Layers.GroundAllMask);
     }
 
     public override void Enter()
@@ -43,10 +33,9 @@ public class PlayerAttackState : PlayerBaseState
         _comboElapsedTime = 0f;
         _currentComboIndex = 0;
         _hasEnteredAttackAnimation = false;
+        _hasBufferedAttackInput = false;
         _isGroundedAtStart = _player.IsGrounded;
 
-        _originalConstraints = _rigidbody2D.constraints;
-        _rigidbody2D.constraints = _originalConstraints | RigidbodyConstraints2D.FreezePositionX;
         _rigidbody2D.linearVelocity = new Vector2(0f, _rigidbody2D.linearVelocity.y);
 
         SetupForwardMotion(0);
@@ -62,51 +51,26 @@ public class PlayerAttackState : PlayerBaseState
         _forwardCompleted = false;
         _prevDisplacement = 0f;
         _hasSyncedInitialDisplacement = false;
+        _stepDuration = CalculateTotalStepDuration(index);
 
-        if (_player.Attack.TryGetAttackData(index, out AttackData attackData))
+        if (_player.Attack.TryGetAttackData(index, out AttackData attackData) &&
+            attackData.ForwardDisplacementCurve != null &&
+            attackData.ForwardDisplacementCurve.length > 0)
         {
-            if (attackData.ReadyDurationRatio > 0f)
-            {
-                _readyDurationRatio = attackData.ReadyDurationRatio;
-            }
-            else
-            {
-                _readyDurationRatio = CalculateDefaultReadyRatio(index);
-            }
-
-            if (attackData.ForwardDisplacementCurve != null && attackData.ForwardDisplacementCurve.length > 0)
-            {
-                _hasForwardMotion = true;
-                _useDisplacementCurve = true;
-                _forwardDisplacementCurve = attackData.ForwardDisplacementCurve;
-                _isForwarding = false;
-            }
-            else if (attackData.ForwardSpeed > 0f && attackData.ForwardDuration > 0f)
-            {
-                _hasForwardMotion = true;
-                _useDisplacementCurve = false;
-                _forwardDelay = attackData.ForwardDelay;
-                _forwardSpeed = attackData.ForwardSpeed;
-                _forwardDuration = attackData.ForwardDuration;
-                _isForwarding = false;
-            }
-            else
-            {
-                _hasForwardMotion = false;
-                _useDisplacementCurve = false;
-                _forwardCompleted = true;
-            }
+            _hasForwardMotion = true;
+            _forwardDisplacementCurve = attackData.ForwardDisplacementCurve;
         }
         else
         {
             _hasForwardMotion = false;
-            _useDisplacementCurve = false;
+            _forwardDisplacementCurve = null;
             _forwardCompleted = true;
         }
     }
 
     private void TransitionToCombo(int nextIndex)
     {
+        _hasBufferedAttackInput = false;
         _currentComboIndex = nextIndex;
         _comboElapsedTime = 0f;
         StopForwardMovement();
@@ -155,7 +119,7 @@ public class PlayerAttackState : PlayerBaseState
             return stateInfo.normalizedTime < comboEnd;
         }
 
-        if (IsActualAttackMotion(stateInfo))
+        if (IsCurrentComboAttackMotion(stateInfo))
         {
             return stateInfo.normalizedTime >= comboStart;
         }
@@ -167,152 +131,43 @@ public class PlayerAttackState : PlayerBaseState
     {
         base.PhysicsExecute();
 
-        if (!_hasForwardMotion || _forwardCompleted) return;
+        if (!_hasForwardMotion || _forwardCompleted || _forwardDisplacementCurve == null) return;
 
-        if (_useDisplacementCurve)
+        float progress = _stepDuration > 0.0001f
+            ? Mathf.Clamp01(_comboElapsedTime / _stepDuration)
+            : 1f;
+
+        float targetDisplacement = _forwardDisplacementCurve.Evaluate(progress);
+
+        if (!_hasSyncedInitialDisplacement)
         {
-            Animator animator = _player.Animator;
-            if (animator == null) return;
+            _hasSyncedInitialDisplacement = true;
+            _prevDisplacement = _forwardDisplacementCurve.Evaluate(0f);
+        }
 
-            AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+        float deltaDistance = targetDisplacement - _prevDisplacement;
+        _prevDisplacement = targetDisplacement;
 
-            float progress = CalculateComboProgress(stateInfo);
-            if (progress < 0f)
+        if (deltaDistance > 0.0001f)
+        {
+            float safeDelta = CheckLedgeObstacle(deltaDistance);
+
+            if (safeDelta > 0.0001f)
             {
-                return;
-            }
-
-            float targetDisplacement = _forwardDisplacementCurve.Evaluate(progress);
-
-            if (!_hasSyncedInitialDisplacement)
-            {
-                _hasSyncedInitialDisplacement = true;
-                _prevDisplacement = targetDisplacement;
-                return;
-            }
-
-            float deltaDistance = targetDisplacement - _prevDisplacement;
-            _prevDisplacement = targetDisplacement;
-
-            if (deltaDistance > 0.0001f)
-            {
-                float safeDelta = CheckWallObstacle(deltaDistance);
-                safeDelta = CheckLedgeObstacle(safeDelta);
-
-                if (safeDelta > 0.0001f)
-                {
-                    if (!_isForwarding)
-                    {
-                        _isForwarding = true;
-                        _rigidbody2D.constraints = _originalConstraints;
-                    }
-
-                    Vector2 newPos = _rigidbody2D.position + new Vector2(_forwardDirection * safeDelta, 0f);
-                    _rigidbody2D.MovePosition(newPos);
-                }
-            }
-            else if (deltaDistance < -0.0001f)
-            {
-                if (!_isForwarding)
-                {
-                    _isForwarding = true;
-                    _rigidbody2D.constraints = _originalConstraints;
-                }
-
-                Vector2 newPos = _rigidbody2D.position + new Vector2(_forwardDirection * deltaDistance, 0f);
+                Vector2 newPos = _rigidbody2D.position + new Vector2(_forwardDirection * safeDelta, 0f);
                 _rigidbody2D.MovePosition(newPos);
             }
-            else if (progress >= 0.99f)
-            {
-                StopForwardMovement();
-            }
         }
-        else
+        else if (deltaDistance < -0.0001f)
         {
-            if (_comboElapsedTime >= _forwardDelay && _comboElapsedTime < _forwardDelay + _forwardDuration)
-            {
-                if (!_isForwarding)
-                {
-                    _isForwarding = true;
-                    _rigidbody2D.constraints = _originalConstraints;
-                }
-
-                _rigidbody2D.linearVelocity = new Vector2(_forwardDirection * _forwardSpeed, _rigidbody2D.linearVelocity.y);
-            }
-            else if (_isForwarding || _comboElapsedTime >= _forwardDelay + _forwardDuration)
-            {
-                StopForwardMovement();
-            }
+            Vector2 newPos = _rigidbody2D.position + new Vector2(_forwardDirection * deltaDistance, 0f);
+            _rigidbody2D.MovePosition(newPos);
         }
-    }
 
-    private float CalculateComboProgress(AnimatorStateInfo stateInfo)
-    {
-        bool isReady = false;
-        bool isActualAttack = false;
-
-        if (_currentComboIndex == 0)
+        if (progress >= 1f)
         {
-            isActualAttack = stateInfo.IsName("Player_Attack") ||
-                             stateInfo.IsName("Player_Attack_1st") ||
-                             stateInfo.IsName("Player_New_Attack_1st");
+            StopForwardMovement();
         }
-        else if (_currentComboIndex == 1)
-        {
-            isReady = stateInfo.IsName("Player_Attack_2nd_Ready");
-            isActualAttack = stateInfo.IsName("Player_Attack_2nd");
-        }
-        else if (_currentComboIndex == 2)
-        {
-            isReady = stateInfo.IsName("Player_Attack_3rd_Ready");
-            isActualAttack = stateInfo.IsName("Player_Attack_3rd");
-        }
-
-        if (!isReady && !isActualAttack)
-        {
-            return -1f;
-        }
-
-        float normalizedTime = Mathf.Clamp01(stateInfo.normalizedTime);
-
-        if (isReady && _readyDurationRatio > 0f)
-        {
-            return normalizedTime * _readyDurationRatio;
-        }
-
-        if (isActualAttack)
-        {
-            if (_readyDurationRatio > 0f)
-            {
-                return _readyDurationRatio + normalizedTime * (1.0f - _readyDurationRatio);
-            }
-
-            return normalizedTime;
-        }
-
-        return -1f;
-    }
-
-    private float CheckWallObstacle(float desiredDistance)
-    {
-        if (_playerCollider == null) return desiredDistance;
-
-        var direction = new Vector2(_forwardDirection, 0f);
-        int hitCount = _playerCollider.Cast(direction, _wallContactFilter, _wallHitResults, desiredDistance + 0.05f);
-
-        for (int i = 0; i < hitCount; i++)
-        {
-            RaycastHit2D hit = _wallHitResults[i];
-            if (hit.collider == null || hit.collider == _playerCollider) continue;
-
-            if (Mathf.Abs(hit.normal.x) > 0.5f)
-            {
-                float safeDist = Mathf.Max(0f, hit.distance - 0.02f);
-                return Mathf.Min(desiredDistance, safeDist);
-            }
-        }
-
-        return desiredDistance;
     }
 
     private float CheckLedgeObstacle(float desiredDistance)
@@ -358,22 +213,11 @@ public class PlayerAttackState : PlayerBaseState
         return maxAllowedDelta;
     }
 
-    private bool IsActualAttackMotion(AnimatorStateInfo stateInfo)
-    {
-        return stateInfo.IsName("Player_Attack") ||
-               stateInfo.IsName("Player_Attack_1st") ||
-               stateInfo.IsName("Player_New_Attack_1st") ||
-               stateInfo.IsName("Player_Attack_2nd") ||
-               stateInfo.IsName("Player_Attack_3rd");
-    }
-
     private void StopForwardMovement()
     {
         if (_forwardCompleted) return;
 
-        _isForwarding = false;
         _forwardCompleted = true;
-        _rigidbody2D.constraints = _originalConstraints | RigidbodyConstraints2D.FreezePositionX;
         _rigidbody2D.linearVelocity = new Vector2(0f, _rigidbody2D.linearVelocity.y);
     }
 
@@ -406,38 +250,35 @@ public class PlayerAttackState : PlayerBaseState
                 _hasEnteredAttackAnimation = true;
             }
 
-            bool isRecovering = stateInfo.IsTag("AttackRecover");
-            bool isTransitioningToRecover = inTransition && nextInfo.IsTag("AttackRecover");
+            bool isCurrentComboRecover = IsCurrentComboRecoverState(stateInfo);
+            bool isCurrentComboMotion = IsCurrentComboAttackMotion(stateInfo);
 
             if (isCurrentAttackOrRecover || isNextAttackOrRecover)
             {
                 _hasEnteredAttackAnimation = true;
             }
 
-            // 타격 진행도 0.7 이상 또는 리커버 진행도 0.5 미만 구간에서 다음 콤보 입력 허용
-            if (_currentComboIndex < 2 && IsInComboWindow(stateInfo, isRecovering))
+            // 콤보 공격 입력 감지 시 단일 예약 버퍼 활성화
+            if (_currentComboIndex < 2 && _inputHandler.TryUseAttackInput())
             {
-                if (_inputHandler.TryUseAttackInput())
+                _hasBufferedAttackInput = true;
+            }
+
+            // 예약된 입력이 있고, 전이 중이 아니며 콤보 조건을 충족했을 때만 다음 콤보로 전이
+            if (_hasBufferedAttackInput && _currentComboIndex < 2 && !inTransition)
+            {
+                if (IsInComboWindow(stateInfo, isCurrentComboRecover))
                 {
+                    _hasBufferedAttackInput = false;
                     TransitionToCombo(_currentComboIndex + 1);
                     return;
                 }
             }
 
-            // 신규 타격 애니메이션으로 전환 중일 때는 이전 리커버 상태로 인한 강제 정지 방지
-            bool isTransitioningToNewAttack = inTransition && (nextInfo.IsName("Player_Attack_2nd_Ready") ||
-                                                              nextInfo.IsName("Player_Attack_2nd") ||
-                                                              nextInfo.IsName("Player_Attack_3rd_Ready") ||
-                                                              nextInfo.IsName("Player_Attack_3rd"));
-
-            if (!isTransitioningToNewAttack && (isRecovering || isTransitioningToRecover))
+            // 현재 진행 중인 콤보의 리커버 상태일 때만 후속 처리 (회피 캔슬 및 종료)
+            if (isCurrentComboRecover)
             {
-                if (_isForwarding || !_forwardCompleted)
-                {
-                    StopForwardMovement();
-                }
-
-                if (isRecovering && stateInfo.normalizedTime >= 0.2f)
+                if (stateInfo.normalizedTime >= 0.2f)
                 {
                     if (_inputHandler.TryUseDodgeInput() && _player.IsGrounded && _player.Movement.CanDodge)
                     {
@@ -446,7 +287,7 @@ public class PlayerAttackState : PlayerBaseState
                     }
                 }
 
-                if (isRecovering && !inTransition && stateInfo.normalizedTime >= 1.0f)
+                if (!inTransition && stateInfo.normalizedTime >= 1.0f)
                 {
                     EndAttack();
                     return;
@@ -458,6 +299,28 @@ public class PlayerAttackState : PlayerBaseState
                 return;
             }
         }
+    }
+
+    private bool IsCurrentComboRecoverState(AnimatorStateInfo stateInfo)
+    {
+        return _currentComboIndex switch
+        {
+            0 => stateInfo.IsName("Player_Attack_1st_Recover"),
+            1 => stateInfo.IsName("Player_Attack_2nd_Recover"),
+            2 => stateInfo.IsName("Player_Attack_3rd_Recover"),
+            _ => false
+        };
+    }
+
+    private bool IsCurrentComboAttackMotion(AnimatorStateInfo stateInfo)
+    {
+        return _currentComboIndex switch
+        {
+            0 => stateInfo.IsName("Player_Attack_1st") || stateInfo.IsName("Player_Attack") || stateInfo.IsName("Player_New_Attack_1st"),
+            1 => stateInfo.IsName("Player_Attack_2nd_Ready") || stateInfo.IsName("Player_Attack_2nd"),
+            2 => stateInfo.IsName("Player_Attack_3rd_Ready") || stateInfo.IsName("Player_Attack_3rd"),
+            _ => false
+        };
     }
 
     private bool IsAttackOrRecoverState(AnimatorStateInfo stateInfo)
@@ -485,16 +348,29 @@ public class PlayerAttackState : PlayerBaseState
     {
         base.Exit();
 
-        _rigidbody2D.constraints = _originalConstraints;
+        _hasBufferedAttackInput = false;
         _player.Attack.StopAttack();
     }
 
-    private float CalculateDefaultReadyRatio(int index)
+    private float CalculateTotalStepDuration(int index)
     {
-        if (index == 0) return 0f;
+        string readyClipName = null;
+        string attackClipName = null;
 
-        string readyClipName = index == 1 ? "Player_Attack_2nd_Ready" : "Player_Attack_3rd_Ready";
-        string attackClipName = index == 1 ? "Player_Attack_2nd" : "Player_Attack_3rd";
+        if (index == 0)
+        {
+            attackClipName = "Player_Attack_1st";
+        }
+        else if (index == 1)
+        {
+            readyClipName = "Player_Attack_2nd_Ready";
+            attackClipName = "Player_Attack_2nd";
+        }
+        else if (index == 2)
+        {
+            readyClipName = "Player_Attack_3rd_Ready";
+            attackClipName = "Player_Attack_3rd";
+        }
 
         float readyDuration = 0f;
         float attackDuration = 0f;
@@ -508,11 +384,11 @@ public class PlayerAttackState : PlayerBaseState
                 AnimationClip clip = clips[i];
                 if (clip == null) continue;
 
-                if (clip.name == readyClipName)
+                if (readyClipName != null && clip.name == readyClipName)
                 {
                     readyDuration = clip.length;
                 }
-                else if (clip.name == attackClipName)
+                else if (attackClipName != null && (clip.name == attackClipName || (index == 0 && clip.name == "Player_Attack")))
                 {
                     attackDuration = clip.length;
                 }
@@ -522,9 +398,16 @@ public class PlayerAttackState : PlayerBaseState
         float totalDuration = readyDuration + attackDuration;
         if (totalDuration > 0.0001f)
         {
-            return readyDuration / totalDuration;
+            return totalDuration;
         }
 
-        return index == 1 ? 0.4615f : (index == 2 ? 0.2857f : 0f);
+        // 폴백 기본 클립 길이 합계
+        return index switch
+        {
+            0 => 0.5625f,
+            1 => 0.375f + 0.4375f,
+            2 => 0.5f + 1.25f,
+            _ => 0.5f
+        };
     }
 }
