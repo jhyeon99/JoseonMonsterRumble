@@ -28,7 +28,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     public event Action<float, float> OnHealthChanged;
     public event Action OnDied;
-    public event Action OnHit;
+    public event Action<HitData> OnHit;
     public event Action<int> OnPotionChanged;
 
 
@@ -57,7 +57,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
             return true;
         }
 
-        OnHit?.Invoke();
+        OnHit?.Invoke(hitdata);
 
         if (TryGetComponent<HitFlash>(out HitFlash flash))
         {

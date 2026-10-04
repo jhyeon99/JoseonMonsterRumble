@@ -31,6 +31,10 @@ public class PlayerProjectile : Projectile
     /// <summary>타겟이 없을 때 날아갈 방향. OnSpawn 전에 호출</summary>
     public void SetFacing(int facing) => _facing = facing >= 0 ? 1 : -1;
 
+    // 유도 투사체라 실제 진행 방향(_dir)으로 밀어냄. 첫 Fire 전에 맞으면 바라보는 방향 사용
+    protected override Vector2 HitDirection =>
+        _dir != Vector2.zero ? _dir : (_facing > 0 ? Vector2.right : Vector2.left);
+
     protected override void Fire()
     {
         if (!_isLaunching) return;
