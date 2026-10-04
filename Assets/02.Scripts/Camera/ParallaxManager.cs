@@ -14,10 +14,10 @@ public class ParallaxManager : MonoBehaviour
         [SerializeField] private Transform _layer;
 
         [Header("가로 패럴렉스 강도")]
-        [Range(0f, 1f)][SerializeField] private float _horizontalStrength;
+        [Range(0f, 1.5f)][SerializeField] private float _horizontalStrength;
 
         [Header("세로 패럴렉스 강도")]
-        [Range(0f, 1f)][SerializeField] private float _verticalStrength = 0f;
+        [Range(0f, 1.5f)][SerializeField] private float _verticalStrength = 0f;
 
         [Header("가로 반복")]
         [SerializeField]
