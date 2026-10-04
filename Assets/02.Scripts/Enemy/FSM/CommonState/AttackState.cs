@@ -14,7 +14,7 @@ public class AttackState : EnemyState
     {
         Debug.Log("공격 시작");
         _enemy.DirectionLock.LockDirection();
-        _attackTimer = _enemy.Data.AttackDurationTime;
+        _attackTimer = _enemy.Data.AttackDurationTime + _enemy.Data.AttackRecoveryTime;
         _enemy.Combat.Attack();
     }
 

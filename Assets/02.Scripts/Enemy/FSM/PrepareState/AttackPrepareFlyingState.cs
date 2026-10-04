@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 
-public class AttackPrepareFlyingState : AttackPrepareState
+public class AttackPrepareFlyingState : EnemyState
 {
+    protected Enemy _enemy;
+    protected float _attackPrepareTimer = 0;
+
     public AttackPrepareFlyingState(Enemy enemy)
     {
         _enemy = enemy;
@@ -9,7 +12,9 @@ public class AttackPrepareFlyingState : AttackPrepareState
 
     public override void Enter()
     {
-        _enemy.Animation.SetRunning(false);
+        Debug.Log("적 공격 준비 시작");
+        _attackPrepareTimer = _enemy.Data.AttackPrepareTime;
+        _enemy.MoveType.StopMove();
     }
 
     public override void FixedUpdate()
@@ -39,5 +44,11 @@ public class AttackPrepareFlyingState : AttackPrepareState
 
             _enemy.StateMachine.ChangeState(new AttackState(_enemy));
         }
+    }
+
+    public override void Exit()
+    {
+        _enemy.MoveType.IsBackMove = false;
+        Debug.Log("적 공격 준비 완료");
     }
 }

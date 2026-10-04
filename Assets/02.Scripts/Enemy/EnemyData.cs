@@ -4,15 +4,15 @@ using UnityEngine;
 public class EnemyData : ScriptableObject
 {
     [Header("공통 능력치")]
-
     [SerializeField] private float _maxHp;
     [SerializeField] private float _moveSpeed;
+    [SerializeField] private float _dieTime;
     public float MaxHp => _maxHp;
     public float MoveSpeed => _moveSpeed;
+    public float DieTime => _dieTime;
 
     [Space(50)]
     [Header("근접 적 능력치")]
-
     [SerializeField]
     private float _meleeAttackDamage;
     [SerializeField] private float _chargeSpeed;
@@ -23,7 +23,6 @@ public class EnemyData : ScriptableObject
 
     [Space(50)]
     [Header("공격 능력치")]
-
     [SerializeField]
     private float _attackDetectRange;
     [SerializeField] private float _attackPrepareTime;
@@ -36,7 +35,6 @@ public class EnemyData : ScriptableObject
 
     [Space(50)]
     [Header("버프 능력치")]
-
     [SerializeField]
     private float _attackBuffAmount;
     public float AttackBuffAmount => _attackBuffAmount;

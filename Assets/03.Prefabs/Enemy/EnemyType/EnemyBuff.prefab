@@ -180,7 +180,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: aaadb808e8afcb04daa4c9e46cf26d5d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -291,8 +291,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed296843e3aee6440b2adb41c250ddd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBuffMove
-  _radius: 2
-  _lerpValue: 5
+  IsBackMove: 0
+  _radius: 7
+  _lerpValue: 1.5
   MaxAngle: 90
 --- !u!114 &6900135879620250934
 MonoBehaviour:

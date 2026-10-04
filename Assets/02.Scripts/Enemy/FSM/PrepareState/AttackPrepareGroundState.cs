@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 
-public class AttackPrepareGroundState : AttackPrepareState
+public class AttackPrepareGroundState : EnemyState
 {
+    protected Enemy _enemy;
+    protected float _attackPrepareTimer = 0;
+
     public AttackPrepareGroundState(Enemy enemy)
     {
         _enemy = enemy;
@@ -9,7 +12,13 @@ public class AttackPrepareGroundState : AttackPrepareState
 
     public override void Enter()
     {
-        _enemy.Animation.SetRunning(false);
+        Debug.Log("적 공격 준비 시작");
+        _attackPrepareTimer = _enemy.Data.AttackPrepareTime;
+        _enemy.MoveType.StopMove();
+        if (_enemy.Combat is EnemyMeleeCombat)
+        {
+            _enemy.Animation.PlayAttack();
+        }
     }
 
     public override void FixedUpdate()
@@ -42,5 +51,6 @@ public class AttackPrepareGroundState : AttackPrepareState
     public override void Exit()
     {
         _enemy.MoveType.IsBackMove = false;
+        Debug.Log("적 공격 준비 완료");
     }
 }

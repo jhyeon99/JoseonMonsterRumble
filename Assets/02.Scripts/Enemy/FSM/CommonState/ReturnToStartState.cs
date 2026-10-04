@@ -13,17 +13,16 @@ public class ReturnToStartState : EnemyState
     {
         _enemy.DirectionLock.LockDirection();
         Debug.Log("시작 위치로 복귀 시작");
+        _enemy.Animation.SetRunning(true);
     }
 
     public override void FixedUpdate()
     {
-        // 시작 위치로 이동
         _enemy.MoveType.MoveToInitialPosition();
     }
 
     public override void Update()
     {
-        // 시작 위치에 거의 도착했으면 Idle 상태로 전환
         if (_enemy.MoveType.IsArrivedAtStart())
         {
             _enemy.StateMachine.ChangeState(new IdleState(_enemy));

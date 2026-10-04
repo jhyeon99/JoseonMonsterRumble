@@ -48,5 +48,6 @@ public class ChaseState : EnemyState
     public override void Exit()
     {
         Debug.Log("추적 종료");
+        _enemy.Animation.SetRunning(false);
     }
 }

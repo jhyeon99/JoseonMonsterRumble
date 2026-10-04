@@ -4,7 +4,7 @@ public abstract class EnemyMoveType : MonoBehaviour
 {
     protected Enemy Enemy { get; private set; }
     protected Rigidbody2D Rigidbody { get; private set; }
-    public bool IsBackMove = false;
+    [HideInInspector] public bool IsBackMove = false;
 
     protected virtual void Awake()
     {

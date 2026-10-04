@@ -25,6 +25,7 @@ public abstract class Enemy : MonoBehaviour
     private Rigidbody2D _enemyRb;
     private HitFlash _hitFlash;
     private EnemyMoveArea _moveArea;
+    private Collider2D _enemyCollider;
 
     public Transform Target => _target;
     public EnemyStateMachine StateMachine => _stateMachine;
@@ -53,6 +54,7 @@ public abstract class Enemy : MonoBehaviour
         _enemyRb = GetComponent<Rigidbody2D>();
         _hitFlash = GetComponent<HitFlash>();
         _moveArea = GetComponent<EnemyMoveArea>();
+        _enemyCollider = GetComponent<Collider2D>();
     }
 
     protected virtual void Start()
@@ -84,5 +86,10 @@ public abstract class Enemy : MonoBehaviour
     public Vector2 GetDirectionToPlayer()
     {
         return (_target.position - transform.position).normalized;
+    }
+
+    public Vector3 GetSoulSpawnPosition()
+    {
+        return _enemyCollider.bounds.center;
     }
 }
