@@ -94,22 +94,6 @@ public class PlayerAttack : MonoBehaviour
         _currentCombo = 0;
     }
 
-    private IEnumerator FullComboAttackRoutine()
-    {
-        int count = _attackDataTableSO.Data.Length;
-        for (int i = 0; i < count; i++)
-        {
-            _currentCombo = i + 1;
-            AttackData step = _attackDataTableSO.Data[i];
-            yield return StartCoroutine(HitboxRoutine(step));
-
-            float delay = 0.45f;
-            yield return new WaitForSeconds(delay);
-        }
-        _currentCombo = 0;
-        _attackRoutine = null;
-    }
-
     private IEnumerator HitboxRoutine(AttackData step)
     {
         float elapsedTime = 0f;

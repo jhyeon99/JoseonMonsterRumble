@@ -2,6 +2,15 @@ using UnityEngine;
 
 public class PlayerAttackState : PlayerBaseState
 {
+    private const float DefaultComboStartNormalizedTime = 0.7f;
+    private const float DefaultComboEndNormalizedTime = 0.5f;
+    private const float LedgeSafetyMargin = 0.1f;
+    private const float LedgeRayDistance = 0.6f;
+    private const int LedgeCheckSteps = 5;
+
+    private readonly float[] _cachedStepDurations = new float[3];
+    private bool _hasCachedStepDurations;
+
     private float _elapsedTime;
     private float _comboElapsedTime;
     private int _currentComboIndex;
@@ -99,8 +108,8 @@ public class PlayerAttackState : PlayerBaseState
             return false;
         }
 
-        float comboStart = 0.7f;
-        float comboEnd = 0.5f;
+        float comboStart = DefaultComboStartNormalizedTime;
+        float comboEnd = DefaultComboEndNormalizedTime;
 
         if (_player.Attack.TryGetAttackData(_currentComboIndex, out AttackData attackData))
         {
@@ -178,31 +187,28 @@ public class PlayerAttackState : PlayerBaseState
         }
 
         Bounds bounds = _playerCollider.bounds;
-        const float safetyMargin = 0.1f;
-        const float rayDistance = 0.6f;
         float currentLeadingEdge = _forwardDirection > 0f ? bounds.max.x : bounds.min.x;
-        float probeX = currentLeadingEdge + (_forwardDirection * (desiredDistance + safetyMargin));
+        float probeX = currentLeadingEdge + (_forwardDirection * (desiredDistance + LedgeSafetyMargin));
         var probeOrigin = new Vector2(probeX, bounds.min.y + 0.1f);
 
-        RaycastHit2D hit = Physics2D.Raycast(probeOrigin, Vector2.down, rayDistance, Constants.Layers.GroundAllMask);
+        RaycastHit2D hit = Physics2D.Raycast(probeOrigin, Vector2.down, LedgeRayDistance, Constants.Layers.GroundAllMask);
         if (hit.collider != null)
         {
             return desiredDistance;
         }
 
         float maxAllowedDelta = 0f;
-        const int steps = 5;
-        for (int i = 1; i <= steps; i++)
+        for (int i = 1; i <= LedgeCheckSteps; i++)
         {
-            float testDelta = desiredDistance * (1f - (float)i / steps);
+            float testDelta = desiredDistance * (1f - (float)i / LedgeCheckSteps);
             if (testDelta <= 0.001f)
             {
                 break;
             }
 
-            float testX = currentLeadingEdge + (_forwardDirection * (testDelta + safetyMargin));
+            float testX = currentLeadingEdge + (_forwardDirection * (testDelta + LedgeSafetyMargin));
             var testOrigin = new Vector2(testX, bounds.min.y + 0.1f);
-            RaycastHit2D stepHit = Physics2D.Raycast(testOrigin, Vector2.down, rayDistance, Constants.Layers.GroundAllMask);
+            RaycastHit2D stepHit = Physics2D.Raycast(testOrigin, Vector2.down, LedgeRayDistance, Constants.Layers.GroundAllMask);
             if (stepHit.collider != null)
             {
                 maxAllowedDelta = testDelta;
@@ -354,54 +360,81 @@ public class PlayerAttackState : PlayerBaseState
 
     private float CalculateTotalStepDuration(int index)
     {
-        string readyClipName = null;
-        string attackClipName = null;
-
-        if (index == 0)
+        if (index < 0 || index >= _cachedStepDurations.Length)
         {
-            attackClipName = "Player_Attack_1st";
-        }
-        else if (index == 1)
-        {
-            readyClipName = "Player_Attack_2nd_Ready";
-            attackClipName = "Player_Attack_2nd";
-        }
-        else if (index == 2)
-        {
-            readyClipName = "Player_Attack_3rd_Ready";
-            attackClipName = "Player_Attack_3rd";
+            return 0.5f;
         }
 
-        float readyDuration = 0f;
-        float attackDuration = 0f;
-
-        Animator animator = _player.Animator;
-        if (animator != null && animator.runtimeAnimatorController != null)
+        if (!_hasCachedStepDurations)
         {
-            AnimationClip[] clips = animator.runtimeAnimatorController.animationClips;
-            for (int i = 0; i < clips.Length; i++)
+            Animator animator = _player.Animator;
+            if (animator != null && animator.runtimeAnimatorController != null)
             {
-                AnimationClip clip = clips[i];
-                if (clip == null) continue;
-
-                if (readyClipName != null && clip.name == readyClipName)
-                {
-                    readyDuration = clip.length;
-                }
-                else if (attackClipName != null && (clip.name == attackClipName || (index == 0 && clip.name == "Player_Attack")))
-                {
-                    attackDuration = clip.length;
-                }
+                CacheStepDurations(animator.runtimeAnimatorController);
+            }
+            else
+            {
+                return GetFallbackStepDuration(index);
             }
         }
 
-        float totalDuration = readyDuration + attackDuration;
-        if (totalDuration > 0.0001f)
+        return _cachedStepDurations[index];
+    }
+
+    private void CacheStepDurations(RuntimeAnimatorController controller)
+    {
+        AnimationClip[] clips = controller.animationClips;
+
+        for (int index = 0; index < _cachedStepDurations.Length; index++)
         {
-            return totalDuration;
+            string readyClipName = null;
+            string attackClipName = null;
+
+            if (index == 0)
+            {
+                attackClipName = "Player_Attack_1st";
+            }
+            else if (index == 1)
+            {
+                readyClipName = "Player_Attack_2nd_Ready";
+                attackClipName = "Player_Attack_2nd";
+            }
+            else if (index == 2)
+            {
+                readyClipName = "Player_Attack_3rd_Ready";
+                attackClipName = "Player_Attack_3rd";
+            }
+
+            float readyDuration = 0f;
+            float attackDuration = 0f;
+
+            if (clips != null)
+            {
+                for (int i = 0; i < clips.Length; i++)
+                {
+                    AnimationClip clip = clips[i];
+                    if (clip == null) continue;
+
+                    if (readyClipName != null && clip.name == readyClipName)
+                    {
+                        readyDuration = clip.length;
+                    }
+                    else if (attackClipName != null && (clip.name == attackClipName || (index == 0 && clip.name == "Player_Attack")))
+                    {
+                        attackDuration = clip.length;
+                    }
+                }
+            }
+
+            float totalDuration = readyDuration + attackDuration;
+            _cachedStepDurations[index] = totalDuration > 0.0001f ? totalDuration : GetFallbackStepDuration(index);
         }
 
-        // 폴백 기본 클립 길이 합계
+        _hasCachedStepDurations = true;
+    }
+
+    private float GetFallbackStepDuration(int index)
+    {
         return index switch
         {
             0 => 0.5625f,
