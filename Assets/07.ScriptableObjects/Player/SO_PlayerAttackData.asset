@@ -19,22 +19,157 @@ MonoBehaviour:
     HitboxOffset: {x: 0, y: 0}
     HitboxSize: {x: 2.3, y: 1}
     ForwardDelay: 0.05
-    ForwardSpeed: 3.8
+    ForwardSpeed: 2
     ForwardDuration: 0.13
+    ForwardDisplacementCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 4.696034
+        outSlope: 4.696034
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.12481125
+        value: 0.58611786
+        inSlope: 4.696034
+        outSlope: 0.12680796
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0.587265
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 1.0416565
+        value: 0.70238113
+        inSlope: 0.12680796
+        outSlope: 0.12680796
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    ReadyDurationRatio: 0
+    ComboStartNormalizedTime: 0.7
+    ComboEndNormalizedTime: 0.5
   - Damage: 10
     ActiveDuration: 0.25
     KnockbackForce: 0
     HitboxOffset: {x: 0, y: 0}
     HitboxSize: {x: 1, y: 1}
-    ForwardDelay: 0
-    ForwardSpeed: 0
-    ForwardDuration: 0
+    ForwardDelay: 0.03
+    ForwardSpeed: 5
+    ForwardDuration: 0.21
+    ForwardDisplacementCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 3.1337967
+        outSlope: 3.1337967
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.10830736
+        value: 0.33941326
+        inSlope: 1.5890149
+        outSlope: 1.5890149
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.3117429
+        outWeight: 0.13355133
+      - serializedVersion: 3
+        time: 0.14445244
+        value: 0.68604624
+        inSlope: 9.590047
+        outSlope: 0.16456403
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0.3153464
+        outWeight: 0.29274607
+      - serializedVersion: 3
+        time: 1.0249939
+        value: 0.8309517
+        inSlope: 0.010582075
+        outSlope: 0.010582075
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.2864605
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    ReadyDurationRatio: 0
+    ComboStartNormalizedTime: 0.9
+    ComboEndNormalizedTime: 0.5
   - Damage: 20
     ActiveDuration: 0.5
     KnockbackForce: 1
     HitboxOffset: {x: 0, y: 0}
     HitboxSize: {x: 2, y: 2}
-    ForwardDelay: 0
-    ForwardSpeed: 0
-    ForwardDuration: 0
+    ForwardDelay: 0.05
+    ForwardSpeed: 5
+    ForwardDuration: 0.5
+    ForwardDisplacementCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 11.376205
+        outSlope: 11.376205
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.15089454
+        value: 1.7166072
+        inSlope: 11.376205
+        outSlope: 0.43619427
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0.3153464
+        outWeight: 0.29274607
+      - serializedVersion: 3
+        time: 0.53041685
+        value: 1.8821527
+        inSlope: 0.43619427
+        outSlope: 0.50312334
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.74655735
+        value: 1.990898
+        inSlope: 0.50312334
+        outSlope: -3.3972275
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.88244754
+        value: 1.5292481
+        inSlope: -3.3972275
+        outSlope: 0.010582075
+        tangentMode: 5
+        weightedMode: 0
+        inWeight: 0.2864605
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    ReadyDurationRatio: 0.2
+    ComboStartNormalizedTime: 0.7
+    ComboEndNormalizedTime: 0.5
   ComboResetTime: 1

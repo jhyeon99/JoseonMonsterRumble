@@ -58,8 +58,13 @@ public class PlayerAttack : MonoBehaviour
 
     public void ExecuteAttack()
     {
+        ExecuteAttackStep(0);
+    }
+
+    public void ExecuteAttackStep(int index)
+    {
         if (_attackDataTableSO == null || _attackDataTableSO.Data == null ||
-            _attackDataTableSO.Data.Length == 0)
+            index < 0 || index >= _attackDataTableSO.Data.Length)
         {
             return;
         }
@@ -69,7 +74,14 @@ public class PlayerAttack : MonoBehaviour
             StopCoroutine(_attackRoutine);
         }
 
-        _attackRoutine = StartCoroutine(FullComboAttackRoutine());
+        _currentCombo = index + 1;
+        _attackRoutine = StartCoroutine(SingleAttackStepRoutine(_attackDataTableSO.Data[index]));
+    }
+
+    private IEnumerator SingleAttackStepRoutine(AttackData step)
+    {
+        yield return StartCoroutine(HitboxRoutine(step));
+        _attackRoutine = null;
     }
 
     public void StopAttack()

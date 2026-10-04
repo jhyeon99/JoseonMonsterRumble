@@ -11,4 +11,8 @@ public struct AttackData
     public float ForwardDelay;
     public float ForwardSpeed;
     public float ForwardDuration;
+    public AnimationCurve ForwardDisplacementCurve;
+    public float ReadyDurationRatio;
+    public float ComboStartNormalizedTime;
+    public float ComboEndNormalizedTime;
 }
