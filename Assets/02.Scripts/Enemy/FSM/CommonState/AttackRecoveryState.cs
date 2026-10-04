@@ -20,10 +20,12 @@ public class AttackRecoveryState : EnemyState
     {
         if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
         {
+            _enemy.Animation.SetRunning(true);
             _enemy.MoveType.BackMove(_enemy.GetDirectionToPlayer());
         }
         else
         {
+            _enemy.Animation.SetRunning(false);
             _enemy.MoveType.StopMove();
         }
     }

@@ -11,6 +11,7 @@ public class ReturnToStartState : EnemyState
 
     public override void Enter()
     {
+        _enemy.DirectionLock.LockDirection();
         Debug.Log("시작 위치로 복귀 시작");
     }
 

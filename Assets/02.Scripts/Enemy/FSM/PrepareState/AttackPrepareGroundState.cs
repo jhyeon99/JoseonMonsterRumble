@@ -7,16 +7,23 @@ public class AttackPrepareGroundState : AttackPrepareState
         _enemy = enemy;
     }
 
+    public override void Enter()
+    {
+        _enemy.Animation.SetRunning(false);
+    }
+
     public override void FixedUpdate()
     {
         if (_enemy.Combat is EnemyRangedCombat)
         {
             if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
             {
+                _enemy.Animation.SetRunning(true);
                 _enemy.MoveType.BackMove(_enemy.GetDirectionToPlayer());
             }
             else
             {
+                _enemy.Animation.SetRunning(false);
                 _enemy.MoveType.StopMove();
             }
         }

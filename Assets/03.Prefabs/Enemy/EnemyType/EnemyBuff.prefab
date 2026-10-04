@@ -109,6 +109,7 @@ GameObject:
   - component: {fileID: 8776698276065337361}
   - component: {fileID: 8846624967543919300}
   - component: {fileID: 3119941757893574753}
+  - component: {fileID: -3787385288428544344}
   m_Layer: 7
   m_Name: EnemyBuff
   m_TagString: Enemy
@@ -354,3 +355,16 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &-3787385288428544344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9002607081654718196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dd406eab553c294d8065045380da7b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAnimation
+  _animator: {fileID: 3119941757893574753}

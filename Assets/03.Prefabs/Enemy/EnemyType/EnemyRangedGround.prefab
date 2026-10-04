@@ -52,6 +52,7 @@ GameObject:
   - component: {fileID: 1950973103743708505}
   - component: {fileID: 5298967445713368216}
   - component: {fileID: 4616397408181961156}
+  - component: {fileID: -8613319524812771622}
   m_Layer: 7
   m_Name: EnemyRangedGround
   m_TagString: Enemy
@@ -335,3 +336,16 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &-8613319524812771622
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4049497279173087227}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dd406eab553c294d8065045380da7b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAnimation
+  _animator: {fileID: 4616397408181961156}

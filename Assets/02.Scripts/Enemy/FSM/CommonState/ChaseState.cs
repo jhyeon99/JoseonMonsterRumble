@@ -13,6 +13,7 @@ public class ChaseState : EnemyState
     {
         Debug.Log("추적 시작");
         _enemy.DirectionLock.UnlockDirection();
+        _enemy.Animation.SetRunning(true);
     }
 
     public override void FixedUpdate()
