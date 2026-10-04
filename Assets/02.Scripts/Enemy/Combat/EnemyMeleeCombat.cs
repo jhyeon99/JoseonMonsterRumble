@@ -35,7 +35,8 @@ public class EnemyMeleeCombat : EnemyCombat
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.TryGetComponent<IDamageable>(out IDamageable damageable)) return;
-        Vector2 hitPoint = other.ClosestPoint(transform.position);
+        // 적 본체 위치 대신 공격 판정 중심 기준으로 계산 (실제 맞은 높이에 가깝게)
+        Vector2 hitPoint = other.ClosestPoint(_attackCollider.bounds.center);
         var hitData = new HitData(
             _currentDamage,
             Enemy.Data.KnockbackForce,

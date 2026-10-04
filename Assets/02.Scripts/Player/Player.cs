@@ -120,7 +120,7 @@ public class Player : MonoBehaviour
                 {
                     _dodgeMotion.BindClipIfEmpty(clips[i], 1.5f);
                 }
-                else if (clips[i].name == "Player_Attack" || clips[i].name == "Player_Attack_1st")
+                else if (clips[i].name == "Player_Attack")
                 {
                     _attackMotion.BindClipIfEmpty(clips[i], 1.0f);
                 }
@@ -236,22 +236,6 @@ public class Player : MonoBehaviour
         if (_animator != null)
         {
             _animator.SetTrigger(AnimParamAttack);
-        }
-    }
-
-    public void TriggerAttack2()
-    {
-        if (_animator != null)
-        {
-            _animator.SetTrigger(AnimParamAttack2);
-        }
-    }
-
-    public void TriggerAttack3()
-    {
-        if (_animator != null)
-        {
-            _animator.SetTrigger(AnimParamAttack3);
         }
     }
 
