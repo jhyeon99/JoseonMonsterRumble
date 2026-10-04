@@ -38,4 +38,9 @@ public class AttackPrepareGroundState : AttackPrepareState
             _enemy.StateMachine.ChangeState(new AttackState(_enemy));
         }
     }
+
+    public override void Exit()
+    {
+        _enemy.MoveType.IsBackMove = false;
+    }
 }

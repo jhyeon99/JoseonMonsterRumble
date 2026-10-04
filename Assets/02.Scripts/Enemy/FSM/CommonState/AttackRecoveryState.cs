@@ -42,5 +42,6 @@ public class AttackRecoveryState : EnemyState
     public override void Exit()
     {
         Debug.Log("휴식 종료");
+        _enemy.MoveType.IsBackMove = false;
     }
 }
