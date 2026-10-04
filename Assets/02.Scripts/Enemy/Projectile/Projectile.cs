@@ -13,7 +13,6 @@ public abstract class Projectile : MonoBehaviour
     protected Vector2 PlayerPosition { get; private set; }
     protected float _t;
     protected bool _isLaunching = false;
-    private Vector2 _toPlayerDirection;
     private float _projectileDamage;
     public float ProjectileDamage => _projectileDamage;
 
@@ -37,7 +36,6 @@ public abstract class Projectile : MonoBehaviour
         if (player != null)
         {
             PlayerPosition = player.position;
-            _toPlayerDirection = (player.position - transform.position).normalized;
         }
 
         ControlPoint = (MuzzlePosition + PlayerPosition) / 2f + new Vector2(0f, _curveHeight);
@@ -47,6 +45,12 @@ public abstract class Projectile : MonoBehaviour
     }
 
     protected abstract void Fire();
+
+    /// <summary>
+    /// 맞은 대상을 밀어낼 방향. 기본은 총구 → 목표 지점 (곡사 투사체 기준).
+    /// 이동 방식이 다른 투사체(직진, 유도 등)는 실제 진행 방향으로 override.
+    /// </summary>
+    protected virtual Vector2 HitDirection => (PlayerPosition - MuzzlePosition).normalized;
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -59,7 +63,7 @@ public abstract class Projectile : MonoBehaviour
                 _projectileDamage,
                 _data.KnockbackForce,
                 hitPoint,
-                _toPlayerDirection
+                HitDirection
             );
 
             damageable.TakeDamage(hitData);
