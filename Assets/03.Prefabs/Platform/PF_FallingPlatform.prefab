@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8100000000000000003}
   - component: {fileID: 8100000000000000004}
   - component: {fileID: 8100000000000000005}
+  - component: {fileID: -8915833762118715949}
   m_Layer: 13
   m_Name: PF_FallingPlatform
   m_TagString: Untagged
@@ -147,6 +148,20 @@ MonoBehaviour:
   _fallDelay: 0.8
   _fallGravityScale: 2
   _respawnDelay: 3
+  _state: 0
+--- !u!210 &-8915833762118715949
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8100000000000000000}
+  m_Enabled: 1
+  m_SortingLayerID: -148662967
+  m_SortingLayer: 3
+  m_SortingOrder: 0
+  m_SortAtRoot: 0
+  m_Sort3DAs2D: 0
 --- !u!1 &8100000000000000010
 GameObject:
   m_ObjectHideFlags: 0
@@ -212,6 +227,7 @@ SpriteRenderer:
     subMeshCount: 0
   m_StaticBatchRoot: {fileID: 0}
   m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
   m_ReceiveGI: 1
   m_PreserveUVs: 0
@@ -228,7 +244,8 @@ SpriteRenderer:
   m_SortingLayer: 2
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6,
+    type: 3}
   m_Color: {r: 0.254717, g: 0.18755284, b: 0.05887327, a: 1}
   m_FlipX: 0
   m_FlipY: 0
