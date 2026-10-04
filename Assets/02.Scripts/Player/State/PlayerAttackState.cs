@@ -6,7 +6,10 @@ public class PlayerAttackState : PlayerBaseState
     private const float DefaultComboEndNormalizedTime = 0.5f;
     private const float LedgeSafetyMargin = 0.1f;
     private const float LedgeRayDistance = 0.6f;
+    private const float LedgeRayOriginYOffset = 0.1f;
     private const int LedgeCheckSteps = 5;
+    private const float AttackSafetyTimeout = 5.0f;
+    private const float DodgeCancelNormalizedTime = 0.2f;
 
     private readonly float[] _cachedStepDurations = new float[3];
     private bool _hasCachedStepDurations;
@@ -189,7 +192,7 @@ public class PlayerAttackState : PlayerBaseState
         Bounds bounds = _playerCollider.bounds;
         float currentLeadingEdge = _forwardDirection > 0f ? bounds.max.x : bounds.min.x;
         float probeX = currentLeadingEdge + (_forwardDirection * (desiredDistance + LedgeSafetyMargin));
-        var probeOrigin = new Vector2(probeX, bounds.min.y + 0.1f);
+        var probeOrigin = new Vector2(probeX, bounds.min.y + LedgeRayOriginYOffset);
 
         RaycastHit2D hit = Physics2D.Raycast(probeOrigin, Vector2.down, LedgeRayDistance, Constants.Layers.GroundAllMask);
         if (hit.collider != null)
@@ -207,7 +210,7 @@ public class PlayerAttackState : PlayerBaseState
             }
 
             float testX = currentLeadingEdge + (_forwardDirection * (testDelta + LedgeSafetyMargin));
-            var testOrigin = new Vector2(testX, bounds.min.y + 0.1f);
+            var testOrigin = new Vector2(testX, bounds.min.y + LedgeRayOriginYOffset);
             RaycastHit2D stepHit = Physics2D.Raycast(testOrigin, Vector2.down, LedgeRayDistance, Constants.Layers.GroundAllMask);
             if (stepHit.collider != null)
             {
@@ -234,8 +237,7 @@ public class PlayerAttackState : PlayerBaseState
         _elapsedTime += Time.deltaTime;
         _comboElapsedTime += Time.deltaTime;
 
-        const float safetyTimeout = 5.0f;
-        if (_elapsedTime >= safetyTimeout)
+        if (_elapsedTime >= AttackSafetyTimeout)
         {
             EndAttack();
             return;
@@ -257,12 +259,6 @@ public class PlayerAttackState : PlayerBaseState
             }
 
             bool isCurrentComboRecover = IsCurrentComboRecoverState(stateInfo);
-            bool isCurrentComboMotion = IsCurrentComboAttackMotion(stateInfo);
-
-            if (isCurrentAttackOrRecover || isNextAttackOrRecover)
-            {
-                _hasEnteredAttackAnimation = true;
-            }
 
             // 콤보 공격 입력 감지 시 단일 예약 버퍼 활성화
             if (_currentComboIndex < 2 && _inputHandler.TryUseAttackInput())
@@ -284,7 +280,7 @@ public class PlayerAttackState : PlayerBaseState
             // 현재 진행 중인 콤보의 리커버 상태일 때만 후속 처리 (회피 캔슬 및 종료)
             if (isCurrentComboRecover)
             {
-                if (stateInfo.normalizedTime >= 0.2f)
+                if (stateInfo.normalizedTime >= DodgeCancelNormalizedTime)
                 {
                     if (_inputHandler.TryUseDodgeInput() && _player.IsGrounded && _player.Movement.CanDodge)
                     {

@@ -43,17 +43,6 @@ public class PlayerAttack : MonoBehaviour
         return false;
     }
 
-    private Coroutine _comboResetCoroutine;
-
-    private Animator _animator;
-    private PlayerInputHandler _inputHandler;
-
-    private void Awake()
-    {
-        _animator = GetComponent<Animator>();
-        _inputHandler = GetComponent<PlayerInputHandler>();
-    }
-
     private Coroutine _attackRoutine;
 
     public void ExecuteAttack()
@@ -123,12 +112,6 @@ public class PlayerAttack : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
-    }
-
-    private IEnumerator ResetComboCorutine()
-    {
-        yield return new WaitForSeconds(_attackDataTableSO.ComboResetTime);
-        _currentCombo = 0;
     }
 
     private void OnDrawGizmosSelected()
