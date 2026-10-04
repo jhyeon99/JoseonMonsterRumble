@@ -51,6 +51,7 @@ public class AttackPrepareGroundState : EnemyState
     public override void Exit()
     {
         _enemy.MoveType.IsBackMove = false;
+        _enemy.MoveType.StopMove();
         Debug.Log("적 공격 준비 완료");
     }
 }

@@ -27,10 +27,12 @@ public class EnemyData : ScriptableObject
     private float _attackDetectRange;
     [SerializeField] private float _attackPrepareTime;
     [SerializeField] private float _attackDurationTime;
+    [SerializeField] private float _attackDelayTime;
     [SerializeField] private float _attackRecoveryTime;
     public float AttackDetectRange => _attackDetectRange;
     public float AttackPrepareTime => _attackPrepareTime;
     public float AttackDurationTime => _attackDurationTime;
+    public float AttackDelayTime => _attackDelayTime;
     public float AttackRecoveryTime => _attackRecoveryTime;
 
     [Space(50)]

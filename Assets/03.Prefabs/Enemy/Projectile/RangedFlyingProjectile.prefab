@@ -110,6 +110,7 @@ MonoBehaviour:
   _data: {fileID: 11400000, guid: d98ecf8c9b6a7fa4ba204938bc05baa0, type: 2}
   _type: 1
   _curveHeight: 5
+  _returnPoolTimer: 8
 --- !u!61 &6406752446465230335
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -237,8 +238,8 @@ TrailRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Time: 0.25
-  m_PreviewTimeScale: 1
+  m_Time: 0.1
+  m_PreviewTimeScale: 0
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1

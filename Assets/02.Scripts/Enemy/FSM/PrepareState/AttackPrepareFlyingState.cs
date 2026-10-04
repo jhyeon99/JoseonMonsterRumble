@@ -49,6 +49,11 @@ public class AttackPrepareFlyingState : EnemyState
     public override void Exit()
     {
         _enemy.MoveType.IsBackMove = false;
+        if (_enemy.Combat is EnemyRangedCombat)
+        {
+            _enemy.MoveType.StopMove();
+        }
+
         Debug.Log("적 공격 준비 완료");
     }
 }
