@@ -8,6 +8,7 @@ using UnityEngine.Serialization;
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(PlayerAttack))]
 [RequireComponent(typeof(PlayerSoul))]
+[RequireComponent(typeof(PlayerRangedAttack))]
 public class Player : MonoBehaviour
 {
     private StateMachine _stateMachine;
@@ -46,6 +47,8 @@ public class Player : MonoBehaviour
     public PlayerAttack Attack => _attack;
     private PlayerSoul _soul;
     public PlayerSoul Soul => _soul;
+    private PlayerRangedAttack _rangedAttack;
+    public PlayerRangedAttack RangedAttack => _rangedAttack;
 
     [SerializeField] private Animator _animator;
     public Animator Animator => _animator;
@@ -59,6 +62,16 @@ public class Player : MonoBehaviour
     private Coroutine _restoreColliderRoutine;
 
     public bool IsGrounded => _movement != null && _movement.IsGrounded();
+
+    // 원거리 공격(부적) 충전을 새로 시작할 수 있는 상태인지
+    private bool CanStartRangedAttack
+    {
+        get
+        {
+            IState state = _stateMachine.CurrentState;
+            return state != DeadState && state != HitState && state != DodgeState;
+        }
+    }
 
     private void OnEnable()
     {
@@ -79,6 +92,7 @@ public class Player : MonoBehaviour
         _movement = GetComponent<PlayerMovement>();
         _attack = GetComponent<PlayerAttack>();
         _soul = GetComponent<PlayerSoul>();
+        _rangedAttack = GetComponent<PlayerRangedAttack>();
 
         if (_animator == null)
         {
@@ -120,7 +134,13 @@ public class Player : MonoBehaviour
     private void Update()
     {
         _stateMachine.Update();
+        HandleRangedAttack();
         SetGrounded(IsGrounded);
+
+        if (_inputHandler.IsPotionKeyDown)
+        {
+            _health.TryUsePotion();
+        }
     }
 
     private void FixedUpdate()
@@ -140,6 +160,33 @@ public class Player : MonoBehaviour
         _dodgeState = new PlayerDodgeState(this, _stateMachine);
         _deadState = new PlayerDeadState(this, _stateMachine);
         _hitState = new PlayerHitState(this, _stateMachine);
+    }
+
+    // 원거리 공격(부적): 누르면 충전 시작, 떼면 발사
+    // 모션이 없어서 FSM 상태 대신 여기서 처리
+    private void HandleRangedAttack()
+    {
+        if (_rangedAttack == null) return;
+
+        // 충전 중이면 키를 뗐는지만 확인 → 떼는 순간 발사
+        // (상태와 상관없이 항상 확인해야 충전이 끝나지 않고 남는 일이 없음)
+        if (_rangedAttack.IsCharging)
+        {
+            if (!_inputHandler.IsRangedAttackKey)
+            {
+                _rangedAttack.ReleaseAttack();
+            }
+
+            return;
+        }
+
+        // 충전 시작은 허용된 상태에서만
+        if (!CanStartRangedAttack) return;
+
+        if (_inputHandler.TryUseRangedAttackInput())
+        {
+            _rangedAttack.PressAttack();
+        }
     }
 
     public void SetRunning(bool isRunning)
@@ -190,18 +237,20 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void HandleHit()
+    private void HandleHit(HitData hitData)
     {
         if (StateMachine.CurrentState == DeadState)
         {
             return;
         }
 
+        HitState.SetHitData(hitData);
         StateMachine.ChangeState(HitState);
     }
 
     private void HandleDeath()
     {
+        _rangedAttack?.CancelCharge();
         StateMachine.ChangeState(DeadState);
     }
 }

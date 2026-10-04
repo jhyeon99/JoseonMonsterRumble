@@ -14,12 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   _maxHp: 100
   _moveSpeed: 3
-  _detectRange: 5
   _meleeAttackDamage: 10
   _chargeSpeed: 10
-  _attackDetectRange: 2.5
+  _knockbackForce: 3
+  _attackDetectRange: 8
   _attackPrepareTime: 1
   _attackDurationTime: 0.5
   _attackRecoveryTime: 1
   _attackBuffAmount: 0
-  _buffRange: 0

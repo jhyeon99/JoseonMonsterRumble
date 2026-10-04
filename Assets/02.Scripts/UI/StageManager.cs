@@ -1,0 +1,439 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+/// <summary>
+/// 스테이지 진행 관리 (싱글톤, 씬이 바뀌어도 유지).
+/// - 세이브(체크포인트) 기억: 게임 실행 중에만 유지
+/// - 사망 / 재시작 시 스테이지 씬을 다시 로드하고, 세이브한 적이 있으면 세이브 포인트에서 시작
+/// - 세이브 포인트보다 왼쪽에 있는 적 제거 (임시, 추후 스폰 매니저로 대체 예정)
+/// </summary>
+public sealed class StageManager : MonoBehaviour
+{
+    public static StageManager Instance { get; private set; }
+
+    [Header("사망 / 재시작 연출")]
+    [SerializeField] private DeathScreenView _deathScreen;
+
+    [Tooltip("사망 후 화면이 어두워지기 시작할 때까지 대기 (사망 모션을 보여주는 시간)")]
+    [SerializeField, Min(0f)] private float _deathDelay = 0.8f;
+
+    [Tooltip("화면이 완전히 어두워진 뒤 씬을 다시 로드하기 전까지 유지하는 시간")]
+    [SerializeField, Min(0f)] private float _displayDuration = 0.8f;
+
+    [Header("디버그 (에디터 전용)")]
+    [Tooltip("TODO: 테스트용. 에디터에서만 R 키로 스테이지 재시작 (빌드에는 포함되지 않음)")]
+#pragma warning disable 0414 // 빌드에서는 사용하지 않는 필드 (직렬화 구조를 에디터와 맞추기 위해 남겨둠)
+    [SerializeField] private bool _enableDebugRestartKey = false;
+#pragma warning restore 0414
+
+    [Header("적 정리 (임시)")]
+    [Tooltip("세이브 포인트 x + 이 값보다 왼쪽에 있는 적을 제거. 음수로 하면 세이브 포인트 바로 왼쪽 적은 남김")]
+    [SerializeField] private float _enemyClearOffsetX = 0f;
+
+    private PlayerHealth _playerHealth;
+    private string _activeSceneName;
+    private string _activeCheckpointId;
+    private bool _isRespawning;
+
+    public bool IsRespawning => _isRespawning;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+
+        if (_deathScreen == null)
+        {
+            Debug.LogWarning($"{name}: Death Screen 참조가 없습니다.", this);
+        }
+    }
+
+    private void Start()
+    {
+        InitializeScene(SceneManager.GetActiveScene(), false);
+    }
+
+#if UNITY_EDITOR
+    private void Update()
+    {
+        // TODO: 테스트용 임시 코드. 에디터에서만 동작 (빌드에는 포함되지 않음)
+        // 일시정지 메뉴에 재시작 버튼이 생기면 제거
+        if (_enableDebugRestartKey && Input.GetKeyDown(KeyCode.R) && !PauseController.IsPaused)
+        {
+            RestartStage();
+        }
+    }
+#endif
+
+    private void OnDestroy()
+    {
+        if (Instance != this)
+        {
+            return;
+        }
+
+        UnbindPlayerHealth();
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+        Instance = null;
+    }
+
+    /// <summary>
+    /// 체크포인트 활성화. 새로 세이브된 경우에만 true (세이브 연출 여부 판단용).
+    /// </summary>
+    public bool ActivateCheckpoint(RespawnPoint point)
+    {
+        if (point == null || string.IsNullOrWhiteSpace(point.CheckpointId))
+        {
+            return false;
+        }
+
+        if (_isRespawning)
+        {
+            return false;
+        }
+
+        string sceneName = point.gameObject.scene.name;
+        if (sceneName != _activeSceneName)
+        {
+            return false;
+        }
+
+        if (point.CheckpointId == _activeCheckpointId)
+        {
+            return false;
+        }
+
+        _activeCheckpointId = point.CheckpointId;
+        RefreshCheckpointVisuals(point.gameObject.scene);
+        return true;
+    }
+
+    /// <summary>
+    /// 스테이지 재시작 (일시정지 메뉴 등에서 호출). 세이브한 적이 있으면 세이브 포인트에서 시작.
+    /// </summary>
+    public void RestartStage()
+    {
+        TryStartRespawn(false);
+    }
+
+    private void HandlePlayerDied()
+    {
+        TryStartRespawn(true);
+    }
+
+    private void TryStartRespawn(bool waitForDeath)
+    {
+        if (_isRespawning)
+        {
+            return;
+        }
+
+        Scene activeScene = SceneManager.GetActiveScene();
+        if (activeScene.buildIndex < 0)
+        {
+            Debug.LogWarning(
+                $"{activeScene.name}: Build Settings에 등록되지 않아 리스폰할 수 없습니다.",
+                this
+            );
+            return;
+        }
+
+        StartCoroutine(RespawnRoutine(activeScene.name, waitForDeath));
+    }
+
+    private IEnumerator RespawnRoutine(string sceneName, bool waitForDeath)
+    {
+        _isRespawning = true;
+
+        if (waitForDeath)
+        {
+            yield return new WaitForSecondsRealtime(_deathDelay);
+        }
+
+        if (_deathScreen != null)
+        {
+            yield return _deathScreen.FadeIn();
+        }
+
+        yield return new WaitForSecondsRealtime(_displayDuration);
+
+        UnbindPlayerHealth();
+
+        // 일시정지 / 히트스톱 중에 재시작해도 정상 속도로 시작
+        Time.timeScale = 1f;
+
+        AsyncOperation loadOperation = SceneManager.LoadSceneAsync(
+            sceneName,
+            LoadSceneMode.Single
+        );
+
+        if (loadOperation == null)
+        {
+            Debug.LogWarning(
+                $"{sceneName}: 씬 재로딩을 시작하지 못했습니다.",
+                this
+            );
+            _deathScreen?.HideImmediate();
+            _isRespawning = false;
+            yield break;
+        }
+
+        yield return loadOperation;
+
+        if (_deathScreen != null)
+        {
+            yield return _deathScreen.FadeOut();
+        }
+
+        _isRespawning = false;
+    }
+
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode loadMode)
+    {
+        bool preserveCheckpoint =
+            _isRespawning && scene.name == _activeSceneName;
+        InitializeScene(scene, preserveCheckpoint);
+    }
+
+    private void InitializeScene(Scene scene, bool preserveCheckpoint)
+    {
+        RespawnPoint[] points = FindSceneRespawnPoints(scene);
+        if (points.Length == 0)
+        {
+            UnbindPlayerHealth();
+            _activeSceneName = string.Empty;
+            _activeCheckpointId = string.Empty;
+            _deathScreen?.HideImmediate();
+            return;
+        }
+
+        RespawnPoint defaultPoint = ValidateAndFindDefault(points, scene.name);
+
+        if (!preserveCheckpoint || _activeSceneName != scene.name)
+        {
+            _activeSceneName = scene.name;
+            _activeCheckpointId = defaultPoint != null
+                ? defaultPoint.CheckpointId
+                : string.Empty;
+        }
+
+        RespawnPoint targetPoint = FindPoint(
+            points,
+            _activeCheckpointId
+        );
+
+        if (targetPoint == null)
+        {
+            targetPoint = defaultPoint;
+            _activeCheckpointId = defaultPoint != null
+                ? defaultPoint.CheckpointId
+                : string.Empty;
+
+            Debug.LogWarning(
+                $"{scene.name}: 활성 체크포인트를 찾지 못해 기본 시작점을 사용합니다.",
+                this
+            );
+        }
+
+        BindPlayerHealth(scene);
+        MovePlayerTo(targetPoint);
+        RefreshCheckpointVisuals(points);
+
+        // 세이브 포인트에서 시작할 때만 왼쪽 적 정리 (기본 시작점이면 건드리지 않음)
+        if (targetPoint != null && !targetPoint.IsDefault)
+        {
+            ClearEnemiesBehind(scene, targetPoint);
+        }
+    }
+
+    // 씬 로드 직후(적의 Start 전)에 호출되어야 EnemyManager에 등록되기 전에 꺼짐
+    private void ClearEnemiesBehind(Scene scene, RespawnPoint point)
+    {
+        float limitX = point.Position.x + _enemyClearOffsetX;
+
+        Enemy[] enemies = FindObjectsByType<Enemy>(
+            FindObjectsInactive.Exclude,
+            FindObjectsSortMode.None
+        );
+
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            Enemy enemy = enemies[i];
+            if (enemy.gameObject.scene != scene)
+            {
+                continue;
+            }
+
+            if (enemy.transform.position.x < limitX)
+            {
+                // Destroy나 사망 처리 대신 비활성화 (아이템 드롭 등 사망 로직이 돌지 않도록)
+                enemy.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    private void RefreshCheckpointVisuals(Scene scene)
+    {
+        RefreshCheckpointVisuals(FindSceneRespawnPoints(scene));
+    }
+
+    private void RefreshCheckpointVisuals(RespawnPoint[] points)
+    {
+        for (int i = 0; i < points.Length; i++)
+        {
+            points[i].SetActivated(points[i].CheckpointId == _activeCheckpointId);
+        }
+    }
+
+    private RespawnPoint[] FindSceneRespawnPoints(Scene scene)
+    {
+        RespawnPoint[] allPoints = FindObjectsByType<RespawnPoint>(
+            FindObjectsInactive.Include,
+            FindObjectsSortMode.None
+        );
+        var scenePoints = new List<RespawnPoint>();
+
+        for (int i = 0; i < allPoints.Length; i++)
+        {
+            if (allPoints[i].gameObject.scene == scene)
+            {
+                scenePoints.Add(allPoints[i]);
+            }
+        }
+
+        return scenePoints.ToArray();
+    }
+
+    private RespawnPoint ValidateAndFindDefault(
+        RespawnPoint[] points,
+        string sceneName
+    )
+    {
+        var checkpointIds = new HashSet<string>();
+        RespawnPoint defaultPoint = null;
+        int defaultCount = 0;
+
+        for (int i = 0; i < points.Length; i++)
+        {
+            RespawnPoint point = points[i];
+
+            if (!checkpointIds.Add(point.CheckpointId))
+            {
+                Debug.LogWarning(
+                    $"{sceneName}: Checkpoint ID '{point.CheckpointId}'가 중복됩니다.",
+                    point
+                );
+            }
+
+            if (!point.IsDefault)
+            {
+                continue;
+            }
+
+            defaultCount++;
+            defaultPoint ??= point;
+        }
+
+        if (defaultCount != 1)
+        {
+            Debug.LogWarning(
+                $"{sceneName}: 기본 RespawnPoint는 정확히 1개여야 합니다. 현재 {defaultCount}개입니다.",
+                this
+            );
+        }
+
+        return defaultPoint;
+    }
+
+    private RespawnPoint FindPoint(
+        RespawnPoint[] points,
+        string checkpointId
+    )
+    {
+        for (int i = 0; i < points.Length; i++)
+        {
+            if (points[i].CheckpointId == checkpointId)
+            {
+                return points[i];
+            }
+        }
+
+        return null;
+    }
+
+    private void BindPlayerHealth(Scene scene)
+    {
+        UnbindPlayerHealth();
+
+        PlayerHealth[] players = FindObjectsByType<PlayerHealth>(
+            FindObjectsInactive.Exclude,
+            FindObjectsSortMode.None
+        );
+
+        for (int i = 0; i < players.Length; i++)
+        {
+            if (players[i].gameObject.scene == scene)
+            {
+                _playerHealth = players[i];
+                break;
+            }
+        }
+
+        if (_playerHealth == null)
+        {
+            Debug.LogWarning(
+                $"{scene.name}: PlayerHealth를 찾지 못했습니다.",
+                this
+            );
+            return;
+        }
+
+        _playerHealth.OnDied += HandlePlayerDied;
+    }
+
+    private void UnbindPlayerHealth()
+    {
+        if (_playerHealth == null)
+        {
+            return;
+        }
+
+        _playerHealth.OnDied -= HandlePlayerDied;
+        _playerHealth = null;
+    }
+
+    private void MovePlayerTo(RespawnPoint point)
+    {
+        if (_playerHealth == null || point == null)
+        {
+            return;
+        }
+
+        // Rigidbody 위치는 다음 물리 스텝에 Transform에 반영되므로 Transform도 같이 옮김 (카메라 스냅용)
+        _playerHealth.transform.position = point.Position;
+
+        Rigidbody2D playerBody = _playerHealth.GetComponent<Rigidbody2D>();
+        if (playerBody != null)
+        {
+            playerBody.linearVelocity = Vector2.zero;
+            playerBody.angularVelocity = 0f;
+            playerBody.position = point.Position;
+        }
+
+        // 카메라가 시작 위치에서 미끄러져 오지 않도록 바로 붙임
+        CameraFollow cameraFollow = FindFirstObjectByType<CameraFollow>();
+        if (cameraFollow != null)
+        {
+            cameraFollow.SnapToTarget();
+        }
+    }
+}

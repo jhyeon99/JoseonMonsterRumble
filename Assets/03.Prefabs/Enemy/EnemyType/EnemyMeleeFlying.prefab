@@ -66,7 +66,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0, y: 0.27754176}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -76,7 +76,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.9, y: 2.6}
+  m_Size: {x: 3.6852403, y: 3.2633922}
   m_EdgeRadius: 0
 --- !u!1 &2319009342568745602
 GameObject:
@@ -99,6 +99,7 @@ GameObject:
   - component: {fileID: 1465709224609016256}
   - component: {fileID: 4112317450272578094}
   - component: {fileID: -8411095045714158178}
+  - component: {fileID: 1363621400415991979}
   m_Layer: 7
   m_Name: EnemyMeleeFlying
   m_TagString: Enemy
@@ -171,12 +172,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -6571245240742730394, guid: 7ba388026850f5440a8d277a19c982ec, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 16e2b52afc22a534996e64bc225f3d44, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 2.87, y: 2.39}
+  m_Size: {x: 2.4, y: 2.4}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -215,17 +216,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0.0033848286, y: 0.24369526}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.87, y: 2.39}
-    newSize: {x: 2.87, y: 2.39}
+    oldSize: {x: 8.533334, y: 4.8}
+    newSize: {x: 2.4, y: 2.4}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.8, y: 2.5}
+  m_Size: {x: 3.1723123, y: 2.7436953}
   m_EdgeRadius: 0
 --- !u!50 &5618623016657024351
 Rigidbody2D:
@@ -372,3 +373,25 @@ MonoBehaviour:
   CenterOffset: {x: 0, y: 0}
   AreaSize: {x: 7, y: 7}
   AreaColor: {r: 0, g: 1, b: 0, a: 0.3}
+--- !u!95 &1363621400415991979
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2319009342568745602}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 23d7dca854af369438c1f305d28e6b3d, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

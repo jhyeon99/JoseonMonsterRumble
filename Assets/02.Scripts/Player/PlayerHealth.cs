@@ -10,6 +10,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     public float MaxHealth => _maxHealth;
     [SerializeField, ReadOnly] private float _currentHealth;
     public float CurrentHealth => _currentHealth;
+    [SerializeField, ReadOnly] private int _potionCount;
+    public int PotionCount => _potionCount;
+    [SerializeField] private int _maxPotionCount = 10;
+    [SerializeField] private float _potionHealAmount = 10f;
+
     [SerializeField] private float _invincibleTime = 1.0f;
 
     private bool _isDead;
@@ -23,7 +28,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     public event Action<float, float> OnHealthChanged;
     public event Action OnDied;
-    public event Action OnHit;
+    public event Action<HitData> OnHit;
+    public event Action<int> OnPotionChanged;
 
 
     private void Awake()
@@ -51,7 +57,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
             return true;
         }
 
-        OnHit?.Invoke();
+        OnHit?.Invoke(hitdata);
 
         if (TryGetComponent<HitFlash>(out HitFlash flash))
         {
@@ -66,6 +72,23 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     {
         _currentHealth = Mathf.Min(_currentHealth + amount, _maxHealth);
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+    }
+
+    public void AddPotion()
+    {
+        _potionCount = Mathf.Min(_potionCount + 1, _maxPotionCount);
+        OnPotionChanged?.Invoke(_potionCount);
+    }
+
+    public bool TryUsePotion()
+    {
+        if (_isDead || _potionCount <= 0) return false;
+        if (Mathf.Approximately(_currentHealth, _maxHealth)) return false;
+
+        Heal(_potionHealAmount);
+        _potionCount--;
+        OnPotionChanged?.Invoke(_potionCount);
+        return true;
     }
 
     public void Kill()
@@ -125,10 +148,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     private void OnDisable()
     {
         int playerLayer = gameObject.layer;
-        int enemyLayer = Constants.Layers.EnemyAttack;
-        if (enemyLayer != -1)
+        int enemyAttackLayer = Constants.Layers.EnemyAttack;
+
+        if (enemyAttackLayer != -1)
         {
-            Physics2D.IgnoreLayerCollision(playerLayer, enemyLayer, false);
+            Physics2D.IgnoreLayerCollision(playerLayer, enemyAttackLayer, false);
         }
     }
 }
