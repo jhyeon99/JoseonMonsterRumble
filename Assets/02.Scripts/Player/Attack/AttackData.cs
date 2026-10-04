@@ -8,4 +8,7 @@ public struct AttackData
     public float KnockbackForce;
     public Vector2 HitboxOffset;
     public Vector2 HitboxSize;
+    public float ForwardDelay;
+    public float ForwardSpeed;
+    public float ForwardDuration;
 }

@@ -118,7 +118,7 @@ public class Player : MonoBehaviour
                 {
                     _dodgeMotion.BindClipIfEmpty(clips[i], 1.5f);
                 }
-                else if (clips[i].name == "Player_Attack")
+                else if (clips[i].name == "Player_Attack" || clips[i].name == "Player_Attack_1st")
                 {
                     _attackMotion.BindClipIfEmpty(clips[i], 1.0f);
                 }

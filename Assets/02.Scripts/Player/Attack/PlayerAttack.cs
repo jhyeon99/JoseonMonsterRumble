@@ -30,6 +30,19 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
+    public bool TryGetAttackData(int index, out AttackData attackData)
+    {
+        if (_attackDataTableSO != null && _attackDataTableSO.Data != null &&
+            index >= 0 && index < _attackDataTableSO.Data.Length)
+        {
+            attackData = _attackDataTableSO.Data[index];
+            return true;
+        }
+
+        attackData = default;
+        return false;
+    }
+
     private Coroutine _comboResetCoroutine;
 
     private Animator _animator;

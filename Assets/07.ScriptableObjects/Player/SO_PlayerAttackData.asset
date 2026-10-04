@@ -18,14 +18,23 @@ MonoBehaviour:
     KnockbackForce: 0
     HitboxOffset: {x: 0, y: 0}
     HitboxSize: {x: 2.3, y: 1}
+    ForwardDelay: 0.05
+    ForwardSpeed: 4
+    ForwardDuration: 0.17
   - Damage: 10
     ActiveDuration: 0.25
     KnockbackForce: 0
     HitboxOffset: {x: 0, y: 0}
     HitboxSize: {x: 1, y: 1}
+    ForwardDelay: 0
+    ForwardSpeed: 0
+    ForwardDuration: 0
   - Damage: 20
     ActiveDuration: 0.5
     KnockbackForce: 1
     HitboxOffset: {x: 0, y: 0}
     HitboxSize: {x: 2, y: 2}
+    ForwardDelay: 0
+    ForwardSpeed: 0
+    ForwardDuration: 0
   ComboResetTime: 1
