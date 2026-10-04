@@ -237,13 +237,14 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void HandleHit()
+    private void HandleHit(HitData hitData)
     {
         if (StateMachine.CurrentState == DeadState)
         {
             return;
         }
 
+        HitState.SetHitData(hitData);
         StateMachine.ChangeState(HitState);
     }
 
