@@ -11,6 +11,18 @@ public class PlayerAttackState : PlayerBaseState
     private const float AttackSafetyTimeout = 5.0f;
     private const float DodgeCancelNormalizedTime = 0.2f;
 
+    private const string AnimStateAttack = "Player_Attack";
+    private const string AnimStateAttack1st = "Player_Attack_1st";
+    private const string AnimStateNewAttack1st = "Player_New_Attack_1st";
+    private const string AnimStateAttack1stRecover = "Player_Attack_1st_Recover";
+    private const string AnimStateAttack2ndReady = "Player_Attack_2nd_Ready";
+    private const string AnimStateAttack2nd = "Player_Attack_2nd";
+    private const string AnimStateAttack2ndRecover = "Player_Attack_2nd_Recover";
+    private const string AnimStateAttack3rdReady = "Player_Attack_3rd_Ready";
+    private const string AnimStateAttack3rd = "Player_Attack_3rd";
+    private const string AnimStateAttack3rdRecover = "Player_Attack_3rd_Recover";
+    private const string AnimTagAttackRecover = "AttackRecover";
+
     private readonly float[] _cachedStepDurations = new float[3];
     private bool _hasCachedStepDurations;
 
@@ -82,9 +94,10 @@ public class PlayerAttackState : PlayerBaseState
 
     private void TransitionToCombo(int nextIndex)
     {
+        _elapsedTime = 0f;
+        _comboElapsedTime = 0f;
         _hasBufferedAttackInput = false;
         _currentComboIndex = nextIndex;
-        _comboElapsedTime = 0f;
         StopForwardMovement();
         SetupForwardMotion(nextIndex);
 
@@ -106,7 +119,7 @@ public class PlayerAttackState : PlayerBaseState
 
     private bool IsInComboWindow(AnimatorStateInfo stateInfo, bool isRecovering)
     {
-        if (stateInfo.IsName("Player_Attack_2nd_Ready") || stateInfo.IsName("Player_Attack_3rd_Ready"))
+        if (stateInfo.IsName(AnimStateAttack2ndReady) || stateInfo.IsName(AnimStateAttack3rdReady))
         {
             return false;
         }
@@ -307,9 +320,9 @@ public class PlayerAttackState : PlayerBaseState
     {
         return _currentComboIndex switch
         {
-            0 => stateInfo.IsName("Player_Attack_1st_Recover"),
-            1 => stateInfo.IsName("Player_Attack_2nd_Recover"),
-            2 => stateInfo.IsName("Player_Attack_3rd_Recover"),
+            0 => stateInfo.IsName(AnimStateAttack1stRecover),
+            1 => stateInfo.IsName(AnimStateAttack2ndRecover),
+            2 => stateInfo.IsName(AnimStateAttack3rdRecover),
             _ => false
         };
     }
@@ -318,27 +331,27 @@ public class PlayerAttackState : PlayerBaseState
     {
         return _currentComboIndex switch
         {
-            0 => stateInfo.IsName("Player_Attack_1st") || stateInfo.IsName("Player_Attack") || stateInfo.IsName("Player_New_Attack_1st"),
-            1 => stateInfo.IsName("Player_Attack_2nd_Ready") || stateInfo.IsName("Player_Attack_2nd"),
-            2 => stateInfo.IsName("Player_Attack_3rd_Ready") || stateInfo.IsName("Player_Attack_3rd"),
+            0 => stateInfo.IsName(AnimStateAttack1st) || stateInfo.IsName(AnimStateAttack) || stateInfo.IsName(AnimStateNewAttack1st),
+            1 => stateInfo.IsName(AnimStateAttack2ndReady) || stateInfo.IsName(AnimStateAttack2nd),
+            2 => stateInfo.IsName(AnimStateAttack3rdReady) || stateInfo.IsName(AnimStateAttack3rd),
             _ => false
         };
     }
 
     private bool IsAttackOrRecoverState(AnimatorStateInfo stateInfo)
     {
-        if (stateInfo.IsTag("AttackRecover"))
+        if (stateInfo.IsTag(AnimTagAttackRecover))
         {
             return true;
         }
 
-        return stateInfo.IsName("Player_Attack") ||
-               stateInfo.IsName("Player_Attack_1st") ||
-               stateInfo.IsName("Player_New_Attack_1st") ||
-               stateInfo.IsName("Player_Attack_2nd") ||
-               stateInfo.IsName("Player_Attack_3rd") ||
-               stateInfo.IsName("Player_Attack_2nd_Ready") ||
-               stateInfo.IsName("Player_Attack_3rd_Ready");
+        return stateInfo.IsName(AnimStateAttack) ||
+               stateInfo.IsName(AnimStateAttack1st) ||
+               stateInfo.IsName(AnimStateNewAttack1st) ||
+               stateInfo.IsName(AnimStateAttack2nd) ||
+               stateInfo.IsName(AnimStateAttack3rd) ||
+               stateInfo.IsName(AnimStateAttack2ndReady) ||
+               stateInfo.IsName(AnimStateAttack3rdReady);
     }
 
     private void EndAttack()
@@ -388,17 +401,17 @@ public class PlayerAttackState : PlayerBaseState
 
             if (index == 0)
             {
-                attackClipName = "Player_Attack_1st";
+                attackClipName = AnimStateAttack1st;
             }
             else if (index == 1)
             {
-                readyClipName = "Player_Attack_2nd_Ready";
-                attackClipName = "Player_Attack_2nd";
+                readyClipName = AnimStateAttack2ndReady;
+                attackClipName = AnimStateAttack2nd;
             }
             else if (index == 2)
             {
-                readyClipName = "Player_Attack_3rd_Ready";
-                attackClipName = "Player_Attack_3rd";
+                readyClipName = AnimStateAttack3rdReady;
+                attackClipName = AnimStateAttack3rd;
             }
 
             float readyDuration = 0f;
@@ -415,7 +428,7 @@ public class PlayerAttackState : PlayerBaseState
                     {
                         readyDuration = clip.length;
                     }
-                    else if (attackClipName != null && (clip.name == attackClipName || (index == 0 && clip.name == "Player_Attack")))
+                    else if (attackClipName != null && (clip.name == attackClipName || (index == 0 && clip.name == AnimStateAttack)))
                     {
                         attackDuration = clip.length;
                     }
