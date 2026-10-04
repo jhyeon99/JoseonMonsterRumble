@@ -30,23 +30,30 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
-    private Coroutine _comboResetCoroutine;
-
-    private Animator _animator;
-    private PlayerInputHandler _inputHandler;
-
-    private void Awake()
+    public bool TryGetAttackData(int index, out AttackData attackData)
     {
-        _animator = GetComponent<Animator>();
-        _inputHandler = GetComponent<PlayerInputHandler>();
+        if (_attackDataTableSO != null && _attackDataTableSO.Data != null &&
+            index >= 0 && index < _attackDataTableSO.Data.Length)
+        {
+            attackData = _attackDataTableSO.Data[index];
+            return true;
+        }
+
+        attackData = default;
+        return false;
     }
 
     private Coroutine _attackRoutine;
 
     public void ExecuteAttack()
     {
+        ExecuteAttackStep(0);
+    }
+
+    public void ExecuteAttackStep(int index)
+    {
         if (_attackDataTableSO == null || _attackDataTableSO.Data == null ||
-            _attackDataTableSO.Data.Length == 0)
+            index < 0 || index >= _attackDataTableSO.Data.Length)
         {
             return;
         }
@@ -56,7 +63,14 @@ public class PlayerAttack : MonoBehaviour
             StopCoroutine(_attackRoutine);
         }
 
-        _attackRoutine = StartCoroutine(FullComboAttackRoutine());
+        _currentCombo = index + 1;
+        _attackRoutine = StartCoroutine(SingleAttackStepRoutine(_attackDataTableSO.Data[index]));
+    }
+
+    private IEnumerator SingleAttackStepRoutine(AttackData step)
+    {
+        yield return StartCoroutine(HitboxRoutine(step));
+        _attackRoutine = null;
     }
 
     public void StopAttack()
@@ -67,22 +81,6 @@ public class PlayerAttack : MonoBehaviour
             _attackRoutine = null;
         }
         _currentCombo = 0;
-    }
-
-    private IEnumerator FullComboAttackRoutine()
-    {
-        int count = _attackDataTableSO.Data.Length;
-        for (int i = 0; i < count; i++)
-        {
-            _currentCombo = i + 1;
-            AttackData step = _attackDataTableSO.Data[i];
-            yield return StartCoroutine(HitboxRoutine(step));
-
-            float delay = 0.45f;
-            yield return new WaitForSeconds(delay);
-        }
-        _currentCombo = 0;
-        _attackRoutine = null;
     }
 
     private IEnumerator HitboxRoutine(AttackData step)
@@ -114,12 +112,6 @@ public class PlayerAttack : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
-    }
-
-    private IEnumerator ResetComboCorutine()
-    {
-        yield return new WaitForSeconds(_attackDataTableSO.ComboResetTime);
-        _currentCombo = 0;
     }
 
     private void OnDrawGizmosSelected()

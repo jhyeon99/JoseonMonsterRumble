@@ -58,6 +58,8 @@ public class Player : MonoBehaviour
     private static readonly int AnimParamDie = Animator.StringToHash("die");
     private static readonly int AnimParamDodge = Animator.StringToHash("dodge");
     private static readonly int AnimParamAttack = Animator.StringToHash("attack");
+    private static readonly int AnimParamAttack2 = Animator.StringToHash("attack2");
+    private static readonly int AnimParamAttack3 = Animator.StringToHash("attack3");
 
     private Coroutine _restoreColliderRoutine;
 
@@ -234,6 +236,22 @@ public class Player : MonoBehaviour
         if (_animator != null)
         {
             _animator.SetTrigger(AnimParamAttack);
+        }
+    }
+
+    public void TriggerAttack2()
+    {
+        if (_animator != null)
+        {
+            _animator.SetTrigger(AnimParamAttack2);
+        }
+    }
+
+    public void TriggerAttack3()
+    {
+        if (_animator != null)
+        {
+            _animator.SetTrigger(AnimParamAttack3);
         }
     }
 
