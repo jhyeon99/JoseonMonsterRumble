@@ -21,6 +21,8 @@ public class EnemyRotation : MonoBehaviour
     {
         _direction = _enemy.GetDirectionToPlayer();
         _angle = Vector2.SignedAngle(Vector2.right, _direction);
-        transform.rotation = Quaternion.Euler(0f, 0f, _angle - 180f);
+        transform.rotation = _direction.x >= 0f
+            ? Quaternion.Euler(0f, 0f, _angle - 164f)
+            : Quaternion.Euler(0f, 0f, _angle - 196f);
     }
 }
