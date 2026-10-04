@@ -6,6 +6,8 @@ public abstract class Projectile : MonoBehaviour
     [SerializeField] private ProjectileData _data;
     [SerializeField] private ProjectileType _type;
     [SerializeField] private float _curveHeight = 5f;
+    [SerializeField] private float _returnPoolTimer = 5f;
+    private float _returnPoolTime = 0f;
     public ProjectileType Type => _type;
     protected float Speed { get; private set; }
     protected Vector2 ControlPoint { get; private set; }
@@ -22,11 +24,23 @@ public abstract class Projectile : MonoBehaviour
     {
         Speed = _data.ProjectileSpeed;
         _projectileDamage = _data.ProjectileDamage;
+        _returnPoolTime = _returnPoolTimer;
     }
 
     private void Update()
     {
         Fire();
+        ReturnProjectile();
+    }
+
+    private void ReturnProjectile()
+    {
+        _returnPoolTime -= Time.deltaTime;
+        if (_returnPoolTime <= 0f)
+        {
+            gameObject.SetActive(false);
+            _returnPoolTime = _returnPoolTimer;
+        }
     }
 
     public void OnSpawn(Transform muzzlePoint, Transform playerPoint, float damageIncreaseValue)
