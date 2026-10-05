@@ -41,6 +41,12 @@ public class PlayerAttackState : PlayerBaseState
     private bool _forwardCompleted;
     private bool _hasBufferedAttackInput;
 
+    // 판정 구간 (AttackData.HitStartRatio / HitEndRatio, 전진 커브와 같은 progress 기준)
+    private float _hitStartRatio;
+    private float _hitEndRatio;
+    private bool _hasStartedHit;
+    private bool _hasEndedHit;
+
     private Collider2D _playerCollider;
 
     public PlayerAttackState(Player player, StateMachine stateMachine)
@@ -66,7 +72,8 @@ public class PlayerAttackState : PlayerBaseState
 
         _player.SetRunning(false);
         _player.TriggerAttack();
-        _player.Attack.ExecuteAttackStep(0);
+        _player.Attack.StartAttackStep(0);
+        SetupHitWindow(0);
     }
 
     private void SetupForwardMotion(int index)
@@ -114,7 +121,51 @@ public class PlayerAttackState : PlayerBaseState
             _player.TriggerAttack();
         }
 
-        _player.Attack.ExecuteAttackStep(nextIndex);
+        _player.Attack.StartAttackStep(nextIndex);
+        SetupHitWindow(nextIndex);
+    }
+
+    private void SetupHitWindow(int index)
+    {
+        _hasStartedHit = false;
+        _hasEndedHit = false;
+
+        if (_player.Attack.TryGetAttackData(index, out AttackData attackData) &&
+            attackData.HitEndRatio > attackData.HitStartRatio)
+        {
+            _hitStartRatio = attackData.HitStartRatio;
+            _hitEndRatio = attackData.HitEndRatio;
+        }
+        else
+        {
+            // 값이 비어 있거나(0~0) 잘못 입력되면 공격 전체 구간에서 판정
+            _hitStartRatio = 0f;
+            _hitEndRatio = 1f;
+        }
+
+        // 시작 비율이 0이면 첫 프레임을 기다리지 않고 바로 판정 시작
+        UpdateHitWindow();
+    }
+
+    private void UpdateHitWindow()
+    {
+        if (_hasEndedHit) return;
+
+        float progress = _stepDuration > 0.0001f
+            ? Mathf.Clamp01(_comboElapsedTime / _stepDuration)
+            : 1f;
+
+        if (!_hasStartedHit && progress >= _hitStartRatio)
+        {
+            _hasStartedHit = true;
+            _player.Attack.BeginHitbox(_currentComboIndex);
+        }
+
+        if (_hasStartedHit && progress >= _hitEndRatio)
+        {
+            _hasEndedHit = true;
+            _player.Attack.EndHitbox();
+        }
     }
 
     private bool IsInComboWindow(AnimatorStateInfo stateInfo, bool isRecovering)
@@ -249,6 +300,8 @@ public class PlayerAttackState : PlayerBaseState
 
         _elapsedTime += Time.deltaTime;
         _comboElapsedTime += Time.deltaTime;
+
+        UpdateHitWindow();
 
         if (_elapsedTime >= AttackSafetyTimeout)
         {
