@@ -7,6 +7,9 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     private float _currentHp;
     public event Action OnDeath;
 
+    // 사망하지 않은 피격 시 호출 (피격 연출용)
+    public event Action<HitData> OnHit;
+
     private void Awake()
     {
         _enemy = GetComponent<Enemy>();
@@ -31,12 +34,15 @@ public class EnemyHealth : MonoBehaviour, IDamageable
             }
 
             _enemy.HitFlash.Flash();
+            _enemy.Animation.PlayHit();
+            OnHit?.Invoke(hitData);
             _enemy.StateMachine.ChangeState(new KnockbackState(_enemy, hitData));
             return true;
         }
 
-        if (_enemy.StateMachine.CurrentState is AttackPrepareState ||
-            _enemy.StateMachine.CurrentState is AttackState)
+        if (_enemy.StateMachine.CurrentState is AttackPrepareFlyingState ||
+            _enemy.StateMachine.CurrentState is AttackState ||
+            _enemy.StateMachine.CurrentState is AttackPrepareGroundState)
         {
             return false;
         }
@@ -53,6 +59,8 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
         Debug.Log($"현재 체력 {_currentHp}");
         _enemy.HitFlash.Flash();
+        _enemy.Animation.PlayHit();
+        OnHit?.Invoke(hitData);
 
         return true;
     }

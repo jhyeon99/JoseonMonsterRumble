@@ -1,10 +1,24 @@
 ﻿using UnityEngine;
 
-public class AttackPrepareGroundState : AttackPrepareState
+public class AttackPrepareGroundState : EnemyState
 {
+    protected Enemy _enemy;
+    protected float _attackPrepareTimer = 0;
+
     public AttackPrepareGroundState(Enemy enemy)
     {
         _enemy = enemy;
+    }
+
+    public override void Enter()
+    {
+        Debug.Log("적 공격 준비 시작");
+        _attackPrepareTimer = _enemy.Data.AttackPrepareTime;
+        _enemy.MoveType.StopMove();
+        if (_enemy.Combat is EnemyMeleeCombat)
+        {
+            _enemy.Animation.PlayAttack();
+        }
     }
 
     public override void FixedUpdate()
@@ -13,10 +27,12 @@ public class AttackPrepareGroundState : AttackPrepareState
         {
             if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
             {
+                _enemy.Animation.SetRunning(true);
                 _enemy.MoveType.BackMove(_enemy.GetDirectionToPlayer());
             }
             else
             {
+                _enemy.Animation.SetRunning(false);
                 _enemy.MoveType.StopMove();
             }
         }
@@ -30,5 +46,12 @@ public class AttackPrepareGroundState : AttackPrepareState
             Debug.Log("지상 적 공격 준비");
             _enemy.StateMachine.ChangeState(new AttackState(_enemy));
         }
+    }
+
+    public override void Exit()
+    {
+        _enemy.MoveType.IsBackMove = false;
+        _enemy.MoveType.StopMove();
+        Debug.Log("적 공격 준비 완료");
     }
 }

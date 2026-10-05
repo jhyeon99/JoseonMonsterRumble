@@ -100,6 +100,7 @@ GameObject:
   - component: {fileID: 4112317450272578094}
   - component: {fileID: -8411095045714158178}
   - component: {fileID: 1363621400415991979}
+  - component: {fileID: 1469972083147089180}
   m_Layer: 7
   m_Name: EnemyMeleeFlying
   m_TagString: Enemy
@@ -395,3 +396,16 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1469972083147089180
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2319009342568745602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dd406eab553c294d8065045380da7b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAnimation
+  _animator: {fileID: 1363621400415991979}

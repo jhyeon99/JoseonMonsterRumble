@@ -28,7 +28,8 @@ public class ExplosionAttack : MonoBehaviour
         );
 
         damageable.TakeDamage(hitData);
-        _enemy.gameObject.SetActive(false);
+        gameObject.SetActive(false);
         Debug.Log($"플레이어에게 폭파공격으로 {_currentDamage}만큼 피해를 입힘.");
+        _enemy.StateMachine.ChangeState(new DeadState(_enemy));
     }
 }

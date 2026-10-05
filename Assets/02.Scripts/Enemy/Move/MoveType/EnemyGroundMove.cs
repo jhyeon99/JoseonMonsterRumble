@@ -1,4 +1,5 @@
 using System;
+using UnityEditor.Searcher;
 using UnityEngine;
 
 public class EnemyGroundMove : EnemyMoveType
@@ -40,16 +41,19 @@ public class EnemyGroundMove : EnemyMoveType
 
     public override void Move(Vector2 direction)
     {
+        IsBackMove = false;
         Rigidbody.linearVelocity = new Vector2(direction.x * Enemy.Data.MoveSpeed, Rigidbody.linearVelocity.y);
     }
 
     public override void BackMove(Vector2 direction)
     {
+        IsBackMove = true;
         Rigidbody.linearVelocity = new Vector2(-direction.x * Enemy.Data.MoveSpeed, Rigidbody.linearVelocity.y);
     }
 
     public override void StopMove()
     {
+        IsBackMove = false;
         Rigidbody.linearVelocity = new Vector2(0f, Rigidbody.linearVelocity.y);
     }
 

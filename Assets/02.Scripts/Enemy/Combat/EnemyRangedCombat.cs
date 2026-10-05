@@ -15,11 +15,11 @@ public class EnemyRangedCombat : EnemyCombat
         Vector2 direction = Enemy.GetDirectionToPlayer();
         if (direction.x <= 0f)
         {
-            projectile.transform.Rotate(0f, 0f, 10.5f);
+            projectile.transform.Rotate(0f, 0f, 8.228f);
         }
         else
         {
-            projectile.transform.Rotate(0f, 0f, -10.5f);
+            projectile.transform.Rotate(0f, 0f, -8.228f);
         }
     }
 }
