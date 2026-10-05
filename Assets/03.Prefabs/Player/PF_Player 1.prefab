@@ -79,7 +79,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1918527705
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 1f0ae36969647604c9dfa8887c2c55a9, type: 3}
@@ -389,8 +389,9 @@ MonoBehaviour:
   _attackOrigin: {fileID: 7957162614261741638}
   _enemyLayer:
     serializedVersion: 2
-    m_Bits: 512
+    m_Bits: 128
   _currentCombo: 0
+  _isHitboxActive: 0
 --- !u!114 &2678545030457979146
 MonoBehaviour:
   m_ObjectHideFlags: 0
