@@ -596,12 +596,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 16e2b52afc22a534996e64bc225f3d44, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4377528bf08715f429cc34e2e11ac44e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 8.533334, y: 4.8}
+  m_Size: {x: 6.4, y: 3.6}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -1852,6 +1852,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cbf20618cf4a314eaf2014263ddb68d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyGroundMove
+  IsBackMove: 0
 --- !u!4 &1880821821516890488
 Transform:
   m_ObjectHideFlags: 0
@@ -1894,6 +1895,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6fa4d4aac6341cd89d9d23bbd2ccc0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyFlyingMove
+  IsBackMove: 0
 --- !u!114 &2024138089113805184
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2207,6 +2209,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed296843e3aee6440b2adb41c250ddd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBuffMove
+  IsBackMove: 0
   _radius: 2
   _lerpValue: 5
   MaxAngle: 90
@@ -2898,7 +2901,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &5910245650945073416
 Transform:
   m_ObjectHideFlags: 0
@@ -3290,6 +3293,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cbf20618cf4a314eaf2014263ddb68d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyGroundMove
+  IsBackMove: 0
 --- !u!4 &6993867479377402304
 Transform:
   m_ObjectHideFlags: 0
@@ -3452,6 +3456,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  _knockbackUpVelocity: 4
+  _knockbackDeceleration: 30
   _coyoteTime: 0.1
   _groundCheckLockout: 0.1
   _fallGravityMultiplier: 2
@@ -3545,6 +3551,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6fa4d4aac6341cd89d9d23bbd2ccc0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyFlyingMove
+  IsBackMove: 0
 --- !u!114 &8794436552116657348
 MonoBehaviour:
   m_ObjectHideFlags: 0
