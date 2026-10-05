@@ -3,7 +3,9 @@ using UnityEngine.SceneManagement;
 
 public class TitleMenuActions : MonoBehaviour
 {
-    [SerializeField] private string _gameSceneName = "Test_Ep1Prototype";
+    private const string DefaultGameSceneName = "Test_Ep0";
+
+    [SerializeField] private string _gameSceneName = DefaultGameSceneName;
 
     public void StartGame()
     {
@@ -13,7 +15,6 @@ public class TitleMenuActions : MonoBehaviour
             return;
         }
 
-        Debug.Log($"실제로 로드하는 씬: {_gameSceneName}", this);
         SceneManager.LoadScene(_gameSceneName);
     }
 

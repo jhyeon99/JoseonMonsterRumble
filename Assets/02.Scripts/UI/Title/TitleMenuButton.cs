@@ -49,6 +49,12 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
 
     public UnityEvent OnClickAction => _onClickAction;
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStaticState()
+    {
+        _isAnyButtonClicked = false;
+    }
+
     private void Awake()
     {
         _originalScale = transform.localScale;
@@ -73,6 +79,8 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
         }
 
         _isInteractable = true;
+        _isPressed = false;
+        _isSelected = false;
         ApplyPress(false);
         ApplyHighlight(false);
     }
@@ -99,13 +107,11 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
             return;
         }
 
+        ApplyHighlight(true);
+
         if (EventSystem.current != null)
         {
             EventSystem.current.SetSelectedGameObject(gameObject);
-        }
-        else
-        {
-            ApplyHighlight(true);
         }
     }
 
@@ -116,10 +122,12 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
             ApplyPress(false);
         }
 
-        if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject != gameObject)
+        if (EventSystem.current != null)
         {
-            ApplyHighlight(false);
+            EventSystem.current.SetSelectedGameObject(null);
         }
+
+        ApplyHighlight(false);
     }
 
     public void OnPointerDown(PointerEventData eventData)
@@ -129,6 +137,7 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
             return;
         }
 
+        PlayClickSound();
         ApplyPress(true);
     }
 
@@ -149,6 +158,7 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
 
     public void OnSubmit(BaseEventData eventData)
     {
+        PlayClickSound();
         HandleClick();
     }
 
@@ -219,7 +229,6 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
     {
         _isInteractable = false;
         _isAnyButtonClicked = true;
-        PlayClickSound();
         ApplyPress(true);
 
         yield return new WaitForSecondsRealtime(_actionDelay);
@@ -233,23 +242,51 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
 
     private void PlayClickSound()
     {
-        if (_clickSound == null)
+        AudioClip clipToPlay = _clickSound;
+        float volumeToPlay = _clickVolume;
+
+        if (clipToPlay == null && AudioManager.Instance != null)
+        {
+            clipToPlay = AudioManager.Instance.ButtonClickClip;
+        }
+
+        if (clipToPlay == null)
         {
             return;
         }
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySfx(clipToPlay, volumeToPlay);
+            return;
+        }
+
         Vector3 position = Camera.main != null ? Camera.main.transform.position : transform.position;
-        AudioSource.PlayClipAtPoint(_clickSound, position, _clickVolume);
+        AudioSource.PlayClipAtPoint(clipToPlay, position, volumeToPlay);
     }
 
     private void PlayHoverSound()
     {
-        if (_hoverSound == null)
+        AudioClip clipToPlay = _hoverSound;
+        float volumeToPlay = _hoverVolume;
+
+        if (clipToPlay == null && AudioManager.Instance != null)
+        {
+            clipToPlay = AudioManager.Instance.ButtonHoverClip;
+        }
+
+        if (clipToPlay == null)
         {
             return;
         }
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySfx(clipToPlay, volumeToPlay);
+            return;
+        }
+
         Vector3 position = Camera.main != null ? Camera.main.transform.position : transform.position;
-        AudioSource.PlayClipAtPoint(_hoverSound, position, _hoverVolume);
+        AudioSource.PlayClipAtPoint(clipToPlay, position, volumeToPlay);
     }
 }
