@@ -67,6 +67,7 @@ public class PauseAudioSettingsView : MonoBehaviour
             _closeButton.onClick.AddListener(RequestClose);
         }
 
+        BindAudioManager();
         RefreshView();
     }
 
@@ -74,6 +75,7 @@ public class PauseAudioSettingsView : MonoBehaviour
     {
         if (_isReady)
         {
+            SyncFromAudioManager();
             RefreshView();
         }
     }
@@ -99,6 +101,8 @@ public class PauseAudioSettingsView : MonoBehaviour
         {
             _closeButton.onClick.RemoveListener(RequestClose);
         }
+
+        UnbindAudioManager();
     }
 
     public void ApplySettings(float bgmVolume, float sfxVolume, bool isBgmMuted, bool isSfxMuted)
@@ -244,5 +248,46 @@ public class PauseAudioSettingsView : MonoBehaviour
         }
 
         return hasRequiredReferences;
+    }
+
+    private void BindAudioManager()
+    {
+        if (AudioManager.Instance == null)
+        {
+            return;
+        }
+
+        _bgmVolumeChanged.AddListener(AudioManager.Instance.SetBgmVolume);
+        _sfxVolumeChanged.AddListener(AudioManager.Instance.SetSfxVolume);
+        _bgmMuteChanged.AddListener(AudioManager.Instance.SetBgmMute);
+        _sfxMuteChanged.AddListener(AudioManager.Instance.SetSfxMute);
+
+        SyncFromAudioManager();
+    }
+
+    private void UnbindAudioManager()
+    {
+        if (AudioManager.Instance == null)
+        {
+            return;
+        }
+
+        _bgmVolumeChanged.RemoveListener(AudioManager.Instance.SetBgmVolume);
+        _sfxVolumeChanged.RemoveListener(AudioManager.Instance.SetSfxVolume);
+        _bgmMuteChanged.RemoveListener(AudioManager.Instance.SetBgmMute);
+        _sfxMuteChanged.RemoveListener(AudioManager.Instance.SetSfxMute);
+    }
+
+    private void SyncFromAudioManager()
+    {
+        if (AudioManager.Instance == null)
+        {
+            return;
+        }
+
+        _bgmVolume = AudioManager.Instance.GetBgmVolume();
+        _sfxVolume = AudioManager.Instance.GetSfxVolume();
+        _isBgmMuted = AudioManager.Instance.IsBgmMuted();
+        _isSfxMuted = AudioManager.Instance.IsSfxMuted();
     }
 }
