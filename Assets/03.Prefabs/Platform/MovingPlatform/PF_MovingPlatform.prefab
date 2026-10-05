@@ -85,7 +85,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6,
+    type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -240,6 +241,7 @@ GameObject:
   m_Component:
   - component: {fileID: 337719205}
   - component: {fileID: 337719204}
+  - component: {fileID: -5930979247470831221}
   m_Layer: 0
   m_Name: PF_MovingPlatform
   m_TagString: Untagged
@@ -286,6 +288,20 @@ MonoBehaviour:
   _mode: 0
   _speed: 2
   _waitTime: 0.1
+  _state: 0
+--- !u!210 &-5930979247470831221
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 337719203}
+  m_Enabled: 1
+  m_SortingLayerID: -148662967
+  m_SortingLayer: 3
+  m_SortingOrder: 0
+  m_SortAtRoot: 0
+  m_Sort3DAs2D: 0
 --- !u!1 &374115154
 GameObject:
   m_ObjectHideFlags: 0

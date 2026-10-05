@@ -1498,7 +1498,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &133539152662404348
 GameObject:
   m_ObjectHideFlags: 0
@@ -2157,6 +2157,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   _currentCombo: 0
+  _isHitboxActive: 0
 --- !u!114 &3639916104659935061
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2338,7 +2339,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &4956322669344726348
 GameObject:
   m_ObjectHideFlags: 0
@@ -3369,7 +3370,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1918527705
-  m_SortingLayer: 3
+  m_SortingLayer: 5
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 1f0ae36969647604c9dfa8887c2c55a9, type: 3}
