@@ -49,6 +49,8 @@ GameObject:
   - component: {fileID: 422475928520026442}
   - component: {fileID: 3440014025680624509}
   - component: {fileID: 2723758708734217559}
+  - component: {fileID: 5431849209313763743}
+  - component: {fileID: 3980747486205739476}
   m_Layer: 6
   m_Name: PF_Player
   m_TagString: Player
@@ -156,6 +158,8 @@ MonoBehaviour:
     _bufferTime: 0.1
   _attackBuffer:
     _bufferTime: 0.1
+  _rangedAttackBuffer:
+    _bufferTime: 0.1
 --- !u!114 &4875297620366183666
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,6 +201,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  _knockbackUpVelocity: 4
+  _knockbackDeceleration: 30
   _coyoteTime: 0.1
   _groundCheckLockout: 0.1
   _fallGravityMultiplier: 2
@@ -205,7 +211,8 @@ MonoBehaviour:
   _addPlatformVelocityMultiplier: 1
   _landingJumpDelay: 0.1
   _noFrictionMaterial: {fileID: 6200000, guid: d54feeb55de6b3340b6241b7545274e9, type: 2}
-  _highFrictionMaterial: {fileID: 6200000, guid: 290f25763082c5a4e8d926772da6ad59, type: 2}
+  _highFrictionMaterial: {fileID: 6200000, guid: 290f25763082c5a4e8d926772da6ad59,
+    type: 2}
 --- !u!114 &3611217571140197611
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -220,6 +227,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   _maxHealth: 100
   _currentHealth: 0
+  _potionCount: 0
+  _maxPotionCount: 10
+  _potionHealAmount: 10
   _invincibleTime: 1
 --- !u!114 &8183156136403691450
 MonoBehaviour:
@@ -295,6 +305,54 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSoul
   _maxSoul: 5
   _currentSoul: 0
+--- !u!114 &5431849209313763743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 959561299230466191}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68c736923ac769b46835243da22562ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerRangedAttack
+  _flipTarget: {fileID: 0}
+  _talismanPrefab: {fileID: 731719100070620148, guid: f3451da9fd85ca246ad1cb820b0ec053,
+    type: 3}
+  _slotCount: 5
+  _centerOffset: {x: 0, y: 1.2}
+  _radius: 0.8
+  _spreadAngle: 120
+  _idleColor: {r: 1, g: 1, b: 1, a: 0.35}
+  _activeColor: {r: 1, g: 1, b: 1, a: 1}
+  _chargeInterval: 0.4
+  _soulCostPerTalisman: 1
+  _damageIncreasePercent: 0
+--- !u!114 &3980747486205739476
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 959561299230466191}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68c736923ac769b46835243da22562ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerRangedAttack
+  _flipTarget: {fileID: 3841625094700711122}
+  _talismanPrefab: {fileID: 731719100070620148, guid: f3451da9fd85ca246ad1cb820b0ec053,
+    type: 3}
+  _slotCount: 5
+  _centerOffset: {x: 0, y: 1.2}
+  _radius: 0.8
+  _spreadAngle: 120
+  _idleColor: {r: 1, g: 1, b: 1, a: 0.35}
+  _activeColor: {r: 1, g: 1, b: 1, a: 1}
+  _chargeInterval: 0.4
+  _soulCostPerTalisman: 1
+  _damageIncreasePercent: 0
 --- !u!1 &4006226916777717362
 GameObject:
   m_ObjectHideFlags: 0
@@ -374,7 +432,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1918527705
-  m_SortingLayer: 3
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 1f0ae36969647604c9dfa8887c2c55a9, type: 3}

@@ -1,34 +1,25 @@
-using System.Collections;
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
+/// <summary>
+/// 플레이어 근접 공격 판정 담당.
+/// 언제 판정을 켜고 끌지는 PlayerAttackState가 AttackData의 HitStartRatio / HitEndRatio로 결정하고,
+/// 여기서는 판정이 켜져 있는 동안 히트박스 검사만 한다.
+/// </summary>
 public class PlayerAttack : MonoBehaviour
 {
     [SerializeField] private AttackDataTableSO _attackDataTableSO;
     [SerializeField] private Transform _attackOrigin;
     [SerializeField] private LayerMask _enemyLayer;
 
-
     [SerializeField, ReadOnly] private int _currentCombo = 0;
+    [SerializeField, ReadOnly] private bool _isHitboxActive;
 
-    public float CurrentAttackDuration
-    {
-        get
-        {
-            if (_currentCombo <= 0 || _attackDataTableSO == null)
-            {
-                return 0f;
-            }
+    public bool IsHitboxActive => _isHitboxActive;
 
-            int index = _currentCombo - 1;
-            if (index >= _attackDataTableSO.Data.Length)
-            {
-                return 0f;
-            }
-
-            return _attackDataTableSO.Data[index].ActiveDuration;
-        }
-    }
+    // 한 번의 공격 단계에서 같은 적은 한 번만 맞도록
+    private readonly HashSet<IDamageable> _hitTargets = new HashSet<IDamageable>();
+    private AttackData _activeStep;
 
     public bool TryGetAttackData(int index, out AttackData attackData)
     {
@@ -43,74 +34,71 @@ public class PlayerAttack : MonoBehaviour
         return false;
     }
 
-    private Coroutine _attackRoutine;
-
-    public void ExecuteAttack()
+    /// <summary>
+    /// 공격 단계 시작 (판정은 아직 켜지 않음). 콤보 단계가 바뀔 때마다 호출.
+    /// </summary>
+    public void StartAttackStep(int index)
     {
-        ExecuteAttackStep(0);
+        EndHitbox();
+        _hitTargets.Clear();
+        _currentCombo = TryGetAttackData(index, out _) ? index + 1 : 0;
     }
 
-    public void ExecuteAttackStep(int index)
+    /// <summary>
+    /// 판정 시작. PlayerAttackState가 HitStartRatio 지점에서 호출.
+    /// </summary>
+    public void BeginHitbox(int index)
     {
-        if (_attackDataTableSO == null || _attackDataTableSO.Data == null ||
-            index < 0 || index >= _attackDataTableSO.Data.Length)
+        if (!TryGetAttackData(index, out AttackData attackData))
         {
             return;
         }
 
-        if (_attackRoutine != null)
-        {
-            StopCoroutine(_attackRoutine);
-        }
+        _activeStep = attackData;
+        _isHitboxActive = true;
 
-        _currentCombo = index + 1;
-        _attackRoutine = StartCoroutine(SingleAttackStepRoutine(_attackDataTableSO.Data[index]));
+        // 판정 구간이 아주 짧아서 같은 프레임에 끝나더라도 최소 한 번은 검사
+        CheckHits();
     }
 
-    private IEnumerator SingleAttackStepRoutine(AttackData step)
+    /// <summary>판정 끝. PlayerAttackState가 HitEndRatio 지점에서 호출.</summary>
+    public void EndHitbox()
     {
-        yield return StartCoroutine(HitboxRoutine(step));
-        _attackRoutine = null;
+        _isHitboxActive = false;
     }
 
     public void StopAttack()
     {
-        if (_attackRoutine != null)
-        {
-            StopCoroutine(_attackRoutine);
-            _attackRoutine = null;
-        }
+        EndHitbox();
+        _hitTargets.Clear();
         _currentCombo = 0;
     }
 
-    private IEnumerator HitboxRoutine(AttackData step)
+    private void Update()
     {
-        float elapsedTime = 0f;
-
-        var hitTargets = new HashSet<IDamageable>();
-
-        while (elapsedTime < step.ActiveDuration)
+        if (_isHitboxActive)
         {
-            Vector3 center = _attackOrigin.position + _attackOrigin.TransformDirection(step.HitboxOffset);
-            Collider2D[] hits = Physics2D.OverlapBoxAll(center, step.HitboxSize, 0f, _enemyLayer);
+            CheckHits();
+        }
+    }
 
-            foreach (Collider2D hit in hits)
-            {
-                if (hit.TryGetComponent<IDamageable>(out IDamageable damageable))
-                {
-                    if (hitTargets.Contains(damageable)) continue;
-                    hitTargets.Add(damageable);
+    private void CheckHits()
+    {
+        if (_attackOrigin == null) return;
 
-                    Vector3 hitPoint = hit.bounds.ClosestPoint(center);
-                    Vector3 attackDir = (hit.transform.position - transform.position).normalized;
+        Vector3 center = _attackOrigin.position + _attackOrigin.TransformDirection(_activeStep.HitboxOffset);
+        Collider2D[] hits = Physics2D.OverlapBoxAll(center, _activeStep.HitboxSize, 0f, _enemyLayer);
 
-                    var hitData = new HitData(step.Damage, step.KnockbackForce, hitPoint, attackDir);
-                    damageable.TakeDamage(hitData);
-                }
-            }
+        foreach (Collider2D hit in hits)
+        {
+            if (!hit.TryGetComponent<IDamageable>(out IDamageable damageable)) continue;
+            if (!_hitTargets.Add(damageable)) continue;
 
-            elapsedTime += Time.deltaTime;
-            yield return null;
+            Vector3 hitPoint = hit.bounds.ClosestPoint(center);
+            Vector3 attackDir = (hit.transform.position - transform.position).normalized;
+
+            var hitData = new HitData(_activeStep.Damage, _activeStep.KnockbackForce, hitPoint, attackDir);
+            damageable.TakeDamage(hitData);
         }
     }
 
@@ -122,10 +110,11 @@ public class PlayerAttack : MonoBehaviour
             return;
         }
 
-        Gizmos.color = Color.red;
         int previewIndex = Mathf.Clamp(_currentCombo - 1, 0, _attackDataTableSO.Data.Length - 1);
         AttackData step = _attackDataTableSO.Data[previewIndex];
 
+        // 판정이 켜져 있으면 빨강, 아니면 회색 (플레이 중 타이밍 확인용)
+        Gizmos.color = _isHitboxActive ? Color.red : new Color(1f, 1f, 1f, 0.3f);
         Vector3 center = _attackOrigin.position + _attackOrigin.TransformDirection(step.HitboxOffset);
         Gizmos.DrawWireCube(center, step.HitboxSize);
     }

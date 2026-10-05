@@ -3,11 +3,8 @@ guid: 1d816683dbbb8034793e9cf1bd4a11e5
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4961302469727102454
-    second: Inmyunjo_Idle_00013_0
-  - first:
-      213: -6573039805752976315
-    second: Inmyunjo_Idle_00013_1
+      213: 8881130581634657946
+    second: inmyunjo_Idle_00013_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -54,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 150
+  spritePixelsToUnits: 200
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -91,7 +88,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 2
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -129,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Inmyunjo_Idle_00013_0
+      name: inmyunjo_Idle_00013_0
       rect:
         serializedVersion: 2
-        x: 421
-        y: 146
-        width: 432
-        height: 318
+        x: 292
+        y: 28
+        width: 731
+        height: 539
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -144,30 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6f52a536f461ad440800000000000000
-      internalID: 4961302469727102454
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Inmyunjo_Idle_00013_1
-      rect:
-        serializedVersion: 2
-        x: 1146
-        y: 108
-        width: 21
-        height: 23
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 54c57934f1fd7c4a0800000000000000
-      internalID: -6573039805752976315
+      spriteID: a9e2132b53d104b70800000000000000
+      internalID: 8881130581634657946
       vertices: []
       indices: 
       edges: []
@@ -186,8 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Inmyunjo_Idle_00013_0: 4961302469727102454
-      Inmyunjo_Idle_00013_1: -6573039805752976315
+      inmyunjo_Idle_00013_0: 8881130581634657946
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
