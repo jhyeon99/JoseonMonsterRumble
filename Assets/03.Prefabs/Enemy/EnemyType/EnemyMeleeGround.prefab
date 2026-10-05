@@ -100,6 +100,7 @@ GameObject:
   - component: {fileID: 1892738677565765542}
   - component: {fileID: 3265818630830939307}
   - component: {fileID: 721203627900600272}
+  - component: {fileID: 8341551516577649733}
   m_Layer: 7
   m_Name: EnemyMeleeGround
   m_TagString: Enemy
@@ -168,8 +169,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1927546311
+  m_SortingLayer: 5
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 719eebe488e18eb4288aeecc1aba39f5, type: 3}
@@ -281,6 +282,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cbf20618cf4a314eaf2014263ddb68d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyGroundMove
+  IsBackMove: 0
 --- !u!114 &1334137726836670619
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -395,3 +397,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAnimation
   _animator: {fileID: 3265818630830939307}
+--- !u!114 &8341551516577649733
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9071619103714574906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2355f4f5ce43304292911b2575e82a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SquashStretchSpring
+  _target: {fileID: 0}
+  _squashAmount: 0.3
+  _stiffness: 300
+  _damping: 12
