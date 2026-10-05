@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AttackDataTableSO
   Data:
   - Damage: 10
-    HitStartRatio: 0
-    HitEndRatio: 0
+    HitStartRatio: 0.5
+    HitEndRatio: 0.9
     KnockbackForce: 0
     HitboxOffset: {x: 0, y: 0}
     HitboxSize: {x: 2.3, y: 1}
@@ -55,8 +55,8 @@ MonoBehaviour:
     ComboStartNormalizedTime: 0.7
     ComboEndNormalizedTime: 0.5
   - Damage: 10
-    HitStartRatio: 0
-    HitEndRatio: 0
+    HitStartRatio: 0.7
+    HitEndRatio: 0.9
     KnockbackForce: 0
     HitboxOffset: {x: 0, y: 0}
     HitboxSize: {x: 1, y: 1}
@@ -96,8 +96,8 @@ MonoBehaviour:
     ComboStartNormalizedTime: 0.9
     ComboEndNormalizedTime: 0.5
   - Damage: 20
-    HitStartRatio: 0
-    HitEndRatio: 0
+    HitStartRatio: 0.5
+    HitEndRatio: 0.8
     KnockbackForce: 1
     HitboxOffset: {x: 0, y: 0}
     HitboxSize: {x: 2, y: 2}
