@@ -39,6 +39,11 @@ public class UI_SoulGaugeBinder : MonoBehaviour
             return false;
         }
 
+        if (_soulSourceComponent == null)
+        {
+            _soulSourceComponent = FindFirstObjectByType<PlayerSoul>();
+        }
+
         _soulSource = _soulSourceComponent as ISoulSource;
         if (_soulSource == null)
         {
