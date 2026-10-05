@@ -10,6 +10,7 @@ public class UI_BossHealthBar : MonoBehaviour
     private const float DefaultHealCatchupDuration = 0.25f;
     private const float DefaultPhaseRefillDuration = 2.0f;
     private const float DefaultFadeDuration = 0.5f;
+    private const float MinFadeDuration = 0.001f;
 
     private const string NameTextObjectName = "Boss_Name_Text";
     private const string MainFillObjectName = "Bar_Container/Bar_Fill";
@@ -256,7 +257,12 @@ public class UI_BossHealthBar : MonoBehaviour
             _ghostFill.color = _damageGhostColor;
         }
 
-        yield return new WaitForSecondsRealtime(_damageDelay);
+        float elapsedDelay = 0f;
+        while (elapsedDelay < _damageDelay)
+        {
+            elapsedDelay += Time.unscaledDeltaTime;
+            yield return null;
+        }
 
         float startGhost = _ghostFill != null ? _ghostFill.fillAmount : _ghostRatio;
         float elapsed = 0f;
@@ -387,7 +393,7 @@ public class UI_BossHealthBar : MonoBehaviour
             yield break;
         }
 
-        if (duration <= 0.001f)
+        if (duration <= MinFadeDuration)
         {
             _canvasGroup.alpha = targetAlpha;
             _fadeCoroutine = null;
