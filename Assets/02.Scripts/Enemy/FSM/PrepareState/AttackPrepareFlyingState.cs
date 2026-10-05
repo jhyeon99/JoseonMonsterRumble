@@ -15,6 +15,10 @@ public class AttackPrepareFlyingState : EnemyState
         Debug.Log("적 공격 준비 시작");
         _attackPrepareTimer = _enemy.Data.AttackPrepareTime;
         _enemy.MoveType.StopMove();
+        if (_enemy.Combat is EnemyMeleeCombat)
+        {
+            _enemy.Animation.PlayAttack();
+        }
     }
 
     public override void FixedUpdate()
