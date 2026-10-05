@@ -34,6 +34,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
             }
 
             _enemy.HitFlash.Flash();
+            _enemy.Animation.PlayHit();
             OnHit?.Invoke(hitData);
             _enemy.StateMachine.ChangeState(new KnockbackState(_enemy, hitData));
             return true;
@@ -58,6 +59,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
         Debug.Log($"현재 체력 {_currentHp}");
         _enemy.HitFlash.Flash();
+        _enemy.Animation.PlayHit();
         OnHit?.Invoke(hitData);
 
         return true;
