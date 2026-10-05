@@ -14,16 +14,18 @@ public class ParallaxManager : MonoBehaviour
         [SerializeField] private Transform _layer;
 
         [Header("가로 패럴렉스 강도")]
-        [Range(0f, 1f)] [SerializeField] private float _horizontalStrength;
+        [Range(0f, 1f)][SerializeField] private float _horizontalStrength;
 
         [Header("세로 패럴렉스 강도")]
-        [Range(0f, 1f)] [SerializeField] private float _verticalStrength = 0f;
+        [Range(0f, 1f)][SerializeField] private float _verticalStrength = 0f;
 
         [Header("가로 반복")]
-        [Tooltip("배경 묶음을 정확히 2번 반복해서 나란히 배치 (AA, ABAB, ABCABC)")] [SerializeField]
+        [Tooltip("배경 묶음을 정확히 2번 반복해서 나란히 배치 (AA, ABAB, ABCABC)")]
+        [SerializeField]
         private bool _loopHorizontally;
 
-        [Tooltip("그림이 반복되는 간격. 0이면 자식 전체 폭의 절반으로 자동 계산")] [SerializeField]
+        [Tooltip("그림이 반복되는 간격. 0이면 자식 전체 폭의 절반으로 자동 계산")]
+        [SerializeField]
         private float _loopWidth;
 
         private Vector3 _startPosition;
@@ -76,7 +78,7 @@ public class ParallaxManager : MonoBehaviour
         private static float FindRepeatInterval(SpriteRenderer[] renderers)
         {
             Sprite referenceSprite = renderers[0].sprite;
-            List<float> positions = new List<float>();
+            var positions = new List<float>();
 
             foreach (SpriteRenderer renderer in renderers)
             {
@@ -129,7 +131,8 @@ public class ParallaxManager : MonoBehaviour
     [SerializeField] private Transform _targetCamera;
 
     [Header("패럴렉스 레이어")]
-    [SerializeField] private List<ParallaxLayerSetting> _layers =
+    [SerializeField]
+    private List<ParallaxLayerSetting> _layers =
         new List<ParallaxLayerSetting>();
 
     private Vector3 _startCameraPosition;
