@@ -17,6 +17,7 @@ public abstract class Projectile : MonoBehaviour
     protected bool _isLaunching = false;
     private float _projectileDamage;
     public float ProjectileDamage => _projectileDamage;
+    protected float KnockbackForce => _data.KnockbackForce;
 
 
     private void Awake()

@@ -49,9 +49,24 @@ public class PlayerInputHandler : MonoBehaviour
         _isPotionKeyDown = Input.GetKeyDown(KeyCode.B);
 
 
-        if (_isJumpKeyDown) _jumpBuffer.Press();
-        if (_isDodgeKeyDown) _dodgeBuffer.Press();
-        if (_isAttackKeyDown) _attackBuffer.Press();
-        if (_isRangedAttackKeyDown) _rangedAttackBuffer.Press();
+        if (_isJumpKeyDown)
+        {
+            _jumpBuffer.Press();
+        }
+
+        if (_isDodgeKeyDown)
+        {
+            _dodgeBuffer.Press();
+        }
+
+        if (_isAttackKeyDown)
+        {
+            _attackBuffer.Press();
+        }
+
+        if (_isRangedAttackKeyDown)
+        {
+            _rangedAttackBuffer.Press();
+        }
     }
 }

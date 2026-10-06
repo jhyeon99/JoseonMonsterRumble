@@ -162,18 +162,32 @@ public class Player : MonoBehaviour
 
     private void HandleRangedAttack()
     {
-        if (_rangedAttack == null)
+        if (_rangedAttack == null || !_rangedAttack.IsCharging)
         {
             return;
         }
 
-        if (_rangedAttack.IsCharging && _inputHandler.IsRangedAttackKeyUp)
+        if (!_inputHandler.IsRangedAttackKeyUp)
         {
-            if (_rangedAttack.StopCharging())
-            {
-                _stateMachine.ChangeState(SpellState);
-            }
+            return;
         }
+
+        if (!CanReleaseRangedAttack())
+        {
+            _rangedAttack.CancelCharge();
+            return;
+        }
+
+        if (_rangedAttack.StopCharging())
+        {
+            _stateMachine.ChangeState(SpellState);
+        }
+    }
+
+    private bool CanReleaseRangedAttack()
+    {
+        IState currentState = _stateMachine.CurrentState;
+        return IsGrounded && (currentState == IdleState || currentState == MoveState);
     }
 
     public void SetRunning(bool isRunning)
