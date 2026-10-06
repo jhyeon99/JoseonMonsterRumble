@@ -20,9 +20,9 @@ public class PlayerRangedAttack : MonoBehaviour
     [SerializeField] private Transform _slotRoot;
 
     [Header("충전")]
-    [SerializeField] private float _chargeInterval = 0.4f; // 누르고 있을 때 부적이 하나씩 추가되는 간격
+    [SerializeField, Min(0.01f)] private float _chargeInterval = 0.4f; // 누르고 있을 때 부적이 하나씩 추가되는 간격
 
-    [SerializeField] private float _soulCostPerTalisman = 1f;
+    [SerializeField, Min(0.01f)] private float _soulCostPerTalisman = 1f;
 
     [Header("데미지")]
     [SerializeField] private float _damageIncreasePercent = 0f;
@@ -155,10 +155,16 @@ public class PlayerRangedAttack : MonoBehaviour
         int count = Mathf.Min(_activeCount, MaxActivatable);
         ResetCharge();
 
-        if (count < 1) return;
+        if (count < 1)
+        {
+            return;
+        }
 
         int fired = Fire(count);
-        if (fired < 1) return;
+        if (fired < 1)
+        {
+            return;
+        }
 
         // 실제로 발사된 개수만큼만 soul 소모
         _soul.TryUseSoul(fired * _soulCostPerTalisman);
@@ -170,37 +176,6 @@ public class PlayerRangedAttack : MonoBehaviour
 
     /// <summary>스펠(단발 원거리 공격) 시전 가능 여부 (영혼 보유 확인)</summary>
     public bool CanCastSpell => _soul != null && _soul.CurrentSoul >= _soulCostPerTalisman;
-
-    /// <summary>스펠 시전 시작 시 첫 번째 슬롯 부적 활성화 (불꽃 점화)</summary>
-    public void PrepareSpellSlot()
-    {
-        if (MaxActivatable < 1)
-        {
-            return;
-        }
-
-        ActivateSlot(0);
-    }
-
-    /// <summary>스펠 애니메이션 시점(PlayerSpellState)에서 단발 부적 발사</summary>
-    public bool FireSingleSpell()
-    {
-        if (!CanCastSpell)
-        {
-            return false;
-        }
-
-        int fired = Fire(1);
-        if (fired < 1)
-        {
-            return false;
-        }
-
-        _soul.TryUseSoul(fired * _soulCostPerTalisman);
-        RefreshSlotVisuals();
-        OnFired?.Invoke(fired);
-        return true;
-    }
 
     /// <summary>버프로 데미지 증가량을 바꿀 때 사용</summary>
     public void SetDamageIncrease(float percent) => _damageIncreasePercent = percent;

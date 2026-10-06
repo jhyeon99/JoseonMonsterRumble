@@ -133,7 +133,7 @@ public class PlayerProjectile : Projectile
         Vector2 hitPoint = other.ClosestPoint(transform.position);
         var hitData = new HitData(
             ProjectileDamage,
-            1f,
+            KnockbackForce,
             hitPoint,
             HitDirection
         );
