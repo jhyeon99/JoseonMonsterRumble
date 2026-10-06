@@ -25,7 +25,7 @@ public class PlayerMoveState : PlayerBaseState
 
         if (_inputHandler.TryUseRangedAttackInput() && _player.CanCastSpell)
         {
-            _stateMachine.ChangeState(_player.SpellState);
+            _player.RangedAttack.PressAttack();
             return;
         }
 

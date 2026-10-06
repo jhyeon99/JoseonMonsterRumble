@@ -43,7 +43,7 @@ public class PlayerSpellState : PlayerBaseState
         if (!_hasFired && _elapsedTime >= CastFireTiming)
         {
             _hasFired = true;
-            _player.RangedAttack.FireSingleSpell();
+            _player.RangedAttack.ReleaseAttack();
         }
 
         if (_elapsedTime >= TotalSpellDuration)
@@ -64,7 +64,7 @@ public class PlayerSpellState : PlayerBaseState
                 _hasEnteredSpellAnimation = true;
             }
 
-            if (_hasEnteredSpellAnimation && !animator.IsInTransition(0) && !isSpellState)
+            if (_hasFired && _hasEnteredSpellAnimation && !animator.IsInTransition(0) && !isSpellState)
             {
                 EndSpell();
                 return;
@@ -84,6 +84,11 @@ public class PlayerSpellState : PlayerBaseState
         base.Exit();
 
         _rigidbody2D.constraints = _originalConstraints;
+
+        if (!_hasFired && _player.RangedAttack != null)
+        {
+            _player.RangedAttack.CancelCharge();
+        }
     }
 
     private void EndSpell()

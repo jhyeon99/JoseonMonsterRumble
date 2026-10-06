@@ -70,16 +70,6 @@ public class Player : MonoBehaviour
 
     public bool CanCastSpell => IsGrounded && _rangedAttack != null && _rangedAttack.CanCastSpell;
 
-    // 원거리 공격(부적) 충전을 새로 시작할 수 있는 상태인지
-    private bool CanStartRangedAttack
-    {
-        get
-        {
-            IState state = _stateMachine.CurrentState;
-            return state != DeadState && state != HitState && state != DodgeState;
-        }
-    }
-
     private void OnEnable()
     {
         Health.OnDied += HandleDeath;
@@ -170,18 +160,18 @@ public class Player : MonoBehaviour
         _spellState = new PlayerSpellState(this, _stateMachine);
     }
 
-    // 원거리 공격(부적): 누르면 충전 시작, 떼면 발사
-    // 스펠 상태가 아닐 때의 기존 로직 보존 (충전 중인 경우에만 릴리즈 처리)
     private void HandleRangedAttack()
     {
-        if (_rangedAttack == null) return;
-
-        // 충전 중이면 키를 뗐는지만 확인 → 떼는 순간 발사
-        if (_rangedAttack.IsCharging)
+        if (_rangedAttack == null)
         {
-            if (!_inputHandler.IsRangedAttackKey)
+            return;
+        }
+
+        if (_rangedAttack.IsCharging && _inputHandler.IsRangedAttackKeyUp)
+        {
+            if (_rangedAttack.StopCharging())
             {
-                _rangedAttack.ReleaseAttack();
+                _stateMachine.ChangeState(SpellState);
             }
         }
     }

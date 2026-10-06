@@ -42,7 +42,7 @@ public abstract class Projectile : MonoBehaviour
         }
     }
 
-    public void OnSpawn(Transform muzzlePoint, Transform playerPoint, float damageIncreaseValue)
+    public virtual void OnSpawn(Transform muzzlePoint, Transform playerPoint, float damageIncreaseValue)
     {
         MuzzlePosition = muzzlePoint.position;
         Transform player = playerPoint;
