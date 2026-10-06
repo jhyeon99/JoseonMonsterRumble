@@ -141,6 +141,28 @@ public class PlayerRangedAttack : MonoBehaviour
     /// <summary>피격, 사망 등으로 발사 없이 충전을 취소할 때 호출</summary>
     public void CancelCharge() => ResetCharge();
 
+    /// <summary>스펠(단발 원거리 공격) 시전 가능 여부 (영혼 보유 확인)</summary>
+    public bool CanCastSpell => _soul != null && _soul.CurrentSoul >= _soulCostPerTalisman;
+
+    /// <summary>스펠 애니메이션 시점(PlayerSpellState)에서 단발 부적 발사</summary>
+    public bool FireSingleSpell()
+    {
+        if (!CanCastSpell)
+        {
+            return false;
+        }
+
+        int fired = Fire(1);
+        if (fired < 1)
+        {
+            return false;
+        }
+
+        _soul.TryUseSoul(fired * _soulCostPerTalisman);
+        OnFired?.Invoke(fired);
+        return true;
+    }
+
     /// <summary>버프로 데미지 증가량을 바꿀 때 사용</summary>
     public void SetDamageIncrease(float percent) => _damageIncreasePercent = percent;
 
