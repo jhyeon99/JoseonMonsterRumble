@@ -25,7 +25,7 @@ public class DeadState : EnemyState
         if (_dieTimer <= 0)
         {
             SoulItem soulItem = ItemPool.Instance.GetSoulItem();
-            soulItem.transform.position = _enemy.GetSoulSpawnPosition();
+            soulItem.transform.position = _enemy.GetEnemyCenterPosition();
             _enemy.gameObject.SetActive(false);
         }
     }

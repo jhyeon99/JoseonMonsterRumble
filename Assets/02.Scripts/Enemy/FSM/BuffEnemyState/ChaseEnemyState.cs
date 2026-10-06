@@ -3,9 +3,9 @@ using UnityEngine;
 public class ChaseEnemyState : EnemyState
 {
     private readonly Enemy _enemy;
-    private readonly Transform _targetEnemy;
+    private readonly Enemy _targetEnemy;
 
-    public ChaseEnemyState(Enemy enemy, Transform target)
+    public ChaseEnemyState(Enemy enemy, Enemy target)
     {
         _enemy = enemy;
         _targetEnemy = target;

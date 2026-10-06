@@ -13,6 +13,7 @@ public class FindEnemyState : EnemyState
 
     public override void Enter()
     {
+        _enemy.DirectionLock.LockDirection();
         _findTimer = _findTime;
         Debug.Log("아군 탐색");
         _enemy.MoveType.StopMove();
