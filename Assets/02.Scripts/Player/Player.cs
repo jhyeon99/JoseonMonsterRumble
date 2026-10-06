@@ -68,6 +68,8 @@ public class Player : MonoBehaviour
 
     public bool IsGrounded => _movement != null && _movement.IsGrounded();
 
+    public bool CanCastSpell => IsGrounded && _rangedAttack != null && _rangedAttack.CanCastSpell;
+
     // 원거리 공격(부적) 충전을 새로 시작할 수 있는 상태인지
     private bool CanStartRangedAttack
     {
