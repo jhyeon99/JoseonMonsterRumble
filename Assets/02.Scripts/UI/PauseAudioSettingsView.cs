@@ -11,8 +11,17 @@ public class PauseAudioSettingsView : MonoBehaviour
     [SerializeField] private Button _sfxMuteButton;
     [SerializeField] private TextMeshProUGUI _bgmMuteStateText;
     [SerializeField] private TextMeshProUGUI _sfxMuteStateText;
+    [SerializeField] private Image _bgmMuteIcon;
+    [SerializeField] private Image _sfxMuteIcon;
+    [SerializeField] private Sprite _soundOnSprite;
+    [SerializeField] private Sprite _soundOffSprite;
     [SerializeField] private Image _bgmFillImage;
     [SerializeField] private Image _sfxFillImage;
+
+    [Header("닫기 연동")]
+    [SerializeField] private Button _outsideDimmerButton;
+    [SerializeField] private Button _closeButton;
+    [SerializeField] private UnityEvent _onCloseRequested = new UnityEvent();
 
     [Header("초기 설정")]
     [SerializeField, Range(0f, 1f)] private float _bgmVolume = 1f;
@@ -32,6 +41,8 @@ public class PauseAudioSettingsView : MonoBehaviour
 
     [SerializeField, ReadOnly] private bool _isReady;
 
+    public UnityEvent OnCloseRequested => _onCloseRequested;
+
     private void Awake()
     {
         _isReady = HasRequiredReferences();
@@ -45,6 +56,18 @@ public class PauseAudioSettingsView : MonoBehaviour
         _sfxVolume = Mathf.Clamp01(_sfxVolume);
         _bgmSlider.onValueChanged.AddListener(HandleBgmVolumeChanged);
         _sfxSlider.onValueChanged.AddListener(HandleSfxVolumeChanged);
+
+        if (_outsideDimmerButton != null)
+        {
+            _outsideDimmerButton.onClick.AddListener(RequestClose);
+        }
+
+        if (_closeButton != null)
+        {
+            _closeButton.onClick.AddListener(RequestClose);
+        }
+
+        BindAudioManager();
         RefreshView();
     }
 
@@ -52,6 +75,7 @@ public class PauseAudioSettingsView : MonoBehaviour
     {
         if (_isReady)
         {
+            SyncFromAudioManager();
             RefreshView();
         }
     }
@@ -67,6 +91,18 @@ public class PauseAudioSettingsView : MonoBehaviour
         {
             _sfxSlider.onValueChanged.RemoveListener(HandleSfxVolumeChanged);
         }
+
+        if (_outsideDimmerButton != null)
+        {
+            _outsideDimmerButton.onClick.RemoveListener(RequestClose);
+        }
+
+        if (_closeButton != null)
+        {
+            _closeButton.onClick.RemoveListener(RequestClose);
+        }
+
+        UnbindAudioManager();
     }
 
     public void ApplySettings(float bgmVolume, float sfxVolume, bool isBgmMuted, bool isSfxMuted)
@@ -76,7 +112,6 @@ public class PauseAudioSettingsView : MonoBehaviour
         _isBgmMuted = isBgmMuted;
         _isSfxMuted = isSfxMuted;
 
-        // TODO: AudioManager 또는 설정 저장 시스템이 확정되면 PlayerPrefs 저장과 로드는 해당 계층에서 처리한다.
         if (_isReady)
         {
             RefreshView();
@@ -107,6 +142,11 @@ public class PauseAudioSettingsView : MonoBehaviour
         _sfxMuteChanged.Invoke(_isSfxMuted);
     }
 
+    public void RequestClose()
+    {
+        _onCloseRequested.Invoke();
+    }
+
     private void HandleBgmVolumeChanged(float value)
     {
         _bgmVolume = Mathf.Clamp01(value);
@@ -129,16 +169,54 @@ public class PauseAudioSettingsView : MonoBehaviour
 
     private void RefreshBgmView()
     {
-        _bgmMuteStateText.text = _isBgmMuted ? "MUTE ON" : "MUTE OFF";
-        _bgmMuteStateText.color = _isBgmMuted ? _mutedColor : _activeColor;
-        _bgmFillImage.color = _isBgmMuted ? _mutedColor : _activeColor;
+        if (_bgmMuteStateText != null)
+        {
+            _bgmMuteStateText.text = _isBgmMuted ? "MUTE ON" : "MUTE OFF";
+            _bgmMuteStateText.color = _isBgmMuted ? _mutedColor : _activeColor;
+        }
+
+        if (_bgmMuteIcon != null)
+        {
+            if (_isBgmMuted && _soundOffSprite != null)
+            {
+                _bgmMuteIcon.sprite = _soundOffSprite;
+            }
+            else if (!_isBgmMuted && _soundOnSprite != null)
+            {
+                _bgmMuteIcon.sprite = _soundOnSprite;
+            }
+        }
+
+        if (_bgmFillImage != null)
+        {
+            _bgmFillImage.color = _isBgmMuted ? _mutedColor : _activeColor;
+        }
     }
 
     private void RefreshSfxView()
     {
-        _sfxMuteStateText.text = _isSfxMuted ? "MUTE ON" : "MUTE OFF";
-        _sfxMuteStateText.color = _isSfxMuted ? _mutedColor : _activeColor;
-        _sfxFillImage.color = _isSfxMuted ? _mutedColor : _activeColor;
+        if (_sfxMuteStateText != null)
+        {
+            _sfxMuteStateText.text = _isSfxMuted ? "MUTE ON" : "MUTE OFF";
+            _sfxMuteStateText.color = _isSfxMuted ? _mutedColor : _activeColor;
+        }
+
+        if (_sfxMuteIcon != null)
+        {
+            if (_isSfxMuted && _soundOffSprite != null)
+            {
+                _sfxMuteIcon.sprite = _soundOffSprite;
+            }
+            else if (!_isSfxMuted && _soundOnSprite != null)
+            {
+                _sfxMuteIcon.sprite = _soundOnSprite;
+            }
+        }
+
+        if (_sfxFillImage != null)
+        {
+            _sfxFillImage.color = _isSfxMuted ? _mutedColor : _activeColor;
+        }
     }
 
     private bool HasRequiredReferences()
@@ -157,18 +235,59 @@ public class PauseAudioSettingsView : MonoBehaviour
             hasRequiredReferences = false;
         }
 
-        if (_bgmMuteStateText == null || _sfxMuteStateText == null)
+        if (_bgmMuteStateText == null && _bgmMuteIcon == null)
         {
-            Debug.LogWarning($"{name}: BGM 또는 SFX Mute State Text 참조가 없습니다.", this);
+            Debug.LogWarning($"{name}: BGM 음소거 표시를 위한 Text 또는 Icon 참조가 없습니다.", this);
             hasRequiredReferences = false;
         }
 
-        if (_bgmFillImage == null || _sfxFillImage == null)
+        if (_sfxMuteStateText == null && _sfxMuteIcon == null)
         {
-            Debug.LogWarning($"{name}: BGM 또는 SFX Slider Fill Image 참조가 없습니다.", this);
+            Debug.LogWarning($"{name}: SFX 음소거 표시를 위한 Text 또는 Icon 참조가 없습니다.", this);
             hasRequiredReferences = false;
         }
 
         return hasRequiredReferences;
+    }
+
+    private void BindAudioManager()
+    {
+        if (AudioManager.Instance == null)
+        {
+            return;
+        }
+
+        _bgmVolumeChanged.AddListener(AudioManager.Instance.SetBgmVolume);
+        _sfxVolumeChanged.AddListener(AudioManager.Instance.SetSfxVolume);
+        _bgmMuteChanged.AddListener(AudioManager.Instance.SetBgmMute);
+        _sfxMuteChanged.AddListener(AudioManager.Instance.SetSfxMute);
+
+        SyncFromAudioManager();
+    }
+
+    private void UnbindAudioManager()
+    {
+        if (AudioManager.Instance == null)
+        {
+            return;
+        }
+
+        _bgmVolumeChanged.RemoveListener(AudioManager.Instance.SetBgmVolume);
+        _sfxVolumeChanged.RemoveListener(AudioManager.Instance.SetSfxVolume);
+        _bgmMuteChanged.RemoveListener(AudioManager.Instance.SetBgmMute);
+        _sfxMuteChanged.RemoveListener(AudioManager.Instance.SetSfxMute);
+    }
+
+    private void SyncFromAudioManager()
+    {
+        if (AudioManager.Instance == null)
+        {
+            return;
+        }
+
+        _bgmVolume = AudioManager.Instance.GetBgmVolume();
+        _sfxVolume = AudioManager.Instance.GetSfxVolume();
+        _isBgmMuted = AudioManager.Instance.IsBgmMuted();
+        _isSfxMuted = AudioManager.Instance.IsSfxMuted();
     }
 }
