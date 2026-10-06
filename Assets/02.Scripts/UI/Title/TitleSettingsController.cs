@@ -22,6 +22,12 @@ public class TitleSettingsController : MonoBehaviour
 
         _titleMenuContainer.SetActive(true);
         _settingsPanel.SetActive(false);
+
+        PauseAudioSettingsView audioSettingsView = _settingsPanel.GetComponent<PauseAudioSettingsView>();
+        if (audioSettingsView != null)
+        {
+            audioSettingsView.OnCloseRequested.AddListener(HideSettings);
+        }
     }
 
     private void Update()
