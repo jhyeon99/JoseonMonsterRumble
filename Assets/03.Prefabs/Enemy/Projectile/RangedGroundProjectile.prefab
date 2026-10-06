@@ -81,8 +81,8 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1918527705
-  m_SortingLayer: 3
-  m_SortingOrder: 0
+  m_SortingLayer: 5
+  m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 2858732299161266206, guid: 7c94bf0c49307534aa1f3049f0df0648,
     type: 3}
@@ -146,6 +146,7 @@ MonoBehaviour:
   _data: {fileID: 11400000, guid: 24996b9090164304aa1221f4c467f82f, type: 2}
   _type: 0
   _curveHeight: 5
+  _returnPoolTimer: 5
 --- !u!96 &5839788867353054483
 TrailRenderer:
   serializedVersion: 4
@@ -191,8 +192,8 @@ TrailRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1918527705
+  m_SortingLayer: 5
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Time: 0.25
@@ -227,21 +228,21 @@ TrailRenderer:
     colorGradient:
       serializedVersion: 2
       key0: {r: 0, g: 0, b: 0, a: 1}
-      key1: {r: 1, g: 1, b: 1, a: 1}
-      key2: {r: 1, g: 1, b: 1, a: 0}
-      key3: {r: 0, g: 0, b: 0, a: 0}
-      key4: {r: 0, g: 0, b: 0, a: 0}
-      key5: {r: 0, g: 0, b: 0, a: 0}
-      key6: {r: 0, g: 0, b: 0, a: 0}
-      key7: {r: 0, g: 0, b: 0, a: 0}
+      key1: {r: 0.13207549, g: 0.018066933, b: 0.018066933, a: 1}
+      key2: {r: 0.14509805, g: 0.019607844, b: 0.019607844, a: 0}
+      key3: {r: 0.3490566, g: 0.055205956, b: 0.044455323, a: 0}
+      key4: {r: 0.3254902, g: 0.050980397, b: 0.043137256, a: 0}
+      key5: {r: 0.9622642, g: 0.13112125, b: 0.077162705, a: 0}
+      key6: {r: 1, g: 0.5613208, b: 0.5613208, a: 0}
+      key7: {r: 1, g: 1, b: 1, a: 0}
       ctime0: 0
-      ctime1: 65535
-      ctime2: 63415
-      ctime3: 0
-      ctime4: 0
-      ctime5: 0
-      ctime6: 0
-      ctime7: 0
+      ctime1: 12336
+      ctime2: 20239
+      ctime3: 30262
+      ctime4: 31804
+      ctime5: 44718
+      ctime6: 54934
+      ctime7: 65535
       atime0: 0
       atime1: 65535
       atime2: 0
@@ -252,7 +253,7 @@ TrailRenderer:
       atime7: 0
       m_Mode: 2
       m_ColorSpace: 0
-      m_NumColorKeys: 2
+      m_NumColorKeys: 8
       m_NumAlphaKeys: 2
     numCornerVertices: 0
     numCapVertices: 0
