@@ -18,7 +18,7 @@ public class KnockbackState : EnemyState
         _knockbackTimer = _knockbackTime;
         Debug.Log("적 넉백!");
         _enemy.MoveType.StopMove();
-        _enemy.EnemyRb.AddForce(_hitData.AttackDirection * _hitData.KnockbackForce, ForceMode2D.Impulse);
+        _enemy.EnemyRb.AddForce(Vector2.up * _hitData.KnockbackForce, ForceMode2D.Impulse);
     }
 
     public override void Update()
