@@ -67,9 +67,8 @@ public abstract class Projectile : MonoBehaviour
     /// </summary>
     protected virtual Vector2 HitDirection => (PlayerPosition - MuzzlePosition).normalized;
 
-    private void OnTriggerEnter2D(Collider2D other)
+    protected virtual void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log("투사체가 부딪혔다.");
         Vector2 hitPoint = other.ClosestPoint(transform.position);
 
         if (other.TryGetComponent<IDamageable>(out IDamageable damageable))
@@ -82,7 +81,6 @@ public abstract class Projectile : MonoBehaviour
             );
 
             damageable.TakeDamage(hitData);
-            Debug.Log($"플레이어에게 원거리공격으로 {_projectileDamage}만큼 피해를 입힘.");
         }
 
         gameObject.SetActive(false);

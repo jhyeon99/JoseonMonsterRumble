@@ -1,47 +1,70 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerProjectile : Projectile
 {
+    private const float ExplosionDuration = 0.5f;
+
+    private static readonly int AnimParamFire = Animator.StringToHash("fire");
+    private static readonly int AnimParamExplode = Animator.StringToHash("explode");
+    private static readonly Collider2D[] Hits = new Collider2D[16];
+
     [Header("탐색")]
     [SerializeField] private float _searchRadius = 8f;
-
     [SerializeField] private LayerMask _enemyLayer;
-
-    [SerializeField] private LayerMask _obstacleLayer; // 시야를 가리는 레이어 (Ground, Wall 등)
-
-    [SerializeField] private Vector2 _sightOffset = new Vector2(0f, 0.5f); // 플레이어 피벗 기준 시야 위치
-
+    [SerializeField] private LayerMask _obstacleLayer;
+    [SerializeField] private Vector2 _sightOffset = new Vector2(0f, 0.5f);
     [SerializeField] private bool _drawDebug = false;
 
     [Header("유도")]
-    [SerializeField] private float _turnSpeed = 360f; // 초당 회전 각도(도)
-
+    [SerializeField] private float _turnSpeed = 360f;
     [SerializeField] private float _lifeTime = 3f;
 
-    private static readonly Collider2D[] Hits = new Collider2D[16];
-
     private Rigidbody2D _rigidbody2D;
+    private Collider2D _collider2D;
+    private Animator _animator;
     private Transform _target;
     private Vector2 _dir;
-    private int _facing = 1; // 1 = 오른쪽, -1 = 왼쪽
+    private int _facing = 1;
     private bool _initialized;
+    private bool _isExploding;
+    private Coroutine _explodeRoutine;
 
-    // ※ Awake / Update / OnTriggerEnter2D 선언 금지 (기반 클래스 것이 private이라 덮어써짐)
-
-    /// <summary>타겟이 없을 때 날아갈 방향. OnSpawn 전에 호출</summary>
     public void SetFacing(int facing) => _facing = facing >= 0 ? 1 : -1;
 
-    // 유도 투사체라 실제 진행 방향(_dir)으로 밀어냄. 첫 Fire 전에 맞으면 바라보는 방향 사용
     protected override Vector2 HitDirection =>
         _dir != Vector2.zero ? _dir : (_facing > 0 ? Vector2.right : Vector2.left);
 
+    public new void OnSpawn(Transform muzzlePoint, Transform playerPoint, float damageIncreaseValue)
+    {
+        base.OnSpawn(muzzlePoint, playerPoint, damageIncreaseValue);
+
+        EnsureComponents();
+
+        _isExploding = false;
+        if (_collider2D != null)
+        {
+            _collider2D.enabled = true;
+        }
+
+        if (_animator != null)
+        {
+            _animator.SetTrigger(AnimParamFire);
+        }
+    }
+
     protected override void Fire()
     {
-        if (!_isLaunching) return;
+        if (!_isLaunching || _isExploding)
+        {
+            return;
+        }
 
-        if (!_initialized) Initialize();
+        if (!_initialized)
+        {
+            Initialize();
+        }
 
-        // 고정된 대상이 살아 있는 동안만 유도
         if (_target != null && _target.gameObject.activeInHierarchy)
         {
             Vector2 toTarget = ((Vector2)_target.position - _rigidbody2D.position).normalized;
@@ -50,7 +73,7 @@ public class PlayerProjectile : Projectile
         }
         else
         {
-            _target = null; // 대상이 죽거나 풀로 돌아가면 그대로 직진
+            _target = null;
         }
 
         ApplyVelocity();
@@ -63,28 +86,103 @@ public class PlayerProjectile : Projectile
         }
     }
 
-    // 발사 직후 첫 프레임에 한 번만 실행: 주변 적 탐색 후 target 고정
+    protected override void OnTriggerEnter2D(Collider2D other)
+    {
+        if (_isExploding)
+        {
+            return;
+        }
+
+        if (!other.TryGetComponent<IDamageable>(out IDamageable damageable))
+        {
+            return;
+        }
+
+        Vector2 hitPoint = other.ClosestPoint(transform.position);
+        var hitData = new HitData(
+            ProjectileDamage,
+            1f,
+            hitPoint,
+            HitDirection
+        );
+
+        damageable.TakeDamage(hitData);
+
+        StartExplosion();
+    }
+
+    private void StartExplosion()
+    {
+        _isExploding = true;
+        _isLaunching = false;
+
+        if (_collider2D != null)
+        {
+            _collider2D.enabled = false;
+        }
+
+        if (_rigidbody2D != null)
+        {
+            _rigidbody2D.linearVelocity = Vector2.zero;
+        }
+
+        if (_animator != null)
+        {
+            _animator.SetTrigger(AnimParamExplode);
+        }
+
+        if (_explodeRoutine != null)
+        {
+            StopCoroutine(_explodeRoutine);
+        }
+
+        _explodeRoutine = StartCoroutine(WaitForExplosionRoutine());
+    }
+
+    private IEnumerator WaitForExplosionRoutine()
+    {
+        yield return new WaitForSeconds(ExplosionDuration);
+
+        _explodeRoutine = null;
+        gameObject.SetActive(false);
+    }
+
+    private void EnsureComponents()
+    {
+        if (_rigidbody2D == null)
+        {
+            _rigidbody2D = GetComponent<Rigidbody2D>();
+        }
+
+        if (_collider2D == null)
+        {
+            _collider2D = GetComponent<Collider2D>();
+        }
+
+        if (_animator == null)
+        {
+            _animator = GetComponentInChildren<Animator>();
+        }
+    }
+
     private void Initialize()
     {
-        if (_rigidbody2D == null) _rigidbody2D = GetComponent<Rigidbody2D>();
+        EnsureComponents();
 
         _target = FindNearestEnemy();
 
         if (_target != null)
         {
-            // 적을 찾았으면 적 방향으로 출발
             _dir = ((Vector2)_target.position - (Vector2)transform.position).normalized;
         }
         else
         {
-            // 못 찾았으면 플레이어가 넘겨준 방향으로 직진
             _dir = _facing > 0 ? Vector2.right : Vector2.left;
         }
 
         _initialized = true;
     }
 
-    // 범위 안에서 시야가 확보된 적 중 가장 가까운 적
     private Transform FindNearestEnemy()
     {
         var filter = new ContactFilter2D();
@@ -100,16 +198,23 @@ public class PlayerProjectile : Projectile
         for (int i = 0; i < count; i++)
         {
             Collider2D col = Hits[i];
-            if (!col.TryGetComponent<IDamageable>(out _)) continue;
+            if (!col.TryGetComponent<IDamageable>(out _))
+            {
+                continue;
+            }
 
             Vector2 enemyPos = col.bounds.center;
             float sqr = (enemyPos - origin).sqrMagnitude;
 
-            // 이미 찾은 적보다 멀면 시야 검사할 필요 없음
-            if (sqr >= minSqr) continue;
+            if (sqr >= minSqr)
+            {
+                continue;
+            }
 
-            // 사이에 장애물이 있으면 감지 안 됨
-            if (!HasLineOfSight(origin, enemyPos)) continue;
+            if (!HasLineOfSight(origin, enemyPos))
+            {
+                continue;
+            }
 
             minSqr = sqr;
             nearest = col.transform;
@@ -124,7 +229,9 @@ public class PlayerProjectile : Projectile
         bool visible = hit.collider == null;
 
         if (_drawDebug)
+        {
             Debug.DrawLine(from, to, visible ? Color.green : Color.red, 1f);
+        }
 
         return visible;
     }
@@ -139,10 +246,22 @@ public class PlayerProjectile : Projectile
 
     private void OnDisable()
     {
-        // 풀로 돌아갈 때 초기화 → 다음 발사 때 다시 탐색
+        if (_explodeRoutine != null)
+        {
+            StopCoroutine(_explodeRoutine);
+            _explodeRoutine = null;
+        }
+
+        _isExploding = false;
         _initialized = false;
         _target = null;
         _facing = 1;
+
+        if (_collider2D != null)
+        {
+            _collider2D.enabled = true;
+        }
+
         if (_rigidbody2D != null)
         {
             _rigidbody2D.linearVelocity = Vector2.zero;

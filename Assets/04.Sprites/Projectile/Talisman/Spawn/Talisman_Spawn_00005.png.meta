@@ -1,0 +1,507 @@
+fileFormatVersion: 2
+guid: 65e2f2acf3d76ed4f83d0cd36458ed29
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1865047605675471936
+    second: Talisman_Spawn_00005_0
+  - first:
+      213: 3964311619232352742
+    second: Talisman_Spawn_00005_1
+  - first:
+      213: -282331571227880339
+    second: Talisman_Spawn_00005_2
+  - first:
+      213: 309625743413091341
+    second: Talisman_Spawn_00005_3
+  - first:
+      213: 627162026308098749
+    second: Talisman_Spawn_00005_4
+  - first:
+      213: -8705865697117128382
+    second: Talisman_Spawn_00005_5
+  - first:
+      213: -5682490817250114480
+    second: Talisman_Spawn_00005_6
+  - first:
+      213: -1277966411582457475
+    second: Talisman_Spawn_00005_7
+  - first:
+      213: 7573735025070147722
+    second: Talisman_Spawn_00005_8
+  - first:
+      213: 9010655616533155738
+    second: Talisman_Spawn_00005_9
+  - first:
+      213: 3147463480980365121
+    second: Talisman_Spawn_00005_10
+  - first:
+      213: 3998431650707316760
+    second: Talisman_Spawn_00005_11
+  - first:
+      213: 6564495941209162746
+    second: Talisman_Spawn_00005_12
+  - first:
+      213: -2108412432063539889
+    second: Talisman_Spawn_00005_13
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 150
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 256
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 3
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Talisman_Spawn_00005_0
+      rect:
+        serializedVersion: 2
+        x: 728
+        y: 629
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 044ba797aeaf1e910800000000000000
+      internalID: 1865047605675471936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Spawn_00005_1
+      rect:
+        serializedVersion: 2
+        x: 682
+        y: 600
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6e94c43f960140730800000000000000
+      internalID: 3964311619232352742
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Spawn_00005_2
+      rect:
+        serializedVersion: 2
+        x: 774
+        y: 564
+        width: 62
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d64951c8ee4f41cf0800000000000000
+      internalID: -282331571227880339
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Spawn_00005_3
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 466
+        width: 33
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0c147129f20c4400800000000000000
+      internalID: 309625743413091341
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Spawn_00005_4
+      rect:
+        serializedVersion: 2
+        x: 403
+        y: 97
+        width: 479
+        height: 461
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dba55b24a8024b800800000000000000
+      internalID: 627162026308098749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Spawn_00005_5
+      rect:
+        serializedVersion: 2
+        x: 888
+        y: 421
+        width: 22
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 249331d264d8e2780800000000000000
+      internalID: -8705865697117128382
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Spawn_00005_6
+      rect:
+        serializedVersion: 2
+        x: 325
+        y: 399
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 054436675bcb321b0800000000000000
+      internalID: -5682490817250114480
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Spawn_00005_7
+      rect:
+        serializedVersion: 2
+        x: 370
+        y: 350
+        width: 9
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d793fb2d150c34ee0800000000000000
+      internalID: -1277966411582457475
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Spawn_00005_8
+      rect:
+        serializedVersion: 2
+        x: 401
+        y: 126
+        width: 11
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a888d30c0ef4b1960800000000000000
+      internalID: 7573735025070147722
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Spawn_00005_9
+      rect:
+        serializedVersion: 2
+        x: 538
+        y: 96
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a9f46d0fa874c0d70800000000000000
+      internalID: 9010655616533155738
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Spawn_00005_10
+      rect:
+        serializedVersion: 2
+        x: 492
+        y: 73
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14f59572c590eab20800000000000000
+      internalID: 3147463480980365121
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Spawn_00005_11
+      rect:
+        serializedVersion: 2
+        x: 517
+        y: 76
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 810a617d6684d7730800000000000000
+      internalID: 3998431650707316760
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Spawn_00005_12
+      rect:
+        serializedVersion: 2
+        x: 774
+        y: 64
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af304414746c91b50800000000000000
+      internalID: 6564495941209162746
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Spawn_00005_13
+      rect:
+        serializedVersion: 2
+        x: 806
+        y: 58
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f45d5da501a6db2e0800000000000000
+      internalID: -2108412432063539889
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Talisman_Spawn_00005_0: 1865047605675471936
+      Talisman_Spawn_00005_1: 3964311619232352742
+      Talisman_Spawn_00005_10: 3147463480980365121
+      Talisman_Spawn_00005_11: 3998431650707316760
+      Talisman_Spawn_00005_12: 6564495941209162746
+      Talisman_Spawn_00005_13: -2108412432063539889
+      Talisman_Spawn_00005_2: -282331571227880339
+      Talisman_Spawn_00005_3: 309625743413091341
+      Talisman_Spawn_00005_4: 627162026308098749
+      Talisman_Spawn_00005_5: -8705865697117128382
+      Talisman_Spawn_00005_6: -5682490817250114480
+      Talisman_Spawn_00005_7: -1277966411582457475
+      Talisman_Spawn_00005_8: 7573735025070147722
+      Talisman_Spawn_00005_9: 9010655616533155738
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
