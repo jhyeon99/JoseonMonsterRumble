@@ -25,7 +25,8 @@ public abstract class Enemy : MonoBehaviour
     private Rigidbody2D _enemyRb;
     private HitFlash _hitFlash;
     private EnemyMoveArea _moveArea;
-    private Collider2D _enemyCollider;
+    private BoxCollider2D _enemyCollider;
+    private float _radius;
 
     public Transform Target => _target;
     public EnemyStateMachine StateMachine => _stateMachine;
@@ -37,6 +38,7 @@ public abstract class Enemy : MonoBehaviour
     public Rigidbody2D EnemyRb => _enemyRb;
     public HitFlash HitFlash => _hitFlash;
     public EnemyMoveArea MoveArea => _moveArea;
+    public float Radius => _radius;
 
     protected virtual void OnDisable()
     {
@@ -54,11 +56,12 @@ public abstract class Enemy : MonoBehaviour
         _enemyRb = GetComponent<Rigidbody2D>();
         _hitFlash = GetComponent<HitFlash>();
         _moveArea = GetComponent<EnemyMoveArea>();
-        _enemyCollider = GetComponent<Collider2D>();
+        _enemyCollider = GetComponent<BoxCollider2D>();
     }
 
     protected virtual void Start()
     {
+        _radius = _enemyCollider.size.y * 0.5f;
         EnemyManager.Instance.AddEnemy(this);
         _target = GameObject.FindWithTag(Constants.Tags.Player).transform;
     }
@@ -88,7 +91,7 @@ public abstract class Enemy : MonoBehaviour
         return (_target.position - transform.position).normalized;
     }
 
-    public Vector3 GetSoulSpawnPosition()
+    public Vector2 GetEnemyCenterPosition()
     {
         return _enemyCollider.bounds.center;
     }

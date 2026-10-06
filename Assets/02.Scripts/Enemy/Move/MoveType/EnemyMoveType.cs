@@ -22,11 +22,11 @@ public abstract class EnemyMoveType : MonoBehaviour
     public abstract void BackMove(Vector2 direction);
     public abstract void StopMove();
 
-    public virtual void ChaseMove(Transform target)
+    public virtual void ChaseMove(Enemy target)
     {
     }
 
-    public virtual void MoveToStartPosition(Transform target)
+    public virtual void MoveToStartPosition(Enemy target)
     {
     }
 
