@@ -3,19 +3,47 @@ using UnityEngine;
 [DefaultExecutionOrder(1)]
 public class CameraFollow : MonoBehaviour
 {
-    [SerializeField] private Transform _target;
-    [SerializeField] private Vector3 _offset = new Vector3(0f, 0f, -10f);
-    [SerializeField] private float _smoothTime = 1f;
+    [SerializeField]
+    private Transform _target;
+
+    [SerializeField]
+    private Vector3 _offset = new Vector3(0f, 0f, -10f);
+
+    [SerializeField]
+    private float _smoothTime = 1f;
 
     [Header("Bound Settings")]
-    [SerializeField] private float _minX = -10f;
+    [SerializeField]
+    private float _minX = -10f;
 
-    [SerializeField] private float _maxX = 10f;
-    [SerializeField] private float _minY = -10f;
-    [SerializeField] private float _maxY = 10f;
+    [SerializeField]
+    private float _maxX = 10f;
+
+    [SerializeField]
+    private float _minY = -10f;
+
+    [SerializeField]
+    private float _maxY = 10f;
 
 
     private Vector3 _velocity = Vector3.zero;
+
+    private void Awake()
+    {
+        // 비어 있으면 Player 태그로 자동 연결 (씬마다 수동 연결 불필요)
+        // StageManager가 리스폰 시 SnapToTarget을 부르기 전에 연결되도록 Awake에서 처리
+        if (_target != null) return;
+
+        var player = GameObject.FindWithTag(Constants.Tags.Player);
+        if (player != null)
+        {
+            _target = player.transform;
+        }
+        else
+        {
+            Debug.LogWarning($"{name}: Player 태그 오브젝트를 찾지 못했습니다.", this);
+        }
+    }
 
     private void LateUpdate()
     {
