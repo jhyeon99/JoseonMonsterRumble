@@ -4,8 +4,9 @@ public class PlayerSpellState : PlayerBaseState
 {
     private const float CastFireTiming = 0.6875f;
     private const float TotalSpellDuration = 1.25f;
-    private const string AnimStateSpell = "PlayerSpell";
-    private const string AnimStateSpellEnd = "PlayerSpellEnd";
+
+    private static readonly int AnimHashSpell = Animator.StringToHash("PlayerSpell");
+    private static readonly int AnimHashSpellEnd = Animator.StringToHash("PlayerSpellEnd");
 
     private float _elapsedTime;
     private bool _hasFired;
@@ -55,16 +56,15 @@ public class PlayerSpellState : PlayerBaseState
         if (animator != null)
         {
             AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+            int shortHash = stateInfo.shortNameHash;
+            bool isSpellState = shortHash == AnimHashSpell || shortHash == AnimHashSpellEnd;
 
-            if (stateInfo.IsName(AnimStateSpell) || stateInfo.IsName(AnimStateSpellEnd))
+            if (isSpellState)
             {
                 _hasEnteredSpellAnimation = true;
             }
 
-            if (_hasEnteredSpellAnimation &&
-                !animator.IsInTransition(0) &&
-                !stateInfo.IsName(AnimStateSpell) &&
-                !stateInfo.IsName(AnimStateSpellEnd))
+            if (_hasEnteredSpellAnimation && !animator.IsInTransition(0) && !isSpellState)
             {
                 EndSpell();
                 return;

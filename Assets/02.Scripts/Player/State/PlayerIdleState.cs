@@ -23,7 +23,7 @@ public class PlayerIdleState : PlayerBaseState
             return;
         }
 
-        if (_inputHandler.TryUseRangedAttackInput() && _player.IsGrounded && _player.RangedAttack != null && _player.RangedAttack.CanCastSpell)
+        if (_inputHandler.TryUseRangedAttackInput() && _player.CanCastSpell)
         {
             _stateMachine.ChangeState(_player.SpellState);
             return;
