@@ -19,7 +19,6 @@ public class PauseController : MonoBehaviour
 
     public static bool IsPaused { get; private set; }
 
-    private float _previousTimeScale = 1f;
     [SerializeField, ReadOnly] private bool _isSettingsAvailable;
 
     private void Awake()
@@ -161,7 +160,6 @@ public class PauseController : MonoBehaviour
 
         if (isPaused)
         {
-            _previousTimeScale = Time.timeScale;
             Time.timeScale = 0f;
             _pauseMenuPanel.SetActive(true);
             if (_settingsPanel != null)
@@ -235,9 +233,10 @@ public class PauseController : MonoBehaviour
         return hasSettingsReferences;
     }
 
+    // 일시정지 직전 값(히트스톱 중이면 0.02 등)을 복원하면 슬로우모션이 남으므로 항상 정상 속도로 복귀
     private void RestoreTimeScale()
     {
-        Time.timeScale = _previousTimeScale;
+        Time.timeScale = 1f;
     }
 
     private void Select(Selectable selectable)
