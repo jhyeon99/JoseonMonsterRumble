@@ -536,7 +536,7 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 2420769363
+  m_SortingLayerID: -1874197933
   m_SortingOrder: 10
   m_TargetDisplay: 0
 --- !u!114 &8333217554183117088
@@ -2671,6 +2671,7 @@ GameObject:
   - component: {fileID: 8597463696024263183}
   - component: {fileID: 5467849673865730379}
   - component: {fileID: 952626523245104332}
+  - component: {fileID: 7061762402617553856}
   m_Layer: 5
   m_Name: Amount_Text
   m_TagString: Untagged
@@ -2797,6 +2798,20 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &7061762402617553856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6590531171311029775}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e0eb52a874883b45b234500e4c8b56f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UI_PotionCount
+  _playerHealth: {fileID: 0}
+  _countText: {fileID: 952626523245104332}
 --- !u!1 &6614055952133699858
 GameObject:
   m_ObjectHideFlags: 0
@@ -2937,7 +2952,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -7498942561190820365, guid: 8e1b4224f9131a24e9157054fdacd223, type: 3}
+  m_Sprite: {fileID: -7498942561190820365, guid: 8e1b4224f9131a24e9157054fdacd223,
+    type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
