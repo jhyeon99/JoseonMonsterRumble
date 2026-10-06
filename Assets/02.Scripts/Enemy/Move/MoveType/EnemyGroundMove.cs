@@ -1,9 +1,50 @@
-using System;
-using UnityEditor.Searcher;
 using UnityEngine;
 
 public class EnemyGroundMove : EnemyMoveType
 {
+    private const float GroundNormalThreshold = 0.7f;
+    private const float LandingVelocityThreshold = 0.1f;
+
+    private readonly ContactPoint2D[] _groundContacts = new ContactPoint2D[8];
+    private ContactFilter2D _groundFilter;
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        _groundFilter.SetLayerMask(Constants.Layers.GroundAllMask);
+        _groundFilter.useTriggers = false;
+    }
+
+    /// <summary>PlayerMovement.IsGrounded와 같은 방식 (바닥 방향 접촉 + 실제로 받쳐주는 접촉만)</summary>
+    public bool IsGrounded()
+    {
+        int count = Rigidbody.GetContacts(_groundFilter, _groundContacts);
+        for (int i = 0; i < count; i++)
+        {
+            ContactPoint2D contact = _groundContacts[i];
+
+            if (contact.normal.y <= GroundNormalThreshold) continue;
+            if (contact.normalImpulse <= 0f) continue;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    // 지상 적은 중력으로 떨어지므로 넉백 중 속도를 건드리지 않음
+    public override void KnockbackPhysicsUpdate()
+    {
+    }
+
+    // PlayerJumpState와 같은 착지 판정: 땅에 닿아 있고 올라가는 중이 아닐 때.
+    // 넉백 직후 아직 땅에 붙어 있어도 위쪽 속도가 남아 있어서 바로 끝나지 않음
+    public override bool IsKnockbackFinished()
+    {
+        return IsGrounded() && Rigidbody.linearVelocity.y <= LandingVelocityThreshold;
+    }
+
     public override void PatrolIdleMove()
     {
         if (Enemy.MoveArea == null) return;
