@@ -4,8 +4,6 @@ public class KnockbackState : EnemyState
 {
     private readonly Enemy _enemy;
     private HitData _hitData;
-    private float _knockbackTimer = 0;
-    private float _knockbackTime = 1.5f;
 
     public KnockbackState(Enemy enemy, HitData hitData)
     {
@@ -15,26 +13,31 @@ public class KnockbackState : EnemyState
 
     public override void Enter()
     {
-        _knockbackTimer = _knockbackTime;
         Debug.Log("적 넉백!");
         _enemy.MoveType.StopMove();
-        _enemy.EnemyRb.AddForce(_hitData.AttackDirection * _hitData.KnockbackForce, ForceMode2D.Impulse);
+
+        // AddForce(Impulse)는 질량에 따라 튀는 높이가 달라지고 연타 시 속도가 누적되므로 직접 대입
+        _enemy.EnemyRb.linearVelocity = Vector2.up * _hitData.KnockbackForce;
+    }
+
+    public override void FixedUpdate()
+    {
+        _enemy.MoveType.KnockbackPhysicsUpdate();
     }
 
     public override void Update()
     {
-        _knockbackTimer -= Time.deltaTime;
-        if (_knockbackTimer <= 0f)
-        {
-            _enemy.MoveType.StopMove();
-            if (_enemy.Type == EnemyType.Buffer)
-            {
-                _enemy.StateMachine.ChangeState(new FindEnemyState(_enemy));
-                return;
-            }
+        // 종료 판정은 이동 타입별로 (지상: 착지, 중력 없는 적: 속도 소멸)
+        if (!_enemy.MoveType.IsKnockbackFinished()) return;
 
-            _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
+        _enemy.MoveType.StopMove();
+        if (_enemy.Type == EnemyType.Buffer)
+        {
+            _enemy.StateMachine.ChangeState(new FindEnemyState(_enemy));
+            return;
         }
+
+        _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
     }
 
     public override void Exit()
