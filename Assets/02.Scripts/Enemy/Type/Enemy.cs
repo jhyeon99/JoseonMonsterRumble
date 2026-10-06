@@ -39,6 +39,7 @@ public abstract class Enemy : MonoBehaviour
     public HitFlash HitFlash => _hitFlash;
     public EnemyMoveArea MoveArea => _moveArea;
     public float Radius => _radius;
+    public bool IsTargetedForBuff { get; set; } = false;
 
     protected virtual void OnDisable()
     {

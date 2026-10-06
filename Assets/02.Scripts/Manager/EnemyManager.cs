@@ -39,15 +39,13 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
-    [ContextMenu("Test Select Random Attacker")]
-    public Enemy SelectRandomAttacker()
+    public Enemy GetDamagedAttackerWithoutBuffer()
     {
-        List<Enemy> attackers = ActiveEnemies.FindAll(CheckAttackerType);
-
-        if (attackers.Count == 0) return null;
-
-        int randomIndex = UnityEngine.Random.Range(0, attackers.Count);
-        return attackers[randomIndex];
+        return ActiveEnemies.Find(e =>
+            e.Type == EnemyType.Attacker &&
+            e.Health.IsDamaged &&
+            !e.IsTargetedForBuff
+        );
     }
 
     private void CheckAttackersLive()
@@ -62,6 +60,12 @@ public class EnemyManager : MonoBehaviour
 
     private bool CheckAttackerType(Enemy enemy)
     {
-        return enemy.Type == EnemyType.Attacker;
+        return enemy.Type == EnemyType.Attacker && enemy.Health.IsAlive;
+        ;
+    }
+
+    public bool HasAnyAttacker()
+    {
+        return ActiveEnemies.Exists(CheckAttackerType);
     }
 }

@@ -59,17 +59,5 @@ public class EnemyFlyingMove : EnemyMoveType
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
         transform.rotation = Quaternion.Euler(0f, 0f, angle - 180f);
-
-        Vector3 scale = transform.localScale;
-        if (direction.x >= 0f)
-        {
-            scale.y = -Mathf.Abs(scale.y);
-        }
-        else
-        {
-            scale.y = Mathf.Abs(scale.y);
-        }
-
-        transform.localScale = scale;
     }
 }
