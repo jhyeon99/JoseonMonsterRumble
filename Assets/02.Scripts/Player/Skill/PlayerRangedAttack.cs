@@ -2,25 +2,22 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+[DisallowMultipleComponent]
 public class PlayerRangedAttack : MonoBehaviour
 {
+    private enum ChargeState
+    {
+        Idle,
+        Charging,
+        ReadyToFire
+    }
+
+    private const int RequiredSlotCount = 5;
+
     [SerializeField] private Transform _flipTarget;
 
     [Header("부적 배치")]
-    [SerializeField] private SpriteRenderer _talismanPrefab; // 머리 위에 표시할 부적 스프라이트
-
-    [SerializeField] private int _slotCount = 5;
-
-    [SerializeField] private Vector2 _centerOffset = new Vector2(0f, 1.2f); // 플레이어 피벗 기준 부채꼴 중심
-
-    [SerializeField] private float _radius = 0.8f;
-
-    [SerializeField] private float _spreadAngle = 120f; // 부채꼴 전체 각도
-
-    [Header("표시")]
-    [SerializeField] private Color _idleColor = new Color(1f, 1f, 1f, 0.35f); // 보유 중(비활성)
-
-    [SerializeField] private Color _activeColor = Color.white; // 활성화됨
+    [SerializeField] private Transform _slotRoot;
 
     [Header("충전")]
     [SerializeField] private float _chargeInterval = 0.4f; // 누르고 있을 때 부적이 하나씩 추가되는 간격
@@ -32,16 +29,18 @@ public class PlayerRangedAttack : MonoBehaviour
 
     private readonly List<SpriteRenderer> _slots = new List<SpriteRenderer>();
     private readonly List<Animator> _slotAnimators = new List<Animator>();
-    private static readonly int AnimParamSpawn = Animator.StringToHash("spawn");
-    private Transform _slotRoot;
+    private readonly List<TalismanSlotVisualFeedback> _slotFeedbacks = new List<TalismanSlotVisualFeedback>();
+    private static readonly int AnimParamActivate = Animator.StringToHash("activate");
+    private static readonly int AnimParamCancel = Animator.StringToHash("cancel");
+    private static readonly int AnimStateSpawn = Animator.StringToHash("Talisman_Spawn");
 
     private PlayerSoul _soul;
 
-    private bool _isCharging;
+    private ChargeState _chargeState;
     private int _activeCount;
     private float _chargeTimer;
 
-    public bool IsCharging => _isCharging;
+    public bool IsCharging => _chargeState == ChargeState.Charging;
     public int ActiveCount => _activeCount;
 
     /// <summary>발사 시 호출. 인자 = 실제로 발사된 부적 개수 (사운드, 이펙트 연결용)</summary>
@@ -49,7 +48,7 @@ public class PlayerRangedAttack : MonoBehaviour
 
     // 지금 활성화할 수 있는 최대 개수 (슬롯 수와 보유 soul 중 작은 값)
     private int MaxActivatable =>
-        Mathf.Min(_slotCount, Mathf.FloorToInt(_soul.CurrentSoul / _soulCostPerTalisman));
+        Mathf.Min(_slots.Count, Mathf.FloorToInt(_soul.CurrentSoul / _soulCostPerTalisman));
 
     private void Awake()
     {
@@ -59,12 +58,13 @@ public class PlayerRangedAttack : MonoBehaviour
             _flipTarget = transform;
         }
 
-        CreateSlots();
+        InitializeSlots();
+        InitializeFollowController();
     }
 
     private void Update()
     {
-        if (!_isCharging)
+        if (_chargeState != ChargeState.Charging)
         {
             return;
         }
@@ -73,14 +73,16 @@ public class PlayerRangedAttack : MonoBehaviour
         while (_chargeTimer >= _chargeInterval)
         {
             _chargeTimer -= _chargeInterval;
-            if (_activeCount < MaxActivatable) _activeCount++;
+            if (_activeCount < MaxActivatable)
+            {
+                ActivateSlot(_activeCount);
+                _activeCount++;
+            }
         }
     }
 
     private void LateUpdate()
     {
-        // 플레이어 좌우 반전에 영향받지 않도록 슬롯은 자식이 아닌 별도 오브젝트로 두고 위치만 따라감
-        _slotRoot.position = transform.position + (Vector3)_centerOffset;
         RefreshSlotVisuals();
     }
 
@@ -114,18 +116,41 @@ public class PlayerRangedAttack : MonoBehaviour
     /// <summary>원거리 공격 키를 누른 순간 호출</summary>
     public void PressAttack()
     {
-        if (_isCharging) return;
-        if (MaxActivatable < 1) return; // soul 부족
+        if (_chargeState != ChargeState.Idle)
+        {
+            return;
+        }
 
-        _isCharging = true;
-        _activeCount = 1; // 누르자마자 1개 (단타)
+        if (MaxActivatable < 1)
+        {
+            return;
+        }
+
+        _chargeState = ChargeState.Charging;
+        _activeCount = 1;
         _chargeTimer = 0f;
+        ActivateSlot(0);
+    }
+
+    public bool StopCharging()
+    {
+        if (_chargeState != ChargeState.Charging)
+        {
+            return false;
+        }
+
+        _chargeState = ChargeState.ReadyToFire;
+        _chargeTimer = 0f;
+        return true;
     }
 
     /// <summary>원거리 공격 키를 뗀 순간 호출</summary>
     public void ReleaseAttack()
     {
-        if (!_isCharging) return;
+        if (_chargeState == ChargeState.Idle)
+        {
+            return;
+        }
 
         int count = Mathf.Min(_activeCount, MaxActivatable);
         ResetCharge();
@@ -146,6 +171,17 @@ public class PlayerRangedAttack : MonoBehaviour
     /// <summary>스펠(단발 원거리 공격) 시전 가능 여부 (영혼 보유 확인)</summary>
     public bool CanCastSpell => _soul != null && _soul.CurrentSoul >= _soulCostPerTalisman;
 
+    /// <summary>스펠 시전 시작 시 첫 번째 슬롯 부적 활성화 (불꽃 점화)</summary>
+    public void PrepareSpellSlot()
+    {
+        if (MaxActivatable < 1)
+        {
+            return;
+        }
+
+        ActivateSlot(0);
+    }
+
     /// <summary>스펠 애니메이션 시점(PlayerSpellState)에서 단발 부적 발사</summary>
     public bool FireSingleSpell()
     {
@@ -161,6 +197,7 @@ public class PlayerRangedAttack : MonoBehaviour
         }
 
         _soul.TryUseSoul(fired * _soulCostPerTalisman);
+        RefreshSlotVisuals();
         OnFired?.Invoke(fired);
         return true;
     }
@@ -180,6 +217,15 @@ public class PlayerRangedAttack : MonoBehaviour
         {
             Transform slot = _slots[i].transform;
 
+            // 슬롯 부적 숨김 처리
+            _slots[i].gameObject.SetActive(false);
+
+            if (ProjectilePool.Instance == null)
+            {
+                Debug.LogError("[PlayerRangedAttack] 씬에 ProjectilePool이 존재하지 않습니다.");
+                break;
+            }
+
             // 풀이 SetActive(true)와 OnSpawn까지 처리함
             Projectile p = ProjectilePool.Instance.GetProjectile(
                 ProjectileType.Player, slot, transform, _damageIncreasePercent);
@@ -197,48 +243,119 @@ public class PlayerRangedAttack : MonoBehaviour
                 break;
             }
 
-            // 풀은 위치를 옮겨주지 않으므로 직접 지정
-            projectile.transform.position = slot.position;
             projectile.SetFacing(facing);
+            projectile.SetTrajectory(i, count);
             fired++;
         }
 
         return fired;
     }
 
+    private void ActivateSlot(int slotIndex)
+    {
+        if (slotIndex >= 0 && slotIndex < _slotAnimators.Count)
+        {
+            Animator animator = _slotAnimators[slotIndex];
+            if (animator != null && _slots[slotIndex].gameObject.activeSelf)
+            {
+                animator.ResetTrigger(AnimParamCancel);
+                animator.SetTrigger(AnimParamActivate);
+            }
+
+            _slotFeedbacks[slotIndex]?.PlayActivation();
+        }
+    }
+
+    private void CancelAllActiveSlots()
+    {
+        for (int i = 0; i < _slotAnimators.Count; i++)
+        {
+            Animator animator = _slotAnimators[i];
+            if (animator != null && _slots[i].gameObject.activeSelf)
+            {
+                animator.ResetTrigger(AnimParamActivate);
+                animator.SetTrigger(AnimParamCancel);
+            }
+
+            _slotFeedbacks[i]?.StopActivation();
+        }
+    }
+
     private void ResetCharge()
     {
-        _isCharging = false;
+        if (_chargeState != ChargeState.Idle && _activeCount > 0)
+        {
+            CancelAllActiveSlots();
+        }
+
+        _chargeState = ChargeState.Idle;
         _activeCount = 0;
         _chargeTimer = 0f;
     }
 
     // ───────── 슬롯 ─────────
 
-    private void CreateSlots()
+    private void InitializeSlots()
     {
-        _slotRoot = new GameObject($"{name}_TalismanSlots").transform;
+        _slots.Clear();
+        _slotAnimators.Clear();
+        _slotFeedbacks.Clear();
 
-        for (int i = 0; i < _slotCount; i++)
+        if (_slotRoot == null)
         {
-            // 왼쪽(i = 0)부터 오른쪽 순서로 부채꼴 배치
-            float t = _slotCount == 1 ? 0.5f : (float)i / (_slotCount - 1);
-            float angle = 90f + _spreadAngle * 0.5f - _spreadAngle * t;
-            float rad = angle * Mathf.Deg2Rad;
-
-            SpriteRenderer slot = Instantiate(_talismanPrefab, _slotRoot);
-            slot.transform.localPosition = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * _radius;
-            slot.transform.localRotation = Quaternion.Euler(0f, 0f, angle - 90f); // 바깥쪽을 향하게
-            slot.gameObject.SetActive(false);
-
-            _slots.Add(slot);
-            _slotAnimators.Add(slot.GetComponentInChildren<Animator>());
+            Debug.LogWarning("[PlayerRangedAttack] 부적 슬롯 부모가 연결되지 않았습니다.", this);
+            return;
         }
+
+        for (int i = 0; i < _slotRoot.childCount; i++)
+        {
+            Transform slotTransform = _slotRoot.GetChild(i);
+            SpriteRenderer slot = slotTransform.GetComponentInChildren<SpriteRenderer>(true);
+            if (slot == null)
+            {
+                Debug.LogWarning($"[PlayerRangedAttack] {slotTransform.name}에 SpriteRenderer가 없습니다.", slotTransform);
+                continue;
+            }
+
+            Animator slotAnimator = slot.GetComponent<Animator>();
+            TalismanSlotVisualFeedback slotFeedback = slot.GetComponent<TalismanSlotVisualFeedback>();
+            if (slotFeedback == null)
+            {
+                Debug.LogWarning($"[PlayerRangedAttack] {slotTransform.name}에 TalismanSlotVisualFeedback이 없습니다.", slotTransform);
+            }
+
+            slot.gameObject.SetActive(false);
+            _slots.Add(slot);
+            _slotAnimators.Add(slotAnimator);
+            _slotFeedbacks.Add(slotFeedback);
+        }
+
+        if (_slots.Count != RequiredSlotCount)
+        {
+            Debug.LogWarning($"[PlayerRangedAttack] 부적 슬롯이 {_slots.Count}개 연결되었습니다. {RequiredSlotCount}개가 필요합니다.", this);
+        }
+    }
+
+    private void InitializeFollowController()
+    {
+        if (_slotRoot == null)
+        {
+            return;
+        }
+
+        TalismanFollowController followController = _slotRoot.GetComponent<TalismanFollowController>();
+        if (followController == null)
+        {
+            Debug.LogWarning("[PlayerRangedAttack] TalismanFollowController가 없습니다.", _slotRoot);
+            return;
+        }
+
+        followController.Initialize(transform);
     }
 
     private void RefreshSlotVisuals()
     {
-        int owned = Mathf.Min(_slotCount, Mathf.FloorToInt(_soul.CurrentSoul / _soulCostPerTalisman));
+        int owned = Mathf.Min(_slots.Count, Mathf.FloorToInt(_soul.CurrentSoul / _soulCostPerTalisman));
 
         for (int i = 0; i < _slots.Count; i++)
         {
@@ -248,18 +365,23 @@ public class PlayerRangedAttack : MonoBehaviour
             if (wasVisible != visible)
             {
                 _slots[i].gameObject.SetActive(visible);
-
-                if (visible && _slotAnimators[i] != null)
+                if (visible)
                 {
-                    _slotAnimators[i].SetTrigger(AnimParamSpawn);
+                    PlaySlotSpawnAnimation(i);
                 }
             }
-
-            if (visible)
-            {
-                _slots[i].color = i < _activeCount ? _activeColor : _idleColor;
-            }
         }
+    }
+
+    private void PlaySlotSpawnAnimation(int slotIndex)
+    {
+        Animator animator = _slotAnimators[slotIndex];
+        if (animator == null)
+        {
+            return;
+        }
+
+        animator.Play(AnimStateSpawn, 0, 0f);
     }
 
     // ───────── 공용 ─────────

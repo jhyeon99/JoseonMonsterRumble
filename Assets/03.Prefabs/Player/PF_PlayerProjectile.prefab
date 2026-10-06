@@ -235,8 +235,52 @@ MonoBehaviour:
     m_Bits: 4096
   _sightOffset: {x: 0, y: 0.5}
   _drawDebug: 0
-  _turnSpeed: 360
   _lifeTime: 3
+  _trajectorySpread: 60
+  _homingDuration: 0.9
+  _accelerationDuration: 0.65
+  _speedCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.3
+      inSlope: 0
+      outSlope: 0.2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.35
+      value: 0.45
+      inSlope: 0.6
+      outSlope: 1.2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.72
+      value: 1.15
+      inSlope: 2.4
+      outSlope: 4.4
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 2.4
+      inSlope: 4.4
+      outSlope: 4.4
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!50 &5618131424794140979
 Rigidbody2D:
   serializedVersion: 5
@@ -262,7 +306,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 0
 --- !u!58 &3943438703559119987
 CircleCollider2D:
