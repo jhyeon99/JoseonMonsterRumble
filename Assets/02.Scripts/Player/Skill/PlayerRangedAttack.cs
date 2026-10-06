@@ -31,6 +31,8 @@ public class PlayerRangedAttack : MonoBehaviour
     [SerializeField] private float _damageIncreasePercent = 0f;
 
     private readonly List<SpriteRenderer> _slots = new List<SpriteRenderer>();
+    private readonly List<Animator> _slotAnimators = new List<Animator>();
+    private static readonly int AnimParamSpawn = Animator.StringToHash("spawn");
     private Transform _slotRoot;
 
     private PlayerSoul _soul;
@@ -230,6 +232,7 @@ public class PlayerRangedAttack : MonoBehaviour
             slot.gameObject.SetActive(false);
 
             _slots.Add(slot);
+            _slotAnimators.Add(slot.GetComponentInChildren<Animator>());
         }
     }
 
@@ -240,11 +243,22 @@ public class PlayerRangedAttack : MonoBehaviour
         for (int i = 0; i < _slots.Count; i++)
         {
             bool visible = i < owned;
-            if (_slots[i].gameObject.activeSelf != visible)
+            bool wasVisible = _slots[i].gameObject.activeSelf;
+
+            if (wasVisible != visible)
+            {
                 _slots[i].gameObject.SetActive(visible);
 
+                if (visible && _slotAnimators[i] != null)
+                {
+                    _slotAnimators[i].SetTrigger(AnimParamSpawn);
+                }
+            }
+
             if (visible)
+            {
                 _slots[i].color = i < _activeCount ? _activeColor : _idleColor;
+            }
         }
     }
 
