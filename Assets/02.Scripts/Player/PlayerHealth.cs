@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using Unity.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(HitFlash))]
