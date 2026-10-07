@@ -10,13 +10,28 @@ public class CameraShake : MonoBehaviour
     [SerializeField] private float _damageMultiplier = 0.02f;
     [SerializeField] private float _maxMagnitude = 0.3f;
 
+    [Header("패링")]
+    [SerializeField] private float _parryDuration = 0.12f;
+    [SerializeField] private float _parryMagnitude = 0.15f;
+
+    [Header("마무리 공격")]
+    [SerializeField] private float _finisherDuration = 0.25f;
+    [SerializeField] private float _finisherMagnitude = 0.35f;
+
     private Vector3 _shakeOffset = Vector3.zero;
 
-    private void OnEnable() => GameEvents.OnPlayerHit += PlayerHitCameraShake;
+    private void OnEnable()
+    {
+        GameEvents.OnPlayerHit += PlayerHitCameraShake;
+        GameEvents.OnParry += ParryCameraShake;
+        GameEvents.OnFinisher += FinisherCameraShake;
+    }
 
     private void OnDisable()
     {
         GameEvents.OnPlayerHit -= PlayerHitCameraShake;
+        GameEvents.OnParry -= ParryCameraShake;
+        GameEvents.OnFinisher -= FinisherCameraShake;
         ResetShake();
     }
 
@@ -33,12 +48,27 @@ public class CameraShake : MonoBehaviour
     private void PlayerHitCameraShake(HitData hitData)
     {
         float magnitude = Mathf.Min(hitData.Damage * _damageMultiplier, _maxMagnitude);
+        StartShake(_duration, magnitude);
+    }
+
+    private void ParryCameraShake(HitData hitData)
+    {
+        StartShake(_parryDuration, _parryMagnitude);
+    }
+
+    private void FinisherCameraShake(Vector2 point)
+    {
+        StartShake(_finisherDuration, _finisherMagnitude);
+    }
+
+    private void StartShake(float duration, float magnitude)
+    {
         if (_cameraShakeRoutine != null)
         {
             StopCoroutine(_cameraShakeRoutine);
         }
 
-        _cameraShakeRoutine = StartCoroutine(DoShake(_duration, magnitude));
+        _cameraShakeRoutine = StartCoroutine(DoShake(duration, magnitude));
     }
 
     private IEnumerator DoShake(float duration, float magnitude)
