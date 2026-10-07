@@ -9,7 +9,6 @@ public class PlayerAttackState : PlayerBaseState
     private const float LedgeRayOriginYOffset = 0.1f;
     private const int LedgeCheckSteps = 5;
     private const float AttackSafetyTimeout = 5.0f;
-    private const float DodgeCancelNormalizedTime = 0.2f;
 
     private const string AnimStateAttack = "Player_Attack";
     private const string AnimStateAttack1st = "Player_Attack_1st";
@@ -343,18 +342,21 @@ public class PlayerAttackState : PlayerBaseState
                 }
             }
 
-            // 현재 진행 중인 콤보의 리커버 상태일 때만 후속 처리 (회피 캔슬 및 종료)
+            // 회피 캔슬: 현재 콤보의 Recover 애니메이션이 시작되면 (Recover로 넘어가는 전이 중 포함) 바로 가능
+            // Recover 시작 직전에 누른 입력도 입력 버퍼(0.1초) 안이면 시작하자마자 회피
+            bool isEnteringComboRecover = inTransition && IsCurrentComboRecoverState(nextInfo);
+            if ((isCurrentComboRecover || isEnteringComboRecover) &&
+                _player.IsGrounded &&
+                _player.Movement.CanDodge &&
+                _inputHandler.TryUseDodgeInput())
+            {
+                _stateMachine.ChangeState(_player.DodgeState);
+                return;
+            }
+
+            // 현재 진행 중인 콤보의 리커버 상태일 때만 종료 처리
             if (isCurrentComboRecover)
             {
-                if (stateInfo.normalizedTime >= DodgeCancelNormalizedTime)
-                {
-                    if (_inputHandler.TryUseDodgeInput() && _player.IsGrounded && _player.Movement.CanDodge)
-                    {
-                        _stateMachine.ChangeState(_player.DodgeState);
-                        return;
-                    }
-                }
-
                 if (!inTransition && stateInfo.normalizedTime >= 1.0f)
                 {
                     EndAttack();
