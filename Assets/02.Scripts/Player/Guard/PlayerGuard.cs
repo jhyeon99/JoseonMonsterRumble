@@ -51,6 +51,15 @@ public class PlayerGuard : MonoBehaviour
     [SerializeField, Min(0f)]
     private float _parryCooldown = 0.5f;
 
+    [Header("패링 반사 (투사체)")]
+    [Tooltip("패링으로 튕겨 낸 투사체의 속도 (초당 거리). 원래 투사체 속도와 관계없이 이 값 사용")]
+    [SerializeField, Min(0.1f)]
+    private float _reflectSpeed = 15f;
+
+    [Tooltip("튕겨 낸 투사체의 데미지 배율 (원래 데미지 기준)")]
+    [SerializeField, Min(0f)]
+    private float _reflectDamageMultiplier = 2f;
+
     [Header("디버그")]
     [SerializeField] private bool _logResult = true;
 
@@ -71,6 +80,8 @@ public class PlayerGuard : MonoBehaviour
     public bool IsGuarding => _isGuarding;
     public bool IsGaugeEmpty => _currentGauge <= 0f;
     public bool CanStartGuard => _currentGauge >= _minGaugeToStart;
+    public float ReflectSpeed => _reflectSpeed;
+    public float ReflectDamageMultiplier => _reflectDamageMultiplier;
 
     /// <summary>기본 판정 시간 기준으로 지금 패링 판정 중인지 (UI, 디버그용)</summary>
     public bool IsParryWindowOpen => _isGuarding && Time.time - _parryWindowStartTime <= _parryWindow;
