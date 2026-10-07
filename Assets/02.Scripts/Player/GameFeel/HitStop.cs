@@ -6,11 +6,19 @@ public class HitStop : MonoBehaviour
     [SerializeField] private float _baseDuration = 0.05f;
     [SerializeField] private float _hitStopTimeScale = 0.02f;
 
-    private void OnEnable() => GameEvents.OnPlayerHit += PlayerHitStop;
+    [Header("패링")]
+    [SerializeField] private float _parryDuration = 0.12f;
+
+    private void OnEnable()
+    {
+        GameEvents.OnPlayerHit += PlayerHitStop;
+        GameEvents.OnParry += ParryHitStop;
+    }
 
     private void OnDisable()
     {
         GameEvents.OnPlayerHit -= PlayerHitStop;
+        GameEvents.OnParry -= ParryHitStop;
         RestoreTimeScale();
     }
 
@@ -18,10 +26,19 @@ public class HitStop : MonoBehaviour
 
     private void PlayerHitStop(HitData hitData)
     {
+        StartHitStop(_baseDuration + (hitData.Damage * 0.005f));
+    }
+
+    private void ParryHitStop(HitData hitData)
+    {
+        StartHitStop(_parryDuration);
+    }
+
+    private void StartHitStop(float duration)
+    {
         // 일시정지 중에는 timeScale을 건드리지 않음 (일시정지가 우선)
         if (PauseController.IsPaused) return;
 
-        float duration = _baseDuration + (hitData.Damage * 0.005f);
         if (_hitStopRoutine != null)
         {
             StopCoroutine(_hitStopRoutine);
