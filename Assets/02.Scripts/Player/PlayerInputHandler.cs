@@ -31,6 +31,21 @@ public class PlayerInputHandler : MonoBehaviour
     public bool TryUseAttackInput() => _attackBuffer.TryUse();
     public bool TryUseRangedAttackInput() => _rangedAttackBuffer.TryUse();
 
+    public void ClearInputState()
+    {
+        _moveInputX = 0f;
+        _isJumpKeyDown = false;
+        _isJumpKey = false;
+        _isDodgeKeyDown = false;
+        _isAttackKeyDown = false;
+        _isRangedAttackKeyDown = false;
+        _isRangedAttackKeyUp = false;
+        _isPotionKeyDown = false;
+        _jumpBuffer.Clear();
+        _dodgeBuffer.Clear();
+        _attackBuffer.Clear();
+        _rangedAttackBuffer.Clear();
+    }
     private void Update()
     {
         GetKeyInput();
@@ -70,3 +85,4 @@ public class PlayerInputHandler : MonoBehaviour
         }
     }
 }
+

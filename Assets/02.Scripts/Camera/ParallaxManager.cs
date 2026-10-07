@@ -163,6 +163,16 @@ public class ParallaxManager : MonoBehaviour
         }
     }
 
+    public void RebaseAtCurrentPosition()
+    {
+        if (_targetCamera == null && Camera.main != null)
+            _targetCamera = Camera.main.transform;
+        if (_targetCamera == null) return;
+        _startCameraPosition = _targetCamera.position;
+        foreach (ParallaxLayerSetting layerSetting in _layers)
+            layerSetting.Initialize();
+    }
+
     private void LateUpdate()
     {
         Vector3 cameraPosition = _targetCamera.position;
