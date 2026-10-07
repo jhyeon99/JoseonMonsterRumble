@@ -29,6 +29,11 @@ public class AttackState : EnemyState
         }
     }
 
+    public override void FixedUpdate()
+    {
+        _enemy.MoveType.QuadraticChargePhysicsUpdate();
+    }
+
     public override void Update()
     {
         _projectileTimer -= Time.deltaTime;
@@ -52,6 +57,7 @@ public class AttackState : EnemyState
     public override void Exit()
     {
         Debug.Log("공격 종료");
+        _enemy.MoveType.StopQuadraticCharge();
         _enemy.DirectionLock.UnlockDirection();
     }
 }
