@@ -10,17 +10,14 @@ public class EnemyFlipFlying : EnemyFlip
         Vector3 scale = transform.localScale;
 
         if (Enemy.GetDirectionToPlayer().x >= 0f)
-
         {
-            scale.x = -1f;
-            scale.y = -1f;
+            scale.x = -Mathf.Abs(scale.x);
+            scale.y = -Mathf.Abs(scale.y);
         }
-
         else
-
         {
-            scale.x = -1f;
-            scale.y = 1f;
+            scale.x = -Mathf.Abs(scale.x);
+            scale.y = Mathf.Abs(scale.y);
         }
 
         transform.localScale = scale;
