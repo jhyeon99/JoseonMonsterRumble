@@ -18,6 +18,7 @@ public class AttackPrepareGroundState : EnemyState
         if (_enemy.Combat is EnemyMeleeCombat)
         {
             _enemy.Animation.PlayAttack();
+            _enemy.DirectionLock.LockDirection();
         }
     }
 

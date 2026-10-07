@@ -41,9 +41,9 @@ public class AttackPrepareFlyingState : EnemyState
         if (_attackPrepareTimer <= 0)
         {
             Debug.Log("공중 적 공격 준비");
-            if (_enemy.Combat is EnemyMeleeCombat)
+            if (_enemy.Combat is EnemyMeleeCombat && _enemy.Target != null)
             {
-                _enemy.MoveType.ChargeMove(_enemy.GetDirectionToPlayer());
+                _enemy.MoveType.StartQuadraticCharge(_enemy.Target.position);
             }
 
             _enemy.StateMachine.ChangeState(new AttackState(_enemy));

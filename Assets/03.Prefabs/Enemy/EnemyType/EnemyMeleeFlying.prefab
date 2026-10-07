@@ -338,7 +338,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyFlyingMove
   IsBackMove: 0
   _knockbackDeceleration: 20
+  _uCurveBottomOffset: 1
+  _uCurveUpOffset: 1
+  _rotationSpeed: 40
   _patrolWaitDuration: 1
+  _patrolYHeight: 0
 --- !u!114 &799531199018240034
 MonoBehaviour:
   m_ObjectHideFlags: 0

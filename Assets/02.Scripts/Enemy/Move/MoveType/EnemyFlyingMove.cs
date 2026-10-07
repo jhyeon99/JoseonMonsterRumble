@@ -1,14 +1,84 @@
 ﻿using UnityEngine;
 
+public enum PatrolYHeightType
+{
+    Center, // Y축 중앙 높이
+    MaxY // Y축 최상단 높이
+}
+
 public class EnemyFlyingMove : EnemyMoveType
 {
+    [Header("U자 돌진 설정")]
+
+    [SerializeField] private float _uCurveBottomOffset = 0.4f;
+    [SerializeField] private float _uCurveUpOffset = 1.5f;
+    [SerializeField] private float _rotationSpeed = 15f;
+    private bool _isQuadraticCharging = false;
+    private Vector2 _chargeStartPos;
+    private Vector2 _chargeControlPos;
+    private Vector2 _chargeEndPos;
+    private float _chargeProgress = 0f;
+    private float _chargeDuration = 1f;
     [Header("패트롤 설정")]
 
     [SerializeField] private float _patrolWaitDuration = 1.0f; // 끝 지점 도달 후 대기 시간(초)
+    [SerializeField] private PatrolYHeightType _patrolYHeight = PatrolYHeightType.Center;
 
     private bool _isMovingRight = true;
     private float _patrolWaitTimer = 0f;
     private bool _isPatrolWaiting = false;
+
+    public override void StartQuadraticCharge(Vector2 playerPos)
+    {
+        _chargeStartPos = Rigidbody.position;
+
+        _chargeControlPos = playerPos + (Vector2.down * _uCurveBottomOffset);
+
+        Vector2 toPlayer = playerPos - _chargeStartPos;
+        _chargeEndPos = playerPos + new Vector2(toPlayer.x, Mathf.Abs(toPlayer.y) + _uCurveUpOffset);
+
+        _chargeProgress = 0f;
+        _chargeDuration = Mathf.Max(Enemy.Data.AttackDurationTime, 0.1f);
+        _isQuadraticCharging = true;
+    }
+
+    public override void QuadraticChargePhysicsUpdate()
+    {
+        if (!_isQuadraticCharging) return;
+
+        _chargeProgress += Time.fixedDeltaTime / _chargeDuration;
+        float t = Mathf.Clamp01(_chargeProgress);
+
+        Vector2 nextPos = (Mathf.Pow(1f - t, 2f) * _chargeStartPos) +
+                          (2f * (1f - t) * t * _chargeControlPos) +
+                          (Mathf.Pow(t, 2f) * _chargeEndPos);
+
+        Rigidbody.MovePosition(nextPos);
+        Vector2 tangent = 2f * (1f - t) * (_chargeControlPos - _chargeStartPos) +
+                          2f * t * (_chargeEndPos - _chargeControlPos);
+
+        if (tangent.sqrMagnitude > 0.0001f)
+        {
+            float moveAngle = Mathf.Atan2(tangent.y, tangent.x) * Mathf.Rad2Deg;
+            float rotationOffset = -180f;
+
+            var targetRotation = Quaternion.Euler(0f, 0f, moveAngle + rotationOffset);
+
+            transform.rotation =
+                Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * _rotationSpeed);
+        }
+
+        if (t >= 1.0f)
+        {
+            _isQuadraticCharging = false;
+        }
+    }
+
+    public override void StopQuadraticCharge()
+    {
+        _isQuadraticCharging = false;
+        Rigidbody.linearVelocity = Vector2.zero;
+    }
 
     public override void Move(Vector2 direction)
     {
@@ -84,9 +154,15 @@ public class EnemyFlyingMove : EnemyMoveType
         float halfWidth = Enemy.MoveArea.AreaSize.x * 0.5f;
         float halfHeight = Enemy.MoveArea.AreaSize.y * 0.5f;
 
+        float targetY = _patrolYHeight switch
+        {
+            PatrolYHeightType.MaxY => center.y + halfHeight,
+            _ => center.y
+        };
+
         // MoveArea Y축 중앙 높이 기준 좌/우 양 끝 지점 계산
-        var leftPos = new Vector2(center.x - halfWidth, center.y + halfHeight);
-        var rightPos = new Vector2(center.x + halfWidth, center.y + halfHeight);
+        var leftPos = new Vector2(center.x - halfWidth, targetY);
+        var rightPos = new Vector2(center.x + halfWidth, targetY);
 
         Vector2 targetPos = _isMovingRight ? rightPos : leftPos;
 
