@@ -130,7 +130,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         _invincibleRoutine = null;
     }
 
-    public void SetInvincible(bool isInvincible)
+    /// <param name="showVisual">false면 반투명 표시 없이 무적만 적용 (해제할 때는 항상 원래대로)</param>
+    public void SetInvincible(bool isInvincible, bool showVisual = true)
     {
         _isInvincible = isInvincible;
 
@@ -142,7 +143,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
             Physics2D.IgnoreLayerCollision(playerLayer, enemyAttackLayer, isInvincible);
         }
 
-        if (_spriteRenderer != null)
+        if (_spriteRenderer != null && (showVisual || !isInvincible))
         {
             Color color = _spriteRenderer.color;
             color.a = isInvincible ? 0.5f : 1.0f;

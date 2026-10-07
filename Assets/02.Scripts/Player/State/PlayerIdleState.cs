@@ -26,7 +26,12 @@ public class PlayerIdleState : PlayerBaseState
 
         if (_inputHandler.TryUseAttackInput() && _player.IsGrounded)
         {
-            _stateMachine.ChangeState(_player.AttackState);
+            // 앞에 그로기 적이 있으면 일반 공격 대신 마무리 공격
+            if (!_player.TryEnterFinisher())
+            {
+                _stateMachine.ChangeState(_player.AttackState);
+            }
+
             return;
         }
 

@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 public class GameEvents
 {
@@ -15,5 +16,13 @@ public class GameEvents
     public static void TriggerParry(HitData hitData)
     {
         OnParry?.Invoke(hitData);
+    }
+
+    /// <summary>마무리 공격 타격 순간 (타격 위치)</summary>
+    public static event Action<Vector2> OnFinisher;
+
+    public static void TriggerFinisher(Vector2 point)
+    {
+        OnFinisher?.Invoke(point);
     }
 }

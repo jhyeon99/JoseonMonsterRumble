@@ -64,8 +64,8 @@ public class EnemyContactDamage : MonoBehaviour
         if (!enabled) return;
         if (other.gameObject.layer != Constants.Layers.Player) return;
 
-        // 죽는 중인 적은 접촉 데미지 없음
-        if (_enemy.StateMachine.CurrentState is DeadState) return;
+        // 죽는 중 / 날아가는 중 / 그로기 중인 적은 접촉 데미지 없음 (그로기 적 앞에서 마무리 공격을 해야 하므로)
+        if (_enemy.IsDefeated || _enemy.IsGroggy) return;
 
         if (Time.time < _nextHitTime) return;
 

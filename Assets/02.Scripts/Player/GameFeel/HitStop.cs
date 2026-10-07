@@ -9,16 +9,21 @@ public class HitStop : MonoBehaviour
     [Header("패링")]
     [SerializeField] private float _parryDuration = 0.12f;
 
+    [Header("마무리 공격")]
+    [SerializeField] private float _finisherDuration = 0.18f;
+
     private void OnEnable()
     {
         GameEvents.OnPlayerHit += PlayerHitStop;
         GameEvents.OnParry += ParryHitStop;
+        GameEvents.OnFinisher += FinisherHitStop;
     }
 
     private void OnDisable()
     {
         GameEvents.OnPlayerHit -= PlayerHitStop;
         GameEvents.OnParry -= ParryHitStop;
+        GameEvents.OnFinisher -= FinisherHitStop;
         RestoreTimeScale();
     }
 
@@ -32,6 +37,11 @@ public class HitStop : MonoBehaviour
     private void ParryHitStop(HitData hitData)
     {
         StartHitStop(_parryDuration);
+    }
+
+    private void FinisherHitStop(Vector2 point)
+    {
+        StartHitStop(_finisherDuration);
     }
 
     private void StartHitStop(float duration)

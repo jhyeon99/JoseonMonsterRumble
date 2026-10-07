@@ -32,6 +32,8 @@ public class Player : MonoBehaviour
     public PlayerSpellState SpellState => _spellState;
     private PlayerGuardState _guardState;
     public PlayerGuardState GuardState => _guardState;
+    private PlayerFinisherState _finisherState;
+    public PlayerFinisherState FinisherState => _finisherState;
 
     [Header("Motion Data")]
     [SerializeField] private ActionMotionData _hitMotion = new ActionMotionData();
@@ -55,6 +57,8 @@ public class Player : MonoBehaviour
     public PlayerRangedAttack RangedAttack => _rangedAttack;
     private PlayerGuard _guard;
     public PlayerGuard Guard => _guard;
+    private PlayerFinisher _finisher;
+    public PlayerFinisher Finisher => _finisher;
 
     [SerializeField] private Animator _animator;
     public Animator Animator => _animator;
@@ -69,6 +73,11 @@ public class Player : MonoBehaviour
     private static readonly int AnimParamSpell = Animator.StringToHash("spell");
     private static readonly int AnimParamIsGuarding = Animator.StringToHash("isGuarding");
     private static readonly int AnimParamParry = Animator.StringToHash("parry");
+
+    // 마무리 공격: 콤보 전이 없이 3타 모션을 바로 재생
+    private const string FinisherAnimState = "Player_Attack_3rd_Ready";
+    private static readonly int FinisherAnimStateHash = Animator.StringToHash(FinisherAnimState);
+    private static readonly int FinisherAnimStateFullHash = Animator.StringToHash("Base Layer." + FinisherAnimState);
 
     // 가드/패링 모션이 애니메이터에 추가되기 전에도 경고 없이 동작하도록 파라미터 유무를 저장
     private bool _hasGuardingParam;
@@ -109,6 +118,13 @@ public class Player : MonoBehaviour
         {
             Debug.LogWarning($"{name}: PlayerGuard가 없어 기본값으로 추가합니다. 수치를 조정하려면 프리팹에 직접 추가하세요.", this);
             _guard = gameObject.AddComponent<PlayerGuard>();
+        }
+
+        _finisher = GetComponent<PlayerFinisher>();
+        if (_finisher == null)
+        {
+            Debug.LogWarning($"{name}: PlayerFinisher가 없어 기본값으로 추가합니다. 수치를 조정하려면 프리팹에 직접 추가하세요.", this);
+            _finisher = gameObject.AddComponent<PlayerFinisher>();
         }
 
         if (_animator == null)
@@ -182,6 +198,20 @@ public class Player : MonoBehaviour
         _hitState = new PlayerHitState(this, _stateMachine);
         _spellState = new PlayerSpellState(this, _stateMachine);
         _guardState = new PlayerGuardState(this, _stateMachine);
+        _finisherState = new PlayerFinisherState(this, _stateMachine);
+    }
+
+    /// <summary>앞에 그로기 적이 있으면 마무리 공격 시작. 시작했으면 true</summary>
+    public bool TryEnterFinisher()
+    {
+        if (!IsGrounded || !_finisher.TryFindTarget(out Enemy target))
+        {
+            return false;
+        }
+
+        _finisherState.SetTarget(target);
+        _stateMachine.ChangeState(_finisherState);
+        return true;
     }
 
     private void HandleRangedAttack()
@@ -284,6 +314,23 @@ public class Player : MonoBehaviour
         {
             _animator.SetTrigger(AnimParamSpell);
         }
+    }
+
+    public void PlayFinisherAnimation()
+    {
+        if (_animator == null)
+        {
+            return;
+        }
+
+        if (_animator.HasState(0, FinisherAnimStateHash) || _animator.HasState(0, FinisherAnimStateFullHash))
+        {
+            _animator.Play(FinisherAnimStateHash, 0, 0f);
+            return;
+        }
+
+        Debug.LogWarning($"{name}: 애니메이터에 {FinisherAnimState} 상태가 없어 attack3 트리거로 대신 재생합니다.", this);
+        TriggerAttack3();
     }
 
     public void SetGuarding(bool isGuarding)
