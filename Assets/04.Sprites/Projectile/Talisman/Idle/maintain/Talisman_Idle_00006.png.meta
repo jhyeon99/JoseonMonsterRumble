@@ -1,0 +1,585 @@
+fileFormatVersion: 2
+guid: 9a583e27fe9e4be4f98fdeb6e53d40be
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8996828424319265140
+    second: Talisman_Idle_00006_0
+  - first:
+      213: 1066028083314304746
+    second: Talisman_Idle_00006_1
+  - first:
+      213: -7928798275594779780
+    second: Talisman_Idle_00006_2
+  - first:
+      213: 2392218005621803811
+    second: Talisman_Idle_00006_3
+  - first:
+      213: 8123750721218232292
+    second: Talisman_Idle_00006_4
+  - first:
+      213: 1336504188684850930
+    second: Talisman_Idle_00006_5
+  - first:
+      213: 5993316893813121419
+    second: Talisman_Idle_00006_6
+  - first:
+      213: -3508673154744316825
+    second: Talisman_Idle_00006_7
+  - first:
+      213: 1538984238988804696
+    second: Talisman_Idle_00006_8
+  - first:
+      213: 804263127854900585
+    second: Talisman_Idle_00006_9
+  - first:
+      213: 6191521485029753372
+    second: Talisman_Idle_00006_10
+  - first:
+      213: 3578186600343248721
+    second: Talisman_Idle_00006_11
+  - first:
+      213: -5482831642408627114
+    second: Talisman_Idle_00006_12
+  - first:
+      213: -5727788122847653210
+    second: Talisman_Idle_00006_13
+  - first:
+      213: -8877078213701059181
+    second: Talisman_Idle_00006_14
+  - first:
+      213: -586581508346604315
+    second: Talisman_Idle_00006_15
+  - first:
+      213: -2145224815794105110
+    second: Talisman_Idle_00006_16
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 150
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 256
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 3
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Talisman_Idle_00006_0
+      rect:
+        serializedVersion: 2
+        x: 628
+        y: 565
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 479efa0e8c72bdc70800000000000000
+      internalID: 8996828424319265140
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Idle_00006_1
+      rect:
+        serializedVersion: 2
+        x: 672
+        y: 558
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae62a8ac4ea4bce00800000000000000
+      internalID: 1066028083314304746
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Idle_00006_2
+      rect:
+        serializedVersion: 2
+        x: 513
+        y: 191
+        width: 264
+        height: 354
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7381771aff37f190800000000000000
+      internalID: -7928798275594779780
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Idle_00006_3
+      rect:
+        serializedVersion: 2
+        x: 674
+        y: 525
+        width: 20
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32b81620a9dd23120800000000000000
+      internalID: 2392218005621803811
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Idle_00006_4
+      rect:
+        serializedVersion: 2
+        x: 760
+        y: 498
+        width: 37
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ef390e4d3c5db070800000000000000
+      internalID: 8123750721218232292
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Idle_00006_5
+      rect:
+        serializedVersion: 2
+        x: 805
+        y: 508
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f6d16f7a773c8210800000000000000
+      internalID: 1336504188684850930
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Idle_00006_6
+      rect:
+        serializedVersion: 2
+        x: 809
+        y: 461
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b81241206f98c2350800000000000000
+      internalID: 5993316893813121419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Idle_00006_7
+      rect:
+        serializedVersion: 2
+        x: 787
+        y: 449
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76c04820b50be4fc0800000000000000
+      internalID: -3508673154744316825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Idle_00006_8
+      rect:
+        serializedVersion: 2
+        x: 777
+        y: 418
+        width: 22
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8524adfe2029b5510800000000000000
+      internalID: 1538984238988804696
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Idle_00006_9
+      rect:
+        serializedVersion: 2
+        x: 776
+        y: 366
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9656cb9bd01592b00800000000000000
+      internalID: 804263127854900585
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Idle_00006_10
+      rect:
+        serializedVersion: 2
+        x: 799
+        y: 360
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c12c56e8cf3bce550800000000000000
+      internalID: 6191521485029753372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Idle_00006_11
+      rect:
+        serializedVersion: 2
+        x: 498
+        y: 333
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15f958541c548a130800000000000000
+      internalID: 3578186600343248721
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Idle_00006_12
+      rect:
+        serializedVersion: 2
+        x: 782
+        y: 332
+        width: 14
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65456f6aba119e3b0800000000000000
+      internalID: -5482831642408627114
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Idle_00006_13
+      rect:
+        serializedVersion: 2
+        x: 494
+        y: 282
+        width: 18
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6a2d6f4ac0fc280b0800000000000000
+      internalID: -5727788122847653210
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Idle_00006_14
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 294
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39d3dfcb5684ec480800000000000000
+      internalID: -8877078213701059181
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Idle_00006_15
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 272
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e4103bd93b0cd7f0800000000000000
+      internalID: -586581508346604315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_Idle_00006_16
+      rect:
+        serializedVersion: 2
+        x: 622
+        y: 182
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae45d3b5561aa32e0800000000000000
+      internalID: -2145224815794105110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Talisman_Idle_00006_0: 8996828424319265140
+      Talisman_Idle_00006_1: 1066028083314304746
+      Talisman_Idle_00006_10: 6191521485029753372
+      Talisman_Idle_00006_11: 3578186600343248721
+      Talisman_Idle_00006_12: -5482831642408627114
+      Talisman_Idle_00006_13: -5727788122847653210
+      Talisman_Idle_00006_14: -8877078213701059181
+      Talisman_Idle_00006_15: -586581508346604315
+      Talisman_Idle_00006_16: -2145224815794105110
+      Talisman_Idle_00006_2: -7928798275594779780
+      Talisman_Idle_00006_3: 2392218005621803811
+      Talisman_Idle_00006_4: 8123750721218232292
+      Talisman_Idle_00006_5: 1336504188684850930
+      Talisman_Idle_00006_6: 5993316893813121419
+      Talisman_Idle_00006_7: -3508673154744316825
+      Talisman_Idle_00006_8: 1538984238988804696
+      Talisman_Idle_00006_9: 804263127854900585
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

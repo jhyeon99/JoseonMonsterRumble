@@ -1,0 +1,819 @@
+fileFormatVersion: 2
+guid: 93d86e64f15e30c429c3e3f9847527dc
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -7502887709561511989
+    second: Talisman_explosion_00019_0
+  - first:
+      213: -7229973909164456569
+    second: Talisman_explosion_00019_1
+  - first:
+      213: -8288091626928499942
+    second: Talisman_explosion_00019_2
+  - first:
+      213: 2771572209128852034
+    second: Talisman_explosion_00019_3
+  - first:
+      213: 6223392961282690516
+    second: Talisman_explosion_00019_4
+  - first:
+      213: 6739059243217514859
+    second: Talisman_explosion_00019_5
+  - first:
+      213: -2366939890989179020
+    second: Talisman_explosion_00019_6
+  - first:
+      213: -6901060151865391894
+    second: Talisman_explosion_00019_7
+  - first:
+      213: 1087573204523843405
+    second: Talisman_explosion_00019_8
+  - first:
+      213: -5553048556070192971
+    second: Talisman_explosion_00019_9
+  - first:
+      213: -971247904283131696
+    second: Talisman_explosion_00019_10
+  - first:
+      213: 4780661445867516287
+    second: Talisman_explosion_00019_11
+  - first:
+      213: -217207858391679664
+    second: Talisman_explosion_00019_12
+  - first:
+      213: -1502014741713811962
+    second: Talisman_explosion_00019_13
+  - first:
+      213: -7317037858909796075
+    second: Talisman_explosion_00019_14
+  - first:
+      213: 4108841467153416433
+    second: Talisman_explosion_00019_15
+  - first:
+      213: 2600583152172335607
+    second: Talisman_explosion_00019_16
+  - first:
+      213: -2421513536564176202
+    second: Talisman_explosion_00019_17
+  - first:
+      213: -3501312779045978416
+    second: Talisman_explosion_00019_18
+  - first:
+      213: 6400085707828769443
+    second: Talisman_explosion_00019_19
+  - first:
+      213: -6738816110811141971
+    second: Talisman_explosion_00019_20
+  - first:
+      213: -8080701325941714436
+    second: Talisman_explosion_00019_21
+  - first:
+      213: -4204140231662468945
+    second: Talisman_explosion_00019_22
+  - first:
+      213: 5142680321997483747
+    second: Talisman_explosion_00019_23
+  - first:
+      213: 8192048830436698051
+    second: Talisman_explosion_00019_24
+  - first:
+      213: -727908966977876730
+    second: Talisman_explosion_00019_25
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 150
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 256
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 3
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_0
+      rect:
+        serializedVersion: 2
+        x: 499
+        y: 589
+        width: 15
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bcf11f1516360e790800000000000000
+      internalID: -7502887709561511989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_1
+      rect:
+        serializedVersion: 2
+        x: 798
+        y: 585
+        width: 12
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78509e02909f9ab90800000000000000
+      internalID: -7229973909164456569
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_2
+      rect:
+        serializedVersion: 2
+        x: 663
+        y: 546
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a139907d398cafc80800000000000000
+      internalID: -8288091626928499942
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_3
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 529
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24a48726d3a967620800000000000000
+      internalID: 2771572209128852034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_4
+      rect:
+        serializedVersion: 2
+        x: 555
+        y: 508
+        width: 13
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ddcbe2eceeed5650800000000000000
+      internalID: 6223392961282690516
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_5
+      rect:
+        serializedVersion: 2
+        x: 297
+        y: 507
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b61fa483da2f58d50800000000000000
+      internalID: 6739059243217514859
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_6
+      rect:
+        serializedVersion: 2
+        x: 785
+        y: 507
+        width: 15
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47f53e0b5b0f62fd0800000000000000
+      internalID: -2366939890989179020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_7
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 507
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae4c572fa528a30a0800000000000000
+      internalID: -6901060151865391894
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_8
+      rect:
+        serializedVersion: 2
+        x: 841
+        y: 502
+        width: 14
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4f70ea3116d71f00800000000000000
+      internalID: 1087573204523843405
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_9
+      rect:
+        serializedVersion: 2
+        x: 604
+        y: 483
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b8b0f272cb9fe2b0800000000000000
+      internalID: -5553048556070192971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_10
+      rect:
+        serializedVersion: 2
+        x: 962
+        y: 490
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0d08c5c4d2f6582f0800000000000000
+      internalID: -971247904283131696
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_11
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 464
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f71b6588142585240800000000000000
+      internalID: 4780661445867516287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_12
+      rect:
+        serializedVersion: 2
+        x: 552
+        y: 419
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05df3268a925cfcf0800000000000000
+      internalID: -217207858391679664
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_13
+      rect:
+        serializedVersion: 2
+        x: 874
+        y: 402
+        width: 11
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6068fb8ec85c72be0800000000000000
+      internalID: -1502014741713811962
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_14
+      rect:
+        serializedVersion: 2
+        x: 236
+        y: 364
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 519c89ba5d8a47a90800000000000000
+      internalID: -7317037858909796075
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_15
+      rect:
+        serializedVersion: 2
+        x: 551
+        y: 345
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f003187b89850930800000000000000
+      internalID: 4108841467153416433
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_16
+      rect:
+        serializedVersion: 2
+        x: 1019
+        y: 334
+        width: 17
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f109123990271420800000000000000
+      internalID: 2600583152172335607
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_17
+      rect:
+        serializedVersion: 2
+        x: 670
+        y: 310
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6bada4aa44e056ed0800000000000000
+      internalID: -2421513536564176202
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_18
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 301
+        width: 17
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0debd650496d86fc0800000000000000
+      internalID: -3501312779045978416
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_19
+      rect:
+        serializedVersion: 2
+        x: 667
+        y: 253
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a2303bca0ca1d850800000000000000
+      internalID: 6400085707828769443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_20
+      rect:
+        serializedVersion: 2
+        x: 781
+        y: 241
+        width: 10
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da82c64737aea72a0800000000000000
+      internalID: -6738816110811141971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_21
+      rect:
+        serializedVersion: 2
+        x: 667
+        y: 201
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf1573b15f49bdf80800000000000000
+      internalID: -8080701325941714436
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_22
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 173
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fa084d9dbb4e7a5c0800000000000000
+      internalID: -4204140231662468945
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_23
+      rect:
+        serializedVersion: 2
+        x: 610
+        y: 175
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ee2d0a71887e5740800000000000000
+      internalID: 5142680321997483747
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_24
+      rect:
+        serializedVersion: 2
+        x: 744
+        y: 164
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c765d8020100b170800000000000000
+      internalID: 8192048830436698051
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Talisman_explosion_00019_25
+      rect:
+        serializedVersion: 2
+        x: 895
+        y: 157
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60d4672b6a2f5e5f0800000000000000
+      internalID: -727908966977876730
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Talisman_explosion_00019_0: -7502887709561511989
+      Talisman_explosion_00019_1: -7229973909164456569
+      Talisman_explosion_00019_10: -971247904283131696
+      Talisman_explosion_00019_11: 4780661445867516287
+      Talisman_explosion_00019_12: -217207858391679664
+      Talisman_explosion_00019_13: -1502014741713811962
+      Talisman_explosion_00019_14: -7317037858909796075
+      Talisman_explosion_00019_15: 4108841467153416433
+      Talisman_explosion_00019_16: 2600583152172335607
+      Talisman_explosion_00019_17: -2421513536564176202
+      Talisman_explosion_00019_18: -3501312779045978416
+      Talisman_explosion_00019_19: 6400085707828769443
+      Talisman_explosion_00019_2: -8288091626928499942
+      Talisman_explosion_00019_20: -6738816110811141971
+      Talisman_explosion_00019_21: -8080701325941714436
+      Talisman_explosion_00019_22: -4204140231662468945
+      Talisman_explosion_00019_23: 5142680321997483747
+      Talisman_explosion_00019_24: 8192048830436698051
+      Talisman_explosion_00019_25: -727908966977876730
+      Talisman_explosion_00019_3: 2771572209128852034
+      Talisman_explosion_00019_4: 6223392961282690516
+      Talisman_explosion_00019_5: 6739059243217514859
+      Talisman_explosion_00019_6: -2366939890989179020
+      Talisman_explosion_00019_7: -6901060151865391894
+      Talisman_explosion_00019_8: 1087573204523843405
+      Talisman_explosion_00019_9: -5553048556070192971
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
