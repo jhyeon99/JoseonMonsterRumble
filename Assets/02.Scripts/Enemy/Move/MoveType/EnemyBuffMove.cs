@@ -3,6 +3,7 @@ using UnityEngine;
 public class EnemyBuffMove : EnemyMoveType
 {
     [SerializeField] private float _lerpValue;
+    [SerializeField] private float _decelerateDistance = 5f;
     [Range(0f, 180f)] public float MaxAngle;
     private bool _isChasing;
     private float _chaseTime;
@@ -33,8 +34,12 @@ public class EnemyBuffMove : EnemyMoveType
         float direction = target.transform.position.x - transform.position.x;
         Flip(direction);
 
-        var smoothPos =
-            Vector2.MoveTowards(Rigidbody.position, startWorldPos, Enemy.Data.MoveSpeed * Time.fixedDeltaTime);
+        float distance = Vector2.Distance(Rigidbody.position, startWorldPos);
+
+        float minSpeed = Enemy.Data.MoveToEnemySpeed * 0.15f;
+        float currentSpeed = Mathf.Lerp(minSpeed, Enemy.Data.MoveToEnemySpeed, distance / _decelerateDistance);
+
+        var smoothPos = Vector2.MoveTowards(Rigidbody.position, startWorldPos, currentSpeed * Time.fixedDeltaTime);
         Rigidbody.MovePosition(smoothPos);
         if (Vector2.Distance(Rigidbody.position, startWorldPos) < 0.1f)
         {

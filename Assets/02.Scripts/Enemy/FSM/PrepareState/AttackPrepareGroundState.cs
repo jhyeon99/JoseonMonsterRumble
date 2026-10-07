@@ -30,11 +30,6 @@ public class AttackPrepareGroundState : EnemyState
                 _enemy.Animation.SetRunning(true);
                 _enemy.MoveType.BackMove(_enemy.GetDirectionToPlayer());
             }
-            else
-            {
-                _enemy.Animation.SetRunning(false);
-                _enemy.MoveType.StopMove();
-            }
         }
     }
 

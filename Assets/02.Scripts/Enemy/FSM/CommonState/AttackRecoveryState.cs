@@ -18,7 +18,7 @@ public class AttackRecoveryState : EnemyState
 
     public override void FixedUpdate()
     {
-        if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
+        if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackRecoverRange)
         {
             _enemy.Animation.SetRunning(true);
             _enemy.MoveType.BackMove(_enemy.GetDirectionToPlayer());
