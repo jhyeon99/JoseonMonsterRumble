@@ -9,6 +9,10 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
     [SerializeField]
     private AttackDefense _defense = new AttackDefense { Parryable = true };
 
+    [Tooltip("패링당했을 때 그로기 시간 (초)")]
+    [SerializeField, Min(0f)]
+    private float _groggyDuration = 2f;
+
     private Coroutine _attackCoroutine;
     private float _currentDamage;
     public float CurrentDamage => _currentDamage;
@@ -63,10 +67,10 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
 
     public void OnParried(HitData hitData, Transform parrier)
     {
-        // 패링당하면 공격 판정을 바로 끔
-        // TODO: 그로기 상태 전환 (다음 작업)
+        // 패링당하면 공격 판정을 바로 끄고 그로기
         StopAttack();
-        Debug.Log($"{name}: 근접 공격이 패링당함");
+        Enemy.EnterGroggy(_groggyDuration);
+        Debug.Log($"{name}: 근접 공격이 패링당함 → 그로기 {_groggyDuration}초");
     }
 
     private void StopAttack()

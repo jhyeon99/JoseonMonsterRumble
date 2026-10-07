@@ -33,6 +33,12 @@ public class PlayerGuardState : PlayerBaseState
             return;
         }
 
+        // 패링 직후 가드를 유지한 채 공격키 → 바로 마무리 공격
+        if (_inputHandler.TryUseAttackInput() && _player.TryEnterFinisher())
+        {
+            return;
+        }
+
         if (_inputHandler.TryUseDodgeInput() && _player.Movement.CanDodge)
         {
             _stateMachine.ChangeState(_player.DodgeState);

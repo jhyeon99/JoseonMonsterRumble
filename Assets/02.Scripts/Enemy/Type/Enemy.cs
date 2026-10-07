@@ -38,6 +38,50 @@ public abstract class Enemy : MonoBehaviour
     public HitFlash HitFlash => _hitFlash;
     public EnemyMoveArea MoveArea => _moveArea;
 
+    /// <summary>패링당해 그로기 중인지</summary>
+    public bool IsGroggy => _stateMachine.CurrentState is GroggyState;
+
+    /// <summary>죽는 중이거나 날아가는 중 (더 이상 행동 / 피격 / 공격하지 않음)</summary>
+    public bool IsDefeated => _stateMachine.CurrentState is DeadState || _stateMachine.CurrentState is LaunchedState;
+
+    /// <summary>그로기 시작 (패링당했을 때 공격 컴포넌트가 호출)</summary>
+    public void EnterGroggy(float duration)
+    {
+        if (IsDefeated)
+        {
+            return;
+        }
+
+        _stateMachine.ChangeState(new GroggyState(this, duration));
+    }
+
+    /// <summary>마무리 공격 준비 중 그로기가 풀리지 않게 고정. 그로기가 아니면 false</summary>
+    public bool TryHoldGroggy()
+    {
+        if (_stateMachine.CurrentState is GroggyState groggy)
+        {
+            groggy.Hold();
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>마무리 공격이 취소됐을 때 그로기 고정 해제</summary>
+    public void ReleaseGroggy()
+    {
+        if (_stateMachine.CurrentState is GroggyState groggy)
+        {
+            groggy.Release();
+        }
+    }
+
+    /// <summary>마무리 공격으로 날려 보내기 (사망 처리)</summary>
+    public void Launch(LaunchSettings settings, float directionX)
+    {
+        _health.Launch(settings, directionX);
+    }
+
     protected virtual void OnDisable()
     {
         EnemyManager.Instance.RemoveEnemy(this);
