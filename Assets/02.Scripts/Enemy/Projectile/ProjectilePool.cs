@@ -6,11 +6,9 @@ public class ProjectilePool : MonoBehaviour
     public static ProjectilePool Instance => _instance;
 
     [Header("투사체 프리팹")]
-
     [SerializeField] private Projectile[] _projectilePrefabs;
 
     [Header("풀 사이즈")]
-
     [SerializeField] private int _poolSize = 20;
 
     private Projectile[,] _pool;
@@ -20,6 +18,7 @@ public class ProjectilePool : MonoBehaviour
         if (_instance != null)
         {
             Destroy(gameObject);
+            return;
         }
 
         _instance = this;

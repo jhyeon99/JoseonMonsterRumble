@@ -87,8 +87,7 @@ public static class ConfigureTitleMenu
             serialized.FindProperty("_buttonImage").objectReferenceValue = image;
             serialized.FindProperty("_normalSprite").objectReferenceValue = normalSprite;
             serialized.FindProperty("_selectedSprite").objectReferenceValue = selectedSprite;
-            serialized.FindProperty("_confirmOnSecondClick").boolValue = true;
-            serialized.FindProperty("_isDefaultSelected").boolValue = false;
+            serialized.FindProperty("_isDefaultSelected").boolValue = (i == 0);
 
             var text = serialized.FindProperty("_buttonText").objectReferenceValue as Component;
             var frame = serialized.FindProperty("_selectFrame").objectReferenceValue as GameObject;

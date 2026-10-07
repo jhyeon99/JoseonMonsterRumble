@@ -22,6 +22,12 @@ public class TitleSettingsController : MonoBehaviour
 
         _titleMenuContainer.SetActive(true);
         _settingsPanel.SetActive(false);
+
+        PauseAudioSettingsView audioSettingsView = _settingsPanel.GetComponent<PauseAudioSettingsView>();
+        if (audioSettingsView != null)
+        {
+            audioSettingsView.OnCloseRequested.AddListener(HideSettings);
+        }
     }
 
     private void Update()
@@ -39,6 +45,11 @@ public class TitleSettingsController : MonoBehaviour
             return;
         }
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayPanelOpen();
+        }
+
         _titleMenuContainer.SetActive(false);
         _settingsPanel.SetActive(true);
         Select(_settingsFirstSelectable);
@@ -49,6 +60,11 @@ public class TitleSettingsController : MonoBehaviour
         if (!_isReady)
         {
             return;
+        }
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayPanelClose();
         }
 
         _settingsPanel.SetActive(false);
