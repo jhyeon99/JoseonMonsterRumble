@@ -21,9 +21,10 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
     public bool TakeDamage(HitData hitData)
     {
-        if (_enemy.StateMachine.CurrentState is DeadState) return false;
+        if (_enemy.IsDefeated) return false;
 
-        if (hitData.KnockbackForce > 0f)
+        // 그로기 중에는 넉백으로 그로기가 풀리지 않게 데미지만 받음
+        if (hitData.KnockbackForce > 0f && !_enemy.IsGroggy)
         {
             _currentHp -= hitData.Damage;
             Debug.Log($"현재 체력 {_currentHp}");
@@ -59,5 +60,15 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         OnHit?.Invoke(hitData);
 
         return true;
+    }
+
+    /// <summary>마무리 공격으로 날려 보냄. 체력과 관계없이 사망 처리 (OnDeath 발생)</summary>
+    public void Launch(LaunchSettings settings, float directionX)
+    {
+        if (_enemy.IsDefeated) return;
+
+        _currentHp = 0f;
+        OnDeath?.Invoke();
+        _enemy.StateMachine.ChangeState(new LaunchedState(_enemy, settings, directionX));
     }
 }
