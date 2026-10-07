@@ -14,6 +14,7 @@ public enum GuardResult
 /// - 가드를 놓고 일정 시간이 지나면 게이지 회복
 /// - 패링: 가드를 시작한 순간부터 패링 판정 시간 안에 패링 가능한 공격이 닿으면 패링 (공격자는 그로기)
 /// - 패링이 아니어도 가드 중에 맞으면 막고, 공격마다 정해진 만큼 게이지 소모 (Unblockable 공격 제외)
+/// - 남은 게이지가 공격의 소모량보다 적으면 가드 브레이크 (막지 못하고 그대로 피격)
 /// 공격별 규칙(패링 가능, 가드 불가, 판정 시간, 게이지 소모)은 각 공격의 AttackDefense에서 조정
 /// </summary>
 public class PlayerGuard : MonoBehaviour
@@ -95,7 +96,7 @@ public class PlayerGuard : MonoBehaviour
     /// <summary>패링 성공</summary>
     public event Action<HitData> OnParried;
 
-    /// <summary>막다가 게이지가 바닥났을 때 (가드 브레이크 연출용)</summary>
+    /// <summary>가드가 깨졌을 때 (게이지 부족으로 피격되거나 막다가 게이지가 바닥남). 가드 브레이크 연출용</summary>
     public event Action OnGuardBroken;
 
     private void Awake()
@@ -206,6 +207,15 @@ public class PlayerGuard : MonoBehaviour
             OnParried?.Invoke(hitData);
             Log("패링 성공");
             return GuardResult.Parried;
+        }
+
+        // 남은 게이지가 소모량보다 적으면 가드 브레이크 → 막지 못하고 그대로 피격
+        if (defense.GuardGaugeCost > _currentGauge)
+        {
+            ChangeGauge(-_currentGauge);
+            OnGuardBroken?.Invoke();
+            Log($"가드 브레이크 (필요 {defense.GuardGaugeCost}, 남은 게이지 부족) → 피격");
+            return GuardResult.None;
         }
 
         if (defense.GuardGaugeCost > 0f)
