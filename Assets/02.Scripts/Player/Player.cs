@@ -28,6 +28,8 @@ public class Player : MonoBehaviour
     public PlayerDeadState DeadState => _deadState;
     private PlayerHitState _hitState;
     public PlayerHitState HitState => _hitState;
+    private PlayerSpellState _spellState;
+    public PlayerSpellState SpellState => _spellState;
 
     [Header("Motion Data")]
     [SerializeField] private ActionMotionData _hitMotion = new ActionMotionData();
@@ -60,20 +62,13 @@ public class Player : MonoBehaviour
     private static readonly int AnimParamAttack = Animator.StringToHash("attack");
     private static readonly int AnimParamAttack2 = Animator.StringToHash("attack2");
     private static readonly int AnimParamAttack3 = Animator.StringToHash("attack3");
+    private static readonly int AnimParamSpell = Animator.StringToHash("spell");
 
     private Coroutine _restoreColliderRoutine;
 
     public bool IsGrounded => _movement != null && _movement.IsGrounded();
 
-    // 원거리 공격(부적) 충전을 새로 시작할 수 있는 상태인지
-    private bool CanStartRangedAttack
-    {
-        get
-        {
-            IState state = _stateMachine.CurrentState;
-            return state != DeadState && state != HitState && state != DodgeState;
-        }
-    }
+    public bool CanCastSpell => IsGrounded && _rangedAttack != null && _rangedAttack.CanCastSpell;
 
     private void OnEnable()
     {
@@ -162,33 +157,37 @@ public class Player : MonoBehaviour
         _dodgeState = new PlayerDodgeState(this, _stateMachine);
         _deadState = new PlayerDeadState(this, _stateMachine);
         _hitState = new PlayerHitState(this, _stateMachine);
+        _spellState = new PlayerSpellState(this, _stateMachine);
     }
 
-    // 원거리 공격(부적): 누르면 충전 시작, 떼면 발사
-    // 모션이 없어서 FSM 상태 대신 여기서 처리
     private void HandleRangedAttack()
     {
-        if (_rangedAttack == null) return;
-
-        // 충전 중이면 키를 뗐는지만 확인 → 떼는 순간 발사
-        // (상태와 상관없이 항상 확인해야 충전이 끝나지 않고 남는 일이 없음)
-        if (_rangedAttack.IsCharging)
+        if (_rangedAttack == null || !_rangedAttack.IsCharging)
         {
-            if (!_inputHandler.IsRangedAttackKey)
-            {
-                _rangedAttack.ReleaseAttack();
-            }
-
             return;
         }
 
-        // 충전 시작은 허용된 상태에서만
-        if (!CanStartRangedAttack) return;
-
-        if (_inputHandler.TryUseRangedAttackInput())
+        if (!_inputHandler.IsRangedAttackKeyUp)
         {
-            _rangedAttack.PressAttack();
+            return;
         }
+
+        if (!CanReleaseRangedAttack())
+        {
+            _rangedAttack.CancelCharge();
+            return;
+        }
+
+        if (_rangedAttack.StopCharging())
+        {
+            _stateMachine.ChangeState(SpellState);
+        }
+    }
+
+    private bool CanReleaseRangedAttack()
+    {
+        IState currentState = _stateMachine.CurrentState;
+        return IsGrounded && (currentState == IdleState || currentState == MoveState);
     }
 
     public void SetRunning(bool isRunning)
@@ -252,6 +251,14 @@ public class Player : MonoBehaviour
         if (_animator != null)
         {
             _animator.SetTrigger(AnimParamAttack3);
+        }
+    }
+
+    public void TriggerSpell()
+    {
+        if (_animator != null)
+        {
+            _animator.SetTrigger(AnimParamSpell);
         }
     }
 

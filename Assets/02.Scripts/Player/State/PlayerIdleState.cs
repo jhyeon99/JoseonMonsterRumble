@@ -23,6 +23,12 @@ public class PlayerIdleState : PlayerBaseState
             return;
         }
 
+        if (_inputHandler.TryUseRangedAttackInput() && _player.CanCastSpell)
+        {
+            _player.RangedAttack.PressAttack();
+            return;
+        }
+
         if (_inputHandler.TryUseDodgeInput() && _player.IsGrounded && _player.Movement.CanDodge)
         {
             _stateMachine.ChangeState(_player.DodgeState);
