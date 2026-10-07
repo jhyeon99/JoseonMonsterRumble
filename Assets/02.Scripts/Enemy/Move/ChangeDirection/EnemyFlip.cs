@@ -16,5 +16,5 @@ public abstract class EnemyFlip : MonoBehaviour
         Flip();
     }
 
-    protected abstract void Flip();
+    public abstract void Flip();
 }

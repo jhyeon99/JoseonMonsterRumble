@@ -12,6 +12,7 @@ public class EnragedState : EnemyState
     public override void Enter()
     {
         Debug.Log("도깨비불 광폭화!!");
+        _enemy.DirectionLock.UnlockDirection();
         _enemy.Combat.Attack();
     }
 

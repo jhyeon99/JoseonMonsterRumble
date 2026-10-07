@@ -89,6 +89,15 @@ public class EnemyGroundMove : EnemyMoveType
     public override void BackMove(Vector2 direction)
     {
         IsBackMove = true;
+        float nextX = Rigidbody.position.x - direction.x * Enemy.Data.MoveSpeed * Time.fixedDeltaTime;
+        float clampX = Enemy.MoveArea.ClampX(nextX);
+
+        if (Mathf.Abs(nextX - clampX) > 0.0001f)
+        {
+            Rigidbody.linearVelocity = new Vector2(0f, Rigidbody.linearVelocity.y);
+            return;
+        }
+
         Rigidbody.linearVelocity = new Vector2(-direction.x * Enemy.Data.MoveSpeed, Rigidbody.linearVelocity.y);
     }
 

@@ -9,6 +9,9 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
     // 사망하지 않은 피격 시 호출 (피격 연출용)
     public event Action<HitData> OnHit;
+    public bool IsAlive => _currentHp > 0f;
+    public bool IsDamaged => IsAlive && _currentHp < _enemy.Data.MaxHp;
+    public float CurrentHp => _currentHp;
 
     private void Awake()
     {
