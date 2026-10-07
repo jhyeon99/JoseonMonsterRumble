@@ -180,7 +180,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.05667305, y: 0.11224723}
+  m_Offset: {x: -0.23113292, y: 0.0015525818}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -190,7 +190,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 4.454212, y: 3.0055904}
+  m_Size: {x: 3.2144327, y: 1.5886993}
   m_EdgeRadius: 0
 --- !u!1 &2319009342568745602
 GameObject:
@@ -271,7 +271,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.20929646, y: -0.22558278}
+  m_Offset: {x: -0.220366, y: -0.0041936636}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -281,7 +281,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.95617, y: 1.7841557}
+  m_Size: {x: 3.3325315, y: 1.5627663}
   m_EdgeRadius: 0
 --- !u!50 &5618623016657024351
 Rigidbody2D:
@@ -337,6 +337,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyFlyingMove
   IsBackMove: 0
+  _knockbackDeceleration: 20
+  _patrolWaitDuration: 1
 --- !u!114 &799531199018240034
 MonoBehaviour:
   m_ObjectHideFlags: 0

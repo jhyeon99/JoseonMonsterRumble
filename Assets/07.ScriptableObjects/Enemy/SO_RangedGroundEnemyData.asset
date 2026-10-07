@@ -18,9 +18,12 @@ MonoBehaviour:
   _meleeAttackDamage: 0
   _chargeSpeed: 0
   _knockbackForce: 0
-  _attackDetectRange: 6
-  _attackPrepareTime: 0.6667
+  _attackDetectRange: 7
+  _attackRecoverRange: 0
+  _attackPrepareTime: 1
   _attackDurationTime: 0.8333
   _attackDelayTime: 0.8333
-  _attackRecoveryTime: 2
+  _attackRecoveryTime: 1
+  _attackAngle: 0
   _attackBuffAmount: 0
+  _moveToEnemySpeed: 0

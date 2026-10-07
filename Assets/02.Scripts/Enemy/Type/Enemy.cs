@@ -27,6 +27,8 @@ public abstract class Enemy : MonoBehaviour
     private EnemyMoveArea _moveArea;
     private BoxCollider2D _enemyCollider;
     private float _radius;
+    private float _rightAngle;
+    private float _leftAngle;
 
     public Transform Target => _target;
     public EnemyStateMachine StateMachine => _stateMachine;
@@ -40,6 +42,8 @@ public abstract class Enemy : MonoBehaviour
     public EnemyMoveArea MoveArea => _moveArea;
     public float Radius => _radius;
     public bool IsTargetedForBuff { get; set; } = false;
+    public float RightAngle => _rightAngle;
+    public float LeftAngle => _leftAngle;
 
     protected virtual void OnDisable()
     {
@@ -58,6 +62,8 @@ public abstract class Enemy : MonoBehaviour
         _hitFlash = GetComponent<HitFlash>();
         _moveArea = GetComponent<EnemyMoveArea>();
         _enemyCollider = GetComponent<BoxCollider2D>();
+        _rightAngle = Data.AttackAngle;
+        _leftAngle = 180f - Data.AttackAngle;
     }
 
     protected virtual void Start()
