@@ -6,8 +6,8 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
     [SerializeField] private Collider2D _attackCollider;
 
     [Header("가드 / 패링")]
-    [SerializeField]
-    private AttackDefense _defense = new AttackDefense { Parryable = true };
+
+    [SerializeField] private AttackDefense _defense = new AttackDefense { Parryable = true };
 
     [Tooltip("패링당했을 때 그로기 시간 (초)")]
     [SerializeField, Min(0f)]
@@ -61,6 +61,7 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
         // 가드 / 패링으로 막히면 false
         if (damageable.TakeDamage(hitData))
         {
+            _attackCollider.enabled = false;
             Debug.Log($"플레이어에게 근접공격으로 {_currentDamage}만큼 피해를 입힘.");
         }
     }

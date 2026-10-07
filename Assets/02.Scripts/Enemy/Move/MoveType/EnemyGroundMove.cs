@@ -92,7 +92,7 @@ public class EnemyGroundMove : EnemyMoveType
         float nextX = Rigidbody.position.x - direction.x * Enemy.Data.MoveSpeed * Time.fixedDeltaTime;
         float clampX = Enemy.MoveArea.ClampX(nextX);
 
-        if (nextX != clampX)
+        if (Mathf.Abs(nextX - clampX) > 0.0001f)
         {
             Rigidbody.linearVelocity = new Vector2(0f, Rigidbody.linearVelocity.y);
             return;
