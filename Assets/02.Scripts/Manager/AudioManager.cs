@@ -158,7 +158,7 @@ public class AudioManager : MonoBehaviour
         _bgmFadeCoroutine = StartCoroutine(FadeBgmRoutine(null, fadeDuration));
     }
 
-    public void PlaySfx(AudioClip clip, float volumeScale = 1f)
+    public void PlaySfx(AudioClip clip, float volumeScale = 1f, float gain = 1f)
     {
         if (clip == null || _isSfxMuted)
         {
@@ -171,7 +171,7 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
-        float finalVolume = Mathf.Clamp01(volumeScale) * _sfxVolume;
+        float finalVolume = Mathf.Clamp01(volumeScale) * _sfxVolume * Mathf.Clamp(gain, 0f, 3f);
         source.PlayOneShot(clip, finalVolume);
     }
 
