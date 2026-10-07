@@ -65,4 +65,19 @@ public class EnemyRotation : MonoBehaviour
             }
         }
     }
+
+    public void ForceRotateToPlayer()
+    {
+        if (_enemy == null || _enemy.Target == null) return;
+
+        Vector2 direction = _enemy.GetDirectionToPlayer();
+        if (direction.sqrMagnitude < 0.0001f) return;
+
+        bool isRight = direction.x >= 0f;
+        float angle = Vector2.SignedAngle(Vector2.right, direction);
+
+        transform.rotation = Quaternion.Euler(0f, 0f, angle - 180f);
+
+        _wasRight = isRight;
+    }
 }

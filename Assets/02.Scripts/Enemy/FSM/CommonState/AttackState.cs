@@ -57,7 +57,7 @@ public class AttackState : EnemyState
     public override void Exit()
     {
         Debug.Log("공격 종료");
-        _enemy.MoveType.StopQuadraticCharge();
         _enemy.DirectionLock.UnlockDirection();
+        _enemy.MoveType.StopQuadraticCharge();
     }
 }
