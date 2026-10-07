@@ -17,6 +17,13 @@ public class PlayerIdleState : PlayerBaseState
     {
         base.Execute();
 
+        // 아래 방향키: 가드 (가드 중 공격키 = 패링이므로 공격보다 먼저 확인)
+        if (_inputHandler.IsGuardKey && _player.IsGrounded && _player.Guard.CanStartGuard)
+        {
+            _stateMachine.ChangeState(_player.GuardState);
+            return;
+        }
+
         if (_inputHandler.TryUseAttackInput() && _player.IsGrounded)
         {
             _stateMachine.ChangeState(_player.AttackState);

@@ -1,9 +1,14 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class EnemyMeleeCombat : EnemyCombat
+public class EnemyMeleeCombat : EnemyCombat, IParryable
 {
     [SerializeField] private Collider2D _attackCollider;
+
+    [Header("가드 / 패링")]
+    [SerializeField]
+    private AttackDefense _defense = new AttackDefense { Parryable = true };
+
     private Coroutine _attackCoroutine;
     private float _currentDamage;
     public float CurrentDamage => _currentDamage;
@@ -44,11 +49,35 @@ public class EnemyMeleeCombat : EnemyCombat
             _currentDamage,
             Enemy.Data.KnockbackForce,
             hitPoint,
-            Enemy.GetDirectionToPlayer()
+            Enemy.GetDirectionToPlayer(),
+            _defense,
+            this
         );
 
-        damageable.TakeDamage(hitData);
-        Debug.Log($"플레이어에게 근접공격으로 {_currentDamage}만큼 피해를 입힘.");
+        // 가드 / 패링으로 막히면 false
+        if (damageable.TakeDamage(hitData))
+        {
+            Debug.Log($"플레이어에게 근접공격으로 {_currentDamage}만큼 피해를 입힘.");
+        }
+    }
+
+    public void OnParried(HitData hitData, Transform parrier)
+    {
+        // 패링당하면 공격 판정을 바로 끔
+        // TODO: 그로기 상태 전환 (다음 작업)
+        StopAttack();
+        Debug.Log($"{name}: 근접 공격이 패링당함");
+    }
+
+    private void StopAttack()
+    {
+        if (_attackCoroutine != null)
+        {
+            StopCoroutine(_attackCoroutine);
+            _attackCoroutine = null;
+        }
+
+        _attackCollider.enabled = false;
     }
 
     public void CalculateDamage(float percentage)

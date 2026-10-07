@@ -30,6 +30,8 @@ public class Player : MonoBehaviour
     public PlayerHitState HitState => _hitState;
     private PlayerSpellState _spellState;
     public PlayerSpellState SpellState => _spellState;
+    private PlayerGuardState _guardState;
+    public PlayerGuardState GuardState => _guardState;
 
     [Header("Motion Data")]
     [SerializeField] private ActionMotionData _hitMotion = new ActionMotionData();
@@ -51,6 +53,8 @@ public class Player : MonoBehaviour
     public PlayerSoul Soul => _soul;
     private PlayerRangedAttack _rangedAttack;
     public PlayerRangedAttack RangedAttack => _rangedAttack;
+    private PlayerGuard _guard;
+    public PlayerGuard Guard => _guard;
 
     [SerializeField] private Animator _animator;
     public Animator Animator => _animator;
@@ -63,6 +67,12 @@ public class Player : MonoBehaviour
     private static readonly int AnimParamAttack2 = Animator.StringToHash("attack2");
     private static readonly int AnimParamAttack3 = Animator.StringToHash("attack3");
     private static readonly int AnimParamSpell = Animator.StringToHash("spell");
+    private static readonly int AnimParamIsGuarding = Animator.StringToHash("isGuarding");
+    private static readonly int AnimParamParry = Animator.StringToHash("parry");
+
+    // 가드/패링 모션이 애니메이터에 추가되기 전에도 경고 없이 동작하도록 파라미터 유무를 저장
+    private bool _hasGuardingParam;
+    private bool _hasParryParam;
 
     private Coroutine _restoreColliderRoutine;
 
@@ -74,12 +84,14 @@ public class Player : MonoBehaviour
     {
         Health.OnDied += HandleDeath;
         Health.OnHit += HandleHit;
+        Guard.OnParried += HandleParried;
     }
 
     private void OnDisable()
     {
         Health.OnDied -= HandleDeath;
         Health.OnHit -= HandleHit;
+        Guard.OnParried -= HandleParried;
     }
 
     private void Awake()
@@ -91,10 +103,21 @@ public class Player : MonoBehaviour
         _soul = GetComponent<PlayerSoul>();
         _rangedAttack = GetComponent<PlayerRangedAttack>();
 
+        // 프리팹에 PlayerGuard가 없으면 기본값으로 추가 (수치를 조정하려면 프리팹에 직접 추가)
+        _guard = GetComponent<PlayerGuard>();
+        if (_guard == null)
+        {
+            Debug.LogWarning($"{name}: PlayerGuard가 없어 기본값으로 추가합니다. 수치를 조정하려면 프리팹에 직접 추가하세요.", this);
+            _guard = gameObject.AddComponent<PlayerGuard>();
+        }
+
         if (_animator == null)
         {
             _animator = GetComponentInChildren<Animator>();
         }
+
+        _hasGuardingParam = HasAnimatorParameter(AnimParamIsGuarding);
+        _hasParryParam = HasAnimatorParameter(AnimParamParry);
 
         InitializeStates();
         InitializeMotionData();
@@ -158,6 +181,7 @@ public class Player : MonoBehaviour
         _deadState = new PlayerDeadState(this, _stateMachine);
         _hitState = new PlayerHitState(this, _stateMachine);
         _spellState = new PlayerSpellState(this, _stateMachine);
+        _guardState = new PlayerGuardState(this, _stateMachine);
     }
 
     private void HandleRangedAttack()
@@ -262,6 +286,40 @@ public class Player : MonoBehaviour
         }
     }
 
+    public void SetGuarding(bool isGuarding)
+    {
+        if (_hasGuardingParam)
+        {
+            _animator.SetBool(AnimParamIsGuarding, isGuarding);
+        }
+    }
+
+    public void TriggerParry()
+    {
+        if (_hasParryParam)
+        {
+            _animator.SetTrigger(AnimParamParry);
+        }
+    }
+
+    private bool HasAnimatorParameter(int nameHash)
+    {
+        if (_animator == null || _animator.runtimeAnimatorController == null)
+        {
+            return false;
+        }
+
+        foreach (AnimatorControllerParameter parameter in _animator.parameters)
+        {
+            if (parameter.nameHash == nameHash)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private void HandleHit(HitData hitData)
     {
         if (StateMachine.CurrentState == DeadState)
@@ -271,6 +329,11 @@ public class Player : MonoBehaviour
 
         HitState.SetHitData(hitData);
         StateMachine.ChangeState(HitState);
+    }
+
+    private void HandleParried(HitData hitData)
+    {
+        TriggerParry();
     }
 
     private void HandleDeath()
