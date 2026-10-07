@@ -4,7 +4,7 @@
 public class EnemyFlipFlying : EnemyFlip
 
 {
-    protected override void Flip()
+    public override void Flip()
 
     {
         Vector3 scale = transform.localScale;

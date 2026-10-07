@@ -19,6 +19,8 @@ public class EnemyFlyingMove : EnemyMoveType
     private Vector2 _chargeEndPos;
     private float _chargeProgress = 0f;
     private float _chargeDuration = 1f;
+    private EnemyRotation _enemyRotation;
+    private EnemyFlip _enemyFlip;
     [Header("패트롤 설정")]
 
     [SerializeField] private float _patrolWaitDuration = 1.0f; // 끝 지점 도달 후 대기 시간(초)
@@ -27,6 +29,13 @@ public class EnemyFlyingMove : EnemyMoveType
     private bool _isMovingRight = true;
     private float _patrolWaitTimer = 0f;
     private bool _isPatrolWaiting = false;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        _enemyRotation = GetComponent<EnemyRotation>();
+        _enemyFlip = GetComponent<EnemyFlip>();
+    }
 
     public override void StartQuadraticCharge(Vector2 playerPos)
     {
@@ -71,6 +80,7 @@ public class EnemyFlyingMove : EnemyMoveType
         if (t >= 1.0f)
         {
             _isQuadraticCharging = false;
+            RotateToPlayer();
         }
     }
 
@@ -78,6 +88,7 @@ public class EnemyFlyingMove : EnemyMoveType
     {
         _isQuadraticCharging = false;
         Rigidbody.linearVelocity = Vector2.zero;
+        RotateToPlayer();
     }
 
     public override void Move(Vector2 direction)
@@ -221,5 +232,18 @@ public class EnemyFlyingMove : EnemyMoveType
         }
 
         transform.localScale = scale;
+    }
+
+    private void RotateToPlayer()
+    {
+        if (_enemyRotation != null)
+        {
+            _enemyRotation.ForceRotateToPlayer();
+        }
+
+        if (_enemyFlip != null)
+        {
+            _enemyFlip.Flip();
+        }
     }
 }
