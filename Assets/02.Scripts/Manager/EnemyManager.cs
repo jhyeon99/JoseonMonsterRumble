@@ -61,7 +61,6 @@ public class EnemyManager : MonoBehaviour
     private bool CheckAttackerType(Enemy enemy)
     {
         return enemy.Type == EnemyType.Attacker && enemy.Health.IsAlive;
-        ;
     }
 
     public bool HasAnyAttacker()
