@@ -222,6 +222,8 @@ GameObject:
   - component: {fileID: 8776698276065337361}
   - component: {fileID: 8846624967543919300}
   - component: {fileID: -3787385288428544344}
+  - component: {fileID: 1842194761569257879}
+  - component: {fileID: 6944414531245368504}
   m_Layer: 7
   m_Name: EnemyBuff
   m_TagString: Enemy
@@ -346,8 +348,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBuffMove
   IsBackMove: 0
-  _radius: 7
-  _lerpValue: 1.5
+  _lerpValue: 1.1
   MaxAngle: 90
 --- !u!114 &6900135879620250934
 MonoBehaviour:
@@ -401,3 +402,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAnimation
   _animator: {fileID: 3742089821849712071}
+--- !u!114 &1842194761569257879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9002607081654718196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3caeca020f324ca8b16f9518517457e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyFlipGround
+--- !u!114 &6944414531245368504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9002607081654718196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17cea9572b5c478fb3829a51b9130a3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GroundDirectionLock
+  _flip: {fileID: 1842194761569257879}

@@ -23,16 +23,25 @@ public class BuffEnemy : Enemy
     [ContextMenu("Test FindNewTarget")]
     public override void FindNewTarget()
     {
-        _targetAttacker = EnemyManager.Instance.SelectRandomAttacker();
-
-        if (_targetAttacker == null)
+        if (!EnemyManager.Instance.HasAnyAttacker())
         {
             StateMachine.ChangeState(new EnragedState(this));
             return;
         }
 
-        _targetAttacker.Health.OnDeath += HandleTargetDeath;
-        StateMachine.ChangeState(new ChaseEnemyState(this, _targetAttacker.transform));
+        Enemy newTarget = EnemyManager.Instance.GetDamagedAttackerWithoutBuffer();
+
+        if (newTarget != null)
+        {
+            _targetAttacker = newTarget;
+            _targetAttacker.IsTargetedForBuff = true;
+            _targetAttacker.Health.OnDeath += HandleTargetDeath;
+            StateMachine.ChangeState(new ChaseEnemyState(this, _targetAttacker));
+        }
+        else
+        {
+            MoveType.StopMove();
+        }
     }
 
     private void HandleAllAttackersKilled()
@@ -42,6 +51,7 @@ public class BuffEnemy : Enemy
 
     private void HandleTargetDeath()
     {
+        StateMachine.ChangeState(new EnragedState(this));
         UnsubscribeTarget();
     }
 
@@ -49,9 +59,9 @@ public class BuffEnemy : Enemy
     {
         if (_targetAttacker != null)
         {
+            _targetAttacker.IsTargetedForBuff = false;
             _targetAttacker.Health.OnDeath -= HandleTargetDeath;
             _targetAttacker = null;
-            StateMachine.ChangeState(new FindEnemyState(this));
         }
     }
 }

@@ -2,7 +2,7 @@
 
 public class EnemyFlipGround : EnemyFlip
 {
-    protected override void Flip()
+    public override void Flip()
     {
         if (Mathf.Abs(Enemy.GetDirectionToPlayer().x) < 0.01f) return;
 
