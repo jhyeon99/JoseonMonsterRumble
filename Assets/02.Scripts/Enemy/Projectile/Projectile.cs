@@ -13,9 +13,13 @@ public abstract class Projectile : MonoBehaviour, IParryable
     private AttackDefense _defense = new AttackDefense { Parryable = true, GuardGaugeCost = 25f };
 
     [Header("패링 반사 (속도 / 데미지 배율은 PlayerGuard에서 설정)")]
-    [Tooltip("켜면 쏜 적의 총구 쪽으로 되돌아감. 끄거나 총구가 없으면 맞은 방향의 반대로 직진")]
+    [Tooltip("켜면 쏜 적의 몸(콜라이더 중심)을 따라가며 되돌아감. 끄거나 쏜 적이 없으면 맞은 방향의 반대로 직진")]
     [SerializeField]
     private bool _reflectToShooter = true;
+
+    [Tooltip("쏜 적에게 되돌아가는 동안 벽 / 발판에 막히지 않고 통과")]
+    [SerializeField]
+    private bool _ignoreGroundWhenReturning = true;
 
     private float _returnPoolTime = 0f;
     public ProjectileType Type => _type;
@@ -32,6 +36,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
     // 반사 상태
     private int _originalLayer;
     private Transform _muzzleTransform;
+    private Collider2D _shooterCollider;
     private bool _isReflected;
     private Vector2 _reflectDirection;
     private float _reflectSpeed;
@@ -73,6 +78,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
     {
         MuzzlePosition = muzzlePoint.position;
         _muzzleTransform = muzzlePoint;
+        _shooterCollider = FindShooterCollider(muzzlePoint);
         Transform player = playerPoint;
 
         if (player != null)
@@ -159,21 +165,76 @@ public abstract class Projectile : MonoBehaviour, IParryable
 
     private Vector2 CalculateReflectDirection(HitData hitData)
     {
-        if (_reflectToShooter && _muzzleTransform != null && _muzzleTransform.gameObject.activeInHierarchy)
+        if (TryGetShooterDirection(out Vector2 toShooter))
         {
-            Vector2 toShooter = (Vector2)_muzzleTransform.position - (Vector2)transform.position;
-            if (toShooter.sqrMagnitude > 0.0001f)
-            {
-                return toShooter.normalized;
-            }
+            return toShooter;
         }
 
         Vector2 back = -hitData.AttackDirection;
         return back.sqrMagnitude > 0.0001f ? back.normalized : Vector2.right;
     }
 
+    /// <summary>쏜 적의 몸 중심 방향. 쏜 적이 없거나 꺼져 있으면 false</summary>
+    private bool TryGetShooterDirection(out Vector2 direction)
+    {
+        direction = Vector2.zero;
+
+        if (!IsReturningToShooter())
+        {
+            return false;
+        }
+
+        Vector2 toShooter = (Vector2)_shooterCollider.bounds.center - (Vector2)transform.position;
+        if (toShooter.sqrMagnitude < 0.0001f)
+        {
+            return false;
+        }
+
+        direction = toShooter.normalized;
+        return true;
+    }
+
+    private bool IsReturningToShooter()
+    {
+        return _reflectToShooter && _shooterCollider != null && _shooterCollider.isActiveAndEnabled;
+    }
+
+    /// <summary>총구에서 위로 올라가며 쏜 적 본체(IDamageable)의 콜라이더를 찾음</summary>
+    private static Collider2D FindShooterCollider(Transform muzzlePoint)
+    {
+        if (muzzlePoint == null)
+        {
+            return null;
+        }
+
+        IDamageable shooter = muzzlePoint.GetComponentInParent<IDamageable>();
+        return shooter is Component component ? component.GetComponent<Collider2D>() : null;
+    }
+
+    // 2D 기준으로 쏜 적 콜라이더 영역 안인지 (z 무시)
+    private bool IsInsideShooter()
+    {
+        Bounds bounds = _shooterCollider.bounds;
+        Vector3 position = transform.position;
+        position.z = bounds.center.z;
+        return bounds.Contains(position);
+    }
+
     private void MoveReflected()
     {
+        // 쏜 적 몸에 도착했는데도 남아 있으면 (이미 쓰러진 적 등) 더 따라가지 않고 직진
+        if (IsReturningToShooter() && IsInsideShooter())
+        {
+            _shooterCollider = null;
+        }
+
+        // 쏜 적이 움직여도 몸에 맞도록 매 프레임 방향을 다시 계산 (쏜 적이 사라지면 마지막 방향으로 직진)
+        if (TryGetShooterDirection(out Vector2 toShooter))
+        {
+            _reflectDirection = toShooter;
+            UpdateReflectRotation();
+        }
+
         transform.position += (Vector3)(_reflectDirection * _reflectSpeed * Time.deltaTime);
     }
 
@@ -186,9 +247,14 @@ public abstract class Projectile : MonoBehaviour, IParryable
 
     private void HandleReflectedHit(Collider2D other)
     {
-        // 벽 / 바닥에 닿으면 사라짐
+        // 벽 / 바닥에 닿으면 사라짐 (쏜 적에게 되돌아가는 중이면 통과)
         if ((Constants.Layers.GroundAllMask & (1 << other.gameObject.layer)) != 0)
         {
+            if (_ignoreGroundWhenReturning && IsReturningToShooter())
+            {
+                return;
+            }
+
             gameObject.SetActive(false);
             return;
         }

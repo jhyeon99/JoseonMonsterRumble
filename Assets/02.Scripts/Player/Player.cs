@@ -210,7 +210,7 @@ public class Player : MonoBehaviour
     /// <summary>앞에 그로기 적이 있으면 마무리 공격 시작. 시작했으면 true</summary>
     public bool TryEnterFinisher()
     {
-        if (!IsGrounded || !_finisher.TryFindTarget(out Enemy target))
+        if (!IsGrounded || !_finisher.TryFindTarget(out IFinishable target))
         {
             return false;
         }
