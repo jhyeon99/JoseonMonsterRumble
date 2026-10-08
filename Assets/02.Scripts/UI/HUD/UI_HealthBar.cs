@@ -42,29 +42,42 @@ public class UI_HealthBar : MonoBehaviour
 
         if (_playerHealth != null)
         {
-            _playerHealth.OnHealthChanged -= HandleHealthChanged;
-            _playerHealth.OnHealthChanged += HandleHealthChanged;
+            SubscribeToHealthChanged();
             UpdateHealth(_playerHealth.CurrentHealth, _playerHealth.MaxHealth, true);
         }
     }
 
     private void OnEnable()
     {
-        if (_playerHealth != null)
-        {
-            _playerHealth.OnHealthChanged -= HandleHealthChanged;
-            _playerHealth.OnHealthChanged += HandleHealthChanged;
-        }
+        SubscribeToHealthChanged();
     }
 
     private void OnDisable()
     {
-        if (_playerHealth != null)
-        {
-            _playerHealth.OnHealthChanged -= HandleHealthChanged;
-        }
+        UnsubscribeFromHealthChanged();
 
         StopTrailCoroutine();
+    }
+
+    private void SubscribeToHealthChanged()
+    {
+        if (_playerHealth == null)
+        {
+            return;
+        }
+
+        _playerHealth.OnHealthChanged -= HandleHealthChanged;
+        _playerHealth.OnHealthChanged += HandleHealthChanged;
+    }
+
+    private void UnsubscribeFromHealthChanged()
+    {
+        if (_playerHealth == null)
+        {
+            return;
+        }
+
+        _playerHealth.OnHealthChanged -= HandleHealthChanged;
     }
 
     private void InitializeComponents()
