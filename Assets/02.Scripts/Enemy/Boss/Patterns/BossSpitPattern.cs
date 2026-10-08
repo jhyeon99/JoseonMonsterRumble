@@ -2,8 +2,10 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 침뱉기. 기존 적 투사체(ProjectilePool)를 그대로 사용하므로 패링하면 보스 입 쪽으로 반사됨.
+/// 침뱉기. 애니메이션 길이 대비 발사 비율마다 한 발씩 발사.
+/// 기존 적 투사체(ProjectilePool)를 그대로 사용하므로 패링하면 보스 입 쪽으로 반사됨.
 /// 씬의 ProjectilePool에 해당 타입 투사체 프리팹이 등록되어 있어야 함.
+/// (판정 시작 / 끝 비율은 사용하지 않음)
 /// </summary>
 public class BossSpitPattern : BossPattern
 {
@@ -16,17 +18,13 @@ public class BossSpitPattern : BossPattern
     [SerializeField]
     private Transform _muzzle;
 
-    [SerializeField, Min(1)] private int _shotCount = 3;
-    [SerializeField, Min(0f)] private float _windupTime = 0.5f;
-    [SerializeField, Min(0f)] private float _shotInterval = 0.35f;
-    [SerializeField, Min(0f)] private float _recoverTime = 0.6f;
+    [Tooltip("발사 지점들 (애니메이션 길이 대비 비율). 3발이면 0.4, 0.55, 0.7 처럼 입력")]
+    [SerializeField]
+    private float[] _fireRatios = { 0.5f };
 
     [Tooltip("투사체 데미지 증가율 (%)")]
     [SerializeField]
     private float _damageIncreasePercent = 0f;
-
-    [Header("애니메이션 (없으면 무시)")]
-    [SerializeField] private string _spitTrigger = "spit";
 
     private void Reset()
     {
@@ -39,27 +37,25 @@ public class BossSpitPattern : BossPattern
         {
             _muzzle = transform;
         }
+
+        if (_fireRatios != null)
+        {
+            System.Array.Sort(_fireRatios);
+        }
     }
 
     protected override IEnumerator Execute()
     {
-        Boss.FacePlayer();
-
-        yield return new WaitForSeconds(_windupTime);
-
-        for (int i = 0; i < _shotCount; i++)
+        if (_fireRatios == null)
         {
-            Boss.FacePlayer();
-            Boss.SetTrigger(_spitTrigger);
-            Fire();
-
-            if (i < _shotCount - 1)
-            {
-                yield return new WaitForSeconds(_shotInterval);
-            }
+            yield break;
         }
 
-        yield return new WaitForSeconds(_recoverTime);
+        foreach (float ratio in _fireRatios)
+        {
+            yield return WaitUntilProgress(Mathf.Clamp01(ratio));
+            Fire();
+        }
     }
 
     private void Fire()
