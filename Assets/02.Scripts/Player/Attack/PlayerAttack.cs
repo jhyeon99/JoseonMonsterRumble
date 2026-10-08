@@ -91,11 +91,11 @@ public class PlayerAttack : MonoBehaviour
 
         foreach (Collider2D hit in hits)
         {
-            if (!hit.TryGetComponent<IDamageable>(out IDamageable damageable)) continue;
+            if (!EnemyHurtbox.TryGetDamageTarget(hit, out IDamageable damageable)) continue;
             if (!_hitTargets.Add(damageable)) continue;
 
-            Vector3 hitPoint = hit.bounds.ClosestPoint(center);
-            Vector3 attackDir = (hit.transform.position - transform.position).normalized;
+            Vector3 hitPoint = hit.ClosestPoint(center);
+            Vector3 attackDir = (hit.bounds.center - transform.position).normalized;
 
             var hitData = new HitData(
                 _activeStep.Damage,
