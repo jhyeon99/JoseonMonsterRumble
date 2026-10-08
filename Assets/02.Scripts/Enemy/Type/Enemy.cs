@@ -8,7 +8,7 @@ public enum EnemyType
     Buffer
 }
 
-public abstract class Enemy : MonoBehaviour
+public abstract class Enemy : MonoBehaviour, IFinishable
 {
     [SerializeField] private EnemyType _enemyType;
     public EnemyType Type => _enemyType;
@@ -88,6 +88,16 @@ public abstract class Enemy : MonoBehaviour
     {
         _health.Launch(settings, directionX);
     }
+
+    #region IFinishable (플레이어 마무리 공격)
+
+    public bool CanBeFinished => isActiveAndEnabled && IsGroggy && !IsDefeated;
+    public Transform FinisherTransform => transform;
+    public bool TryHoldForFinisher() => TryHoldGroggy();
+    public void ReleaseFinisherHold() => ReleaseGroggy();
+    public void ReceiveFinisher(LaunchSettings launch, float directionX) => Launch(launch, directionX);
+
+    #endregion
 
     protected virtual void OnDisable()
     {
