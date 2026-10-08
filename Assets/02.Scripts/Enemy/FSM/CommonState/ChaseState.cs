@@ -17,16 +17,19 @@ public class ChaseState : EnemyState
 
     public override void FixedUpdate()
     {
-        if (!_enemy.MoveType.IsEndPosition(_enemy.GetDirectionToPlayer()))
+        if (_enemy.MoveType is EnemyGroundMove)
         {
-            _enemy.Animation.SetRunning(true);
-            _enemy.MoveType.Move(_enemy.GetDirectionToPlayer());
+            if (_enemy.GetDistanceXToPlayer() <= _enemy.Data.AttackDetectRange)
+            {
+                if (_enemy.MoveType.IsEndPosition(_enemy.GetDirectionToPlayer()))
+                {
+                    _enemy.Animation.SetRunning(false);
+                    _enemy.MoveType.StopMove();
+                }
+            }
         }
-        else
-        {
-            _enemy.Animation.SetRunning(false);
-            _enemy.MoveType.StopMove();
-        }
+        _enemy.Animation.SetRunning(true);
+        _enemy.MoveType.Move(_enemy.GetDirectionToPlayer());
     }
 
     public override void Update()
