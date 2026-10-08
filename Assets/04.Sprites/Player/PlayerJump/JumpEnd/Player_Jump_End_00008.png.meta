@@ -3,11 +3,11 @@ guid: 3bba0dc86b53f2049833622f14399c52
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1113715255563480830
-    second: Player_Jump_End_00008_0
+      213: -4214234883199741521
+    second: player_jump_end_00008_0
   - first:
-      213: 4745004978926836862
-    second: Player_Jump_End_00008_1
+      213: -7608933023559428593
+    second: player_jump_end_00008_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -78,7 +78,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 2
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -129,13 +129,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Player_Jump_End_00008_0
+      name: player_jump_end_00008_0
       rect:
         serializedVersion: 2
         x: 395
         y: 0
         width: 93
-        height: 68
+        height: 70
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -144,20 +144,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 201943330e94b80f0800000000000000
-      internalID: -1113715255563480830
+      spriteID: fa1d1d2a3b70485c0800000000000000
+      internalID: -4214234883199741521
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Player_Jump_End_00008_1
+      name: player_jump_end_00008_1
       rect:
         serializedVersion: 2
         x: 426
         y: 0
         width: 455
-        height: 492
+        height: 494
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -166,8 +166,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e7cd46263e4a9d140800000000000000
-      internalID: 4745004978926836862
+      spriteID: f06500b9ab3a76690800000000000000
+      internalID: -7608933023559428593
       vertices: []
       indices: 
       edges: []
@@ -186,8 +186,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Player_Jump_End_00008_0: -1113715255563480830
-      Player_Jump_End_00008_1: 4745004978926836862
+      player_jump_end_00008_0: -4214234883199741521
+      player_jump_end_00008_1: -7608933023559428593
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -14,6 +14,7 @@ public class IdleState : EnemyState
         Debug.Log("Idle 시작");
         _enemy.DirectionLock.LockDirection();
         _enemy.MoveType.StopMove();
+        _enemy.Animation.SetRunning(true);
     }
 
     public override void FixedUpdate()

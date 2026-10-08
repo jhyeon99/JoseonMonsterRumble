@@ -1,5 +1,6 @@
 ﻿public enum ProjectileType
 {
     Ground,
-    Flying
+    Flying,
+    Player
 }

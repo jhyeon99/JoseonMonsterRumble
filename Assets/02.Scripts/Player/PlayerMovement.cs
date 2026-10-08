@@ -13,9 +13,17 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] private float _dodgeDuration = 0.3f;
     public float DodgeDuration => _dodgeDuration;
+    [SerializeField] private float _dodgeInvincibleDuration = 0.2f;
+    public float DodgeInvincibleDuration => _dodgeInvincibleDuration;
     [SerializeField] private float _dodgeCooldown = 0f;
     [SerializeField] private AnimationCurve _dodgeSpeedCurve;
     public AnimationCurve DodgeSpeedCurve => _dodgeSpeedCurve;
+
+    [Header("Knockback")]
+    [SerializeField] private float _knockbackUpVelocity = 4f;
+    public float KnockbackUpVelocity => _knockbackUpVelocity;
+    [SerializeField] private float _knockbackDeceleration = 30f;
+    public float KnockbackDeceleration => _knockbackDeceleration;
 
     [SerializeField] private float _coyoteTime = 0.1f;
 
@@ -101,10 +109,12 @@ public class PlayerMovement : MonoBehaviour
 
     public void ApplyGravity(bool isJumpHeld)
     {
-        bool idleOnGround = !_isJumping && !_hasHorizontalInput && IsGrounded();
+        Vector2 v = _rigidbody2D.linearVelocity;
+
+        // 넉백 등 외부 힘으로 움직이는 중에는 고마찰을 걸지 않음
+        bool idleOnGround = !_isJumping && !_hasHorizontalInput && Mathf.Abs(v.x) < 0.1f && IsGrounded();
         _rigidbody2D.sharedMaterial = idleOnGround ? _highFrictionMaterial : _noFrictionMaterial;
 
-        Vector2 v = _rigidbody2D.linearVelocity;
         float multiplier = 1f;
 
         if (v.y < 0f)

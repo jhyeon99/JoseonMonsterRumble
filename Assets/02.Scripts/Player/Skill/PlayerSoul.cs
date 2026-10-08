@@ -11,9 +11,28 @@ public class PlayerSoul : MonoBehaviour, ISoulSource
 
     public event Action<float, float> OnSoulChanged;
 
+#if UNITY_EDITOR
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            AddSoul(1f);
+        }
+    }
+#endif
+
     public void AddSoul(float amount)
     {
         _currentSoul = Mathf.Min(_currentSoul + amount, _maxSoul);
         OnSoulChanged?.Invoke(_currentSoul, _maxSoul);
+    }
+
+    public bool TryUseSoul(float amount)
+    {
+        if (_currentSoul < amount) return false;
+
+        _currentSoul -= amount;
+        OnSoulChanged?.Invoke(_currentSoul, _maxSoul);
+        return true;
     }
 }

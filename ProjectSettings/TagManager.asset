@@ -27,7 +27,7 @@ TagManager:
   - Interactable
   - Trigger
   - Item
-  - 
+  - Front
   - 
   - 
   - 
@@ -51,13 +51,22 @@ TagManager:
   - name: EnvironmentBack
     uniqueID: 1334980413
     locked: 0
+  - name: Ground
+    uniqueID: 4146304329
+    locked: 0
+  - name: EnvironmentFront
+    uniqueID: 4064049573
+    locked: 0
+  - name: Enemy
+    uniqueID: 2367420985
+    locked: 0
   - name: Character
     uniqueID: 1918527705
     locked: 0
   - name: Effect
     uniqueID: 2468278681
     locked: 0
-  - name: EnvironmentFront
+  - name: Foreground
     uniqueID: 2474048271
     locked: 0
   - name: UI

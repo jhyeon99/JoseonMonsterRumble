@@ -21,7 +21,7 @@ public class EnemyMoveArea : MonoBehaviour
 
     public bool IsPositionInArea(Vector2 targetPosition)
     {
-        Vector2 basePos = Application.isPlaying ? _startPosition : (Vector2)transform.position;
+        Vector2 basePos = Application.isPlaying ? _startPosition : transform.position;
         Vector2 center = basePos + CenterOffset;
         Vector2 halfSize = AreaSize * 0.5f;
 
@@ -32,9 +32,21 @@ public class EnemyMoveArea : MonoBehaviour
                targetPosition.y >= minBounds.y && targetPosition.y <= maxBounds.y;
     }
 
+    public float ClampX(float x)
+    {
+        Vector2 basePos = Application.isPlaying ? _startPosition : transform.position;
+        float center = basePos.x + CenterOffset.x;
+        float halfWidth = AreaSize.x * 0.5f;
+
+        float mixWidth = center - halfWidth;
+        float maxWidth = center + halfWidth;
+
+        return Mathf.Clamp(x, mixWidth, maxWidth);
+    }
+
     private void OnDrawGizmos()
     {
-        Vector2 basePos = Application.isPlaying ? _startPosition : (Vector2)transform.position;
+        Vector2 basePos = Application.isPlaying ? _startPosition : transform.position;
         Vector2 center = basePos + CenterOffset;
 
         Gizmos.color = AreaColor;

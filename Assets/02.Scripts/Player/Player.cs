@@ -8,6 +8,7 @@ using UnityEngine.Serialization;
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(PlayerAttack))]
 [RequireComponent(typeof(PlayerSoul))]
+[RequireComponent(typeof(PlayerRangedAttack))]
 public class Player : MonoBehaviour
 {
     private StateMachine _stateMachine;
@@ -27,6 +28,12 @@ public class Player : MonoBehaviour
     public PlayerDeadState DeadState => _deadState;
     private PlayerHitState _hitState;
     public PlayerHitState HitState => _hitState;
+    private PlayerSpellState _spellState;
+    public PlayerSpellState SpellState => _spellState;
+    private PlayerGuardState _guardState;
+    public PlayerGuardState GuardState => _guardState;
+    private PlayerFinisherState _finisherState;
+    public PlayerFinisherState FinisherState => _finisherState;
 
     [Header("Motion Data")]
     [SerializeField] private ActionMotionData _hitMotion = new ActionMotionData();
@@ -46,6 +53,12 @@ public class Player : MonoBehaviour
     public PlayerAttack Attack => _attack;
     private PlayerSoul _soul;
     public PlayerSoul Soul => _soul;
+    private PlayerRangedAttack _rangedAttack;
+    public PlayerRangedAttack RangedAttack => _rangedAttack;
+    private PlayerGuard _guard;
+    public PlayerGuard Guard => _guard;
+    private PlayerFinisher _finisher;
+    public PlayerFinisher Finisher => _finisher;
 
     [SerializeField] private Animator _animator;
     public Animator Animator => _animator;
@@ -55,6 +68,24 @@ public class Player : MonoBehaviour
     private static readonly int AnimParamDie = Animator.StringToHash("die");
     private static readonly int AnimParamDodge = Animator.StringToHash("dodge");
     private static readonly int AnimParamAttack = Animator.StringToHash("attack");
+    private static readonly int AnimParamAttack2 = Animator.StringToHash("attack2");
+    private static readonly int AnimParamAttack3 = Animator.StringToHash("attack3");
+    private static readonly int AnimParamSpell = Animator.StringToHash("spell");
+    private static readonly int AnimParamIsGuarding = Animator.StringToHash("isGuarding");
+    private static readonly int AnimParamGuardStart = Animator.StringToHash("guardStart");
+    private static readonly int AnimParamParry = Animator.StringToHash("parry");
+    private static readonly int AnimParamGuardHit = Animator.StringToHash("guardHit");
+
+    // 마무리 공격: 콤보 전이 없이 3타 모션을 바로 재생
+    private const string FinisherAnimState = "Player_Attack_3rd_Ready";
+    private static readonly int FinisherAnimStateHash = Animator.StringToHash(FinisherAnimState);
+    private static readonly int FinisherAnimStateFullHash = Animator.StringToHash("Base Layer." + FinisherAnimState);
+
+    // 가드/패링 모션이 애니메이터에 추가되기 전에도 경고 없이 동작하도록 파라미터 유무를 저장
+    private bool _hasGuardingParam;
+    private bool _hasGuardStartParam;
+    private bool _hasParryParam;
+    private bool _hasGuardHitParam;
 
     private Coroutine _restoreColliderRoutine;
 
@@ -64,12 +95,16 @@ public class Player : MonoBehaviour
     {
         Health.OnDied += HandleDeath;
         Health.OnHit += HandleHit;
+        Guard.OnParried += HandleParried;
+        Guard.OnBlocked += HandleBlocked;
     }
 
     private void OnDisable()
     {
         Health.OnDied -= HandleDeath;
         Health.OnHit -= HandleHit;
+        Guard.OnParried -= HandleParried;
+        Guard.OnBlocked -= HandleBlocked;
     }
 
     private void Awake()
@@ -79,11 +114,32 @@ public class Player : MonoBehaviour
         _movement = GetComponent<PlayerMovement>();
         _attack = GetComponent<PlayerAttack>();
         _soul = GetComponent<PlayerSoul>();
+        _rangedAttack = GetComponent<PlayerRangedAttack>();
+
+        // 프리팹에 PlayerGuard가 없으면 기본값으로 추가 (수치를 조정하려면 프리팹에 직접 추가)
+        _guard = GetComponent<PlayerGuard>();
+        if (_guard == null)
+        {
+            Debug.LogWarning($"{name}: PlayerGuard가 없어 기본값으로 추가합니다. 수치를 조정하려면 프리팹에 직접 추가하세요.", this);
+            _guard = gameObject.AddComponent<PlayerGuard>();
+        }
+
+        _finisher = GetComponent<PlayerFinisher>();
+        if (_finisher == null)
+        {
+            Debug.LogWarning($"{name}: PlayerFinisher가 없어 기본값으로 추가합니다. 수치를 조정하려면 프리팹에 직접 추가하세요.", this);
+            _finisher = gameObject.AddComponent<PlayerFinisher>();
+        }
 
         if (_animator == null)
         {
             _animator = GetComponentInChildren<Animator>();
         }
+
+        _hasGuardingParam = HasAnimatorParameter(AnimParamIsGuarding);
+        _hasGuardStartParam = HasAnimatorParameter(AnimParamGuardStart);
+        _hasParryParam = HasAnimatorParameter(AnimParamParry);
+        _hasGuardHitParam = HasAnimatorParameter(AnimParamGuardHit);
 
         InitializeStates();
         InitializeMotionData();
@@ -120,7 +176,13 @@ public class Player : MonoBehaviour
     private void Update()
     {
         _stateMachine.Update();
+        HandleRangedAttack();
         SetGrounded(IsGrounded);
+
+        if (_inputHandler.IsPotionKeyDown)
+        {
+            _health.TryUsePotion();
+        }
     }
 
     private void FixedUpdate()
@@ -140,6 +202,55 @@ public class Player : MonoBehaviour
         _dodgeState = new PlayerDodgeState(this, _stateMachine);
         _deadState = new PlayerDeadState(this, _stateMachine);
         _hitState = new PlayerHitState(this, _stateMachine);
+        _spellState = new PlayerSpellState(this, _stateMachine);
+        _guardState = new PlayerGuardState(this, _stateMachine);
+        _finisherState = new PlayerFinisherState(this, _stateMachine);
+    }
+
+    /// <summary>앞에 그로기 적이 있으면 마무리 공격 시작. 시작했으면 true</summary>
+    public bool TryEnterFinisher()
+    {
+        if (!IsGrounded || !_finisher.TryFindTarget(out IFinishable target))
+        {
+            return false;
+        }
+
+        _finisherState.SetTarget(target);
+        _stateMachine.ChangeState(_finisherState);
+        return true;
+    }
+
+    private void HandleRangedAttack()
+    {
+        if (_rangedAttack == null)
+        {
+            return;
+        }
+
+        IState currentState = _stateMachine.CurrentState;
+
+        if (_inputHandler.TryUseRangedAttackInput() &&
+            currentState != DeadState &&
+            currentState != SpellState)
+        {
+            _rangedAttack.PressAttack();
+        }
+
+        if (_rangedAttack.IsCharging && _inputHandler.IsRangedAttackKeyUp)
+        {
+            _rangedAttack.StopCharging();
+        }
+
+        if (_rangedAttack.IsReadyToFire && CanReleaseRangedAttack())
+        {
+            _stateMachine.ChangeState(SpellState);
+        }
+    }
+
+    private bool CanReleaseRangedAttack()
+    {
+        IState currentState = _stateMachine.CurrentState;
+        return IsGrounded && (currentState == IdleState || currentState == MoveState);
     }
 
     public void SetRunning(bool isRunning)
@@ -190,18 +301,132 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void HandleHit()
+    public void TriggerAttack2()
+    {
+        if (_animator != null)
+        {
+            _animator.SetTrigger(AnimParamAttack2);
+        }
+    }
+
+    public void TriggerAttack3()
+    {
+        if (_animator != null)
+        {
+            _animator.SetTrigger(AnimParamAttack3);
+        }
+    }
+
+    public void TriggerSpell()
+    {
+        if (_animator != null)
+        {
+            _animator.SetTrigger(AnimParamSpell);
+        }
+    }
+
+    public void PlayFinisherAnimation()
+    {
+        if (_animator == null)
+        {
+            return;
+        }
+
+        if (_animator.HasState(0, FinisherAnimStateHash) || _animator.HasState(0, FinisherAnimStateFullHash))
+        {
+            _animator.Play(FinisherAnimStateHash, 0, 0f);
+            return;
+        }
+
+        Debug.LogWarning($"{name}: 애니메이터에 {FinisherAnimState} 상태가 없어 attack3 트리거로 대신 재생합니다.", this);
+        TriggerAttack3();
+    }
+
+    public void SetGuarding(bool isGuarding)
+    {
+        if (_hasGuardingParam)
+        {
+            _animator.SetBool(AnimParamIsGuarding, isGuarding);
+        }
+    }
+
+    public void TriggerGuardStart()
+    {
+        if (_hasGuardStartParam)
+        {
+            _animator.SetTrigger(AnimParamGuardStart);
+        }
+    }
+
+    public void TriggerParry()
+    {
+        if (_hasParryParam)
+        {
+            _animator.SetTrigger(AnimParamParry);
+        }
+    }
+
+    public void TriggerGuardHit()
+    {
+        if (_hasGuardHitParam)
+        {
+            _animator.SetTrigger(AnimParamGuardHit);
+        }
+    }
+
+    private bool HasAnimatorParameter(int nameHash)
+    {
+        if (_animator == null || _animator.runtimeAnimatorController == null)
+        {
+            return false;
+        }
+
+        foreach (AnimatorControllerParameter parameter in _animator.parameters)
+        {
+            if (parameter.nameHash == nameHash)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void HandleHit(HitData hitData)
     {
         if (StateMachine.CurrentState == DeadState)
         {
             return;
         }
 
+        if (StateMachine.CurrentState == SpellState && SpellState.IsSuperArmorActive)
+        {
+            return;
+        }
+
+        if (StateMachine.CurrentState == AttackState && AttackState.IsThirdAttackSuperArmorActive())
+        {
+            return;
+        }
+
+        HitState.SetHitData(hitData);
         StateMachine.ChangeState(HitState);
+    }
+
+    private void HandleParried(HitData hitData)
+    {
+        TriggerParry();
+    }
+
+    private void HandleBlocked(HitData hitData)
+    {
+        TriggerGuardHit();
+        GuardState.StartBlockKnockback(hitData.AttackDirection);
     }
 
     private void HandleDeath()
     {
+        _rangedAttack?.CancelCharge();
         StateMachine.ChangeState(DeadState);
     }
 }

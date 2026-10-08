@@ -1,0 +1,533 @@
+fileFormatVersion: 2
+guid: 161816eef945c904484de89523d2110e
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5536250113371605983
+    second: Player_Atk_3rd_Recover_00007_0
+  - first:
+      213: -6445941552430894541
+    second: Player_Atk_3rd_Recover_00007_1
+  - first:
+      213: -7097138473670626676
+    second: Player_Atk_3rd_Recover_00007_2
+  - first:
+      213: 2731943503474452815
+    second: Player_Atk_3rd_Recover_00007_3
+  - first:
+      213: -5857569229517882452
+    second: Player_Atk_3rd_Recover_00007_4
+  - first:
+      213: 2896549063299459037
+    second: Player_Atk_3rd_Recover_00007_5
+  - first:
+      213: -3202409877464083788
+    second: Player_Atk_3rd_Recover_00007_6
+  - first:
+      213: 7234988447107465572
+    second: Player_Atk_3rd_Recover_00007_7
+  - first:
+      213: -8056736944016500720
+    second: Player_Atk_3rd_Recover_00007_8
+  - first:
+      213: 2255156565646297258
+    second: Player_Atk_3rd_Recover_00007_9
+  - first:
+      213: 5848545646773671591
+    second: Player_Atk_3rd_Recover_00007_10
+  - first:
+      213: 2796365423730865512
+    second: Player_Atk_3rd_Recover_00007_11
+  - first:
+      213: 844412669563449855
+    second: Player_Atk_3rd_Recover_00007_12
+  - first:
+      213: -4688367160587571374
+    second: Player_Atk_3rd_Recover_00007_13
+  - first:
+      213: 2391965690134462237
+    second: Player_Atk_3rd_Recover_00007_14
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 7
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 200
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Player_Atk_3rd_Recover_00007_0
+      rect:
+        serializedVersion: 2
+        x: 180
+        y: 163
+        width: 11
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 124f4ccaad94b23b0800000000000000
+      internalID: -5536250113371605983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Atk_3rd_Recover_00007_1
+      rect:
+        serializedVersion: 2
+        x: 207
+        y: 132
+        width: 54
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3323d646f4a6b86a0800000000000000
+      internalID: -6445941552430894541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Atk_3rd_Recover_00007_2
+      rect:
+        serializedVersion: 2
+        x: 448
+        y: 0
+        width: 317
+        height: 507
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c82ba131926e18d90800000000000000
+      internalID: -7097138473670626676
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Atk_3rd_Recover_00007_3
+      rect:
+        serializedVersion: 2
+        x: 167
+        y: 144
+        width: 10
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f49e7075420d9e520800000000000000
+      internalID: 2731943503474452815
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Atk_3rd_Recover_00007_4
+      rect:
+        serializedVersion: 2
+        x: 186
+        y: 141
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cabf35b02dbb5bea0800000000000000
+      internalID: -5857569229517882452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Atk_3rd_Recover_00007_5
+      rect:
+        serializedVersion: 2
+        x: 229
+        y: 122
+        width: 10
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd76478c60c923820800000000000000
+      internalID: 2896549063299459037
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Atk_3rd_Recover_00007_6
+      rect:
+        serializedVersion: 2
+        x: 171
+        y: 49
+        width: 48
+        height: 71
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b21d8cfe21ce83d0800000000000000
+      internalID: -3202409877464083788
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Atk_3rd_Recover_00007_7
+      rect:
+        serializedVersion: 2
+        x: 961
+        y: 78
+        width: 11
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 46145e7f8a7d76460800000000000000
+      internalID: 7234988447107465572
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Atk_3rd_Recover_00007_8
+      rect:
+        serializedVersion: 2
+        x: 235
+        y: 61
+        width: 18
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01851239f68b03090800000000000000
+      internalID: -8056736944016500720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Atk_3rd_Recover_00007_9
+      rect:
+        serializedVersion: 2
+        x: 890
+        y: 7
+        width: 80
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa8cc38b2fceb4f10800000000000000
+      internalID: 2255156565646297258
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Atk_3rd_Recover_00007_10
+      rect:
+        serializedVersion: 2
+        x: 914
+        y: 51
+        width: 20
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a61a9067453a2150800000000000000
+      internalID: 5848545646773671591
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Atk_3rd_Recover_00007_11
+      rect:
+        serializedVersion: 2
+        x: 221
+        y: 44
+        width: 12
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 865b9af798faec620800000000000000
+      internalID: 2796365423730865512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Atk_3rd_Recover_00007_12
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 4
+        width: 157
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff13b2d59d4f7bb00800000000000000
+      internalID: 844412669563449855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Atk_3rd_Recover_00007_13
+      rect:
+        serializedVersion: 2
+        x: 444
+        y: 4
+        width: 21
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25f229058e29feeb0800000000000000
+      internalID: -4688367160587571374
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Atk_3rd_Recover_00007_14
+      rect:
+        serializedVersion: 2
+        x: 852
+        y: 8
+        width: 33
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1ff26b3f18f13120800000000000000
+      internalID: 2391965690134462237
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Player_Atk_3rd_Recover_00007_0: -5536250113371605983
+      Player_Atk_3rd_Recover_00007_1: -6445941552430894541
+      Player_Atk_3rd_Recover_00007_10: 5848545646773671591
+      Player_Atk_3rd_Recover_00007_11: 2796365423730865512
+      Player_Atk_3rd_Recover_00007_12: 844412669563449855
+      Player_Atk_3rd_Recover_00007_13: -4688367160587571374
+      Player_Atk_3rd_Recover_00007_14: 2391965690134462237
+      Player_Atk_3rd_Recover_00007_2: -7097138473670626676
+      Player_Atk_3rd_Recover_00007_3: 2731943503474452815
+      Player_Atk_3rd_Recover_00007_4: -5857569229517882452
+      Player_Atk_3rd_Recover_00007_5: 2896549063299459037
+      Player_Atk_3rd_Recover_00007_6: -3202409877464083788
+      Player_Atk_3rd_Recover_00007_7: 7234988447107465572
+      Player_Atk_3rd_Recover_00007_8: -8056736944016500720
+      Player_Atk_3rd_Recover_00007_9: 2255156565646297258
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
