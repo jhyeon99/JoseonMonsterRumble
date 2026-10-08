@@ -392,6 +392,21 @@ public class Player : MonoBehaviour
         return false;
     }
 
+    public bool IsSuperArmorActive()
+    {
+        if (StateMachine.CurrentState == SpellState && SpellState.IsSuperArmorActive)
+        {
+            return true;
+        }
+
+        if (StateMachine.CurrentState == AttackState && AttackState.IsThirdAttackSuperArmorActive())
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     private void HandleHit(HitData hitData)
     {
         if (StateMachine.CurrentState == DeadState)
@@ -399,12 +414,7 @@ public class Player : MonoBehaviour
             return;
         }
 
-        if (StateMachine.CurrentState == SpellState && SpellState.IsSuperArmorActive)
-        {
-            return;
-        }
-
-        if (StateMachine.CurrentState == AttackState && AttackState.IsThirdAttackSuperArmorActive())
+        if (IsSuperArmorActive())
         {
             return;
         }

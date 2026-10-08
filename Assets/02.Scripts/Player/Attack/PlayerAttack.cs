@@ -14,6 +14,18 @@ public class PlayerAttack : MonoBehaviour
     [Tooltip("콜라이더 중심과 외곽 접점 사이 보간 비율 (0: 몸체 중심, 1: 외곽 표면)")]
     [SerializeField, Range(0f, 1f)] private float _hitPointCenterRatio = 0.35f;
 
+#if UNITY_EDITOR
+    [Header("에디터 히트박스 기즈모")]
+    [Tooltip("에디터 비재생 상태에서 1, 2, 3타 히트박스를 모두 표시할지 여부")]
+    [SerializeField] private bool _showAllHitboxesInEditor = true;
+
+    [Tooltip("특정 타수만 단독 확인 (0: 전체, 1: 1타, 2: 2타, 3: 3타)")]
+    [SerializeField, Range(0, 3)] private int _previewComboIndex = 0;
+
+    [Tooltip("반투명 채움 볼륨 큐브 표시 여부")]
+    [SerializeField] private bool _drawSolidHitbox = true;
+#endif
+
     [SerializeField, ReadOnly] private int _currentCombo = 0;
     [SerializeField, ReadOnly] private bool _isHitboxActive;
 
@@ -111,7 +123,39 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        UnityEngine.Object activeObj = UnityEditor.Selection.activeObject;
+        if (activeObj == null) return;
+
+        bool isPlayerOrChild = false;
+        if (UnityEditor.Selection.activeGameObject != null)
+        {
+            GameObject selectedGO = UnityEditor.Selection.activeGameObject;
+            isPlayerOrChild = (selectedGO == gameObject || selectedGO.transform.IsChildOf(transform));
+        }
+
+        bool isAttackDataSelected = (activeObj == _attackDataTableSO);
+
+        // Player 본체, 자식 오브젝트(Visual 등), 또는 연결된 AttackData 에셋이 선택되었을 때 렌더링
+        if (!isPlayerOrChild && !isAttackDataSelected)
+        {
+            return;
+        }
+
+        DrawHitboxGizmos();
+    }
+#endif
+
     private void OnDrawGizmosSelected()
+    {
+#if !UNITY_EDITOR
+        DrawHitboxGizmos();
+#endif
+    }
+
+    private void DrawHitboxGizmos()
     {
         if (_attackDataTableSO == null || _attackDataTableSO.Data == null ||
             _attackDataTableSO.Data.Length == 0 || _attackOrigin == null)
@@ -119,12 +163,53 @@ public class PlayerAttack : MonoBehaviour
             return;
         }
 
-        int previewIndex = Mathf.Clamp(_currentCombo - 1, 0, _attackDataTableSO.Data.Length - 1);
-        AttackData step = _attackDataTableSO.Data[previewIndex];
+        // 플레이 중 실제 공격 판정이 활성화된 프레임에는 빨간색으로 점등 표시
+        if (Application.isPlaying && _isHitboxActive)
+        {
+            int activeIndex = Mathf.Clamp(_currentCombo - 1, 0, _attackDataTableSO.Data.Length - 1);
+            AttackData activeStep = _attackDataTableSO.Data[activeIndex];
 
-        // 판정이 켜져 있으면 빨강, 아니면 회색 (플레이 중 타이밍 확인용)
-        Gizmos.color = _isHitboxActive ? Color.red : new Color(1f, 1f, 1f, 0.3f);
-        Vector3 center = _attackOrigin.position + _attackOrigin.TransformDirection(step.HitboxOffset);
-        Gizmos.DrawWireCube(center, step.HitboxSize);
+            Vector3 activeCenter = _attackOrigin.position + _attackOrigin.TransformDirection(activeStep.HitboxOffset);
+            Gizmos.color = new Color(1f, 0f, 0f, 0.35f);
+            Gizmos.DrawCube(activeCenter, activeStep.HitboxSize);
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireCube(activeCenter, activeStep.HitboxSize);
+            return;
+        }
+
+#if UNITY_EDITOR
+        var wireColors = new Color[]
+        {
+            new Color(0.2f, 0.7f, 1f, 1f),   // 1타: 하늘색
+            new Color(0.2f, 1f, 0.4f, 1f),   // 2타: 연두색
+            new Color(1f, 0.5f, 0.1f, 1f)    // 3타: 주황색
+        };
+
+        var solidColors = new Color[]
+        {
+            new Color(0.2f, 0.7f, 1f, 0.15f), // 1타 반투명 면
+            new Color(0.2f, 1f, 0.4f, 0.15f), // 2타 반투명 면
+            new Color(1f, 0.5f, 0.1f, 0.15f)  // 3타 반투명 면
+        };
+
+        for (int i = 0; i < _attackDataTableSO.Data.Length; i++)
+        {
+            if (!_showAllHitboxesInEditor && _previewComboIndex != (i + 1)) continue;
+            if (_previewComboIndex != 0 && _previewComboIndex != (i + 1)) continue;
+
+            AttackData step = _attackDataTableSO.Data[i];
+            Vector3 center = _attackOrigin.position + _attackOrigin.TransformDirection(step.HitboxOffset);
+            int colorIndex = Mathf.Clamp(i, 0, wireColors.Length - 1);
+
+            if (_drawSolidHitbox)
+            {
+                Gizmos.color = solidColors[colorIndex];
+                Gizmos.DrawCube(center, step.HitboxSize);
+            }
+
+            Gizmos.color = wireColors[colorIndex];
+            Gizmos.DrawWireCube(center, step.HitboxSize);
+        }
+#endif
     }
 }
