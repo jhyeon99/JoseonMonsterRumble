@@ -1,3 +1,4 @@
+using Com.LuisPedroFonseca.ProCamera2D;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -70,6 +71,11 @@ public sealed class StageManager : MonoBehaviour
         if (_enableDebugRestartKey && Input.GetKeyDown(KeyCode.R) && !PauseController.IsPaused)
         {
             RestartStage();
+        }
+
+        if (Input.GetKeyDown(KeyCode.F12))
+        {
+            SceneManager.LoadScene("Test_Boss");
         }
     }
 #endif
@@ -430,6 +436,14 @@ public sealed class StageManager : MonoBehaviour
         }
 
         // 카메라가 시작 위치에서 미끄러져 오지 않도록 바로 붙임
+        Camera mainCamera = Camera.main;
+        ProCamera2D proCamera = mainCamera != null ? mainCamera.GetComponent<ProCamera2D>() : null;
+        if (proCamera != null && proCamera.isActiveAndEnabled)
+        {
+            proCamera.Reset();
+            return;
+        }
+
         CameraFollow cameraFollow = FindFirstObjectByType<CameraFollow>();
         if (cameraFollow != null)
         {
