@@ -1,125 +1,111 @@
-using System.Collections;
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
+/// <summary>
+/// 플레이어 근접 공격 판정 담당.
+/// 언제 판정을 켜고 끌지는 PlayerAttackState가 AttackData의 HitStartRatio / HitEndRatio로 결정하고,
+/// 여기서는 판정이 켜져 있는 동안 히트박스 검사만 한다.
+/// </summary>
 public class PlayerAttack : MonoBehaviour
 {
     [SerializeField] private AttackDataTableSO _attackDataTableSO;
     [SerializeField] private Transform _attackOrigin;
     [SerializeField] private LayerMask _enemyLayer;
 
-
     [SerializeField, ReadOnly] private int _currentCombo = 0;
+    [SerializeField, ReadOnly] private bool _isHitboxActive;
 
-    public float CurrentAttackDuration
+    public bool IsHitboxActive => _isHitboxActive;
+
+    // 한 번의 공격 단계에서 같은 적은 한 번만 맞도록
+    private readonly HashSet<IDamageable> _hitTargets = new HashSet<IDamageable>();
+    private AttackData _activeStep;
+
+    public bool TryGetAttackData(int index, out AttackData attackData)
     {
-        get
+        if (_attackDataTableSO != null && _attackDataTableSO.Data != null &&
+            index >= 0 && index < _attackDataTableSO.Data.Length)
         {
-            if (_currentCombo <= 0 || _attackDataTableSO == null)
-            {
-                return 0f;
-            }
-
-            int index = _currentCombo - 1;
-            if (index >= _attackDataTableSO.Data.Length)
-            {
-                return 0f;
-            }
-
-            return _attackDataTableSO.Data[index].ActiveDuration;
+            attackData = _attackDataTableSO.Data[index];
+            return true;
         }
+
+        attackData = default;
+        return false;
     }
 
-    private Coroutine _comboResetCoroutine;
-
-    private Animator _animator;
-    private PlayerInputHandler _inputHandler;
-
-    private void Awake()
+    /// <summary>
+    /// 공격 단계 시작 (판정은 아직 켜지 않음). 콤보 단계가 바뀔 때마다 호출.
+    /// </summary>
+    public void StartAttackStep(int index)
     {
-        _animator = GetComponent<Animator>();
-        _inputHandler = GetComponent<PlayerInputHandler>();
+        EndHitbox();
+        _hitTargets.Clear();
+        _currentCombo = TryGetAttackData(index, out _) ? index + 1 : 0;
     }
 
-    private Coroutine _attackRoutine;
-
-    public void ExecuteAttack()
+    /// <summary>
+    /// 판정 시작. PlayerAttackState가 HitStartRatio 지점에서 호출.
+    /// </summary>
+    public void BeginHitbox(int index)
     {
-        if (_attackDataTableSO == null || _attackDataTableSO.Data == null ||
-            _attackDataTableSO.Data.Length == 0)
+        if (!TryGetAttackData(index, out AttackData attackData))
         {
             return;
         }
 
-        if (_attackRoutine != null)
-        {
-            StopCoroutine(_attackRoutine);
-        }
+        _activeStep = attackData;
+        _isHitboxActive = true;
 
-        _attackRoutine = StartCoroutine(FullComboAttackRoutine());
+        // 판정 구간이 아주 짧아서 같은 프레임에 끝나더라도 최소 한 번은 검사
+        CheckHits();
+    }
+
+    /// <summary>판정 끝. PlayerAttackState가 HitEndRatio 지점에서 호출.</summary>
+    public void EndHitbox()
+    {
+        _isHitboxActive = false;
     }
 
     public void StopAttack()
     {
-        if (_attackRoutine != null)
-        {
-            StopCoroutine(_attackRoutine);
-            _attackRoutine = null;
-        }
+        EndHitbox();
+        _hitTargets.Clear();
         _currentCombo = 0;
     }
 
-    private IEnumerator FullComboAttackRoutine()
+    private void Update()
     {
-        int count = _attackDataTableSO.Data.Length;
-        for (int i = 0; i < count; i++)
+        if (_isHitboxActive)
         {
-            _currentCombo = i + 1;
-            AttackData step = _attackDataTableSO.Data[i];
-            yield return StartCoroutine(HitboxRoutine(step));
-
-            float delay = 0.45f;
-            yield return new WaitForSeconds(delay);
-        }
-        _currentCombo = 0;
-        _attackRoutine = null;
-    }
-
-    private IEnumerator HitboxRoutine(AttackData step)
-    {
-        float elapsedTime = 0f;
-
-        var hitTargets = new HashSet<IDamageable>();
-
-        while (elapsedTime < step.ActiveDuration)
-        {
-            Vector3 center = _attackOrigin.position + _attackOrigin.TransformDirection(step.HitboxOffset);
-            Collider2D[] hits = Physics2D.OverlapBoxAll(center, step.HitboxSize, 0f, _enemyLayer);
-
-            foreach (Collider2D hit in hits)
-            {
-                if (hit.TryGetComponent<IDamageable>(out IDamageable damageable))
-                {
-                    if (hitTargets.Contains(damageable)) continue;
-                    hitTargets.Add(damageable);
-
-                    Vector3 hitPoint = hit.bounds.ClosestPoint(center);
-                    Vector3 attackDir = (hit.transform.position - transform.position).normalized;
-
-                    var hitData = new HitData(step.Damage, step.KnockbackForce, hitPoint, attackDir);
-                    damageable.TakeDamage(hitData);
-                }
-            }
-
-            elapsedTime += Time.deltaTime;
-            yield return null;
+            CheckHits();
         }
     }
 
-    private IEnumerator ResetComboCorutine()
+    private void CheckHits()
     {
-        yield return new WaitForSeconds(_attackDataTableSO.ComboResetTime);
-        _currentCombo = 0;
+        if (_attackOrigin == null) return;
+
+        Vector3 center = _attackOrigin.position + _attackOrigin.TransformDirection(_activeStep.HitboxOffset);
+        Collider2D[] hits = Physics2D.OverlapBoxAll(center, _activeStep.HitboxSize, 0f, _enemyLayer);
+
+        foreach (Collider2D hit in hits)
+        {
+            if (!hit.TryGetComponent<IDamageable>(out IDamageable damageable)) continue;
+            if (!_hitTargets.Add(damageable)) continue;
+
+            Vector3 hitPoint = hit.bounds.ClosestPoint(center);
+            Vector3 attackDir = (hit.transform.position - transform.position).normalized;
+
+            var hitData = new HitData(
+                _activeStep.Damage,
+                _activeStep.KnockbackForce,
+                hitPoint,
+                attackDir,
+                comboStep: _currentCombo
+            );
+            damageable.TakeDamage(hitData);
+        }
     }
 
     private void OnDrawGizmosSelected()
@@ -130,10 +116,11 @@ public class PlayerAttack : MonoBehaviour
             return;
         }
 
-        Gizmos.color = Color.red;
         int previewIndex = Mathf.Clamp(_currentCombo - 1, 0, _attackDataTableSO.Data.Length - 1);
         AttackData step = _attackDataTableSO.Data[previewIndex];
 
+        // 판정이 켜져 있으면 빨강, 아니면 회색 (플레이 중 타이밍 확인용)
+        Gizmos.color = _isHitboxActive ? Color.red : new Color(1f, 1f, 1f, 0.3f);
         Vector3 center = _attackOrigin.position + _attackOrigin.TransformDirection(step.HitboxOffset);
         Gizmos.DrawWireCube(center, step.HitboxSize);
     }

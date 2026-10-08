@@ -1,10 +1,25 @@
 ﻿using UnityEngine;
 
+
 public class EnemyFlipFlying : EnemyFlip
+
 {
-    protected override void Flip()
+    public override void Flip()
+
     {
-        transform.localScale =
-            Enemy.GetDirectionToPlayer().x > 0 ? new Vector3(-1f, -1f, 1f) : new Vector3(-1f, 1f, 1f);
+        Vector3 scale = transform.localScale;
+
+        if (Enemy.GetDirectionToPlayer().x >= 0f)
+        {
+            scale.x = -Mathf.Abs(scale.x);
+            scale.y = -Mathf.Abs(scale.y);
+        }
+        else
+        {
+            scale.x = -Mathf.Abs(scale.x);
+            scale.y = Mathf.Abs(scale.y);
+        }
+
+        transform.localScale = scale;
     }
 }

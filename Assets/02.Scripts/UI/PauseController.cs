@@ -19,8 +19,8 @@ public class PauseController : MonoBehaviour
 
     public static bool IsPaused { get; private set; }
 
-    private float _previousTimeScale = 1f;
     [SerializeField, ReadOnly] private bool _isSettingsAvailable;
+    private CanvasGroup _pauseMenuCanvasGroup;
 
     private void Awake()
     {
@@ -32,16 +32,36 @@ public class PauseController : MonoBehaviour
 
         _isPaused = false;
         IsPaused = false;
+        if (_pauseMenuPanel != null)
+        {
+            _pauseMenuCanvasGroup = _pauseMenuPanel.GetComponent<CanvasGroup>();
+            if (_pauseMenuCanvasGroup == null)
+            {
+                _pauseMenuCanvasGroup = _pauseMenuPanel.AddComponent<CanvasGroup>();
+            }
+        }
+
+        InitializeSettingsReferences();
         _isSettingsAvailable = HasSettingsReferences();
         _pauseMenuPanel.SetActive(true);
+        SetPauseMenuInteractable(true);
         if (_settingsPanel != null)
         {
             _settingsPanel.SetActive(false);
+            PauseAudioSettingsView audioSettingsView = _settingsPanel.GetComponent<PauseAudioSettingsView>();
+            if (audioSettingsView != null)
+            {
+                audioSettingsView.OnCloseRequested.AddListener(HideSettings);
+            }
         }
 
         if (!_isSettingsAvailable && _settingsButton != null)
         {
             _settingsButton.interactable = false;
+        }
+        else if (_isSettingsAvailable && _settingsButton != null)
+        {
+            _settingsButton.interactable = true;
         }
 
         _titleConfirmationPanel.SetActive(false);
@@ -93,7 +113,12 @@ public class PauseController : MonoBehaviour
             return;
         }
 
-        _pauseMenuPanel.SetActive(false);
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayPanelOpen();
+        }
+
+        SetPauseMenuInteractable(false);
         _titleConfirmationPanel.SetActive(false);
         _settingsPanel.SetActive(true);
         Select(_settingsFirstSelectable);
@@ -106,8 +131,14 @@ public class PauseController : MonoBehaviour
             return;
         }
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayPanelClose();
+        }
+
         _settingsPanel.SetActive(false);
         _pauseMenuPanel.SetActive(true);
+        SetPauseMenuInteractable(true);
         Select(_settingsButton);
     }
 
@@ -118,12 +149,12 @@ public class PauseController : MonoBehaviour
             return;
         }
 
-        _pauseMenuPanel.SetActive(false);
         if (_settingsPanel != null)
         {
             _settingsPanel.SetActive(false);
         }
 
+        SetPauseMenuInteractable(false);
         _titleConfirmationPanel.SetActive(true);
         Select(_confirmYesButton);
     }
@@ -131,8 +162,17 @@ public class PauseController : MonoBehaviour
     public void HideTitleConfirmation()
     {
         _titleConfirmationPanel.SetActive(false);
-        _pauseMenuPanel.SetActive(true);
+        SetPauseMenuInteractable(true);
         Select(_titleButton);
+    }
+
+    private void SetPauseMenuInteractable(bool isInteractable)
+    {
+        if (_pauseMenuCanvasGroup != null)
+        {
+            _pauseMenuCanvasGroup.interactable = isInteractable;
+            _pauseMenuCanvasGroup.blocksRaycasts = isInteractable;
+        }
     }
 
     public void ReturnToTitle()
@@ -161,9 +201,9 @@ public class PauseController : MonoBehaviour
 
         if (isPaused)
         {
-            _previousTimeScale = Time.timeScale;
             Time.timeScale = 0f;
             _pauseMenuPanel.SetActive(true);
+            SetPauseMenuInteractable(true);
             if (_settingsPanel != null)
             {
                 _settingsPanel.SetActive(false);
@@ -176,6 +216,8 @@ public class PauseController : MonoBehaviour
         }
 
         _pauseOverlay.SetActive(false);
+        _titleConfirmationPanel.SetActive(false);
+        SetPauseMenuInteractable(true);
         RestoreTimeScale();
     }
 
@@ -210,6 +252,23 @@ public class PauseController : MonoBehaviour
         return hasRequiredReferences;
     }
 
+    private void InitializeSettingsReferences()
+    {
+        if (_settingsPanel == null)
+        {
+            PauseAudioSettingsView audioSettingsView = GetComponentInChildren<PauseAudioSettingsView>(true);
+            if (audioSettingsView != null)
+            {
+                _settingsPanel = audioSettingsView.gameObject;
+            }
+        }
+
+        if (_settingsFirstSelectable == null && _settingsPanel != null)
+        {
+            _settingsFirstSelectable = _settingsPanel.GetComponentInChildren<Selectable>(true);
+        }
+    }
+
     private bool HasSettingsReferences()
     {
         bool hasSettingsReferences = true;
@@ -235,9 +294,10 @@ public class PauseController : MonoBehaviour
         return hasSettingsReferences;
     }
 
+    // 일시정지 직전 값(히트스톱 중이면 0.02 등)을 복원하면 슬로우모션이 남으므로 항상 정상 속도로 복귀
     private void RestoreTimeScale()
     {
-        Time.timeScale = _previousTimeScale;
+        Time.timeScale = 1f;
     }
 
     private void Select(Selectable selectable)

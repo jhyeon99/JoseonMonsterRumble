@@ -7,6 +7,12 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     private float _currentHp;
     public event Action OnDeath;
 
+    // 사망하지 않은 피격 시 호출 (피격 연출용)
+    public event Action<HitData> OnHit;
+    public bool IsAlive => _currentHp > 0f;
+    public bool IsDamaged => IsAlive && _currentHp < _enemy.Data.MaxHp;
+    public float CurrentHp => _currentHp;
+
     private void Awake()
     {
         _enemy = GetComponent<Enemy>();
@@ -15,9 +21,10 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
     public bool TakeDamage(HitData hitData)
     {
-        if (_enemy.StateMachine.CurrentState is DeadState) return false;
+        if (_enemy.IsDefeated) return false;
 
-        if (hitData.KnockbackForce > 0f)
+        // 그로기 중에는 넉백으로 그로기가 풀리지 않게 데미지만 받음
+        if (hitData.KnockbackForce > 0f && !_enemy.IsGroggy)
         {
             _currentHp -= hitData.Damage;
             Debug.Log($"현재 체력 {_currentHp}");
@@ -31,14 +38,10 @@ public class EnemyHealth : MonoBehaviour, IDamageable
             }
 
             _enemy.HitFlash.Flash();
+            _enemy.Animation.PlayHit();
+            OnHit?.Invoke(hitData);
             _enemy.StateMachine.ChangeState(new KnockbackState(_enemy, hitData));
             return true;
-        }
-
-        if (_enemy.StateMachine.CurrentState is AttackPrepareState ||
-            _enemy.StateMachine.CurrentState is AttackState)
-        {
-            return false;
         }
 
         _currentHp -= hitData.Damage;
@@ -53,7 +56,19 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
         Debug.Log($"현재 체력 {_currentHp}");
         _enemy.HitFlash.Flash();
+        _enemy.Animation.PlayHit();
+        OnHit?.Invoke(hitData);
 
         return true;
+    }
+
+    /// <summary>마무리 공격으로 날려 보냄. 체력과 관계없이 사망 처리 (OnDeath 발생)</summary>
+    public void Launch(LaunchSettings settings, float directionX)
+    {
+        if (_enemy.IsDefeated) return;
+
+        _currentHp = 0f;
+        OnDeath?.Invoke();
+        _enemy.StateMachine.ChangeState(new LaunchedState(_enemy, settings, directionX));
     }
 }

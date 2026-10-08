@@ -12,10 +12,23 @@ public sealed class RespawnPoint : MonoBehaviour
 
     public Vector2 Position => transform.position;
 
+    [Header("체크포인트 표시")]
+    [SerializeField] private Sprite _inactiveSprite;
+    [SerializeField] private Sprite _activeSprite;
+
     private bool _hasWarnedMissingController;
+    private SpriteRenderer _spriteRenderer;
 
     private void Awake()
     {
+        _spriteRenderer = GetComponent<SpriteRenderer>();
+        if (_inactiveSprite == null)
+        {
+            _inactiveSprite = _spriteRenderer.sprite;
+        }
+
+        SetActivated(false);
+
         BoxCollider2D trigger = GetComponent<BoxCollider2D>();
         if (!trigger.isTrigger)
         {
@@ -38,10 +51,10 @@ public sealed class RespawnPoint : MonoBehaviour
             return;
         }
 
-        DeathRespawnController controller = DeathRespawnController.Instance;
-        if (controller != null)
+        StageManager stageManager = StageManager.Instance;
+        if (stageManager != null)
         {
-            controller.ActivateCheckpoint(this);
+            stageManager.ActivateCheckpoint(this);
             return;
         }
 
@@ -52,9 +65,19 @@ public sealed class RespawnPoint : MonoBehaviour
 
         _hasWarnedMissingController = true;
         Debug.LogWarning(
-            $"{name}: DeathRespawnController가 없습니다.",
+            $"{name}: StageManager가 없습니다.",
             this
         );
+    }
+
+    /// <summary>활성화 상태 표시만 바꿈 (씬 로드 후 상태 복원용, 연출 없음)</summary>
+    public void SetActivated(bool isActivated)
+    {
+        Sprite sprite = isActivated ? _activeSprite : _inactiveSprite;
+        if (_spriteRenderer != null && sprite != null)
+        {
+            _spriteRenderer.sprite = sprite;
+        }
     }
 
     private void OnDrawGizmos()

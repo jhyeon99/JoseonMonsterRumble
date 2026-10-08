@@ -3,8 +3,8 @@ guid: 3cf75d2eb316c3446b3d35d6894462aa
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3755238406476661343
-    second: Player_Jump_Start_00004_0
+      213: -6801340679412097903
+    second: player_jump_start_00004_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 2
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Player_Jump_Start_00004_0
+      name: player_jump_start_00004_0
       rect:
         serializedVersion: 2
-        x: 438
+        x: 464
         y: 0
-        width: 432
-        height: 514
+        width: 409
+        height: 512
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1adfd0fb096b2ebc0800000000000000
-      internalID: -3755238406476661343
+      spriteID: 19c5a37efa8cc91a0800000000000000
+      internalID: -6801340679412097903
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Player_Jump_Start_00004_0: -3755238406476661343
+      player_jump_start_00004_0: -6801340679412097903
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

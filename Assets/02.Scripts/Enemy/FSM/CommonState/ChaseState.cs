@@ -13,6 +13,7 @@ public class ChaseState : EnemyState
     {
         Debug.Log("추적 시작");
         _enemy.DirectionLock.UnlockDirection();
+        _enemy.Animation.SetRunning(true);
     }
 
     public override void FixedUpdate()
@@ -47,5 +48,6 @@ public class ChaseState : EnemyState
     public override void Exit()
     {
         Debug.Log("추적 종료");
+        _enemy.Animation.SetRunning(false);
     }
 }

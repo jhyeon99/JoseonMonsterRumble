@@ -7,11 +7,31 @@ public struct HitData
     public Vector2 HitPoint;
     public Vector2 AttackDirection;
 
-    public HitData(float damage, float knockbackForce, Vector2 hitPoint, Vector2 attackDirection)
+    /// <summary>가드 / 패링 규칙. 기본값은 패링 불가, 가드 가능</summary>
+    public AttackDefense Defense;
+
+    /// <summary>패링당했을 때 반응할 대상 (그로기, 반사 등). 반응이 없으면 null</summary>
+    public IParryable Source;
+
+    /// <summary>플레이어 근접 콤보 단계 (1 = 1타, 2 = 2타, 3 = 3타). 콤보 공격이 아니면 0</summary>
+    public int ComboStep;
+
+    public HitData(
+        float damage,
+        float knockbackForce,
+        Vector2 hitPoint,
+        Vector2 attackDirection,
+        AttackDefense defense = default,
+        IParryable source = null,
+        int comboStep = 0
+    )
     {
         Damage = damage;
         KnockbackForce = knockbackForce;
         HitPoint = hitPoint;
         AttackDirection = attackDirection;
+        Defense = defense;
+        Source = source;
+        ComboStep = comboStep;
     }
 }
