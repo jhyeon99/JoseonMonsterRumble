@@ -20,10 +20,12 @@ public class PlayerMovement : MonoBehaviour
     public AnimationCurve DodgeSpeedCurve => _dodgeSpeedCurve;
 
     [Header("Knockback")]
-    [SerializeField] private float _knockbackUpVelocity = 4f;
+    [SerializeField] private float _knockbackUpVelocity = 3f;
     public float KnockbackUpVelocity => _knockbackUpVelocity;
-    [SerializeField] private float _knockbackDeceleration = 30f;
+    [SerializeField] private float _knockbackDeceleration = 12f;
     public float KnockbackDeceleration => _knockbackDeceleration;
+    [SerializeField] private float _knockbackHorizontalMultiplier = 1.8f;
+    public float KnockbackHorizontalMultiplier => _knockbackHorizontalMultiplier;
 
     [SerializeField] private float _coyoteTime = 0.1f;
 

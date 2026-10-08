@@ -16,7 +16,7 @@ MonoBehaviour:
   - Damage: 10
     HitStartRatio: 0.5
     HitEndRatio: 0.9
-    KnockbackForce: 0
+    KnockbackForce: 3
     HitboxOffset: {x: 0, y: 0}
     HitboxSize: {x: 2.3, y: 1}
     ForwardDisplacementCurve:
@@ -66,7 +66,7 @@ MonoBehaviour:
   - Damage: 10
     HitStartRatio: 0.7
     HitEndRatio: 0.9
-    KnockbackForce: 0
+    KnockbackForce: 5
     HitboxOffset: {x: 0, y: 0}
     HitboxSize: {x: 1, y: 1}
     ForwardDisplacementCurve:
@@ -107,7 +107,7 @@ MonoBehaviour:
   - Damage: 20
     HitStartRatio: 0.5
     HitEndRatio: 0.8
-    KnockbackForce: 5
+    KnockbackForce: 3
     HitboxOffset: {x: 0, y: 0}
     HitboxSize: {x: 2, y: 2}
     ForwardDisplacementCurve:
