@@ -147,6 +147,11 @@ public abstract class Enemy : MonoBehaviour, IFinishable
         return Vector2.Distance(transform.position, _target.position);
     }
 
+    public float GetDistanceXToPlayer()
+    {
+        return Mathf.Abs(transform.position.x - _target.position.x);
+    }
+
     public Vector2 GetDirectionToPlayer()
     {
         return (_target.position - transform.position).normalized;

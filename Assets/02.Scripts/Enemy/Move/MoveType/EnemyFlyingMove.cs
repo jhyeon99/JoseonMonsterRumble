@@ -13,6 +13,19 @@ public class EnemyFlyingMove : EnemyMoveType
     [SerializeField] private float _uCurveBottomOffset = 0.4f;
     [SerializeField] private float _uCurveUpOffset = 1.5f;
     [SerializeField] private float _rotationSpeed = 15f;
+    [Header("돌진 타격 감속 설정")]
+
+    [SerializeField] private float _hitSlowDelay = 0.1f;
+    [SerializeField, Range(0.1f, 1f)] private float _hitSlowRatio = 0.3f;
+    [SerializeField] private float _hitSlowDuration = 0.25f;
+
+    private float _slowDelayTimer = 0f;
+    private float _slowDurationTimer = 0f;
+    private bool _isSlowDelaying = false;
+    private bool _isSlowed = false;
+    private bool _hasTriggeredBottomSlow = false;
+    private float _currentSlowMultiplier = 1f;
+    private float _slowTimer = 0f;
     private bool _isQuadraticCharging = false;
     private Vector2 _chargeStartPos;
     private Vector2 _chargeControlPos;
@@ -21,6 +34,7 @@ public class EnemyFlyingMove : EnemyMoveType
     private float _chargeDuration = 1f;
     private EnemyRotation _enemyRotation;
     private EnemyFlip _enemyFlip;
+
     [Header("패트롤 설정")]
 
     [SerializeField] private float _patrolWaitDuration = 1.0f; // 끝 지점 도달 후 대기 시간(초)
@@ -37,6 +51,23 @@ public class EnemyFlyingMove : EnemyMoveType
         _enemyFlip = GetComponent<EnemyFlip>();
     }
 
+    /// <summary>
+    /// PatrolYHeightType 설정에 따라 허용되는 최대 Y축 좌표를 반환합니다.
+    /// </summary>
+    private float GetMaxAllowedY()
+    {
+        if (Enemy == null || Enemy.MoveArea == null) return float.MaxValue;
+
+        Vector2 center = Enemy.MoveArea.StartPosition + Enemy.MoveArea.CenterOffset;
+        float halfHeight = Enemy.MoveArea.AreaSize.y * 0.5f;
+
+        return _patrolYHeight switch
+        {
+            PatrolYHeightType.MaxY => center.y + halfHeight,
+            _ => center.y // Center 지정 시 Center 높이 이상 올라가지 못함
+        };
+    }
+
     public override void StartQuadraticCharge(Vector2 playerPos)
     {
         _chargeStartPos = Rigidbody.position;
@@ -49,22 +80,73 @@ public class EnemyFlyingMove : EnemyMoveType
         _chargeProgress = 0f;
         _chargeDuration = Mathf.Max(Enemy.Data.AttackDurationTime, 0.1f);
         _isQuadraticCharging = true;
+
+        _hasTriggeredBottomSlow = false;
+        _isSlowDelaying = false;
+        _isSlowed = false;
+    }
+
+    public void ApplyHitSlowdown()
+    {
+        if (_isSlowDelaying || _isSlowed) return;
+
+        _isSlowDelaying = true;
+        _isSlowed = false;
+        _slowDelayTimer = _hitSlowDelay;
+        _slowDurationTimer = _hitSlowDuration;
     }
 
     public override void QuadraticChargePhysicsUpdate()
     {
         if (!_isQuadraticCharging) return;
 
-        _chargeProgress += Time.fixedDeltaTime / _chargeDuration;
+        float currentMultiplier = 1f;
+
+        if (_isSlowDelaying)
+        {
+            _slowDelayTimer -= Time.fixedDeltaTime;
+            if (_slowDelayTimer <= 0f)
+            {
+                _isSlowDelaying = false;
+                _isSlowed = true;
+            }
+        }
+
+        if (_isSlowed)
+        {
+            _slowDurationTimer -= Time.fixedDeltaTime;
+            if (_slowDurationTimer <= 0f)
+            {
+                _isSlowed = false;
+            }
+            else
+            {
+                currentMultiplier = _hitSlowRatio;
+            }
+        }
+
+        float effectiveDeltaTime = Time.fixedDeltaTime * currentMultiplier;
+
+        _chargeProgress += effectiveDeltaTime / _chargeDuration;
         float t = Mathf.Clamp01(_chargeProgress);
 
         Vector2 nextPos = (Mathf.Pow(1f - t, 2f) * _chargeStartPos) +
                           (2f * (1f - t) * t * _chargeControlPos) +
                           (Mathf.Pow(t, 2f) * _chargeEndPos);
 
+        float maxY = GetMaxAllowedY();
+        nextPos.y = Mathf.Min(nextPos.y, maxY);
+
         Rigidbody.MovePosition(nextPos);
+
         Vector2 tangent = 2f * (1f - t) * (_chargeControlPos - _chargeStartPos) +
                           2f * t * (_chargeEndPos - _chargeControlPos);
+
+        if (!_hasTriggeredBottomSlow && tangent.y >= 0f)
+        {
+            _hasTriggeredBottomSlow = true;
+            ApplyHitSlowdown();
+        }
 
         if (tangent.sqrMagnitude > 0.0001f)
         {
@@ -74,7 +156,7 @@ public class EnemyFlyingMove : EnemyMoveType
             var targetRotation = Quaternion.Euler(0f, 0f, moveAngle + rotationOffset);
 
             transform.rotation =
-                Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * _rotationSpeed);
+                Quaternion.Slerp(transform.rotation, targetRotation, effectiveDeltaTime * _rotationSpeed);
         }
 
         if (t >= 1.0f)
@@ -87,8 +169,25 @@ public class EnemyFlyingMove : EnemyMoveType
     public override void StopQuadraticCharge()
     {
         _isQuadraticCharging = false;
+        _isSlowDelaying = false;
+        _isSlowed = false;
+        _hasTriggeredBottomSlow = false;
+        _slowDelayTimer = 0f;
+        _slowDurationTimer = 0f;
+
         Rigidbody.linearVelocity = Vector2.zero;
-        RotateToPlayer();
+
+        if (Enemy.MoveArea.IsPositionInArea(Enemy.Target.position))
+        {
+            RotateToPlayer();
+        }
+        else
+        {
+            Enemy.transform.rotation = Quaternion.identity;
+            Vector3 scale = Enemy.transform.localScale;
+            scale.y = 1f;
+            Enemy.transform.localScale = scale;
+        }
     }
 
     public override void Move(Vector2 direction)
@@ -99,7 +198,6 @@ public class EnemyFlyingMove : EnemyMoveType
 
     public override void BackMove(Vector2 direction)
     {
-        // 후퇴 속도 (진행 방향의 반대)
         Vector2 desiredVelocity = -(direction * Enemy.Data.MoveSpeed);
         Rigidbody.linearVelocity = GetAngleRestrictedVelocity(desiredVelocity, out _);
     }
@@ -111,6 +209,14 @@ public class EnemyFlyingMove : EnemyMoveType
 
     private Vector2 GetAngleRestrictedVelocity(Vector2 desiredVelocity, out bool isAllowed)
     {
+        float maxY = GetMaxAllowedY();
+
+        // 현재 최대 높이 이상에 위치해 있고, 상향(+Y) 이동을 시도할 경우 Y속도 차단
+        if (Rigidbody.position.y >= maxY && desiredVelocity.y > 0f)
+        {
+            desiredVelocity.y = 0f;
+        }
+
         if (Enemy.Target == null)
         {
             isAllowed = true;
@@ -148,13 +254,22 @@ public class EnemyFlyingMove : EnemyMoveType
             targetAngle = relPos.x >= 0f ? -Enemy.RightAngle : -Enemy.LeftAngle;
         }
 
-        // 이동 가능한 각도의 위치로 목표 지점 계산 및 속도 반환
         float rad = targetAngle * Mathf.Deg2Rad;
         Vector2 targetOffset = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * distance;
         Vector2 targetWorldPos = playerPos + targetOffset;
 
+        // 제한 각도로 계산된 목표 위치의 Y 좌표도 상한선 제한
+        targetWorldPos.y = Mathf.Min(targetWorldPos.y, maxY);
+
         Vector2 moveDir = (targetWorldPos - Rigidbody.position).normalized;
-        return moveDir * Enemy.Data.MoveSpeed;
+        Vector2 finalVelocity = moveDir * Enemy.Data.MoveSpeed;
+
+        if (Rigidbody.position.y >= maxY && finalVelocity.y > 0f)
+        {
+            finalVelocity.y = 0f;
+        }
+
+        return finalVelocity;
     }
 
     public override void PatrolIdleMove()
@@ -171,13 +286,11 @@ public class EnemyFlyingMove : EnemyMoveType
             _ => center.y
         };
 
-        // MoveArea Y축 중앙 높이 기준 좌/우 양 끝 지점 계산
         var leftPos = new Vector2(center.x - halfWidth, targetY);
         var rightPos = new Vector2(center.x + halfWidth, targetY);
 
         Vector2 targetPos = _isMovingRight ? rightPos : leftPos;
 
-        // 지점 도달 후 대기 상태 처리
         if (_isPatrolWaiting)
         {
             Rigidbody.linearVelocity = Vector2.zero;
@@ -187,7 +300,7 @@ public class EnemyFlyingMove : EnemyMoveType
             {
                 _isPatrolWaiting = false;
                 _patrolWaitTimer = 0f;
-                _isMovingRight = !_isMovingRight; // 대기 끝난 후 방향 전환 (우 <-> 좌)
+                _isMovingRight = !_isMovingRight;
             }
 
             return;
@@ -198,9 +311,10 @@ public class EnemyFlyingMove : EnemyMoveType
 
         var nextPos =
             Vector2.MoveTowards(Rigidbody.position, targetPos, Enemy.Data.MoveSpeed * Time.fixedDeltaTime);
+
+        nextPos.y = Mathf.Min(nextPos.y, GetMaxAllowedY());
         Rigidbody.MovePosition(nextPos);
 
-        // 양 끝 지점 도달 판정
         if (Vector2.Distance(Rigidbody.position, targetPos) < 0.1f)
         {
             _isPatrolWaiting = true;
@@ -213,7 +327,13 @@ public class EnemyFlyingMove : EnemyMoveType
         Vector2 startPos = Enemy.MoveArea.StartPosition;
         Vector2 direction = (startPos - Rigidbody.position).normalized;
 
-        Rigidbody.linearVelocity = direction * Enemy.Data.MoveSpeed;
+        Vector2 velocity = direction * Enemy.Data.MoveSpeed;
+        if (Rigidbody.position.y >= GetMaxAllowedY() && velocity.y > 0f)
+        {
+            velocity.y = 0f;
+        }
+
+        Rigidbody.linearVelocity = velocity;
         HandleFlip(direction);
     }
 
