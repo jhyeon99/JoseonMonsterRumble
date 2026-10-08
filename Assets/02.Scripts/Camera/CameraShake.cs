@@ -23,9 +23,15 @@ public class CameraShake : MonoBehaviour
     [SerializeField, Min(0f)]
     private float _damageMultiplier = 0.02f;
 
-    [Header("적 강타")]
+    [Header("적 피격")]
     [SerializeField]
-    private CameraShakeSettings _enemyHeavyHitShake = new CameraShakeSettings(0.08f, 0.04f);
+    private CameraShakeSettings _enemyLightHitShake = new CameraShakeSettings(0.092f, 0.046f);
+
+    [SerializeField]
+    private CameraShakeSettings _enemyHeavyHitShake = new CameraShakeSettings(0.11f, 0.055f);
+
+    [SerializeField]
+    private CameraShakeSettings _talismanHitShake = new CameraShakeSettings(0.05f, 0.015f);
 
     [Header("패링")]
     [SerializeField]
@@ -191,10 +197,10 @@ public class CameraShake : MonoBehaviour
 
     private void HandleEnemyHit(HitData hitData)
     {
-        if (hitData.IsHeavyImpact)
-        {
-            StartShake(_enemyHeavyHitShake);
-        }
+        CameraShakeSettings settings = hitData.IsTalisman
+            ? _talismanHitShake
+            : hitData.IsHeavyImpact ? _enemyHeavyHitShake : _enemyLightHitShake;
+        StartShake(settings);
     }
 
     private void HandleParry(HitData hitData)

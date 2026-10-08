@@ -11,6 +11,8 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] private AttackDataTableSO _attackDataTableSO;
     [SerializeField] private Transform _attackOrigin;
     [SerializeField] private LayerMask _enemyLayer;
+    [Tooltip("콜라이더 중심과 외곽 접점 사이 보간 비율 (0: 몸체 중심, 1: 외곽 표면)")]
+    [SerializeField, Range(0f, 1f)] private float _hitPointCenterRatio = 0.35f;
 
     [SerializeField, ReadOnly] private int _currentCombo = 0;
     [SerializeField, ReadOnly] private bool _isHitboxActive;
@@ -94,7 +96,8 @@ public class PlayerAttack : MonoBehaviour
             if (!EnemyHurtbox.TryGetDamageTarget(hit, out IDamageable damageable)) continue;
             if (!_hitTargets.Add(damageable)) continue;
 
-            Vector3 hitPoint = hit.ClosestPoint(center);
+            Vector3 edgePoint = hit.ClosestPoint(center);
+            var hitPoint = Vector3.Lerp(hit.bounds.center, edgePoint, _hitPointCenterRatio);
             Vector3 attackDir = (hit.bounds.center - transform.position).normalized;
 
             var hitData = new HitData(

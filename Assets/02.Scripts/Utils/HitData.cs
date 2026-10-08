@@ -22,6 +22,8 @@ public struct HitData
     /// <summary>플레이어가 패링하여 되돌려 보낸 적 투사체인지</summary>
     public bool IsReflectedProjectile;
 
+    public bool IsTalisman;
+
     public bool IsHeavyImpact => ComboStep == HeavyComboStep || IsReflectedProjectile;
 
     public HitData(
@@ -33,7 +35,8 @@ public struct HitData
         IParryable source = null,
         int comboStep = 0,
         string attackName = "",
-        bool isReflectedProjectile = false
+        bool isReflectedProjectile = false,
+        bool isTalisman = false
     )
     {
         Damage = damage;
@@ -44,6 +47,7 @@ public struct HitData
         Source = source;
         ComboStep = comboStep;
         IsReflectedProjectile = isReflectedProjectile;
+        IsTalisman = isTalisman;
         AttackName = attackName;
     }
 }

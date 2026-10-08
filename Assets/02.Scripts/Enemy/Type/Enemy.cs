@@ -59,6 +59,7 @@ public abstract class Enemy : MonoBehaviour, IFinishable
             return;
         }
 
+        _moveType.ResetLightKnockback();
         _stateMachine.ChangeState(new GroggyState(this, duration));
     }
 
@@ -139,6 +140,15 @@ public abstract class Enemy : MonoBehaviour, IFinishable
 
     protected void FixedUpdate()
     {
+        if (IsDefeated || IsGroggy)
+        {
+            _moveType.ResetLightKnockback();
+        }
+        else if (_moveType.UpdateLightKnockbackPhysics())
+        {
+            return;
+        }
+
         _stateMachine.FixedUpdate();
     }
 

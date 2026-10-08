@@ -50,6 +50,12 @@ public class HitStop : MonoBehaviour
     [SerializeField]
     private HitStopSettings _enemyHeavyHit = new HitStopSettings(0.075f, 0.02f);
 
+    [Header("부적 명중")]
+    [SerializeField] private HitStopSettings _talismanHit = new HitStopSettings(0.025f, 0.15f);
+    [Tooltip("연속 명중 시 히트스탑 재발동 최소 간격. 실제 시간 기준")]
+    [SerializeField, Min(0f)] private float _talismanHitInterval = 0.15f;
+    private float _nextTalismanHitTime;
+
     [Header("패링")]
     [SerializeField]
     private HitStopSettings _parry = new HitStopSettings(0.12f, 0.02f);
@@ -131,6 +137,19 @@ public class HitStop : MonoBehaviour
 
     private void HandleEnemyHit(HitData hitData)
     {
+        if (hitData.IsTalisman)
+        {
+            // 연속 부적은 진행 중인 히트스탑을 연장하거나 강화하지 않는다.
+            if (_isActive || PauseController.IsPaused || Time.unscaledTime < _nextTalismanHitTime)
+            {
+                return;
+            }
+
+            _nextTalismanHitTime = Time.unscaledTime + _talismanHitInterval;
+            Begin(_talismanHit.Duration, _talismanHit.TimeScale);
+            return;
+        }
+
         HitStopSettings settings = hitData.IsHeavyImpact ? _enemyHeavyHit : _enemyLightHit;
         Begin(settings.Duration, settings.TimeScale);
     }
@@ -195,6 +214,7 @@ public class HitStop : MonoBehaviour
 
     private void StopInternal()
     {
+        _nextTalismanHitTime = 0f;
         if (!_isActive)
         {
             return;

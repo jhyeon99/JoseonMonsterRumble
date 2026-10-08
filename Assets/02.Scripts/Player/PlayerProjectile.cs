@@ -134,7 +134,8 @@ public class PlayerProjectile : Projectile
             ProjectileDamage,
             KnockbackForce,
             hitPoint,
-            HitDirection
+            HitDirection,
+            isTalisman: true
         );
 
         bool damageAccepted = damageable.TakeDamage(hitData);
