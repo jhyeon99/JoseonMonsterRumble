@@ -128,8 +128,8 @@ public class PlayerFinisher : MonoBehaviour
     }
 #endif
 
-    /// <summary>앞쪽 탐지 범위 안에서 가장 가까운 그로기 적</summary>
-    public bool TryFindTarget(out Enemy target)
+    /// <summary>앞쪽 탐지 범위 안에서 가장 가까운 마무리 가능 대상 (그로기 적, 최종 그로기 보스 등)</summary>
+    public bool TryFindTarget(out IFinishable target)
     {
         target = null;
 
@@ -142,17 +142,17 @@ public class PlayerFinisher : MonoBehaviour
 
         for (int i = 0; i < count; i++)
         {
-            Enemy enemy = Hits[i].GetComponentInParent<Enemy>();
-            if (enemy == null || !enemy.IsGroggy)
+            IFinishable finishable = Hits[i].GetComponentInParent<IFinishable>();
+            if (finishable == null || !finishable.CanBeFinished)
             {
                 continue;
             }
 
-            float distance = Mathf.Abs(enemy.transform.position.x - transform.position.x);
+            float distance = Mathf.Abs(finishable.FinisherTransform.position.x - transform.position.x);
             if (distance < closest)
             {
                 closest = distance;
-                target = enemy;
+                target = finishable;
             }
         }
 
