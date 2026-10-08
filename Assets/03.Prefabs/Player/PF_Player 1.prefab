@@ -320,8 +320,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _knockbackUpVelocity: 4
-  _knockbackDeceleration: 30
+  _knockbackUpVelocity: 5
+  _knockbackDeceleration: 20
+  _knockbackHorizontalMultiplier: 10
   _coyoteTime: 0.1
   _groundCheckLockout: 0.1
   _fallGravityMultiplier: 2
