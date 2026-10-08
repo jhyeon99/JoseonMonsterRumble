@@ -3,14 +3,18 @@ using UnityEngine;
 public class PlayerSpellState : PlayerBaseState
 {
     private const float SpellStateSafetyTimeout = 3f;
+    private const float SpellSuperArmorDuration = 0.15f;
 
     private static readonly int AnimHashSpell = Animator.StringToHash("PlayerSpell");
     private static readonly int AnimHashSpellEnd = Animator.StringToHash("PlayerSpellEnd");
 
     private float _elapsedTime;
+    private float _superArmorElapsedTime;
     private bool _hasFired;
     private bool _hasEnteredSpellAnimation;
     private RigidbodyConstraints2D _originalConstraints;
+
+    public bool IsSuperArmorActive => _hasFired && _superArmorElapsedTime < SpellSuperArmorDuration;
 
     public PlayerSpellState(Player player, StateMachine stateMachine)
         : base(player, stateMachine)
@@ -22,6 +26,7 @@ public class PlayerSpellState : PlayerBaseState
         base.Enter();
 
         _elapsedTime = 0f;
+        _superArmorElapsedTime = 0f;
         _hasFired = false;
         _hasEnteredSpellAnimation = false;
 
@@ -38,6 +43,10 @@ public class PlayerSpellState : PlayerBaseState
         base.Execute();
 
         _elapsedTime += Time.deltaTime;
+        if (_hasFired)
+        {
+            _superArmorElapsedTime += Time.deltaTime;
+        }
 
         Animator animator = _player.Animator;
         if (animator != null)
@@ -115,6 +124,7 @@ public class PlayerSpellState : PlayerBaseState
     private void FireSpell()
     {
         _hasFired = true;
+        _superArmorElapsedTime = 0f;
         _player.RangedAttack.ReleaseAttack();
     }
 

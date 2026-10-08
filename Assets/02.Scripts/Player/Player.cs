@@ -72,7 +72,9 @@ public class Player : MonoBehaviour
     private static readonly int AnimParamAttack3 = Animator.StringToHash("attack3");
     private static readonly int AnimParamSpell = Animator.StringToHash("spell");
     private static readonly int AnimParamIsGuarding = Animator.StringToHash("isGuarding");
+    private static readonly int AnimParamGuardStart = Animator.StringToHash("guardStart");
     private static readonly int AnimParamParry = Animator.StringToHash("parry");
+    private static readonly int AnimParamGuardHit = Animator.StringToHash("guardHit");
 
     // 마무리 공격: 콤보 전이 없이 3타 모션을 바로 재생
     private const string FinisherAnimState = "Player_Attack_3rd_Ready";
@@ -81,19 +83,20 @@ public class Player : MonoBehaviour
 
     // 가드/패링 모션이 애니메이터에 추가되기 전에도 경고 없이 동작하도록 파라미터 유무를 저장
     private bool _hasGuardingParam;
+    private bool _hasGuardStartParam;
     private bool _hasParryParam;
+    private bool _hasGuardHitParam;
 
     private Coroutine _restoreColliderRoutine;
 
     public bool IsGrounded => _movement != null && _movement.IsGrounded();
-
-    public bool CanCastSpell => IsGrounded && _rangedAttack != null && _rangedAttack.CanCastSpell;
 
     private void OnEnable()
     {
         Health.OnDied += HandleDeath;
         Health.OnHit += HandleHit;
         Guard.OnParried += HandleParried;
+        Guard.OnBlocked += HandleBlocked;
     }
 
     private void OnDisable()
@@ -101,6 +104,7 @@ public class Player : MonoBehaviour
         Health.OnDied -= HandleDeath;
         Health.OnHit -= HandleHit;
         Guard.OnParried -= HandleParried;
+        Guard.OnBlocked -= HandleBlocked;
     }
 
     private void Awake()
@@ -133,7 +137,9 @@ public class Player : MonoBehaviour
         }
 
         _hasGuardingParam = HasAnimatorParameter(AnimParamIsGuarding);
+        _hasGuardStartParam = HasAnimatorParameter(AnimParamGuardStart);
         _hasParryParam = HasAnimatorParameter(AnimParamParry);
+        _hasGuardHitParam = HasAnimatorParameter(AnimParamGuardHit);
 
         InitializeStates();
         InitializeMotionData();
@@ -216,23 +222,26 @@ public class Player : MonoBehaviour
 
     private void HandleRangedAttack()
     {
-        if (_rangedAttack == null || !_rangedAttack.IsCharging)
+        if (_rangedAttack == null)
         {
             return;
         }
 
-        if (!_inputHandler.IsRangedAttackKeyUp)
+        IState currentState = _stateMachine.CurrentState;
+
+        if (_inputHandler.TryUseRangedAttackInput() &&
+            currentState != DeadState &&
+            currentState != SpellState)
         {
-            return;
+            _rangedAttack.PressAttack();
         }
 
-        if (!CanReleaseRangedAttack())
+        if (_rangedAttack.IsCharging && _inputHandler.IsRangedAttackKeyUp)
         {
-            _rangedAttack.CancelCharge();
-            return;
+            _rangedAttack.StopCharging();
         }
 
-        if (_rangedAttack.StopCharging())
+        if (_rangedAttack.IsReadyToFire && CanReleaseRangedAttack())
         {
             _stateMachine.ChangeState(SpellState);
         }
@@ -341,11 +350,27 @@ public class Player : MonoBehaviour
         }
     }
 
+    public void TriggerGuardStart()
+    {
+        if (_hasGuardStartParam)
+        {
+            _animator.SetTrigger(AnimParamGuardStart);
+        }
+    }
+
     public void TriggerParry()
     {
         if (_hasParryParam)
         {
             _animator.SetTrigger(AnimParamParry);
+        }
+    }
+
+    public void TriggerGuardHit()
+    {
+        if (_hasGuardHitParam)
+        {
+            _animator.SetTrigger(AnimParamGuardHit);
         }
     }
 
@@ -374,6 +399,16 @@ public class Player : MonoBehaviour
             return;
         }
 
+        if (StateMachine.CurrentState == SpellState && SpellState.IsSuperArmorActive)
+        {
+            return;
+        }
+
+        if (StateMachine.CurrentState == AttackState && AttackState.IsThirdAttackSuperArmorActive())
+        {
+            return;
+        }
+
         HitState.SetHitData(hitData);
         StateMachine.ChangeState(HitState);
     }
@@ -381,6 +416,12 @@ public class Player : MonoBehaviour
     private void HandleParried(HitData hitData)
     {
         TriggerParry();
+    }
+
+    private void HandleBlocked(HitData hitData)
+    {
+        TriggerGuardHit();
+        GuardState.StartBlockKnockback(hitData.AttackDirection);
     }
 
     private void HandleDeath()
