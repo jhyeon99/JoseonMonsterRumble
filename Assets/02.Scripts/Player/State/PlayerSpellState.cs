@@ -4,6 +4,7 @@ public class PlayerSpellState : PlayerBaseState
 {
     private const float SpellStateSafetyTimeout = 3f;
     private const float SpellSuperArmorDuration = 0.15f;
+    private const float SpellFireNormalizedTime = 0.35f;
 
     private static readonly int AnimHashSpell = Animator.StringToHash("PlayerSpell");
     private static readonly int AnimHashSpellEnd = Animator.StringToHash("PlayerSpellEnd");
@@ -66,8 +67,10 @@ public class PlayerSpellState : PlayerBaseState
                 _hasEnteredSpellAnimation = true;
             }
 
+            bool isSpellCastPointReached = stateInfo.shortNameHash == AnimHashSpell && stateInfo.normalizedTime >= SpellFireNormalizedTime;
+
             if (!_hasFired &&
-                (stateInfo.shortNameHash == AnimHashSpellEnd || isEnteringSpellEnd))
+                (isSpellCastPointReached || stateInfo.shortNameHash == AnimHashSpellEnd || isEnteringSpellEnd))
             {
                 FireSpell();
             }

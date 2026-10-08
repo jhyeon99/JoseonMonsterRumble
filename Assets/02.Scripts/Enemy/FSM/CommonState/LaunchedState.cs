@@ -45,7 +45,7 @@ public class LaunchedState : EnemyState
         // 방향 반전 / 회전 스크립트가 연출을 덮어쓰지 않게 고정
         _enemy.DirectionLock?.LockDirection();
         _enemy.Animation.SetGroggy(false);
-        _enemy.Animation.PlayHit();
+        _enemy.Animation.PlayLaunchHit();
 
         // 물리를 끄기 전에 기준점을 기록 (LaunchPivot이 있으면 그 위치, 없으면 콜라이더 중심)
         Transform enemyTransform = _enemy.transform;
@@ -55,6 +55,11 @@ public class LaunchedState : EnemyState
         _centerOffset = _startCenter - enemyTransform.position;
         _currentCenter = _startCenter;
         _spinAngle = 0f;
+
+        if (ItemPool.Instance != null)
+        {
+            ItemPool.Instance.SpawnDeathSouls(_startCenter, 5);
+        }
 
         // 물리와 충돌을 끄고 직접 움직임
         Rigidbody2D rb = _enemy.EnemyRb;
@@ -149,17 +154,6 @@ public class LaunchedState : EnemyState
     private void Finish()
     {
         _isFinished = true;
-
-        if (ItemPool.Instance != null)
-        {
-            SoulItem soulItem = ItemPool.Instance.GetSoulItem();
-            if (soulItem != null)
-            {
-                // 날아간 위치에서 소울이 생겨 플레이어에게 흡수됨
-                soulItem.transform.position = _currentCenter;
-            }
-        }
-
         _enemy.gameObject.SetActive(false);
     }
 }

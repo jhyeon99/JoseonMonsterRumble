@@ -29,6 +29,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     private SpriteRenderer _spriteRenderer;
     private Coroutine _invincibleRoutine;
     private PlayerGuard _guard;
+    private Player _player;
 
     public event Action<float, float> OnHealthChanged;
     public event Action OnDied;
@@ -48,6 +49,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     {
         // Player.Awake에서 PlayerGuard를 추가하는 경우가 있어서 Awake가 아닌 Start에서 가져옴
         TryGetComponent(out _guard);
+        TryGetComponent(out _player);
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
     }
 
@@ -83,7 +85,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
             flash.Flash();
         }
 
-        StartInvincible();
+        bool isSuperArmor = _player != null && _player.IsSuperArmorActive();
+        if (!isSuperArmor)
+        {
+            StartInvincible();
+        }
         return true;
     }
 
