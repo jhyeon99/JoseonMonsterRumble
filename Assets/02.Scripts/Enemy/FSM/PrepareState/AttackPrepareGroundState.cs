@@ -77,20 +77,17 @@ public class AttackPrepareGroundState : EnemyState
     {
         _enemy.MoveType.IsBackMove = false;
         _enemy.MoveType.StopMove();
-        if (_enemy.Combat is EnemyRangedCombat)
+        Vector3 scale = _enemy.transform.localScale;
+        if (_enemy.GetDirectionToPlayer().x > 0f)
         {
-            Vector3 scale = _enemy.transform.localScale;
-            if (_enemy.GetDirectionToPlayer().x > 0f)
-            {
-                scale.x = Mathf.Abs(scale.x);
-            }
-            else if (_enemy.GetDirectionToPlayer().x < 0f)
-            {
-                scale.x = -Mathf.Abs(scale.x);
-            }
-
-            _enemy.transform.localScale = scale;
+            scale.x = Mathf.Abs(scale.x);
         }
+        else if (_enemy.GetDirectionToPlayer().x < 0f)
+        {
+            scale.x = -Mathf.Abs(scale.x);
+        }
+
+        _enemy.transform.localScale = scale;
 
         Debug.Log("적 공격 준비 완료");
     }

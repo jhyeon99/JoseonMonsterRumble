@@ -25,7 +25,7 @@ public abstract class Enemy : MonoBehaviour, IFinishable
     private Rigidbody2D _enemyRb;
     private HitFlash _hitFlash;
     private EnemyMoveArea _moveArea;
-    private BoxCollider2D _enemyCollider;
+    private Collider2D _enemyCollider;
     private float _radius;
     private float _rightAngle;
     private float _leftAngle;
@@ -115,14 +115,14 @@ public abstract class Enemy : MonoBehaviour, IFinishable
         _enemyRb = GetComponent<Rigidbody2D>();
         _hitFlash = GetComponent<HitFlash>();
         _moveArea = GetComponent<EnemyMoveArea>();
-        _enemyCollider = GetComponent<BoxCollider2D>();
+        _enemyCollider = GetComponent<Collider2D>();
         _rightAngle = Data.AttackAngle;
         _leftAngle = 180f - Data.AttackAngle;
     }
 
     protected virtual void Start()
     {
-        _radius = _enemyCollider.size.y * 0.5f;
+        _radius = _enemyCollider.bounds.extents.y;
         EnemyManager.Instance.AddEnemy(this);
         _target = GameObject.FindWithTag(Constants.Tags.Player).transform;
     }

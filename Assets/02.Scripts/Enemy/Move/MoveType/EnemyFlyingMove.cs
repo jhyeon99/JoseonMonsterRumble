@@ -24,8 +24,6 @@ public class EnemyFlyingMove : EnemyMoveType
     private bool _isSlowDelaying = false;
     private bool _isSlowed = false;
     private bool _hasTriggeredBottomSlow = false;
-    private float _currentSlowMultiplier = 1f;
-    private float _slowTimer = 0f;
     private bool _isQuadraticCharging = false;
     private Vector2 _chargeStartPos;
     private Vector2 _chargeControlPos;
