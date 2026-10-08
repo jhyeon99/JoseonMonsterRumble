@@ -62,6 +62,11 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
         if (damageable.TakeDamage(hitData))
         {
             _attackCollider.enabled = false;
+            if (Enemy.MoveType is EnemyFlyingMove flyingMove)
+            {
+                flyingMove.ApplyHitSlowdown();
+            }
+
             Debug.Log($"플레이어에게 근접공격으로 {_currentDamage}만큼 피해를 입힘.");
         }
     }

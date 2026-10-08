@@ -28,6 +28,11 @@ public abstract class EnemyMoveType : MonoBehaviour
     {
     }
 
+    public virtual bool IsEndPosition(Vector2 direction)
+    {
+        return false;
+    }
+
     public virtual void MoveToStartPosition(Enemy target)
     {
     }
