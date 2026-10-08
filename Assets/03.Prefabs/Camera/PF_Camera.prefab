@@ -174,9 +174,15 @@ MonoBehaviour:
   _duration: 0.1
   _damageMultiplier: 0.02
   _maxMagnitude: 0.3
+  _enemyLightHitShake:
+    Duration: 0.092
+    Magnitude: 0.046
   _enemyHeavyHitShake:
-    Duration: 0.08
-    Magnitude: 0.04
+    Duration: 0.11
+    Magnitude: 0.055
+  _talismanHitShake:
+    Duration: 0.05
+    Magnitude: 0.015
 --- !u!114 &1248506260812186181
 MonoBehaviour:
   m_ObjectHideFlags: 0

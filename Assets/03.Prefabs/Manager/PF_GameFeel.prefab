@@ -49,8 +49,12 @@ MonoBehaviour:
   _parryDuration: 0.12
   _finisherDuration: 0.25
   _enemyLightHit:
-    Duration: 0.035
-    TimeScale: 0.08
-  _enemyHeavyHit:
-    Duration: 0.075
+    Duration: 0.086
     TimeScale: 0.02
+  _enemyHeavyHit:
+    Duration: 0.105
+    TimeScale: 0.02
+  _talismanHit:
+    Duration: 0.025
+    TimeScale: 0.15
+  _talismanHitInterval: 0.15

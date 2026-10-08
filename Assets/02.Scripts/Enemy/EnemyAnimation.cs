@@ -10,6 +10,8 @@ public enum EnemyHitAnimationMode
 public class EnemyAnimation : MonoBehaviour
 {
     private const int ThirdComboStep = 3;
+    private const int AnimationLayer = 0;
+    private static readonly int HitTagHash = Animator.StringToHash("Hit");
 
     [SerializeField] private Animator _animator;
     [SerializeField] private EnemyHitAnimationMode _hitAnimationMode = EnemyHitAnimationMode.AllDamage;
@@ -33,10 +35,28 @@ public class EnemyAnimation : MonoBehaviour
 
     public void PlayDamageHit(HitData hitData)
     {
+        if (hitData.IsTalisman)
+        {
+            if (!IsPlayingHit())
+            {
+                _animator.ResetTrigger(_attack);
+                PlayHit();
+            }
+
+            return;
+        }
+
         if (ShouldPlayDamageHit(hitData))
         {
             PlayHit();
         }
+    }
+
+    public bool IsPlayingHit()
+    {
+        return _animator.GetCurrentAnimatorStateInfo(AnimationLayer).tagHash == HitTagHash ||
+            (_animator.IsInTransition(AnimationLayer) &&
+             _animator.GetNextAnimatorStateInfo(AnimationLayer).tagHash == HitTagHash);
     }
 
     public void PlayParriedHit()

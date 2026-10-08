@@ -11,6 +11,7 @@ public class EffectManager : MonoBehaviour
     [Header("적 피격 이펙트 크기")]
     [SerializeField, Min(0f)] private float _lightEnemyHitScale = 0.8f;
     [SerializeField, Min(0f)] private float _heavyEnemyHitScale = 1.3f;
+    [SerializeField, Min(0f)] private float _talismanHitScale = 0.65f;
 
     private static EffectManager _instance = null;
     public static EffectManager Instance
@@ -88,7 +89,9 @@ public class EffectManager : MonoBehaviour
 
     public void PlayEnemyHit(HitData hitData)
     {
-        float scale = hitData.IsHeavyImpact ? _heavyEnemyHitScale : _lightEnemyHitScale;
+        float scale = hitData.IsTalisman
+            ? _talismanHitScale
+            : hitData.IsHeavyImpact ? _heavyEnemyHitScale : _lightEnemyHitScale;
         Play(EffectType.EnemyHit, hitData.HitPoint, hitData.AttackDirection.x < 0f, scale);
     }
 

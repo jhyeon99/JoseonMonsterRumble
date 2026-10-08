@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour, IDamageable
 {
+    private const int FirstComboStep = 1;
+    private const int SecondComboStep = 2;
     private Enemy _enemy;
     private float _currentHp;
     public event Action OnDeath;
@@ -31,6 +33,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         if (_currentHp <= 0f)
         {
             _currentHp = 0f;
+            _enemy.MoveType.ResetLightKnockback();
             OnDeath?.Invoke();
             _enemy.StateMachine.ChangeState(new DeadState(_enemy));
             return true;
@@ -43,7 +46,11 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         // 그로기 중에는 넉백으로 그로기가 풀리지 않게 데미지만 받음
         if (shouldKnockback)
         {
-            _enemy.StateMachine.ChangeState(new KnockbackState(_enemy, hitData));
+            bool isLightComboHit = hitData.ComboStep == FirstComboStep || hitData.ComboStep == SecondComboStep;
+            if (!isLightComboHit || !_enemy.MoveType.TryStartLightKnockback(hitData))
+            {
+                _enemy.StateMachine.ChangeState(new KnockbackState(_enemy, hitData));
+            }
         }
 
         return true;
@@ -55,6 +62,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         if (_enemy.IsDefeated) return;
 
         _currentHp = 0f;
+        _enemy.MoveType.ResetLightKnockback();
         OnDeath?.Invoke();
         _enemy.StateMachine.ChangeState(new LaunchedState(_enemy, settings, directionX));
     }

@@ -35,7 +35,7 @@ public class EnemyGroundMove : EnemyMoveType
 
     public override void KnockbackPhysicsUpdate(bool isHorizontalOnly)
     {
-        if (!isHorizontalOnly || !IsGrounded() || Rigidbody.linearVelocity.y > LandingVelocityThreshold)
+        if (!isHorizontalOnly)
         {
             return;
         }
@@ -45,10 +45,12 @@ public class EnemyGroundMove : EnemyMoveType
 
     public override bool IsKnockbackFinished(bool isHorizontalOnly)
     {
-        bool hasLanded = IsGrounded() && Rigidbody.linearVelocity.y <= LandingVelocityThreshold;
-        return !isHorizontalOnly
-            ? hasLanded
-            : hasLanded && IsHorizontalKnockbackStopped();
+        if (isHorizontalOnly)
+        {
+            return IsHorizontalKnockbackStopped();
+        }
+
+        return IsGrounded() && Rigidbody.linearVelocity.y <= LandingVelocityThreshold;
     }
 
     public override void PatrolIdleMove()

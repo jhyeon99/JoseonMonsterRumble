@@ -82,7 +82,7 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
         Debug.Log($"{name}: 근접 공격이 패링당함 → 그로기 {_groggyDuration}초");
     }
 
-    private void StopAttack()
+    public override void StopAttack()
     {
         if (_attackCoroutine != null)
         {
@@ -91,6 +91,11 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
         }
 
         _attackCollider.enabled = false;
+    }
+
+    private void OnDisable()
+    {
+        StopAttack();
     }
 
     public void CalculateDamage(float percentage)
