@@ -3,10 +3,9 @@ using UnityEngine;
 public class BuffState : EnemyState
 {
     private readonly Enemy _enemy;
-    private readonly Transform _targetEnemy;
-    private Enemy _target;
+    private readonly Enemy _targetEnemy;
 
-    public BuffState(Enemy enemy, Transform target)
+    public BuffState(Enemy enemy, Enemy target)
     {
         _enemy = enemy;
         _targetEnemy = target;
@@ -15,8 +14,7 @@ public class BuffState : EnemyState
     public override void Enter()
     {
         Debug.Log("버프 상태 진입!");
-        _target = _targetEnemy.GetComponent<Enemy>();
-        _target.Combat.IncreaseDamage(_enemy.Data.AttackBuffAmount);
+        _targetEnemy.Combat.IncreaseDamage(_enemy.Data.AttackBuffAmount);
     }
 
     public override void FixedUpdate()
@@ -26,6 +24,6 @@ public class BuffState : EnemyState
 
     public override void Exit()
     {
-        _target.Combat.NormalDamage();
+        _targetEnemy.Combat.NormalDamage();
     }
 }

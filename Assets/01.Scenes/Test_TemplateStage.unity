@@ -634,6 +634,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: EnemyRangedFlying
       objectReference: {fileID: 0}
+    - target: {fileID: 7004840251579652640, guid: e1509d913becb694880583ae2ea28454,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -708,6 +713,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: PF_Player 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5784287867887489289, guid: 02dae753a2a50bc49bc239cc07eb60a5,
+        type: 3}
+      propertyPath: _dodgeDuration
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5784287867887489289, guid: 02dae753a2a50bc49bc239cc07eb60a5,
+        type: 3}
+      propertyPath: _dodgeInvincibleDuration
+      value: 0.3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -775,6 +790,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: EnemyRangedGround
+      objectReference: {fileID: 0}
+    - target: {fileID: 4049497279173087227, guid: b5f45f1d8b5e07e48b3e6c0307c93ed4,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

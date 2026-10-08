@@ -25,7 +25,10 @@ public abstract class Enemy : MonoBehaviour
     private Rigidbody2D _enemyRb;
     private HitFlash _hitFlash;
     private EnemyMoveArea _moveArea;
-    private Collider2D _enemyCollider;
+    private BoxCollider2D _enemyCollider;
+    private float _radius;
+    private float _rightAngle;
+    private float _leftAngle;
 
     public Transform Target => _target;
     public EnemyStateMachine StateMachine => _stateMachine;
@@ -37,6 +40,10 @@ public abstract class Enemy : MonoBehaviour
     public Rigidbody2D EnemyRb => _enemyRb;
     public HitFlash HitFlash => _hitFlash;
     public EnemyMoveArea MoveArea => _moveArea;
+    public float Radius => _radius;
+    public bool IsTargetedForBuff { get; set; } = false;
+    public float RightAngle => _rightAngle;
+    public float LeftAngle => _leftAngle;
 
     /// <summary>패링당해 그로기 중인지</summary>
     public bool IsGroggy => _stateMachine.CurrentState is GroggyState;
@@ -98,11 +105,14 @@ public abstract class Enemy : MonoBehaviour
         _enemyRb = GetComponent<Rigidbody2D>();
         _hitFlash = GetComponent<HitFlash>();
         _moveArea = GetComponent<EnemyMoveArea>();
-        _enemyCollider = GetComponent<Collider2D>();
+        _enemyCollider = GetComponent<BoxCollider2D>();
+        _rightAngle = Data.AttackAngle;
+        _leftAngle = 180f - Data.AttackAngle;
     }
 
     protected virtual void Start()
     {
+        _radius = _enemyCollider.size.y * 0.5f;
         EnemyManager.Instance.AddEnemy(this);
         _target = GameObject.FindWithTag(Constants.Tags.Player).transform;
     }
@@ -132,7 +142,7 @@ public abstract class Enemy : MonoBehaviour
         return (_target.position - transform.position).normalized;
     }
 
-    public Vector3 GetSoulSpawnPosition()
+    public Vector2 GetEnemyCenterPosition()
     {
         return _enemyCollider.bounds.center;
     }

@@ -50,7 +50,7 @@ public class LaunchedState : EnemyState
         // 물리를 끄기 전에 기준점을 기록 (LaunchPivot이 있으면 그 위치, 없으면 콜라이더 중심)
         Transform enemyTransform = _enemy.transform;
         LaunchPivot pivot = _enemy.GetComponentInChildren<LaunchPivot>(true);
-        _startCenter = pivot != null ? pivot.transform.position : _enemy.GetSoulSpawnPosition();
+        _startCenter = pivot != null ? pivot.transform.position : _enemy.GetEnemyCenterPosition();
         _startCenter.z = enemyTransform.position.z;
         _centerOffset = _startCenter - enemyTransform.position;
         _currentCenter = _startCenter;
