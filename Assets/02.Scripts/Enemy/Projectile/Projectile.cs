@@ -4,15 +4,21 @@ using UnityEngine;
 public abstract class Projectile : MonoBehaviour, IParryable
 {
     [SerializeField] private ProjectileData _data;
+
+    [Tooltip("비어 있으면 ProjectileData의 AttackName 또는 기본값을 사용합니다.")]
+    [SerializeField]
+    private string _attackName;
+
     [SerializeField] private ProjectileType _type;
     [SerializeField] private float _curveHeight = 5f;
     [SerializeField] private float _returnPoolTimer = 5f;
 
     [Header("가드 / 패링")]
-    [SerializeField]
-    private AttackDefense _defense = new AttackDefense { Parryable = true, GuardGaugeCost = 25f };
+
+    [SerializeField] private AttackDefense _defense = new AttackDefense { Parryable = true, GuardGaugeCost = 25f };
 
     [Header("패링 반사 (속도 / 데미지 배율은 PlayerGuard에서 설정)")]
+
     [Tooltip("켜면 쏜 적의 몸(콜라이더 중심)을 따라가며 되돌아감. 끄거나 쏜 적이 없으면 맞은 방향의 반대로 직진")]
     [SerializeField]
     private bool _reflectToShooter = true;
@@ -32,6 +38,9 @@ public abstract class Projectile : MonoBehaviour, IParryable
     private float _projectileDamage;
     public float ProjectileDamage => _projectileDamage;
     protected float KnockbackForce => _data.KnockbackForce;
+    public string AttackName => !string.IsNullOrWhiteSpace(_attackName)
+        ? _attackName
+        : (_data != null && !string.IsNullOrWhiteSpace(_data.AttackName) ? _data.AttackName : "원거리 공격");
 
     // 반사 상태
     private int _originalLayer;
@@ -120,7 +129,9 @@ public abstract class Projectile : MonoBehaviour, IParryable
                 hitPoint,
                 HitDirection,
                 _defense,
-                this
+                this,
+                0,
+                AttackName
             );
 
             damageable.TakeDamage(hitData);
@@ -275,7 +286,11 @@ public abstract class Projectile : MonoBehaviour, IParryable
             _projectileDamage,
             _data.KnockbackForce,
             other.ClosestPoint(transform.position),
-            _reflectDirection
+            _reflectDirection,
+            default,
+            null,
+            0,
+            "반사된 투사체"
         );
 
         // 이미 쓰러진 적 등 데미지를 받지 않으면 통과
