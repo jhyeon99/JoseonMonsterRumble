@@ -15,23 +15,28 @@ public sealed class StageManager : MonoBehaviour
     public static StageManager Instance { get; private set; }
 
     [Header("사망 / 재시작 연출")]
-    [SerializeField] private DeathScreenView _deathScreen;
+    [SerializeField]
+    private DeathScreenView _deathScreen;
 
     [Tooltip("사망 후 화면이 어두워지기 시작할 때까지 대기 (사망 모션을 보여주는 시간)")]
-    [SerializeField, Min(0f)] private float _deathDelay = 0.8f;
+    [SerializeField, Min(0f)]
+    private float _deathDelay = 0.8f;
 
     [Tooltip("화면이 완전히 어두워진 뒤 씬을 다시 로드하기 전까지 유지하는 시간")]
-    [SerializeField, Min(0f)] private float _displayDuration = 0.8f;
+    [SerializeField, Min(0f)]
+    private float _displayDuration = 0.8f;
 
     [Header("디버그 (에디터 전용)")]
     [Tooltip("TODO: 테스트용. 에디터에서만 R 키로 스테이지 재시작 (빌드에는 포함되지 않음)")]
 #pragma warning disable 0414 // 빌드에서는 사용하지 않는 필드 (직렬화 구조를 에디터와 맞추기 위해 남겨둠)
-    [SerializeField] private bool _enableDebugRestartKey = false;
+    [SerializeField]
+    private bool _enableDebugRestartKey = false;
 #pragma warning restore 0414
 
     [Header("적 정리 (임시)")]
     [Tooltip("세이브 포인트 x + 이 값보다 왼쪽에 있는 적을 제거. 음수로 하면 세이브 포인트 바로 왼쪽 적은 남김")]
-    [SerializeField] private float _enemyClearOffsetX = 0f;
+    [SerializeField]
+    private float _enemyClearOffsetX = 0f;
 
     private PlayerHealth _playerHealth;
     private string _activeSceneName;
@@ -63,10 +68,9 @@ public sealed class StageManager : MonoBehaviour
         InitializeScene(SceneManager.GetActiveScene(), false);
     }
 
-#if UNITY_EDITOR
     private void Update()
     {
-        // TODO: 테스트용 임시 코드. 에디터에서만 동작 (빌드에는 포함되지 않음)
+        // TODO: 테스트용 임시 코드.
         // 일시정지 메뉴에 재시작 버튼이 생기면 제거
         if (_enableDebugRestartKey && Input.GetKeyDown(KeyCode.R) && !PauseController.IsPaused)
         {
@@ -78,7 +82,6 @@ public sealed class StageManager : MonoBehaviour
             SceneManager.LoadScene("Test_Boss");
         }
     }
-#endif
 
     private void OnDestroy()
     {
