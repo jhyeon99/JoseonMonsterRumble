@@ -14,6 +14,10 @@ public class UI_GuardGaugeBinder : MonoBehaviour
 
         _guardSource.OnGaugeChanged -= HandleGaugeChanged;
         _guardSource.OnGaugeChanged += HandleGaugeChanged;
+        _guardSource.OnBlocked -= HandleBlocked;
+        _guardSource.OnBlocked += HandleBlocked;
+        _guardSource.OnParried -= HandleParried;
+        _guardSource.OnParried += HandleParried;
         _guardSource.OnGuardBroken -= HandleGuardBroken;
         _guardSource.OnGuardBroken += HandleGuardBroken;
 
@@ -28,6 +32,8 @@ public class UI_GuardGaugeBinder : MonoBehaviour
         }
 
         _guardSource.OnGaugeChanged -= HandleGaugeChanged;
+        _guardSource.OnBlocked -= HandleBlocked;
+        _guardSource.OnParried -= HandleParried;
         _guardSource.OnGuardBroken -= HandleGuardBroken;
     }
 
@@ -39,6 +45,16 @@ public class UI_GuardGaugeBinder : MonoBehaviour
     private void HandleGuardBroken()
     {
         _guardGauge.PlayBreakFeedback();
+    }
+
+    private void HandleBlocked(HitData _)
+    {
+        _guardGauge.PlayBlockFeedback(_guardSource.BlockDrainPauseRemaining);
+    }
+
+    private void HandleParried(HitData _)
+    {
+        _guardGauge.PlayParryFeedback();
     }
 
     private bool TryResolveReferences()

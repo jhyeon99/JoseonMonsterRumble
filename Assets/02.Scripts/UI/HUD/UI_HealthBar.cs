@@ -6,7 +6,11 @@ public class UI_HealthBar : MonoBehaviour
 {
     [Header("컴포넌트 참조")]
     [SerializeField] private PlayerHealth _playerHealth;
+    [SerializeField] private RectTransform _mainMask;
+    [SerializeField] private Image _mainMaskImage;
     [SerializeField] private Image _mainFill;
+    [SerializeField] private RectTransform _ghostMask;
+    [SerializeField] private Image _ghostMaskImage;
     [SerializeField] private Image _ghostFill;
 
     [Header("잔상 색상 설정")]
@@ -22,6 +26,7 @@ public class UI_HealthBar : MonoBehaviour
     [SerializeField] private float _ghostRatio = 1f;
 
     private Coroutine _trailCoroutine;
+    private float _maskFullWidth;
 
     private void Awake()
     {
@@ -37,6 +42,7 @@ public class UI_HealthBar : MonoBehaviour
 
         if (_playerHealth != null)
         {
+            _playerHealth.OnHealthChanged -= HandleHealthChanged;
             _playerHealth.OnHealthChanged += HandleHealthChanged;
             UpdateHealth(_playerHealth.CurrentHealth, _playerHealth.MaxHealth, true);
         }
@@ -65,7 +71,7 @@ public class UI_HealthBar : MonoBehaviour
     {
         if (_mainFill == null)
         {
-            Transform mainFillTransform = transform.Find("Bar_Fill");
+            Transform mainFillTransform = transform.Find("Bar_Fill_Mask/Bar_Fill");
             if (mainFillTransform != null)
             {
                 _mainFill = mainFillTransform.GetComponent<Image>();
@@ -74,26 +80,14 @@ public class UI_HealthBar : MonoBehaviour
 
         if (_ghostFill == null)
         {
-            Transform ghostTransform = transform.Find("Bar_Ghost");
+            Transform ghostTransform = transform.Find("Bar_Ghost_Mask/Bar_Ghost");
             if (ghostTransform != null)
             {
                 _ghostFill = ghostTransform.GetComponent<Image>();
             }
-            else if (_mainFill != null)
-            {
-                CreateGhostFill();
-            }
         }
-    }
 
-    private void CreateGhostFill()
-    {
-        GameObject ghostObj = Instantiate(_mainFill.gameObject, transform);
-        ghostObj.name = "Bar_Ghost";
-        ghostObj.transform.SetSiblingIndex(_mainFill.transform.GetSiblingIndex());
-
-        _ghostFill = ghostObj.GetComponent<Image>();
-        _ghostFill.color = _damageGhostColor;
+        InitializeMasks();
     }
 
     private void HandleHealthChanged(float currentHealth, float maxHealth)
@@ -111,8 +105,8 @@ public class UI_HealthBar : MonoBehaviour
             _currentRatio = targetRatio;
             _ghostRatio = targetRatio;
 
-            if (_mainFill != null) _mainFill.fillAmount = targetRatio;
-            if (_ghostFill != null) _ghostFill.fillAmount = targetRatio;
+            UpdateMainMask(targetRatio);
+            UpdateGhostMask(targetRatio);
             return;
         }
 
@@ -124,12 +118,7 @@ public class UI_HealthBar : MonoBehaviour
         if (targetRatio < _currentRatio)
         {
             // 데미지 피격
-            if (_mainFill != null)
-            {
-                _mainFill.fillAmount = targetRatio;
-            }
-
-            _currentRatio = targetRatio;
+            UpdateMainMask(targetRatio);
             StartTrailCoroutine(ApplyDamageTrail(targetRatio));
         }
         else
@@ -138,10 +127,9 @@ public class UI_HealthBar : MonoBehaviour
             if (_ghostFill != null)
             {
                 _ghostFill.color = _healGhostColor;
-                _ghostFill.fillAmount = targetRatio;
             }
 
-            _ghostRatio = targetRatio;
+            UpdateGhostMask(targetRatio);
             StartTrailCoroutine(ApplyHealTrail(targetRatio));
         }
     }
@@ -170,7 +158,7 @@ public class UI_HealthBar : MonoBehaviour
 
         yield return new WaitForSecondsRealtime(_damageDelay);
 
-        float startGhost = _ghostFill != null ? _ghostFill.fillAmount : _ghostRatio;
+        float startGhost = _ghostRatio;
         float elapsed = 0f;
 
         while (elapsed < _damageCatchupDuration)
@@ -179,27 +167,17 @@ public class UI_HealthBar : MonoBehaviour
             float t = Mathf.Clamp01(elapsed / _damageCatchupDuration);
             float current = Mathf.Lerp(startGhost, targetRatio, t);
 
-            if (_ghostFill != null)
-            {
-                _ghostFill.fillAmount = current;
-            }
-
-            _ghostRatio = current;
+            UpdateGhostMask(current);
             yield return null;
         }
 
-        if (_ghostFill != null)
-        {
-            _ghostFill.fillAmount = targetRatio;
-        }
-
-        _ghostRatio = targetRatio;
+        UpdateGhostMask(targetRatio);
         _trailCoroutine = null;
     }
 
     private IEnumerator ApplyHealTrail(float targetRatio)
     {
-        float startMain = _mainFill != null ? _mainFill.fillAmount : _currentRatio;
+        float startMain = _currentRatio;
         float elapsed = 0f;
 
         while (elapsed < _healCatchupDuration)
@@ -208,28 +186,68 @@ public class UI_HealthBar : MonoBehaviour
             float t = Mathf.Clamp01(elapsed / _healCatchupDuration);
             float current = Mathf.Lerp(startMain, targetRatio, t);
 
-            if (_mainFill != null)
-            {
-                _mainFill.fillAmount = current;
-            }
-
-            _currentRatio = current;
+            UpdateMainMask(current);
             yield return null;
         }
 
-        if (_mainFill != null)
-        {
-            _mainFill.fillAmount = targetRatio;
-        }
-
-        _currentRatio = targetRatio;
-
-        if (_ghostFill != null)
-        {
-            _ghostFill.fillAmount = targetRatio;
-        }
-
-        _ghostRatio = targetRatio;
+        UpdateMainMask(targetRatio);
+        UpdateGhostMask(targetRatio);
         _trailCoroutine = null;
+    }
+
+    private void InitializeMasks()
+    {
+        if (_mainMask == null || _mainMaskImage == null || _mainFill == null
+            || _ghostMask == null || _ghostMaskImage == null || _ghostFill == null)
+        {
+            Debug.LogWarning($"[{nameof(UI_HealthBar)}] HP Mask 참조가 필요합니다.", this);
+            return;
+        }
+
+        _maskFullWidth = _mainFill.rectTransform.rect.width;
+        if (_maskFullWidth <= 0f)
+        {
+            Debug.LogWarning($"[{nameof(UI_HealthBar)}] HP Fill 폭이 0보다 커야 합니다.", this);
+            return;
+        }
+
+        InitializeMask(_mainMask, _mainMaskImage, _mainFill);
+        InitializeMask(_ghostMask, _ghostMaskImage, _ghostFill);
+        UpdateMainMask(_currentRatio);
+        UpdateGhostMask(_ghostRatio);
+    }
+
+    private void InitializeMask(RectTransform mask, Image maskImage, Image fillImage)
+    {
+        mask.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, _maskFullWidth);
+        fillImage.rectTransform.SetSizeWithCurrentAnchors(
+            RectTransform.Axis.Horizontal,
+            _maskFullWidth);
+        maskImage.sprite = _mainFill.sprite;
+        maskImage.type = Image.Type.Simple;
+        fillImage.type = Image.Type.Simple;
+    }
+
+    private void UpdateMainMask(float ratio)
+    {
+        _currentRatio = Mathf.Clamp01(ratio);
+        UpdateMaskWidth(_mainMask, _currentRatio);
+    }
+
+    private void UpdateGhostMask(float ratio)
+    {
+        _ghostRatio = Mathf.Clamp01(ratio);
+        UpdateMaskWidth(_ghostMask, _ghostRatio);
+    }
+
+    private void UpdateMaskWidth(RectTransform mask, float ratio)
+    {
+        if (mask == null)
+        {
+            return;
+        }
+
+        float targetWidth = _maskFullWidth * ratio;
+        mask.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, targetWidth);
     }
 }
