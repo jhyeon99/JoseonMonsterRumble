@@ -74,6 +74,14 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField]
     private string _groggyEndTrigger = "groggyEnd";
 
+    [Tooltip("groggyEnd 이후 재생되는 일어나는 애니메이션 클립. 이 길이만큼 기다린 뒤 다음 패턴을 고름")]
+    [SerializeField]
+    private AnimationClip _groggyEndClip;
+
+    [Tooltip("일어나는 클립이 없을 때 기다리는 시간 (초)")]
+    [SerializeField, Min(0f)]
+    private float _groggyEndFallbackDuration = 0.5f;
+
     [SerializeField]
     private string _howlTrigger = "howl";
 
@@ -137,6 +145,9 @@ public class Boss : MonoBehaviour, IFinishable
     public string GroggyTrigger => _groggyTrigger;
     public string GroggyBool => _groggyBool;
     public string GroggyEndTrigger => _groggyEndTrigger;
+
+    /// <summary>그로기에서 일어나는 애니메이션 길이 (초)</summary>
+    public float GroggyEndDuration => _groggyEndClip != null ? _groggyEndClip.length : _groggyEndFallbackDuration;
     public string HowlTrigger => _howlTrigger;
     public string DefeatTrigger => _defeatTrigger;
 
