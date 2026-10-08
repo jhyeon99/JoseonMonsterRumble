@@ -184,7 +184,21 @@ public class Boss : MonoBehaviour, IFinishable
         _bodyCollider = GetComponent<Collider2D>();
         GroundY = transform.position.y;
 
+        // 보스는 스크립트로만 움직임. Dynamic이면 중력 / 플레이어와의 충돌로 튀어 오를 수 있음
+        if (_body != null && _body.bodyType != RigidbodyType2D.Kinematic)
+        {
+            Debug.LogWarning($"{name}: 보스 Rigidbody2D를 Kinematic으로 바꿉니다. 프리팹에서도 Kinematic으로 설정해 주세요.", this);
+            _body.bodyType = RigidbodyType2D.Kinematic;
+            _body.linearVelocity = Vector2.zero;
+        }
+
         CacheAnimatorParameters();
+
+        // 애니메이터가 루트에 있으면 클립의 위치 키가 보스 이동을 덮어씀 (점프하는 것처럼 보임)
+        if (_animator != null && _animator.gameObject == gameObject)
+        {
+            Debug.LogWarning($"{name}: Animator가 보스 루트에 있습니다. 애니메이션에 위치(Position) 키가 있으면 패턴 이동과 충돌하니 스프라이트 자식으로 옮겨 주세요.", this);
+        }
 
         GetComponentsInChildren(true, _patterns);
         foreach (BossPattern pattern in _patterns)
