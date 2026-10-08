@@ -62,8 +62,17 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField]
     private string _introTrigger = "intro";
 
+    [Tooltip("그로기 시작 시 보낼 트리거 (비우면 사용 안 함)")]
+    [SerializeField]
+    private string _groggyTrigger = "";
+
+    [Tooltip("그로기 중 켜 둘 Bool (비우면 사용 안 함)")]
     [SerializeField]
     private string _groggyBool = "isGroggy";
+
+    [Tooltip("짧은 그로기가 끝날 때 보낼 트리거 (비우면 사용 안 함)")]
+    [SerializeField]
+    private string _groggyEndTrigger = "groggyEnd";
 
     [SerializeField]
     private string _howlTrigger = "howl";
@@ -125,7 +134,9 @@ public class Boss : MonoBehaviour, IFinishable
     public bool DisableOnDefeat => _disableOnDefeat;
 
     public string IntroTrigger => _introTrigger;
+    public string GroggyTrigger => _groggyTrigger;
     public string GroggyBool => _groggyBool;
+    public string GroggyEndTrigger => _groggyEndTrigger;
     public string HowlTrigger => _howlTrigger;
     public string DefeatTrigger => _defeatTrigger;
 

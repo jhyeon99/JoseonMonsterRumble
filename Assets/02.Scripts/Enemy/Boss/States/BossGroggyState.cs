@@ -19,6 +19,10 @@ public class BossGroggyState : BossState
     {
         _boss.Log($"그로기 {_timer}초");
         _boss.SnapToGround();
+
+        // 이전 그로기에서 남은 종료 트리거가 바로 소비되지 않도록 정리
+        _boss.ResetTrigger(_boss.GroggyEndTrigger);
+        _boss.SetTrigger(_boss.GroggyTrigger);
         _boss.SetBool(_boss.GroggyBool, true);
     }
 
@@ -33,6 +37,8 @@ public class BossGroggyState : BossState
 
     public override void Exit()
     {
+        _boss.ResetTrigger(_boss.GroggyTrigger);
         _boss.SetBool(_boss.GroggyBool, false);
+        _boss.SetTrigger(_boss.GroggyEndTrigger);
     }
 }
