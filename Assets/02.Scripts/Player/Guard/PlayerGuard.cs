@@ -110,7 +110,7 @@ public class PlayerGuard : MonoBehaviour
     public float ReflectDamageMultiplier => _reflectDamageMultiplier;
     public float BlockKnockbackSpeed => _blockKnockbackSpeed;
     public float BlockKnockbackDeceleration => _blockKnockbackDeceleration;
-    public float BlockDrainPauseRemaining => Mathf.Max(0f, _drainResumeTime - Time.unscaledTime);
+    public float BlockDrainPauseRemaining => Mathf.Max(0f, _drainResumeTime - Time.time);
 
     /// <summary>기본 판정 시간 기준으로 지금 패링 판정 중인지 (UI, 디버그용)</summary>
     public bool IsParryWindowOpen => _isGuarding && Time.time - _parryWindowStartTime <= _parryWindow;
@@ -301,7 +301,7 @@ public class PlayerGuard : MonoBehaviour
             return;
         }
 
-        _drainResumeTime = Time.unscaledTime + _postBlockDrainPauseDuration;
+        _drainResumeTime = Time.time + _postBlockDrainPauseDuration;
     }
 
     // AttackDirection은 공격자 → 플레이어 방향. 바라보는 방향과 반대면 정면에서 온 공격

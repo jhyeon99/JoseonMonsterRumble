@@ -232,7 +232,8 @@ public class UI_GuardGauge : MonoBehaviour
 
     private void InitializeGhostMask()
     {
-        if (_ghostMask == null || _ghostMaskImage == null || _ghostImage == null)
+        if (_ghostMask == null || _ghostMaskImage == null || _ghostImage == null
+            || _fillImage == null || _fillMaskFullWidth <= 0f)
         {
             return;
         }
@@ -296,7 +297,7 @@ public class UI_GuardGauge : MonoBehaviour
 
         while (elapsed < holdDuration)
         {
-            elapsed += Time.unscaledDeltaTime;
+            elapsed += Time.deltaTime;
             yield return null;
         }
 
@@ -312,7 +313,7 @@ public class UI_GuardGauge : MonoBehaviour
 
         while (elapsed < decreaseDuration)
         {
-            elapsed += Time.unscaledDeltaTime;
+            elapsed += Time.deltaTime;
             float ratio = Mathf.Clamp01(elapsed / decreaseDuration);
             float ghostRatio = Mathf.SmoothStep(startRatio, _ghostTargetRatio, ratio);
             UpdateGhostMask(ghostRatio);
