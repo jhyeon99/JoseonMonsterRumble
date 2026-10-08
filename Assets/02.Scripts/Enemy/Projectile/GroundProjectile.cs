@@ -8,7 +8,6 @@ public class GroundProjectile : Projectile
 
     {
         if (!_isLaunching) return;
-        TrailPrefab.SetActive(true);
 
         _t += Time.deltaTime * Speed;
 

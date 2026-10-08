@@ -12,7 +12,6 @@ public abstract class Projectile : MonoBehaviour, IParryable
     [SerializeField] private ProjectileType _type;
     [SerializeField] private float _curveHeight = 5f;
     [SerializeField] private float _returnPoolTimer = 5f;
-    [SerializeField] private GameObject _trailPrefab;
 
     [Header("가드 / 패링")]
 
@@ -38,7 +37,6 @@ public abstract class Projectile : MonoBehaviour, IParryable
     protected bool _isLaunching = false;
     private float _projectileDamage;
     public float ProjectileDamage => _projectileDamage;
-    public GameObject TrailPrefab => _trailPrefab;
     protected float KnockbackForce => _data.KnockbackForce;
     public string AttackName => !string.IsNullOrWhiteSpace(_attackName)
         ? _attackName
@@ -81,7 +79,6 @@ public abstract class Projectile : MonoBehaviour, IParryable
         if (_returnPoolTime <= 0f)
         {
             gameObject.SetActive(false);
-            _trailPrefab.SetActive(false);
             _returnPoolTime = _returnPoolTimer;
         }
     }

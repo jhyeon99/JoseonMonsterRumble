@@ -55,7 +55,6 @@ public class ProjectilePool : MonoBehaviour
                 if (projectile.gameObject.activeSelf == false)
                 {
                     projectile.gameObject.SetActive(true);
-                    projectile.TrailPrefab.SetActive(false);
                     projectile.OnSpawn(muzzlePoint, playerPoint, damageIncreaseValue);
                     return projectile;
                 }
