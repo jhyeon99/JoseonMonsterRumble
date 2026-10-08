@@ -13,7 +13,6 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
     [Tooltip("패링당했을 때 그로기 시간 (초)")]
     [SerializeField, Min(0f)]
     private float _groggyDuration = 2f;
-
     private Coroutine _attackCoroutine;
     private float _currentDamage;
     public float CurrentDamage => _currentDamage;
@@ -57,6 +56,7 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
             Enemy.GetDirectionToPlayer(),
             _defense,
             this,
+            0,
             _attackName
         );
 
