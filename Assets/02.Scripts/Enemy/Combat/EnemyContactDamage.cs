@@ -16,6 +16,16 @@ public class EnemyContactDamage : MonoBehaviour
     [SerializeField, Min(0f)]
     private float _knockbackForce = 5f;
 
+    [Tooltip("겹쳐 있는 동안 판정 간격 (초). 가드로 막는 중에 매 프레임 게이지가 깎이지 않도록")]
+    [SerializeField, Min(0f)]
+    private float _hitInterval = 0.5f;
+
+    [Header("가드 / 패링")]
+    [Tooltip("기본은 패링 불가, 가드 가능")]
+    [SerializeField]
+    private AttackDefense _defense;
+
+    private float _nextHitTime;
 
     private Enemy _enemy;
     private Collider2D _zone;
@@ -54,8 +64,10 @@ public class EnemyContactDamage : MonoBehaviour
         if (!enabled) return;
         if (other.gameObject.layer != Constants.Layers.Player) return;
 
-        // 죽는 중인 적은 접촉 데미지 없음
-        if (_enemy.StateMachine.CurrentState is DeadState) return;
+        // 죽는 중 / 날아가는 중 / 그로기 중인 적은 접촉 데미지 없음 (그로기 적 앞에서 마무리 공격을 해야 하므로)
+        if (_enemy.IsDefeated || _enemy.IsGroggy) return;
+
+        if (Time.time < _nextHitTime) return;
 
         IDamageable damageable = other.GetComponentInParent<IDamageable>();
         if (damageable == null) return;
@@ -67,7 +79,8 @@ public class EnemyContactDamage : MonoBehaviour
 
         Vector2 hitPoint = other.ClosestPoint(_zone.bounds.center);
 
-        var hitData = new HitData(_damage, _knockbackForce, hitPoint, attackDirection);
+        var hitData = new HitData(_damage, _knockbackForce, hitPoint, attackDirection, _defense);
         damageable.TakeDamage(hitData);
+        _nextHitTime = Time.time + _hitInterval;
     }
 }
