@@ -97,7 +97,13 @@ public class PlayerAttack : MonoBehaviour
             Vector3 hitPoint = hit.bounds.ClosestPoint(center);
             Vector3 attackDir = (hit.transform.position - transform.position).normalized;
 
-            var hitData = new HitData(_activeStep.Damage, _activeStep.KnockbackForce, hitPoint, attackDir);
+            var hitData = new HitData(
+                _activeStep.Damage,
+                _activeStep.KnockbackForce,
+                hitPoint,
+                attackDir,
+                comboStep: _currentCombo
+            );
             damageable.TakeDamage(hitData);
         }
     }
