@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -137,6 +138,12 @@ public abstract class BossPattern : MonoBehaviour
         }
 
         _onFinished = null;
+
+        if (Boss != null)
+        {
+            Boss.ResetTrigger(_animationTrigger);
+        }
+
         Cleanup();
     }
 
@@ -146,11 +153,27 @@ public abstract class BossPattern : MonoBehaviour
         OnPatternStart();
         Boss.SetTrigger(_animationTrigger);
 
-        // 중첩 코루틴까지 이 코루틴 하나로 돌려서 Stop 한 번에 모두 멈추게 함
-        IEnumerator execute = Execute();
-        while (execute.MoveNext())
+        // 중첩된 IEnumerator(RunHitWindow, WaitUntilProgress 등)까지 이 코루틴 하나에서 직접 돌림.
+        // Unity에 중첩 코루틴으로 넘기면 Stop(그로기 등) 후에도 안쪽이 계속 돌아 판정이 켜질 수 있음
+        var stack = new Stack<IEnumerator>();
+        stack.Push(Execute());
+
+        while (stack.Count > 0)
         {
-            yield return execute.Current;
+            IEnumerator current = stack.Peek();
+            if (!current.MoveNext())
+            {
+                stack.Pop();
+                continue;
+            }
+
+            if (current.Current is IEnumerator nested)
+            {
+                stack.Push(nested);
+                continue;
+            }
+
+            yield return current.Current;
         }
 
         // 애니메이션이 끝날 때까지 기다림
