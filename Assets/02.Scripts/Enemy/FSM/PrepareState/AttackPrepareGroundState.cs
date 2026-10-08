@@ -17,6 +17,9 @@ public class AttackPrepareGroundState : EnemyState
         _enemy.MoveType.StopMove();
         if (_enemy.Combat is EnemyMeleeCombat)
         {
+            // 뒤로 물러나던 방향(플레이어 반대)을 보고 있을 수 있으므로, 방향을 잠그기 전에 플레이어 쪽을 보게 함
+            // (휴식 → 추적 → 공격 준비가 한 프레임에 이어지면 Flip이 돌기 전에 잠겨서 뒤를 보고 공격하던 문제)
+            FacePlayer();
             _enemy.Animation.PlayAttack();
             _enemy.DirectionLock.LockDirection();
         }
@@ -42,6 +45,19 @@ public class AttackPrepareGroundState : EnemyState
             Debug.Log("지상 적 공격 준비");
             _enemy.StateMachine.ChangeState(new AttackState(_enemy));
         }
+    }
+
+    private void FacePlayer()
+    {
+        float directionX = _enemy.GetDirectionToPlayer().x;
+        if (Mathf.Abs(directionX) < 0.01f)
+        {
+            return;
+        }
+
+        Vector3 scale = _enemy.transform.localScale;
+        scale.x = directionX > 0f ? Mathf.Abs(scale.x) : -Mathf.Abs(scale.x);
+        _enemy.transform.localScale = scale;
     }
 
     public override void Exit()
