@@ -14,6 +14,8 @@ public class BossFinalGroggyState : BossState
         _boss.Log("완전 그로기 (마무리 공격 대기)");
         _boss.ClearMinions();
         _boss.SnapToGround();
+        _boss.ResetTrigger(_boss.GroggyEndTrigger);
+        _boss.SetTrigger(_boss.GroggyTrigger);
         _boss.SetBool(_boss.GroggyBool, true);
     }
 
