@@ -1,12 +1,13 @@
 using UnityEngine;
 
 /// <summary>
-/// 그로기 적 마무리 공격. 3타 모션을 바로 재생하고 타격 순간에 적을 날려 보냄.
+/// 그로기 대상(IFinishable) 마무리 공격. 3타 모션을 바로 재생하고 타격 순간에 대상에게 마무리를 전달.
+/// 일반 적은 날려 보내고, 보스는 처치 연출로 넘어감.
 /// 마무리 공격 중에는 무적.
 /// </summary>
 public class PlayerFinisherState : PlayerBaseState
 {
-    private Enemy _target;
+    private IFinishable _target;
     private float _elapsedTime;
     private float _impactDelay;
     private float _duration;
@@ -18,7 +19,7 @@ public class PlayerFinisherState : PlayerBaseState
     {
     }
 
-    public void SetTarget(Enemy target)
+    public void SetTarget(IFinishable target)
     {
         _target = target;
     }
@@ -42,9 +43,9 @@ public class PlayerFinisherState : PlayerBaseState
         _player.Health.SetInvincible(true, false);
 
         // 준비 동작 중에 그로기가 풀리지 않게 고정
-        if (_target != null)
+        if (IsTargetAlive())
         {
-            _target.TryHoldGroggy();
+            _target.TryHoldForFinisher();
         }
 
         _player.PlayFinisherAnimation();
@@ -89,9 +90,9 @@ public class PlayerFinisherState : PlayerBaseState
         _player.Health.SetInvincible(false, false);
 
         // 타격 전에 끊겼으면 그로기 고정 해제
-        if (!_hasImpacted && _target != null)
+        if (!_hasImpacted && IsTargetAlive())
         {
-            _target.ReleaseGroggy();
+            _target.ReleaseFinisherHold();
         }
 
         _target = null;
@@ -101,26 +102,33 @@ public class PlayerFinisherState : PlayerBaseState
     {
         _hasImpacted = true;
 
-        if (_target == null || !_target.isActiveAndEnabled || !_target.IsGroggy)
+        if (!IsTargetAlive() || !_target.CanBeFinished)
         {
             return;
         }
 
-        float directionX = _target.transform.position.x >= _player.transform.position.x ? 1f : -1f;
-        Vector2 point = _target.transform.position;
+        Transform targetTransform = _target.FinisherTransform;
+        float directionX = targetTransform.position.x >= _player.transform.position.x ? 1f : -1f;
+        Vector2 point = targetTransform.position;
 
-        _target.Launch(_player.Finisher.Launch, directionX);
+        _target.ReceiveFinisher(_player.Finisher.Launch, directionX);
         GameEvents.TriggerFinisher(point);
+    }
+
+    // 대상이 파괴됐거나 꺼졌는지 (인터페이스라 Unity의 null 비교가 적용되지 않아 직접 확인)
+    private bool IsTargetAlive()
+    {
+        return _target is Behaviour behaviour && behaviour != null && behaviour.isActiveAndEnabled;
     }
 
     private void FaceTarget()
     {
-        if (_target == null)
+        if (!IsTargetAlive())
         {
             return;
         }
 
-        float diff = _target.transform.position.x - _player.transform.position.x;
+        float diff = _target.FinisherTransform.position.x - _player.transform.position.x;
         if (Mathf.Abs(diff) > 0.01f)
         {
             _player.transform.localScale = new Vector3(Mathf.Sign(diff), 1f, 1f);
