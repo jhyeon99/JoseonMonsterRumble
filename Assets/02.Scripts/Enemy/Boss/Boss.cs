@@ -453,6 +453,15 @@ public class Boss : MonoBehaviour, IFinishable
         }
     }
 
+    /// <summary>예약된 트리거 취소 (패턴이 끊겼을 때 공격 애니메이션이 뒤늦게 재생되지 않도록)</summary>
+    public void ResetTrigger(string parameter)
+    {
+        if (TryGetParameter(parameter, out int hash))
+        {
+            _animator.ResetTrigger(hash);
+        }
+    }
+
     public void SetBool(string parameter, bool value)
     {
         if (TryGetParameter(parameter, out int hash))
