@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class DeadState : EnemyState
 {
@@ -17,6 +17,11 @@ public class DeadState : EnemyState
         _enemy.Animation.PlayDie();
         DisableRigidbody();
         _dieTimer = _enemy.Data.DieTime;
+
+        if (ItemPool.Instance != null)
+        {
+            ItemPool.Instance.SpawnDeathSouls(_enemy.GetEnemyCenterPosition(), 5);
+        }
     }
 
     public override void Update()
@@ -24,8 +29,6 @@ public class DeadState : EnemyState
         _dieTimer -= Time.deltaTime;
         if (_dieTimer <= 0)
         {
-            SoulItem soulItem = ItemPool.Instance.GetSoulItem();
-            soulItem.transform.position = _enemy.GetEnemyCenterPosition();
             _enemy.gameObject.SetActive(false);
         }
     }

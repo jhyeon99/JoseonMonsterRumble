@@ -13,13 +13,42 @@ public class EffectManager : MonoBehaviour
     [SerializeField, Min(0f)] private float _heavyEnemyHitScale = 1.3f;
 
     private static EffectManager _instance = null;
-    public static EffectManager Instance => _instance;
+    public static EffectManager Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                EffectManager existing = FindFirstObjectByType<EffectManager>();
+                if (existing != null)
+                {
+                    _instance = existing;
+                }
+                else
+                {
+                    EffectManager prefab = Resources.Load<EffectManager>("PF_EffectManager");
+                    if (prefab != null)
+                    {
+                        _instance = Instantiate(prefab);
+                        _instance.name = "EffectManager";
+                    }
+                }
+            }
+            return _instance;
+        }
+    }
 
     private EffectPool _pool;
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    private static void EnsureInstance()
+    {
+        _ = Instance;
+    }
+
     private void Awake()
     {
-        if (_instance != null)
+        if (_instance != null && _instance != this)
         {
             Destroy(gameObject);
             return;
