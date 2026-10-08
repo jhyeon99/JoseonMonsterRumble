@@ -53,10 +53,10 @@ public class PrologueIntroController : MonoBehaviour
     [SerializeField] private Sprite _enterKeySprite;
 
     [Header("Dialogue layout")]
-    [SerializeField, Min(180f)] private float _dialogueHeight = 230f;
+    [SerializeField, Min(180f)] private float _dialogueHeight = 280f;
     [SerializeField, Min(0f)] private float _dialogueBottomMargin = 48f;
     [SerializeField, Min(0f)] private float _dialogueSideMargin = 64f;
-    [SerializeField, Min(18)] private int _dialogueFontSize = 36;
+    [SerializeField, Min(18)] private int _dialogueFontSize = 48;
     [SerializeField] private Color _dialogueTextColor = new Color(0.94f, 0.93f, 0.88f, 1f);
     [SerializeField] private Color _choiceTextColor = new Color(1f, 0.88f, 0.65f, 1f);
     [SerializeField] private Color _dialoguePanelColor = new Color(0.055f, 0.065f, 0.075f, 0.94f);
@@ -105,6 +105,10 @@ public class PrologueIntroController : MonoBehaviour
     private Text _continueHint;
     private GameObject _dialoguePanel;
     private GameObject _continuePrompt;
+    private RectTransform _continuePromptRect;
+    private Image _continuePromptImage;
+    private Vector2 _continuePromptRestPosition;
+    private Color _continuePromptRestColor;
     private GameObject _exitChoice;
     private RectTransform _exitChoiceRect;
     private Image _exitChoiceBackground;
@@ -438,6 +442,7 @@ public class PrologueIntroController : MonoBehaviour
 
     private IEnumerator WaitForEnter()
     {
+        SetContinueKeyPress(0f);
         _continuePrompt.SetActive(true);
         // Require a fresh press so a held Enter cannot skip several steps.
         while (Input.GetKey(KeyCode.Return) || Input.GetKey(KeyCode.KeypadEnter))
@@ -445,8 +450,36 @@ public class PrologueIntroController : MonoBehaviour
         yield return null;
         while (!Input.GetKeyDown(KeyCode.Return) && !Input.GetKeyDown(KeyCode.KeypadEnter))
             yield return null;
+        yield return AnimateContinueKeyPress();
         _continuePrompt.SetActive(false);
         yield return null;
+    }
+
+    private IEnumerator AnimateContinueKeyPress()
+    {
+        SetContinueKeyPress(1f);
+        yield return new WaitForSecondsRealtime(0.05f);
+
+        float elapsed = 0f;
+        const float releaseDuration = 0.09f;
+        while (elapsed < releaseDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float amount = 1f - Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / releaseDuration));
+            SetContinueKeyPress(amount);
+            yield return null;
+        }
+        SetContinueKeyPress(0f);
+    }
+
+    private void SetContinueKeyPress(float amount)
+    {
+        if (_continuePromptRect == null || _continuePromptImage == null) return;
+        _continuePromptRect.localScale = Vector3.one * Mathf.Lerp(1f, 0.88f, amount);
+        _continuePromptRect.anchoredPosition = _continuePromptRestPosition + Vector2.down * (4f * amount);
+        var pressedColor = new Color(_continuePromptRestColor.r * 0.78f,
+            _continuePromptRestColor.g * 0.78f, _continuePromptRestColor.b * 0.78f, _continuePromptRestColor.a);
+        _continuePromptImage.color = Color.Lerp(_continuePromptRestColor, pressedColor, amount);
     }
 
     private void Update()
@@ -515,13 +548,13 @@ public class PrologueIntroController : MonoBehaviour
         RectTransform subtitleRect = subtitleObject.GetComponent<RectTransform>();
         subtitleRect.anchorMin = Vector2.zero;
         subtitleRect.anchorMax = Vector2.one;
-        subtitleRect.offsetMin = new Vector2(40f, 82f);
+        subtitleRect.offsetMin = new Vector2(40f, 28f);
         subtitleRect.offsetMax = new Vector2(-40f, -28f);
         _subtitle = subtitleObject.GetComponent<Text>();
         _subtitle.font = _subtitleFont != null ? _subtitleFont :
             Font.CreateDynamicFontFromOSFont(new[] { "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans CJK KR", "Arial" }, _dialogueFontSize);
         _subtitle.fontSize = _dialogueFontSize;
-        _subtitle.alignment = TextAnchor.MiddleLeft;
+        _subtitle.alignment = TextAnchor.MiddleCenter;
         _subtitle.color = _dialogueTextColor;
         _subtitle.raycastTarget = false;
 
@@ -531,12 +564,16 @@ public class PrologueIntroController : MonoBehaviour
         promptRect.anchorMin = new Vector2(1f, 0f);
         promptRect.anchorMax = new Vector2(1f, 0f);
         promptRect.pivot = new Vector2(1f, 0f);
-        promptRect.anchoredPosition = new Vector2(-28f, 20f);
-        promptRect.sizeDelta = new Vector2(184f, 56f);
+        promptRect.anchoredPosition = new Vector2(-32f, 16f);
+        promptRect.sizeDelta = _enterKeySprite != null ? new Vector2(80f, 80f) : new Vector2(184f, 56f);
         Image keyBackground = _continuePrompt.GetComponent<Image>();
         ConfigureDialogueImage(keyBackground, _enterKeySprite, new Color(0.22f, 0.23f, 0.25f, 1f));
         keyBackground.type = Image.Type.Simple;
         keyBackground.preserveAspect = _enterKeySprite != null;
+        _continuePromptRect = promptRect;
+        _continuePromptImage = keyBackground;
+        _continuePromptRestPosition = promptRect.anchoredPosition;
+        _continuePromptRestColor = keyBackground.color;
         Outline keyOutline = _continuePrompt.GetComponent<Outline>();
         keyOutline.effectColor = new Color(0.50f, 0.51f, 0.53f, 1f);
         keyOutline.effectDistance = new Vector2(1f, -1f);
@@ -591,9 +628,10 @@ public class PrologueIntroController : MonoBehaviour
         _exitChoiceRect.anchorMax = Vector2.one;
         _exitChoiceRect.pivot = new Vector2(1f, 0f);
         _exitChoiceRect.anchoredPosition = new Vector2(0f, 18f);
-        _exitChoiceRect.sizeDelta = new Vector2(360f, 76f);
+        _exitChoiceRect.sizeDelta = new Vector2(360f, 112f);
         _exitChoiceBackground = _exitChoice.GetComponent<Image>();
         ConfigureDialogueImage(_exitChoiceBackground, _choicePanelSprite, new Color(0.13f, 0.12f, 0.10f, 0.98f));
+        _exitChoiceBackground.pixelsPerUnitMultiplier = 2f;
         Outline choiceOutline = _exitChoice.GetComponent<Outline>();
         choiceOutline.effectColor = _dialogueBorderColor;
         choiceOutline.effectDistance = new Vector2(1f, -1f);
@@ -603,12 +641,12 @@ public class PrologueIntroController : MonoBehaviour
         RectTransform choiceLabelRect = choiceLabelObject.GetComponent<RectTransform>();
         choiceLabelRect.anchorMin = Vector2.zero;
         choiceLabelRect.anchorMax = Vector2.one;
-        choiceLabelRect.offsetMin = new Vector2(24f, 0f);
-        choiceLabelRect.offsetMax = new Vector2(-72f, 0f);
+        choiceLabelRect.offsetMin = new Vector2(40f, 16f);
+        choiceLabelRect.offsetMax = new Vector2(-40f, -16f);
         Text choiceLabel = choiceLabelObject.GetComponent<Text>();
         choiceLabel.font = _subtitle.font;
         choiceLabel.fontSize = 32;
-        choiceLabel.alignment = TextAnchor.MiddleLeft;
+        choiceLabel.alignment = TextAnchor.MiddleCenter;
         choiceLabel.color = _choiceTextColor;
         choiceLabel.text = "나가보자.";
         choiceLabel.raycastTarget = false;
@@ -695,6 +733,7 @@ public class PrologueIntroController : MonoBehaviour
         UnlockPlayer();
         RestoreGameplayUi();
         if (_subtitle != null) ShowSubtitle("");
+        SetContinueKeyPress(0f);
         if (_continuePrompt != null) _continuePrompt.SetActive(false);
         if (_exitChoice != null) _exitChoice.SetActive(false);
         if (_fade != null)

@@ -37,6 +37,7 @@ public sealed class StageManager : MonoBehaviour
     private string _activeSceneName;
     private string _activeCheckpointId;
     private bool _isRespawning;
+    private bool _isChangingScene;
 
     public bool IsRespawning => _isRespawning;
 
@@ -75,7 +76,7 @@ public sealed class StageManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.F12))
         {
-            SceneManager.LoadScene("Test_Boss");
+            TryLoadStageScene("Test_Boss");
         }
     }
 #endif
@@ -102,7 +103,7 @@ public sealed class StageManager : MonoBehaviour
             return false;
         }
 
-        if (_isRespawning)
+        if (_isRespawning || _isChangingScene)
         {
             return false;
         }
@@ -131,6 +132,45 @@ public sealed class StageManager : MonoBehaviour
         TryStartRespawn(false);
     }
 
+    /// <summary>지정한 스테이지 씬으로 전환한다. 중복 전환과 리스폰 중 전환은 막는다.</summary>
+    public bool TryLoadStageScene(string sceneName)
+    {
+        if (_isRespawning || _isChangingScene || string.IsNullOrWhiteSpace(sceneName))
+            return false;
+
+        if (SceneManager.GetActiveScene().name == sceneName)
+            return false;
+
+        if (!Application.CanStreamedLevelBeLoaded(sceneName))
+        {
+            Debug.LogWarning($"{name}: '{sceneName}' 씬을 Build Settings에서 찾을 수 없습니다.", this);
+            return false;
+        }
+
+        StartCoroutine(ChangeStageSceneRoutine(sceneName));
+        return true;
+    }
+
+    private IEnumerator ChangeStageSceneRoutine(string sceneName)
+    {
+        _isChangingScene = true;
+        CameraShake.Stop();
+        Time.timeScale = 1f;
+        UnbindPlayerHealth();
+
+        AsyncOperation loadOperation = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
+        if (loadOperation == null)
+        {
+            Debug.LogWarning($"{sceneName}: 씬 전환을 시작하지 못했습니다.", this);
+            BindPlayerHealth(SceneManager.GetActiveScene());
+            _isChangingScene = false;
+            yield break;
+        }
+
+        yield return loadOperation;
+        _isChangingScene = false;
+    }
+
     private void HandlePlayerDied()
     {
         TryStartRespawn(true);
@@ -138,7 +178,7 @@ public sealed class StageManager : MonoBehaviour
 
     private void TryStartRespawn(bool waitForDeath)
     {
-        if (_isRespawning)
+        if (_isRespawning || _isChangingScene)
         {
             return;
         }
