@@ -47,17 +47,11 @@ public class PlayerAttackState : PlayerBaseState
     private bool _hasEndedHit;
 
     private Collider2D _playerCollider;
-    private int _startingComboIndex = 0;
 
     public PlayerAttackState(Player player, StateMachine stateMachine)
         : base(player, stateMachine)
     {
         _playerCollider = _player.GetComponent<Collider2D>();
-    }
-
-    public void SetStartingComboIndex(int index)
-    {
-        _startingComboIndex = Mathf.Clamp(index, 0, 2);
     }
 
     public bool IsThirdAttackSuperArmorActive()
@@ -89,33 +83,19 @@ public class PlayerAttackState : PlayerBaseState
 
         _elapsedTime = 0f;
         _comboElapsedTime = 0f;
-        _currentComboIndex = _startingComboIndex;
-        _startingComboIndex = 0;
+        _currentComboIndex = 0;
         _hasEnteredAttackAnimation = false;
         _hasBufferedAttackInput = false;
         _isGroundedAtStart = _player.IsGrounded;
 
         _rigidbody2D.linearVelocity = new Vector2(0f, _rigidbody2D.linearVelocity.y);
 
-        SetupForwardMotion(_currentComboIndex);
+        SetupForwardMotion(0);
 
         _player.SetRunning(false);
-
-        if (_currentComboIndex == 1)
-        {
-            _player.TriggerAttack2();
-        }
-        else if (_currentComboIndex == 2)
-        {
-            _player.TriggerAttack3();
-        }
-        else
-        {
-            _player.TriggerAttack();
-        }
-
-        _player.Attack.StartAttackStep(_currentComboIndex);
-        SetupHitWindow(_currentComboIndex);
+        _player.TriggerAttack();
+        _player.Attack.StartAttackStep(0);
+        SetupHitWindow(0);
     }
 
     private void SetupForwardMotion(int index)
@@ -462,7 +442,6 @@ public class PlayerAttackState : PlayerBaseState
         base.Exit();
 
         _hasBufferedAttackInput = false;
-        _startingComboIndex = 0;
         _player.Attack.StopAttack();
     }
 
