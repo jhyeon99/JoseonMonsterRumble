@@ -35,6 +35,11 @@ public class EnemyAnimation : MonoBehaviour
 
     public void PlayDamageHit(HitData hitData)
     {
+        if (_animator == null)
+        {
+            return;
+        }
+
         if (hitData.IsTalisman)
         {
             if (!IsPlayingHit())
@@ -54,6 +59,11 @@ public class EnemyAnimation : MonoBehaviour
 
     public bool IsPlayingHit()
     {
+        if (_animator == null)
+        {
+            return false;
+        }
+
         return _animator.GetCurrentAnimatorStateInfo(AnimationLayer).tagHash == HitTagHash ||
             (_animator.IsInTransition(AnimationLayer) &&
              _animator.GetNextAnimatorStateInfo(AnimationLayer).tagHash == HitTagHash);
