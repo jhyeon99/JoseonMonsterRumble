@@ -187,7 +187,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 3.3}
-  m_Radius: 4
+  m_Radius: 3.4
 --- !u!114 &112649
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -554,7 +554,7 @@ PrefabInstance:
     - target: {fileID: 8739586090997248517, guid: 0724e02a57a092c49b39a4533524c6a8,
         type: 3}
       propertyPath: m_SortingLayer
-      value: 7
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 8739586090997248517, guid: 0724e02a57a092c49b39a4533524c6a8,
         type: 3}
@@ -676,7 +676,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 3.3}
-  m_Radius: 4
+  m_Radius: 3.4
 --- !u!114 &414719030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1102,7 +1102,7 @@ PrefabInstance:
     - target: {fileID: 8739586090997248517, guid: 0724e02a57a092c49b39a4533524c6a8,
         type: 3}
       propertyPath: m_SortingLayer
-      value: 7
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 8739586090997248517, guid: 0724e02a57a092c49b39a4533524c6a8,
         type: 3}
@@ -1407,7 +1407,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 3.3}
-  m_Radius: 4
+  m_Radius: 3.4
 --- !u!50 &785247149
 Rigidbody2D:
   serializedVersion: 5
@@ -1470,6 +1470,7 @@ MonoBehaviour:
   _animationClip: {fileID: 0}
   _fallbackDuration: 1.5
   _animationSpeed: 1
+  _animationStartTimeout: 1.5
   _afterDelay: 0
   _hitStartRatio: 0.4
   _hitEndRatio: 0.6
@@ -1497,13 +1498,87 @@ MonoBehaviour:
   _weight: 1
   _cooldown: 0
   _animationTrigger: tongueHigh
-  _animationClip: {fileID: 0}
+  _animationClip: {fileID: 7400000, guid: 902c258cc89872344a5c25120fa550ba, type: 2}
   _fallbackDuration: 1.5
   _animationSpeed: 1
+  _animationStartTimeout: 1.5
   _afterDelay: 0
-  _hitStartRatio: 0.3
-  _hitEndRatio: 0.4
+  _hitStartRatio: 0.35
+  _hitEndRatio: 0.45
   _hitbox: {fileID: 1937329868}
+  _stretchHitbox: 1
+  _rootX: -3
+  _tipX: -12
+  _extendCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.1283775
+      value: 0.40751132
+      inSlope: 4.238727
+      outSlope: 4.238727
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.23638922
+      value: 0.73618126
+      inSlope: 1.906202
+      outSlope: 1.906202
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.41918334
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.60283506
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.9082852
+      value: 0.4443398
+      inSlope: -4.227521
+      outSlope: -4.227521
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _minLength: 0.2
 --- !u!114 &785247153
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1522,13 +1597,78 @@ MonoBehaviour:
   _weight: 1
   _cooldown: 0
   _animationTrigger: tongueLow
-  _animationClip: {fileID: 0}
+  _animationClip: {fileID: 7400000, guid: 46d329ab850c04a47b990559ce818988, type: 2}
   _fallbackDuration: 1.5
   _animationSpeed: 1
+  _animationStartTimeout: 1.5
   _afterDelay: 0
-  _hitStartRatio: 0.4
-  _hitEndRatio: 0.5
+  _hitStartRatio: 0.42
+  _hitEndRatio: 0.52
   _hitbox: {fileID: 715870055}
+  _stretchHitbox: 1
+  _rootX: -3
+  _tipX: -12
+  _extendCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.06445704
+      value: 0.3661741
+      inSlope: 2.9426923
+      outSlope: 2.9426923
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.35
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.65
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.9064172
+      value: 0.46962434
+      inSlope: -4.2741504
+      outSlope: -4.2741504
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _minLength: 0.2
 --- !u!114 &785247154
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1550,6 +1690,7 @@ MonoBehaviour:
   _animationClip: {fileID: 0}
   _fallbackDuration: 1.5
   _animationSpeed: 1
+  _animationStartTimeout: 1.5
   _afterDelay: 0
   _hitStartRatio: 0.5
   _hitEndRatio: 0.7
@@ -1589,6 +1730,7 @@ MonoBehaviour:
   _animationClip: {fileID: 0}
   _fallbackDuration: 1.5
   _animationSpeed: 1
+  _animationStartTimeout: 1.5
   _afterDelay: 0
   _hitStartRatio: 0.4
   _hitEndRatio: 0.6
@@ -1931,7 +2073,7 @@ PrefabInstance:
     - target: {fileID: 8739586090997248517, guid: 0724e02a57a092c49b39a4533524c6a8,
         type: 3}
       propertyPath: m_SortingLayer
-      value: 7
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 8739586090997248517, guid: 0724e02a57a092c49b39a4533524c6a8,
         type: 3}
@@ -2202,7 +2344,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1918527705
-  m_SortingLayer: 5
+  m_SortingLayer: 6
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: eaab4500fef954041806aaf5277db381, type: 3}
@@ -2339,7 +2481,7 @@ PrefabInstance:
     - target: {fileID: 8739586090997248517, guid: 0724e02a57a092c49b39a4533524c6a8,
         type: 3}
       propertyPath: m_SortingLayer
-      value: 7
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 8739586090997248517, guid: 0724e02a57a092c49b39a4533524c6a8,
         type: 3}
@@ -3187,7 +3329,7 @@ PrefabInstance:
     - target: {fileID: 8809101005342838770, guid: 32e10db0df569104491554a680a0f3ff,
         type: 3}
       propertyPath: orthographic size
-      value: 8
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

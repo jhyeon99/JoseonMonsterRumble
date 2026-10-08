@@ -116,6 +116,7 @@ public class Boss : MonoBehaviour, IFinishable
     private readonly List<BossPattern> _candidates = new List<BossPattern>();
     private readonly HashSet<int> _animatorParameters = new HashSet<int>();
     private readonly List<GameObject> _minions = new List<GameObject>();
+    private readonly List<AnimatorClipInfo> _clipInfos = new List<AnimatorClipInfo>();
 
     private BossHealth _health;
     private Animator _animator;
@@ -473,6 +474,46 @@ public class Boss : MonoBehaviour, IFinishable
         {
             _animator.SetTrigger(hash);
         }
+    }
+
+    /// <summary>애니메이터가 지금 이 클립을 재생 중인지 (전이 중이면 다음 상태도 확인)</summary>
+    public bool IsPlayingClip(AnimationClip clip)
+    {
+        if (_animator == null || clip == null || !_animator.isActiveAndEnabled)
+        {
+            return false;
+        }
+
+        _clipInfos.Clear();
+        _animator.GetCurrentAnimatorClipInfo(0, _clipInfos);
+        if (ContainsClip(_clipInfos, clip))
+        {
+            return true;
+        }
+
+        if (_animator.IsInTransition(0))
+        {
+            _clipInfos.Clear();
+            _animator.GetNextAnimatorClipInfo(0, _clipInfos);
+            return ContainsClip(_clipInfos, clip);
+        }
+
+        return false;
+    }
+
+    public bool HasAnimator => _animator != null && _animator.runtimeAnimatorController != null;
+
+    private static bool ContainsClip(List<AnimatorClipInfo> infos, AnimationClip clip)
+    {
+        for (int i = 0; i < infos.Count; i++)
+        {
+            if (infos[i].clip == clip)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>예약된 트리거 취소 (패턴이 끊겼을 때 공격 애니메이션이 뒤늦게 재생되지 않도록)</summary>
