@@ -91,8 +91,6 @@ public class Player : MonoBehaviour
 
     public bool IsGrounded => _movement != null && _movement.IsGrounded();
 
-    public bool CanCastSpell => IsGrounded && _rangedAttack != null && _rangedAttack.CanCastSpell;
-
     private void OnEnable()
     {
         Health.OnDied += HandleDeath;
@@ -224,23 +222,26 @@ public class Player : MonoBehaviour
 
     private void HandleRangedAttack()
     {
-        if (_rangedAttack == null || !_rangedAttack.IsCharging)
+        if (_rangedAttack == null)
         {
             return;
         }
 
-        if (!_inputHandler.IsRangedAttackKeyUp)
+        IState currentState = _stateMachine.CurrentState;
+
+        if (_inputHandler.TryUseRangedAttackInput() &&
+            currentState != DeadState &&
+            currentState != SpellState)
         {
-            return;
+            _rangedAttack.PressAttack();
         }
 
-        if (!CanReleaseRangedAttack())
+        if (_rangedAttack.IsCharging && _inputHandler.IsRangedAttackKeyUp)
         {
-            _rangedAttack.CancelCharge();
-            return;
+            _rangedAttack.StopCharging();
         }
 
-        if (_rangedAttack.StopCharging())
+        if (_rangedAttack.IsReadyToFire && CanReleaseRangedAttack())
         {
             _stateMachine.ChangeState(SpellState);
         }
@@ -394,6 +395,16 @@ public class Player : MonoBehaviour
     private void HandleHit(HitData hitData)
     {
         if (StateMachine.CurrentState == DeadState)
+        {
+            return;
+        }
+
+        if (StateMachine.CurrentState == SpellState && SpellState.IsSuperArmorActive)
+        {
+            return;
+        }
+
+        if (StateMachine.CurrentState == AttackState && AttackState.IsThirdAttackSuperArmorActive())
         {
             return;
         }

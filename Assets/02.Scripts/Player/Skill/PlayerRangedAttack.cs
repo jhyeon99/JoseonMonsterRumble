@@ -22,6 +22,9 @@ public class PlayerRangedAttack : MonoBehaviour
     [Header("충전")]
     [SerializeField, Min(0.01f)] private float _chargeInterval = 0.4f; // 누르고 있을 때 부적이 하나씩 추가되는 간격
 
+    [Tooltip("차징이 가속된 뒤 도달하는 최소 슬롯 활성화 간격")]
+    [SerializeField, Min(0.01f)] private float _minimumChargeInterval = 0.12f;
+
     [SerializeField, Min(0.01f)] private float _soulCostPerTalisman = 1f;
 
     [Header("데미지")]
@@ -41,6 +44,7 @@ public class PlayerRangedAttack : MonoBehaviour
     private float _chargeTimer;
 
     public bool IsCharging => _chargeState == ChargeState.Charging;
+    public bool IsReadyToFire => _chargeState == ChargeState.ReadyToFire;
     public int ActiveCount => _activeCount;
 
     /// <summary>발사 시 호출. 인자 = 실제로 발사된 부적 개수 (사운드, 이펙트 연결용)</summary>
@@ -70,14 +74,23 @@ public class PlayerRangedAttack : MonoBehaviour
         }
 
         _chargeTimer += Time.deltaTime;
-        while (_chargeTimer >= _chargeInterval)
+        while (true)
         {
-            _chargeTimer -= _chargeInterval;
-            if (_activeCount < MaxActivatable)
+            float currentInterval = CalculateChargeInterval();
+            if (_chargeTimer < currentInterval)
             {
-                ActivateSlot(_activeCount);
-                _activeCount++;
+                break;
             }
+
+            _chargeTimer -= currentInterval;
+
+            if (_activeCount >= MaxActivatable)
+            {
+                continue;
+            }
+
+            ActivateSlot(_activeCount);
+            _activeCount++;
         }
     }
 
@@ -174,9 +187,6 @@ public class PlayerRangedAttack : MonoBehaviour
     /// <summary>피격, 사망 등으로 발사 없이 충전을 취소할 때 호출</summary>
     public void CancelCharge() => ResetCharge();
 
-    /// <summary>스펠(단발 원거리 공격) 시전 가능 여부 (영혼 보유 확인)</summary>
-    public bool CanCastSpell => _soul != null && _soul.CurrentSoul >= _soulCostPerTalisman;
-
     /// <summary>버프로 데미지 증가량을 바꿀 때 사용</summary>
     public void SetDamageIncrease(float percent) => _damageIncreasePercent = percent;
 
@@ -266,6 +276,13 @@ public class PlayerRangedAttack : MonoBehaviour
         _chargeState = ChargeState.Idle;
         _activeCount = 0;
         _chargeTimer = 0f;
+    }
+
+    private float CalculateChargeInterval()
+    {
+        float progress = Mathf.InverseLerp(1f, RequiredSlotCount - 1f, _activeCount);
+        float minimumInterval = Mathf.Min(_chargeInterval, _minimumChargeInterval);
+        return Mathf.Lerp(_chargeInterval, minimumInterval, progress);
     }
 
     // ───────── 슬롯 ─────────

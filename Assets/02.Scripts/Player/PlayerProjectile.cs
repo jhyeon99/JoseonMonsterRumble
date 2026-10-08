@@ -28,7 +28,7 @@ public class PlayerProjectile : Projectile
     [SerializeField, Min(0.01f)] private float _accelerationDuration = 0.65f;
     [SerializeField]
     private AnimationCurve _speedCurve = new AnimationCurve(
-        new Keyframe(0f, 0.3f),
+        new Keyframe(0f, 0.36f),
         new Keyframe(0.35f, 0.45f),
         new Keyframe(0.72f, 1.15f),
         new Keyframe(1f, 2.4f));
