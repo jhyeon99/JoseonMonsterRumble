@@ -457,6 +457,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerGuard
   _maxGauge: 100
   _drainPerSecond: 30
+  _postBlockDrainPauseDuration: 0.3
+  _postBlockDrainPauseMinimumRatio: 0.1
   _recoverPerSecond: 40
   _recoverDelay: 0.5
   _minGaugeToStart: 10
