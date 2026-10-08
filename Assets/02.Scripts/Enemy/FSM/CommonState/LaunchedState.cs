@@ -45,7 +45,7 @@ public class LaunchedState : EnemyState
         // 방향 반전 / 회전 스크립트가 연출을 덮어쓰지 않게 고정
         _enemy.DirectionLock?.LockDirection();
         _enemy.Animation.SetGroggy(false);
-        _enemy.Animation.PlayHit();
+        _enemy.Animation.PlayLaunchHit();
 
         // 물리를 끄기 전에 기준점을 기록 (LaunchPivot이 있으면 그 위치, 없으면 콜라이더 중심)
         Transform enemyTransform = _enemy.transform;

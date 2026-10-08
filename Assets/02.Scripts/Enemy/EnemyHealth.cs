@@ -23,28 +23,10 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     {
         if (_enemy.IsDefeated) return false;
 
-        // 그로기 중에는 넉백으로 그로기가 풀리지 않게 데미지만 받음
-        if (hitData.KnockbackForce > 0f && !_enemy.IsGroggy)
-        {
-            _currentHp -= hitData.Damage;
-            Debug.Log($"현재 체력 {_currentHp}");
-
-            if (_currentHp <= 0f)
-            {
-                _currentHp = 0f;
-                OnDeath?.Invoke();
-                _enemy.StateMachine.ChangeState(new DeadState(_enemy));
-                return true;
-            }
-
-            _enemy.HitFlash.Flash();
-            _enemy.Animation.PlayHit();
-            OnHit?.Invoke(hitData);
-            _enemy.StateMachine.ChangeState(new KnockbackState(_enemy, hitData));
-            return true;
-        }
-
+        bool shouldKnockback = hitData.KnockbackForce > 0f && !_enemy.IsGroggy;
         _currentHp -= hitData.Damage;
+        Debug.Log($"현재 체력 {_currentHp}");
+        GameEvents.TriggerEnemyHit(hitData);
 
         if (_currentHp <= 0f)
         {
@@ -54,10 +36,15 @@ public class EnemyHealth : MonoBehaviour, IDamageable
             return true;
         }
 
-        Debug.Log($"현재 체력 {_currentHp}");
         _enemy.HitFlash.Flash();
-        _enemy.Animation.PlayHit();
+        _enemy.Animation.PlayDamageHit(hitData);
         OnHit?.Invoke(hitData);
+
+        // 그로기 중에는 넉백으로 그로기가 풀리지 않게 데미지만 받음
+        if (shouldKnockback)
+        {
+            _enemy.StateMachine.ChangeState(new KnockbackState(_enemy, hitData));
+        }
 
         return true;
     }

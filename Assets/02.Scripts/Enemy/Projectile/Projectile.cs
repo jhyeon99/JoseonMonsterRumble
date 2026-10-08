@@ -110,6 +110,11 @@ public abstract class Projectile : MonoBehaviour, IParryable
             return;
         }
 
+        if (other.GetComponentInParent<Enemy>() != null)
+        {
+            return;
+        }
+
         Vector2 hitPoint = other.ClosestPoint(transform.position);
 
         if (other.TryGetComponent<IDamageable>(out IDamageable damageable))
@@ -275,7 +280,8 @@ public abstract class Projectile : MonoBehaviour, IParryable
             _projectileDamage,
             _data.KnockbackForce,
             other.ClosestPoint(transform.position),
-            _reflectDirection
+            _reflectDirection,
+            isReflectedProjectile: true
         );
 
         // 이미 쓰러진 적 등 데미지를 받지 않으면 통과
