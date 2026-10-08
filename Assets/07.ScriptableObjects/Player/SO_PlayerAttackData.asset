@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SO_PlayerAttackData
   m_EditorClassIdentifier: Assembly-CSharp::AttackDataTableSO
   Data:
-  - Damage: 10
+  - Damage: 20
     HitStartRatio: 0.5
     HitEndRatio: 0.9
     KnockbackForce: 3
@@ -63,7 +63,7 @@ MonoBehaviour:
       m_RotationOrder: 4
     ComboStartNormalizedTime: 0.7
     ComboEndNormalizedTime: 0.5
-  - Damage: 10
+  - Damage: 25
     HitStartRatio: 0.7
     HitEndRatio: 0.9
     KnockbackForce: 5
@@ -104,7 +104,7 @@ MonoBehaviour:
       m_RotationOrder: 4
     ComboStartNormalizedTime: 0.9
     ComboEndNormalizedTime: 0.5
-  - Damage: 20
+  - Damage: 45
     HitStartRatio: 0.5
     HitEndRatio: 0.8
     KnockbackForce: 3
