@@ -3,8 +3,8 @@ guid: c07d05d9c04f29f4fbae2340db335cd4
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4761283520068621398
-    second: Player_Jump_End_00003_0
+      213: -4802343193115462536
+    second: player_jump_end_00003_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -88,7 +88,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 2
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Player_Jump_End_00003_0
+      name: player_jump_end_00003_0
       rect:
         serializedVersion: 2
-        x: 417
+        x: 418
         y: 0
-        width: 474
-        height: 505
+        width: 473
+        height: 503
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6549c98922a731240800000000000000
-      internalID: 4761283520068621398
+      spriteID: 87476dc4f46aa5db0800000000000000
+      internalID: -4802343193115462536
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Player_Jump_End_00003_0: 4761283520068621398
+      player_jump_end_00003_0: -4802343193115462536
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
