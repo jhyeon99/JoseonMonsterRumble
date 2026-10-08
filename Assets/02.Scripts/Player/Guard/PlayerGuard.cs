@@ -43,6 +43,15 @@ public class PlayerGuard : MonoBehaviour
     [SerializeField]
     private bool _blockOnlyFront = false;
 
+    [Header("가드 넉백")]
+    [Tooltip("일반 가드 성공 시 공격 진행 방향으로 밀리는 초기 수평 속도")]
+    [SerializeField, Min(0f)]
+    private float _blockKnockbackSpeed = 5f;
+
+    [Tooltip("일반 가드 넉백의 수평 감속도")]
+    [SerializeField, Min(0.1f)]
+    private float _blockKnockbackDeceleration = 50f;
+
     [Header("패링")]
     [Tooltip("가드를 시작한 순간부터 패링으로 인정하는 기본 시간 (초). 공격별 ParryWindowOverride가 있으면 그 값 사용")]
     [SerializeField, Min(0f)]
@@ -51,6 +60,10 @@ public class PlayerGuard : MonoBehaviour
     [Tooltip("패링 판정을 연 뒤 다시 열 수 있을 때까지 시간 (초). 아래 방향키 연타로 패링 판정을 계속 여는 것 방지")]
     [SerializeField, Min(0f)]
     private float _parryCooldown = 0.5f;
+
+    [Tooltip("패링 성공 직후 공격 키 입력 시 3타 반격으로 즉시 연계 가능한 유효 시간 (초)")]
+    [SerializeField, Min(0f)]
+    private float _parryCounterWindow = 0.8f;
 
     [Header("패링 반사 (투사체)")]
     [Tooltip("패링으로 튕겨 낸 투사체의 속도 (초당 거리). 원래 투사체 속도와 관계없이 이 값 사용")]
@@ -76,6 +89,9 @@ public class PlayerGuard : MonoBehaviour
     // 마지막으로 패링 판정을 연 시각 (연타 방지용)
     private float _lastParryWindowOpenedTime = float.NegativeInfinity;
 
+    // 마지막으로 패링에 성공한 시각
+    private float _lastParrySuccessTime = float.NegativeInfinity;
+
     public float CurrentGauge => _currentGauge;
     public float MaxGauge => _maxGauge;
     public bool IsGuarding => _isGuarding;
@@ -83,9 +99,20 @@ public class PlayerGuard : MonoBehaviour
     public bool CanStartGuard => _currentGauge >= _minGaugeToStart;
     public float ReflectSpeed => _reflectSpeed;
     public float ReflectDamageMultiplier => _reflectDamageMultiplier;
+    public float BlockKnockbackSpeed => _blockKnockbackSpeed;
+    public float BlockKnockbackDeceleration => _blockKnockbackDeceleration;
 
     /// <summary>기본 판정 시간 기준으로 지금 패링 판정 중인지 (UI, 디버그용)</summary>
     public bool IsParryWindowOpen => _isGuarding && Time.time - _parryWindowStartTime <= _parryWindow;
+
+    /// <summary>패링 성공 후 유효 시간 내에 반격 가능한 상태인지</summary>
+    public bool CanParryCounter => Time.time - _lastParrySuccessTime <= _parryCounterWindow;
+
+    /// <summary>패링 반격 권한 소모</summary>
+    public void ConsumeParryCounter()
+    {
+        _lastParrySuccessTime = float.NegativeInfinity;
+    }
 
     /// <summary>게이지 변경 (현재값, 최대값). UI 연결용</summary>
     public event Action<float, float> OnGaugeChanged;
@@ -201,6 +228,9 @@ public class PlayerGuard : MonoBehaviour
         {
             // 한 번의 가드 시작으로 한 번만 패링
             _parryWindowStartTime = float.NegativeInfinity;
+            _lastParrySuccessTime = hitData.Source is Projectile
+                ? float.NegativeInfinity
+                : Time.time;
 
             hitData.Source?.OnParried(hitData, transform);
             GameEvents.TriggerParry(hitData);
