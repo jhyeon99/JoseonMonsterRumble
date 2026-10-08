@@ -332,6 +332,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04b1d99fa932bd24d9de580947f1d471, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyContactDamage
+  _attackName: "\uC811\uCD09 \uD53C\uD574"
   _damage: 10
   _knockbackForce: 1
   _hitInterval: 0.5
@@ -579,6 +580,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMeleeCombat
   _attackCollider: {fileID: 1249033454365970758}
+  _attackName: "\uBC29\uB9DD\uC774 \uACF5\uACA9"
   _defense:
     Parryable: 1
     Unblockable: 0
