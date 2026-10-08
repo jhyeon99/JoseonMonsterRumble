@@ -842,7 +842,7 @@ Transform:
   m_GameObject: {fileID: 711533466}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.5, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1366,7 +1366,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03bc3f18f4d682644b8e04c4b276f1c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossHealth
-  _phase1MaxHp: 300
+  _phase1MaxHp: 1
   _phase2MaxHp: 400
   _healthBar: {fileID: 0}
   _logDamage: 1
@@ -1416,7 +1416,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 785247143}
-  m_BodyType: 0
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
@@ -1467,7 +1467,13 @@ MonoBehaviour:
   _weight: 1
   _cooldown: 0
   _animationTrigger: tackle
-  _animationClip: {fileID: 0}
+  _animationClip: {fileID: 7400000, guid: d70a9e2655bdd2d41b1c97bd9b9ee82b, type: 2}
+  _followingClips:
+  - {fileID: 7400000, guid: 50aeaf308fd8d1141b5a1e088e12f1db, type: 2}
+  - {fileID: 7400000, guid: 32c56c1a2fe272549a2e2ab2a3a6d8c2, type: 2}
+  - {fileID: 7400000, guid: 7641761ecb3369b49989f6a3d558b145, type: 2}
+  - {fileID: 7400000, guid: ba02ffbd53abc724abc689e38d5656f1, type: 2}
+  _durationOverride: 0
   _fallbackDuration: 1.5
   _animationSpeed: 1
   _animationStartTimeout: 1.5
@@ -1475,6 +1481,9 @@ MonoBehaviour:
   _hitStartRatio: 0.4
   _hitEndRatio: 0.6
   _hitbox: {fileID: 112649}
+  _loopClip: {fileID: 7400000, guid: 32c56c1a2fe272549a2e2ab2a3a6d8c2, type: 2}
+  _loopEndTrigger: tackleEnd
+  _chargeSpeed: 14
   _edgeMargin: 2
   _fallbackDistance: 12
   _stopShake:
@@ -1499,6 +1508,8 @@ MonoBehaviour:
   _cooldown: 0
   _animationTrigger: tongueHigh
   _animationClip: {fileID: 7400000, guid: 902c258cc89872344a5c25120fa550ba, type: 2}
+  _followingClips: []
+  _durationOverride: 0
   _fallbackDuration: 1.5
   _animationSpeed: 1
   _animationStartTimeout: 1.5
@@ -1598,12 +1609,14 @@ MonoBehaviour:
   _cooldown: 0
   _animationTrigger: tongueLow
   _animationClip: {fileID: 7400000, guid: 46d329ab850c04a47b990559ce818988, type: 2}
+  _followingClips: []
+  _durationOverride: 0
   _fallbackDuration: 1.5
   _animationSpeed: 1
   _animationStartTimeout: 1.5
   _afterDelay: 0
-  _hitStartRatio: 0.42
-  _hitEndRatio: 0.52
+  _hitStartRatio: 0.4
+  _hitEndRatio: 0.5
   _hitbox: {fileID: 715870055}
   _stretchHitbox: 1
   _rootX: -3
@@ -1687,13 +1700,15 @@ MonoBehaviour:
   _weight: 1
   _cooldown: 0
   _animationTrigger: jumpAttack
-  _animationClip: {fileID: 0}
+  _animationClip: {fileID: 7400000, guid: 3298f7deb7cb63544840683e648b67bb, type: 2}
+  _followingClips: []
+  _durationOverride: 0
   _fallbackDuration: 1.5
   _animationSpeed: 1
   _animationStartTimeout: 1.5
   _afterDelay: 0
   _hitStartRatio: 0.5
-  _hitEndRatio: 0.7
+  _hitEndRatio: 0.6
   _jumpHeight: 6
   _apexRatio: 0.25
   _trackUntilRatio: 0.3
@@ -1727,7 +1742,9 @@ MonoBehaviour:
   _weight: 1
   _cooldown: 0
   _animationTrigger: spit
-  _animationClip: {fileID: 0}
+  _animationClip: {fileID: 7400000, guid: e4f7dafeef8985f4096369cdda6bd9e8, type: 2}
+  _followingClips: []
+  _durationOverride: 0
   _fallbackDuration: 1.5
   _animationSpeed: 1
   _animationStartTimeout: 1.5
@@ -2216,18 +2233,38 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5784287867887489289, guid: 02dae753a2a50bc49bc239cc07eb60a5,
         type: 3}
+      propertyPath: _dodgeDuration
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5784287867887489289, guid: 02dae753a2a50bc49bc239cc07eb60a5,
+        type: 3}
       propertyPath: _fallGravityMultiplier
       value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5784287867887489289, guid: 02dae753a2a50bc49bc239cc07eb60a5,
+        type: 3}
+      propertyPath: _dodgeInvincibleDuration
+      value: 3.5
       objectReference: {fileID: 0}
     - target: {fileID: 5784287867887489289, guid: 02dae753a2a50bc49bc239cc07eb60a5,
         type: 3}
       propertyPath: _lowJumpGravityMultiplier
       value: 1.3
       objectReference: {fileID: 0}
+    - target: {fileID: 5865546316811053667, guid: 02dae753a2a50bc49bc239cc07eb60a5,
+        type: 3}
+      propertyPath: _guardBuffer._bufferTime
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5865546316811053667, guid: 02dae753a2a50bc49bc239cc07eb60a5,
+        type: 3}
+      propertyPath: _attackBuffer._bufferTime
+      value: 0.1
+      objectReference: {fileID: 0}
     - target: {fileID: 6993064074418352138, guid: 02dae753a2a50bc49bc239cc07eb60a5,
         type: 3}
       propertyPath: m_GravityScale
-      value: 5
+      value: 2.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
