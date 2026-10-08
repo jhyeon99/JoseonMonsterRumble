@@ -2,8 +2,8 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 돌진 (2페이즈). 예고 → 바라보는 방향의 맵 끝까지 돌진(판정) → 정지.
-/// 판정 높이를 2층 점프로 피할 수 있게 배치.
+/// 돌진 (2페이즈). 애니메이션 시작 ~ 판정 시작: 예고 / 판정 시작 ~ 끝: 바라보는 방향 맵 끝까지 돌진(판정).
+/// 돌진 속도는 판정 구간 안에 맵 끝에 도착하도록 자동 계산. 판정 높이를 2층 점프로 피할 수 있게 배치.
 /// </summary>
 public class BossChargePattern : BossPattern
 {
@@ -11,9 +11,6 @@ public class BossChargePattern : BossPattern
     [Tooltip("돌진 판정 (보스 몸 앞쪽)")]
     [SerializeField]
     private BossHitbox _hitbox;
-
-    [SerializeField, Min(0f)] private float _windupTime = 0.8f;
-    [SerializeField, Min(0.1f)] private float _chargeSpeed = 14f;
 
     [Tooltip("맵 끝에서 이만큼 앞에서 멈춤")]
     [SerializeField, Min(0f)]
@@ -23,13 +20,9 @@ public class BossChargePattern : BossPattern
     [SerializeField, Min(0f)]
     private float _fallbackDistance = 12f;
 
-    [SerializeField, Min(0f)] private float _recoverTime = 1f;
     [SerializeField] private CameraShakeSettings _stopShake = new CameraShakeSettings(0.3f, 0.2f);
 
-    [Header("애니메이션 (없으면 무시)")]
-    [SerializeField] private string _readyTrigger = "chargeReady";
-    [SerializeField] private string _chargeTrigger = "charge";
-    [SerializeField] private string _stopTrigger = "chargeStop";
+    private float _direction;
 
     private void Reset()
     {
@@ -45,40 +38,34 @@ public class BossChargePattern : BossPattern
         }
     }
 
+    protected override void OnPatternStart()
+    {
+        base.OnPatternStart();
+        _direction = Boss.FacingX;
+    }
+
     protected override IEnumerator Execute()
     {
-        Boss.FacePlayer();
-        float direction = Boss.FacingX;
-
-        Boss.SetTrigger(_readyTrigger);
         _hitbox.SetTelegraph(true);
-
-        yield return new WaitForSeconds(_windupTime);
+        yield return WaitUntilProgress(HitStartRatio);
 
         _hitbox.SetTelegraph(false);
-        Boss.SetTrigger(_chargeTrigger);
         _hitbox.Activate();
 
         float startX = Boss.Position.x;
-        float targetX = GetTargetX(startX, direction);
+        float targetX = GetTargetX(startX, _direction);
+        float span = Mathf.Max(0.0001f, HitEndRatio - HitStartRatio);
 
-        // 막혀서 못 가는 경우를 대비해 예상 시간 + 1초가 지나면 멈춤
-        float maxTime = (Mathf.Abs(targetX - startX) / _chargeSpeed) + 1f;
-        float elapsed = 0f;
-
-        while (!Mathf.Approximately(Boss.Position.x, targetX) && elapsed < maxTime)
+        while (Progress < HitEndRatio)
         {
-            elapsed += Time.fixedDeltaTime;
-            float x = Mathf.MoveTowards(Boss.Position.x, targetX, _chargeSpeed * Time.fixedDeltaTime);
-            Boss.MoveTo(new Vector2(x, Boss.GroundY));
+            float t = Mathf.Clamp01((Progress - HitStartRatio) / span);
+            Boss.MoveTo(new Vector2(Mathf.Lerp(startX, targetX, t), Boss.GroundY));
             yield return new WaitForFixedUpdate();
         }
 
+        Boss.MoveTo(new Vector2(targetX, Boss.GroundY));
         _hitbox.Deactivate();
-        Boss.SetTrigger(_stopTrigger);
         CameraShake.Shake(_stopShake);
-
-        yield return new WaitForSeconds(_recoverTime);
     }
 
     protected override void Cleanup()
