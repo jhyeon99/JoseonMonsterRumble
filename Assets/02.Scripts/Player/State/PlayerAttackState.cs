@@ -60,6 +60,29 @@ public class PlayerAttackState : PlayerBaseState
         _startingComboIndex = Mathf.Clamp(index, 0, 2);
     }
 
+    public bool IsThirdAttackSuperArmorActive()
+    {
+        Animator animator = _player.Animator;
+        if (_currentComboIndex != 2 || animator == null)
+        {
+            return false;
+        }
+
+        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+        if (!stateInfo.IsName(AnimStateAttack3rd))
+        {
+            return false;
+        }
+
+        if (!animator.IsInTransition(0))
+        {
+            return true;
+        }
+
+        AnimatorStateInfo nextStateInfo = animator.GetNextAnimatorStateInfo(0);
+        return !nextStateInfo.IsName(AnimStateAttack3rdRecover);
+    }
+
     public override void Enter()
     {
         base.Enter();
