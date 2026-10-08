@@ -124,8 +124,7 @@ public class PlayerProjectile : Projectile
             return;
         }
 
-        IDamageable damageable = other.GetComponentInParent<IDamageable>();
-        if (damageable == null)
+        if (!EnemyHurtbox.TryGetDamageTarget(other, out IDamageable damageable))
         {
             return;
         }
@@ -135,7 +134,8 @@ public class PlayerProjectile : Projectile
             ProjectileDamage,
             KnockbackForce,
             hitPoint,
-            HitDirection
+            HitDirection,
+            isTalisman: true
         );
 
         bool damageAccepted = damageable.TakeDamage(hitData);
@@ -317,8 +317,8 @@ public class PlayerProjectile : Projectile
         for (int i = 0; i < count; i++)
         {
             Collider2D col = Hits[i];
-            IDamageable damageable = col.GetComponentInParent<IDamageable>();
-            if (damageable == null || ReferenceEquals(damageable, ignoredDamageable))
+            if (!EnemyHurtbox.TryGetDamageTarget(col, out IDamageable damageable) ||
+                ReferenceEquals(damageable, ignoredDamageable))
             {
                 continue;
             }
@@ -352,7 +352,7 @@ public class PlayerProjectile : Projectile
             return;
         }
 
-        _targetDamageable = _targetCollider.GetComponentInParent<IDamageable>();
+        EnemyHurtbox.TryGetDamageTarget(_targetCollider, out _targetDamageable);
         _targetHealth = _targetCollider.GetComponentInParent<EnemyHealth>();
         if (_targetHealth != null)
         {

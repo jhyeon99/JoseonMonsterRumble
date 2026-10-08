@@ -77,11 +77,12 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
     {
         // 패링당하면 공격 판정을 바로 끄고 그로기
         StopAttack();
+        Enemy.Animation.PlayParriedHit();
         Enemy.EnterGroggy(_groggyDuration);
         Debug.Log($"{name}: 근접 공격이 패링당함 → 그로기 {_groggyDuration}초");
     }
 
-    private void StopAttack()
+    public override void StopAttack()
     {
         if (_attackCoroutine != null)
         {
@@ -90,6 +91,11 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
         }
 
         _attackCollider.enabled = false;
+    }
+
+    private void OnDisable()
+    {
+        StopAttack();
     }
 
     public void CalculateDamage(float percentage)

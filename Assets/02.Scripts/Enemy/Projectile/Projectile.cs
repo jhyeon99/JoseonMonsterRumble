@@ -119,6 +119,11 @@ public abstract class Projectile : MonoBehaviour, IParryable
             return;
         }
 
+        if (other.GetComponentInParent<Enemy>() != null)
+        {
+            return;
+        }
+
         Vector2 hitPoint = other.ClosestPoint(transform.position);
 
         if (other.TryGetComponent<IDamageable>(out IDamageable damageable))
@@ -276,8 +281,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
             return;
         }
 
-        IDamageable damageable = other.GetComponentInParent<IDamageable>();
-        if (damageable == null)
+        if (!EnemyHurtbox.TryGetDamageTarget(other, out IDamageable damageable))
         {
             return;
         }
@@ -287,10 +291,8 @@ public abstract class Projectile : MonoBehaviour, IParryable
             _data.KnockbackForce,
             other.ClosestPoint(transform.position),
             _reflectDirection,
-            default,
-            null,
-            0,
-            "반사된 투사체"
+            attackName: "반사된 투사체",
+            isReflectedProjectile: true
         );
 
         // 이미 쓰러진 적 등 데미지를 받지 않으면 통과

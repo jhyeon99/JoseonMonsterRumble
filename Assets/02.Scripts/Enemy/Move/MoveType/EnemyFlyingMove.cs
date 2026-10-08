@@ -68,6 +68,8 @@ public class EnemyFlyingMove : EnemyMoveType
 
     public override void StartQuadraticCharge(Vector2 playerPos)
     {
+        // 밀림 중 새 돌진이 시작되면 그 시점 이후의 이동만 궤적에 반영한다.
+        ResetLightKnockbackOrigin();
         _chargeStartPos = Rigidbody.position;
 
         _chargeControlPos = playerPos + (Vector2.down * _uCurveBottomOffset);
@@ -92,6 +94,19 @@ public class EnemyFlyingMove : EnemyMoveType
         _isSlowed = false;
         _slowDelayTimer = _hitSlowDelay;
         _slowDurationTimer = _hitSlowDuration;
+    }
+
+    protected override void HandleLightKnockbackEnd(Vector2 displacement)
+    {
+        if (!_isQuadraticCharging)
+        {
+            return;
+        }
+
+        // 저장된 궤적으로 되돌아가지 않고 밀린 위치에서 돌진을 이어 간다.
+        _chargeStartPos += displacement;
+        _chargeControlPos += displacement;
+        _chargeEndPos += displacement;
     }
 
     public override void QuadraticChargePhysicsUpdate()

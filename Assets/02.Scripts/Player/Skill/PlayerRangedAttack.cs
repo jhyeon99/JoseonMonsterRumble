@@ -20,10 +20,10 @@ public class PlayerRangedAttack : MonoBehaviour
     [SerializeField] private Transform _slotRoot;
 
     [Header("충전")]
-    [SerializeField, Min(0.01f)] private float _chargeInterval = 0.4f; // 누르고 있을 때 부적이 하나씩 추가되는 간격
+    [SerializeField, Min(0.01f)] private float _chargeInterval = 0.22f; // 누르고 있을 때 부적이 하나씩 추가되는 간격
 
     [Tooltip("차징이 가속된 뒤 도달하는 최소 슬롯 활성화 간격")]
-    [SerializeField, Min(0.01f)] private float _minimumChargeInterval = 0.12f;
+    [SerializeField, Min(0.01f)] private float _minimumChargeInterval = 0.1f;
 
     [SerializeField, Min(0.01f)] private float _soulCostPerTalisman = 1f;
 

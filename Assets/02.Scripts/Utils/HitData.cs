@@ -2,6 +2,8 @@ using UnityEngine;
 
 public struct HitData
 {
+    private const int HeavyComboStep = 3;
+
     public float Damage;
     public float KnockbackForce;
     public Vector2 HitPoint;
@@ -17,6 +19,13 @@ public struct HitData
     /// <summary>공격 명칭 / 사망 원인</summary>
     public string AttackName;
 
+    /// <summary>플레이어가 패링하여 되돌려 보낸 적 투사체인지</summary>
+    public bool IsReflectedProjectile;
+
+    public bool IsTalisman;
+
+    public bool IsHeavyImpact => ComboStep == HeavyComboStep || IsReflectedProjectile;
+
     public HitData(
         float damage,
         float knockbackForce,
@@ -25,7 +34,9 @@ public struct HitData
         AttackDefense defense = default,
         IParryable source = null,
         int comboStep = 0,
-        string attackName = ""
+        string attackName = "",
+        bool isReflectedProjectile = false,
+        bool isTalisman = false
     )
     {
         Damage = damage;
@@ -35,6 +46,8 @@ public struct HitData
         Defense = defense;
         Source = source;
         ComboStep = comboStep;
+        IsReflectedProjectile = isReflectedProjectile;
+        IsTalisman = isTalisman;
         AttackName = attackName;
     }
 }

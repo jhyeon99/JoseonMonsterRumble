@@ -99,7 +99,7 @@ public class EffectPool : MonoBehaviour
     /// position 위치에서 type 이펙트를 한 번 재생.
     /// flipX는 등록할 때 AllowFlip을 켠 이펙트에만 적용.
     /// </summary>
-    public void Play(EffectType type, Vector2 position, bool flipX = false)
+    public void Play(EffectType type, Vector2 position, bool flipX = false, float scaleMultiplier = 1f)
     {
         if (!_slots.TryGetValue(type, out EffectSlot slot))
         {
@@ -119,7 +119,7 @@ public class EffectPool : MonoBehaviour
         {
             scale.x = -scale.x;
         }
-        effectTransform.localScale = scale;
+        effectTransform.localScale = scale * Mathf.Max(0f, scaleMultiplier);
 
         // 다시 켜면 Animator가 기본 상태(처음 프레임)부터 재생
         instance.SetActive(true);
