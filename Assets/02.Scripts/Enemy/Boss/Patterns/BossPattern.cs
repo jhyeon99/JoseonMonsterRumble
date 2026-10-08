@@ -48,6 +48,10 @@ public abstract class BossPattern : MonoBehaviour
     [SerializeField, Min(0.01f)]
     private float _animationSpeed = 1f;
 
+    [Tooltip("트리거를 보낸 뒤 애니메이터가 이 클립 재생을 시작할 때까지 기다리는 최대 시간 (초). 이전 애니메이션이 끝나기를 기다려야 할 때")]
+    [SerializeField, Min(0f)]
+    private float _animationStartTimeout = 1.5f;
+
     [Tooltip("애니메이션이 끝난 뒤 다음 행동까지 추가 대기 (초)")]
     [SerializeField, Min(0f)]
     private float _afterDelay = 0f;
@@ -152,6 +156,24 @@ public abstract class BossPattern : MonoBehaviour
         _startTime = Time.time;
         OnPatternStart();
         Boss.SetTrigger(_animationTrigger);
+
+        // 애니메이터가 실제로 이 클립을 재생하기 시작한 순간부터 진행도를 셈
+        // (이전 애니메이션이 끝나기를 기다리는 동안 판정 / 발사가 먼저 나가지 않도록)
+        if (_animationClip != null && Boss.HasAnimator)
+        {
+            float waitUntil = Time.time + _animationStartTimeout;
+            while (!Boss.IsPlayingClip(_animationClip) && Time.time < waitUntil)
+            {
+                yield return null;
+            }
+
+            if (!Boss.IsPlayingClip(_animationClip))
+            {
+                Debug.LogWarning($"{name}: {PatternName} 클립({_animationClip.name})이 재생되지 않아 트리거 기준으로 진행합니다. 트리거 이름 / 애니메이터 전이를 확인하세요.", this);
+            }
+
+            _startTime = Time.time;
+        }
 
         // 중첩된 IEnumerator(RunHitWindow, WaitUntilProgress 등)까지 이 코루틴 하나에서 직접 돌림.
         // Unity에 중첩 코루틴으로 넘기면 Stop(그로기 등) 후에도 안쪽이 계속 돌아 판정이 켜질 수 있음
