@@ -14,9 +14,10 @@ public struct HitData
 
     /// <summary>패링당했을 때 반응할 대상 (그로기, 반사 등). 반응이 없으면 null</summary>
     public IParryable Source;
-
     /// <summary>플레이어 근접 콤보 단계 (1 = 1타, 2 = 2타, 3 = 3타). 콤보 공격이 아니면 0</summary>
     public int ComboStep;
+    /// <summary>공격 명칭 / 사망 원인</summary>
+    public string AttackName;
 
     /// <summary>플레이어가 패링하여 되돌려 보낸 적 투사체인지</summary>
     public bool IsReflectedProjectile;
@@ -31,6 +32,7 @@ public struct HitData
         AttackDefense defense = default,
         IParryable source = null,
         int comboStep = 0,
+        string attackName = "",
         bool isReflectedProjectile = false
     )
     {
@@ -42,5 +44,6 @@ public struct HitData
         Source = source;
         ComboStep = comboStep;
         IsReflectedProjectile = isReflectedProjectile;
+        AttackName = attackName;
     }
 }

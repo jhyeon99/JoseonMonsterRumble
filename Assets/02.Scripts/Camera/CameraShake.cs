@@ -1,3 +1,4 @@
+using Com.LuisPedroFonseca.ProCamera2D;
 using UnityEngine;
 
 /// <summary>
@@ -51,6 +52,8 @@ public class CameraShake : MonoBehaviour
     [SerializeField, Range(0f, 1f)]
     private float _verticalShakeRatio = 0.3f;
 
+    private ProCamera2D _proCamera;
+    private ProCamera2DShake _proCameraShake;
     private Camera _camera;
     private CameraFollow _follow;
     private float _baseOrthographicSize;
@@ -77,6 +80,9 @@ public class CameraShake : MonoBehaviour
 
     private void Awake()
     {
+        _proCamera = GetComponent<ProCamera2D>();
+        _proCameraShake = GetComponent<ProCamera2DShake>();
+
         _camera = GetComponent<Camera>();
         if (_camera == null)
         {
@@ -193,7 +199,8 @@ public class CameraShake : MonoBehaviour
 
     private void HandleParry(HitData hitData)
     {
-        StartShake(_parryShake);
+        // 패링 히트스톱 중에도 성공 순간부터 실제 시간 기준으로 흔든다.
+        StartShake(_parryShake, ignoreTimeScale: true);
         StartZoom(_parryZoom, hitData.HitPoint);
     }
 
@@ -218,7 +225,7 @@ public class CameraShake : MonoBehaviour
 
     #region 시작
 
-    private void StartShake(CameraShakeSettings settings)
+    private void StartShake(CameraShakeSettings settings, bool ignoreTimeScale = false)
     {
         if (settings.Duration <= 0f || settings.Magnitude <= 0f)
         {
@@ -233,6 +240,14 @@ public class CameraShake : MonoBehaviour
 
         _shake = settings;
         _shakeStartTime = _clock;
+
+        if (_proCameraShake != null && _proCameraShake.isActiveAndEnabled)
+        {
+            _proCameraShake.StopShaking();
+            _proCameraShake.Shake(settings.Duration,
+                new Vector2(settings.Magnitude, settings.Magnitude * _verticalShakeRatio),
+                smoothness: 0.03f, ignoreTimeScale: ignoreTimeScale);
+        }
     }
 
     private void StartKick(Vector2 direction, CameraKickSettings settings)
@@ -275,6 +290,9 @@ public class CameraShake : MonoBehaviour
 
     private void StopAll()
     {
+        if (_proCameraShake != null && _proCameraShake.isActiveAndEnabled)
+            _proCameraShake.StopShaking();
+
         _shake = default;
         _kick = default;
         _isZooming = false;
@@ -297,8 +315,9 @@ public class CameraShake : MonoBehaviour
             _clock += Time.unscaledDeltaTime;
         }
 
-        // CameraFollow가 없으면 지난 프레임 오프셋을 직접 되돌림 (있으면 매 프레임 기준 위치를 새로 씀)
-        if (_follow == null || !_follow.isActiveAndEnabled)
+        // 추적 카메라는 매 프레임 기준 위치를 새로 쓰므로 오프셋을 다시 빼지 않는다.
+        if ((_follow == null || !_follow.isActiveAndEnabled) &&
+            (_proCamera == null || !_proCamera.isActiveAndEnabled))
         {
             transform.position -= _lastOffset;
         }
@@ -333,6 +352,10 @@ public class CameraShake : MonoBehaviour
 
     private Vector3 GetShakeOffset()
     {
+        // ProCamera2D의 Shake 확장이 흔들림을 적용할 때는 중복으로 흔들지 않는다.
+        if (_proCameraShake != null && _proCameraShake.isActiveAndEnabled)
+            return Vector3.zero;
+
         float strength = GetCurrentShakeStrength();
         if (strength <= 0f)
         {
@@ -412,8 +435,20 @@ public class CameraShake : MonoBehaviour
             return;
         }
 
-        _camera.orthographicSize = _baseOrthographicSize * (1f - (_zoom.Amount * zoomWeight));
+        SetOrthographicSize(_baseOrthographicSize * (1f - (_zoom.Amount * zoomWeight)));
         _isZoomApplied = true;
+    }
+
+    private void SetOrthographicSize(float size)
+    {
+        if (_proCamera != null && _proCamera.isActiveAndEnabled)
+        {
+            _proCamera.UpdateScreenSize(size);
+        }
+        else
+        {
+            _camera.orthographicSize = size;
+        }
     }
 
     private void RestoreZoom()
@@ -423,7 +458,7 @@ public class CameraShake : MonoBehaviour
             return;
         }
 
-        _camera.orthographicSize = _baseOrthographicSize;
+        SetOrthographicSize(_baseOrthographicSize);
         _isZoomApplied = false;
     }
 
