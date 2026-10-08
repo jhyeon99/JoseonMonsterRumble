@@ -22,7 +22,6 @@ public class PrologueIntroController : MonoBehaviour
     [Tooltip("검은 화면에서 비명 소리와 동시에 재생할 지게 부서지는 소리입니다.")]
     [SerializeField] private AudioClip _jigeBreakClip;
     [SerializeField] private AudioClip _doorClip;
-    [SerializeField, Min(0.1f)] private float _screamWaitWithoutClip = 1.5f;
 
     [Header("Broken jige inspection")]
     [SerializeField] private Transform _jige;
@@ -32,9 +31,26 @@ public class PrologueIntroController : MonoBehaviour
 
     [Header("Dialogue")]
     [SerializeField] private Font _subtitleFont;
-    [SerializeField, Min(0.1f)] private float _whatDuration = 1f;
     [SerializeField, Min(0.1f)] private float _inspectionDuration = 2f;
     [SerializeField, Min(0.1f)] private float _forwardDuration = 1.5f;
+
+    [Header("Dialogue images (optional)")]
+    [Tooltip("하단 대사창의 배경 그림입니다. 비워두면 기본 디자인을 사용합니다.")]
+    [SerializeField] private Sprite _dialoguePanelSprite;
+    [Tooltip("오른쪽 위 선택지의 배경 그림입니다. 선택지 글자는 별도로 표시합니다.")]
+    [SerializeField] private Sprite _choicePanelSprite;
+    [Tooltip("Enter 문구와 화살표가 포함된 완성된 키 이미지입니다. 넣으면 기본 Enter 그림을 대체합니다.")]
+    [SerializeField] private Sprite _enterKeySprite;
+
+    [Header("Dialogue layout")]
+    [SerializeField, Min(180f)] private float _dialogueHeight = 230f;
+    [SerializeField, Min(0f)] private float _dialogueBottomMargin = 48f;
+    [SerializeField, Min(0f)] private float _dialogueSideMargin = 64f;
+    [SerializeField, Min(18)] private int _dialogueFontSize = 36;
+    [SerializeField] private Color _dialogueTextColor = new Color(0.94f, 0.93f, 0.88f, 1f);
+    [SerializeField] private Color _choiceTextColor = new Color(1f, 0.88f, 0.65f, 1f);
+    [SerializeField] private Color _dialoguePanelColor = new Color(0.055f, 0.065f, 0.075f, 0.94f);
+    [SerializeField] private Color _dialogueBorderColor = new Color(0.68f, 0.60f, 0.44f, 0.85f);
 
     [Header("Backgrounds (required)")]
     [SerializeField] private GameObject _background1;
@@ -76,6 +92,12 @@ public class PrologueIntroController : MonoBehaviour
     private float _transitionDirection;
     private bool _jigeReached;
     private Text _subtitle;
+    private Text _continueHint;
+    private GameObject _dialoguePanel;
+    private GameObject _continuePrompt;
+    private GameObject _exitChoice;
+    private RectTransform _exitChoiceRect;
+    private Image _exitChoiceBackground;
     private Transform _jigeFocus;
     private readonly HashSet<ParallaxManager> _destinationParallax =
         new HashSet<ParallaxManager>();
@@ -195,17 +217,25 @@ public class PrologueIntroController : MonoBehaviour
 
         _camera.Reset(true, true, true);
         Phase = "Scream";
-        ShowSubtitle("[부서지는 소리와 남자의 비명]");
+        ShowSubtitle("[무언가 부서지는 소리와 남자의 비명]");
         PlaySound(_screamClip);
         PlaySound(_jigeBreakClip);
-        float openingSoundDuration = Mathf.Max(
-            _screamClip != null ? _screamClip.length : 0f,
-            _jigeBreakClip != null ? _jigeBreakClip.length : 0f);
-        yield return new WaitForSecondsRealtime(openingSoundDuration > 0f ? openingSoundDuration : _screamWaitWithoutClip);
+        // 비명을 끝까지 들은 뒤부터 새 Enter 입력을 받는다.
+        float screamDuration = _screamClip != null ? _screamClip.length : 0f;
+        if (screamDuration > 0f)
+            yield return new WaitForSecondsRealtime(screamDuration);
+        yield return WaitForEnter();
         Phase = "What";
         ShowSubtitle("뭐야?");
-        yield return new WaitForSecondsRealtime(_whatDuration);
+        yield return WaitForEnter();
+        // 선택지를 고르는 동안 하단에 기존 대사를 남겨 두고 Enter로 확정한다.
+        Phase = "ExitChoice";
+        _exitChoice.SetActive(true);
+        AudioManager.Instance.PlayButtonHover();
+        yield return WaitForEnter();
+        _exitChoice.SetActive(false);
         ShowSubtitle("");
+        AudioManager.Instance.PlayButtonClick();
         Phase = "DoorOpening";
         PlaySound(_doorClip, 1.5f);
         // Keep the screen black until the last second of the door sound.
@@ -351,7 +381,34 @@ public class PrologueIntroController : MonoBehaviour
         if (clip != null) AudioManager.Instance.PlaySfx(clip, gain: gain);
     }
 
-    private void ShowSubtitle(string text) => _subtitle.text = text;
+    private void ShowSubtitle(string text)
+    {
+        _subtitle.text = text;
+        _dialoguePanel.SetActive(!string.IsNullOrEmpty(text));
+    }
+
+    private IEnumerator WaitForEnter()
+    {
+        _continuePrompt.SetActive(true);
+        // Require a fresh press so a held Enter cannot skip several steps.
+        while (Input.GetKey(KeyCode.Return) || Input.GetKey(KeyCode.KeypadEnter))
+            yield return null;
+        yield return null;
+        while (!Input.GetKeyDown(KeyCode.Return) && !Input.GetKeyDown(KeyCode.KeypadEnter))
+            yield return null;
+        _continuePrompt.SetActive(false);
+        yield return null;
+    }
+
+    private void Update()
+    {
+        if (_exitChoice == null || !_exitChoice.activeSelf) return;
+        bool hovered = RectTransformUtility.RectangleContainsScreenPoint(_exitChoiceRect, Input.mousePosition);
+        if (_choicePanelSprite != null)
+            _exitChoiceBackground.color = hovered ? new Color(1f, 0.96f, 0.87f, 1f) : Color.white;
+        else
+            _exitChoiceBackground.color = hovered ? new Color(0.24f, 0.20f, 0.13f, 1f) : new Color(0.13f, 0.12f, 0.10f, 0.98f);
+    }
 
     private void CreateFadeOverlay()
     {
@@ -389,21 +446,164 @@ public class PrologueIntroController : MonoBehaviour
         subtitleScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         subtitleScaler.referenceResolution = new Vector2(1920, 1080);
         subtitleScaler.matchWidthOrHeight = 0.5f;
-        var subtitleObject = new GameObject("Subtitle", typeof(RectTransform), typeof(Text), typeof(Outline));
-        subtitleObject.transform.SetParent(subtitleCanvasObject.transform, false);
+        _dialoguePanel = new GameObject("DialoguePanel", typeof(RectTransform), typeof(Image), typeof(Outline));
+        _dialoguePanel.transform.SetParent(subtitleCanvasObject.transform, false);
+        RectTransform dialogueRect = _dialoguePanel.GetComponent<RectTransform>();
+        dialogueRect.anchorMin = Vector2.zero;
+        dialogueRect.anchorMax = new Vector2(1f, 0f);
+        dialogueRect.pivot = new Vector2(0.5f, 0f);
+        dialogueRect.offsetMin = new Vector2(_dialogueSideMargin, _dialogueBottomMargin);
+        dialogueRect.offsetMax = new Vector2(-_dialogueSideMargin, _dialogueBottomMargin + _dialogueHeight);
+        Image dialogueBackground = _dialoguePanel.GetComponent<Image>();
+        ConfigureDialogueImage(dialogueBackground, _dialoguePanelSprite, _dialoguePanelColor);
+        Outline dialogueOutline = _dialoguePanel.GetComponent<Outline>();
+        dialogueOutline.effectColor = _dialogueBorderColor;
+        dialogueOutline.effectDistance = new Vector2(1f, -1f);
+        dialogueOutline.enabled = _dialoguePanelSprite == null;
+
+        var subtitleObject = new GameObject("Subtitle", typeof(RectTransform), typeof(Text));
+        subtitleObject.transform.SetParent(_dialoguePanel.transform, false);
         RectTransform subtitleRect = subtitleObject.GetComponent<RectTransform>();
-        subtitleRect.anchorMin = new Vector2(0.1f, 0f);
-        subtitleRect.anchorMax = new Vector2(0.9f, 0.2f);
-        subtitleRect.offsetMin = new Vector2(0f, 48f);
-        subtitleRect.offsetMax = Vector2.zero;
+        subtitleRect.anchorMin = Vector2.zero;
+        subtitleRect.anchorMax = Vector2.one;
+        subtitleRect.offsetMin = new Vector2(40f, 82f);
+        subtitleRect.offsetMax = new Vector2(-40f, -28f);
         _subtitle = subtitleObject.GetComponent<Text>();
         _subtitle.font = _subtitleFont != null ? _subtitleFont :
-            Font.CreateDynamicFontFromOSFont(new[] { "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans CJK KR", "Arial" }, 36);
-        _subtitle.fontSize = 36;
-        _subtitle.alignment = TextAnchor.MiddleCenter;
-        _subtitle.color = Color.white;
+            Font.CreateDynamicFontFromOSFont(new[] { "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans CJK KR", "Arial" }, _dialogueFontSize);
+        _subtitle.fontSize = _dialogueFontSize;
+        _subtitle.alignment = TextAnchor.MiddleLeft;
+        _subtitle.color = _dialogueTextColor;
         _subtitle.raycastTarget = false;
-        subtitleObject.GetComponent<Outline>().effectDistance = new Vector2(2f, -2f);
+
+        _continuePrompt = new GameObject("EnterKey", typeof(RectTransform), typeof(Image), typeof(Outline));
+        _continuePrompt.transform.SetParent(_dialoguePanel.transform, false);
+        RectTransform promptRect = _continuePrompt.GetComponent<RectTransform>();
+        promptRect.anchorMin = new Vector2(1f, 0f);
+        promptRect.anchorMax = new Vector2(1f, 0f);
+        promptRect.pivot = new Vector2(1f, 0f);
+        promptRect.anchoredPosition = new Vector2(-28f, 20f);
+        promptRect.sizeDelta = new Vector2(184f, 56f);
+        Image keyBackground = _continuePrompt.GetComponent<Image>();
+        ConfigureDialogueImage(keyBackground, _enterKeySprite, new Color(0.22f, 0.23f, 0.25f, 1f));
+        keyBackground.type = Image.Type.Simple;
+        keyBackground.preserveAspect = _enterKeySprite != null;
+        Outline keyOutline = _continuePrompt.GetComponent<Outline>();
+        keyOutline.effectColor = new Color(0.50f, 0.51f, 0.53f, 1f);
+        keyOutline.effectDistance = new Vector2(1f, -1f);
+        keyOutline.enabled = _enterKeySprite == null;
+
+        var keyFace = new GameObject("KeyFace", typeof(RectTransform), typeof(Image));
+        keyFace.transform.SetParent(_continuePrompt.transform, false);
+        RectTransform keyFaceRect = keyFace.GetComponent<RectTransform>();
+        keyFaceRect.anchorMin = Vector2.zero;
+        keyFaceRect.anchorMax = Vector2.one;
+        keyFaceRect.offsetMin = new Vector2(3f, 6f);
+        keyFaceRect.offsetMax = new Vector2(-3f, -3f);
+        Image keyFaceImage = keyFace.GetComponent<Image>();
+        keyFaceImage.color = new Color(0.09f, 0.10f, 0.12f, 1f);
+        keyFaceImage.raycastTarget = false;
+
+        var hintObject = new GameObject("ContinueHint", typeof(RectTransform), typeof(Text));
+        hintObject.transform.SetParent(keyFace.transform, false);
+        RectTransform hintRect = hintObject.GetComponent<RectTransform>();
+        hintRect.anchorMin = Vector2.zero;
+        hintRect.anchorMax = Vector2.one;
+        hintRect.offsetMin = new Vector2(8f, 0f);
+        hintRect.offsetMax = new Vector2(-65f, 0f);
+        _continueHint = hintObject.GetComponent<Text>();
+        _continueHint.font = _subtitle.font;
+        _continueHint.fontSize = 26;
+        _continueHint.alignment = TextAnchor.MiddleCenter;
+        _continueHint.color = new Color(0.94f, 0.94f, 0.94f, 1f);
+        _continueHint.text = "Enter";
+        _continueHint.raycastTarget = false;
+
+        // 화살표는 글꼴의 특수문자 지원 여부에 관계없이 같은 모양으로 표시한다.
+        var returnArrow = new GameObject("ReturnArrow", typeof(RectTransform));
+        returnArrow.transform.SetParent(keyFace.transform, false);
+        RectTransform arrowRect = returnArrow.GetComponent<RectTransform>();
+        arrowRect.anchorMin = new Vector2(1f, 0.5f);
+        arrowRect.anchorMax = new Vector2(1f, 0.5f);
+        arrowRect.pivot = new Vector2(1f, 0.5f);
+        arrowRect.anchoredPosition = new Vector2(-16f, 0f);
+        arrowRect.sizeDelta = new Vector2(50f, 32f);
+        CreateKeyStroke(arrowRect, "Horizontal", new Vector2(-1f, -4f), new Vector2(42f, 3f));
+        CreateKeyStroke(arrowRect, "Vertical", new Vector2(20f, 5f), new Vector2(3f, 18f));
+        CreateKeyStroke(arrowRect, "ArrowUpper", new Vector2(-17f, 1f), new Vector2(14f, 3f), 45f);
+        CreateKeyStroke(arrowRect, "ArrowLower", new Vector2(-17f, -9f), new Vector2(14f, 3f), -45f);
+        keyFace.SetActive(_enterKeySprite == null);
+        _continuePrompt.SetActive(false);
+
+        _exitChoice = new GameObject("ExitChoice", typeof(RectTransform), typeof(Image), typeof(Outline));
+        _exitChoice.transform.SetParent(_dialoguePanel.transform, false);
+        _exitChoiceRect = _exitChoice.GetComponent<RectTransform>();
+        _exitChoiceRect.anchorMin = Vector2.one;
+        _exitChoiceRect.anchorMax = Vector2.one;
+        _exitChoiceRect.pivot = new Vector2(1f, 0f);
+        _exitChoiceRect.anchoredPosition = new Vector2(0f, 18f);
+        _exitChoiceRect.sizeDelta = new Vector2(360f, 76f);
+        _exitChoiceBackground = _exitChoice.GetComponent<Image>();
+        ConfigureDialogueImage(_exitChoiceBackground, _choicePanelSprite, new Color(0.13f, 0.12f, 0.10f, 0.98f));
+        Outline choiceOutline = _exitChoice.GetComponent<Outline>();
+        choiceOutline.effectColor = _dialogueBorderColor;
+        choiceOutline.effectDistance = new Vector2(1f, -1f);
+        choiceOutline.enabled = _choicePanelSprite == null;
+        var choiceLabelObject = new GameObject("Label", typeof(RectTransform), typeof(Text));
+        choiceLabelObject.transform.SetParent(_exitChoice.transform, false);
+        RectTransform choiceLabelRect = choiceLabelObject.GetComponent<RectTransform>();
+        choiceLabelRect.anchorMin = Vector2.zero;
+        choiceLabelRect.anchorMax = Vector2.one;
+        choiceLabelRect.offsetMin = new Vector2(24f, 0f);
+        choiceLabelRect.offsetMax = new Vector2(-72f, 0f);
+        Text choiceLabel = choiceLabelObject.GetComponent<Text>();
+        choiceLabel.font = _subtitle.font;
+        choiceLabel.fontSize = 32;
+        choiceLabel.alignment = TextAnchor.MiddleLeft;
+        choiceLabel.color = _choiceTextColor;
+        choiceLabel.text = "나가보자.";
+        choiceLabel.raycastTarget = false;
+
+        var choiceMarkerObject = new GameObject("SelectionArrow", typeof(RectTransform), typeof(Text));
+        choiceMarkerObject.transform.SetParent(_exitChoice.transform, false);
+        RectTransform choiceMarkerRect = choiceMarkerObject.GetComponent<RectTransform>();
+        choiceMarkerRect.anchorMin = new Vector2(1f, 0f);
+        choiceMarkerRect.anchorMax = Vector2.one;
+        choiceMarkerRect.pivot = new Vector2(1f, 0.5f);
+        choiceMarkerRect.sizeDelta = new Vector2(56f, 0f);
+        choiceMarkerRect.anchoredPosition = new Vector2(-12f, 0f);
+        Text choiceMarker = choiceMarkerObject.GetComponent<Text>();
+        choiceMarker.font = _subtitle.font;
+        choiceMarker.fontSize = 42;
+        choiceMarker.alignment = TextAnchor.MiddleCenter;
+        choiceMarker.color = choiceLabel.color;
+        choiceMarker.text = "‹";
+        choiceMarker.raycastTarget = false;
+        _exitChoice.SetActive(false);
+        _dialoguePanel.SetActive(false);
+    }
+
+    private static void ConfigureDialogueImage(Image image, Sprite sprite, Color fallbackColor)
+    {
+        image.sprite = sprite;
+        image.color = sprite != null ? Color.white : fallbackColor;
+        image.type = sprite != null && sprite.border != Vector4.zero ? Image.Type.Sliced : Image.Type.Simple;
+        image.raycastTarget = false;
+    }
+
+    private static void CreateKeyStroke(RectTransform parent, string name, Vector2 position, Vector2 size, float angle = 0f)
+    {
+        var stroke = new GameObject(name, typeof(RectTransform), typeof(Image));
+        stroke.transform.SetParent(parent, false);
+        RectTransform rect = stroke.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = position;
+        rect.sizeDelta = size;
+        rect.localRotation = Quaternion.Euler(0f, 0f, angle);
+        Image image = stroke.GetComponent<Image>();
+        image.color = new Color(0.94f, 0.94f, 0.94f, 1f);
+        image.raycastTarget = false;
     }
 
     private IEnumerator FadeTo(float alpha, float duration)
@@ -446,6 +646,8 @@ public class PrologueIntroController : MonoBehaviour
         UnlockPlayer();
         RestoreGameplayUi();
         if (_subtitle != null) ShowSubtitle("");
+        if (_continuePrompt != null) _continuePrompt.SetActive(false);
+        if (_exitChoice != null) _exitChoice.SetActive(false);
         if (_fade != null)
         {
             _fade.alpha = 0f;
