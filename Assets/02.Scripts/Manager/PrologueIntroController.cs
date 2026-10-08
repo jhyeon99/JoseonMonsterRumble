@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using Com.LuisPedroFonseca.ProCamera2D;
 
 // Attach to an always-active scene-root object, outside both locations.
@@ -16,6 +17,15 @@ public class PrologueIntroController : MonoBehaviour
     [Header("Location transition")]
     [Tooltip("시작 위치에서 이 지점의 X좌표를 넘어가면 장소 2로 전환합니다.")]
     [SerializeField] private Transform _location2TransitionPoint;
+
+    [Header("Next scene exit")]
+    [Tooltip("배경 2로 이동한 뒤 이 오브젝트에 가까워지면 다음 씬으로 넘어갑니다. 비워두면 전환하지 않습니다.")]
+    [SerializeField] private Transform _nextSceneExitPoint;
+    [SerializeField] private string _nextSceneName = "Test_Ep1";
+    [Tooltip("출구 지점과 플레이어 사이의 거리입니다. X/Y 거리만 사용합니다.")]
+    [SerializeField, Min(0.1f)] private float _nextSceneTriggerDistance = 1.5f;
+    [Tooltip("다음 씬을 불러온 뒤 검은 화면이 밝아지는 시간입니다.")]
+    [SerializeField, Min(0.01f)] private float _nextSceneRevealDuration = 0.75f;
 
     [Header("Opening sounds (assign later)")]
     [SerializeField] private AudioClip _screamClip;
@@ -320,6 +330,45 @@ public class PrologueIntroController : MonoBehaviour
         _fade.blocksRaycasts = false;
         RestoreGameplayUi();
         Phase = "Complete";
+        yield return WaitForNextSceneExit();
+    }
+
+    private IEnumerator WaitForNextSceneExit()
+    {
+        if (_nextSceneExitPoint == null) yield break;
+        if (string.IsNullOrWhiteSpace(_nextSceneName) || !Application.CanStreamedLevelBeLoaded(_nextSceneName))
+        {
+            Debug.LogError($"Prologue: 다음 씬 '{_nextSceneName}'을 Build Settings의 Scene List에 등록하세요.", this);
+            yield break;
+        }
+
+        while (_nextSceneExitPoint != null)
+        {
+            bool playerCanExit = !PauseController.IsPaused && !_player.Health.IsDead &&
+                (StageManager.Instance == null || !StageManager.Instance.IsRespawning);
+            float distance = Vector2.Distance(_player.transform.position, _nextSceneExitPoint.position);
+            if (playerCanExit && distance <= _nextSceneTriggerDistance) break;
+            yield return null;
+        }
+        if (_nextSceneExitPoint == null) yield break;
+
+        AsyncOperation loadOperation = SceneManager.LoadSceneAsync(_nextSceneName, LoadSceneMode.Single);
+        if (loadOperation == null) yield break;
+        loadOperation.allowSceneActivation = false;
+        LockPlayer();
+        Phase = "LeavingPrologue";
+        yield return FadeTo(1f, _fadeToBlack);
+        SceneArrivalFade.Prepare(_nextSceneRevealDuration);
+        Time.timeScale = 1f;
+        loadOperation.allowSceneActivation = true;
+        yield return loadOperation;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (_nextSceneExitPoint == null) return;
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(_nextSceneExitPoint.position, _nextSceneTriggerDistance);
     }
 
     private void AlignDestinationBackground()
