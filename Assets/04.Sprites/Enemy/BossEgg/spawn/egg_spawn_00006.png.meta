@@ -1,0 +1,689 @@
+fileFormatVersion: 2
+guid: b1337775eba7a704f8d38e82609a6b8a
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7759002450580518039
+    second: egg_spawn_00006_0
+  - first:
+      213: 2796834243719155964
+    second: egg_spawn_00006_1
+  - first:
+      213: -2048555917332181147
+    second: egg_spawn_00006_2
+  - first:
+      213: -1117689330303392580
+    second: egg_spawn_00006_3
+  - first:
+      213: -4956815221662705284
+    second: egg_spawn_00006_4
+  - first:
+      213: -5153328053566592372
+    second: egg_spawn_00006_5
+  - first:
+      213: 4277312077775286855
+    second: egg_spawn_00006_6
+  - first:
+      213: -1590175708478173922
+    second: egg_spawn_00006_7
+  - first:
+      213: 2473281174460588358
+    second: egg_spawn_00006_8
+  - first:
+      213: -814801967717935889
+    second: egg_spawn_00006_9
+  - first:
+      213: -2649992742709755462
+    second: egg_spawn_00006_10
+  - first:
+      213: -7930162366741482669
+    second: egg_spawn_00006_11
+  - first:
+      213: 3795833202718386735
+    second: egg_spawn_00006_12
+  - first:
+      213: 6099295126784427737
+    second: egg_spawn_00006_13
+  - first:
+      213: 2385117465588281711
+    second: egg_spawn_00006_14
+  - first:
+      213: -8881012034785202687
+    second: egg_spawn_00006_15
+  - first:
+      213: 6577865382531254620
+    second: egg_spawn_00006_16
+  - first:
+      213: 366613078760800711
+    second: egg_spawn_00006_17
+  - first:
+      213: 8149618902273678822
+    second: egg_spawn_00006_18
+  - first:
+      213: -7324213822953939940
+    second: egg_spawn_00006_19
+  - first:
+      213: -3520959743822323298
+    second: egg_spawn_00006_20
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 200
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: egg_spawn_00006_0
+      rect:
+        serializedVersion: 2
+        x: 815
+        y: 593
+        width: 24
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 794bc3eae938dab60800000000000000
+      internalID: 7759002450580518039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_1
+      rect:
+        serializedVersion: 2
+        x: 850
+        y: 612
+        width: 25
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf057882de950d620800000000000000
+      internalID: 2796834243719155964
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_2
+      rect:
+        serializedVersion: 2
+        x: 388
+        y: 568
+        width: 71
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56f04e43f311293e0800000000000000
+      internalID: -2048555917332181147
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_3
+      rect:
+        serializedVersion: 2
+        x: 472
+        y: 554
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb4a502d97b2d70f0800000000000000
+      internalID: -1117689330303392580
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_4
+      rect:
+        serializedVersion: 2
+        x: 665
+        y: 545
+        width: 24
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c799b8771dad53bb0800000000000000
+      internalID: -4956815221662705284
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_5
+      rect:
+        serializedVersion: 2
+        x: 414
+        y: 142
+        width: 417
+        height: 409
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8aab145073bb78b0800000000000000
+      internalID: -5153328053566592372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_6
+      rect:
+        serializedVersion: 2
+        x: 775
+        y: 549
+        width: 18
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 742b84d2ca01c5b30800000000000000
+      internalID: 4277312077775286855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_7
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 445
+        width: 29
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1d04b54e9f8ee9e0800000000000000
+      internalID: -1590175708478173922
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_8
+      rect:
+        serializedVersion: 2
+        x: 857
+        y: 440
+        width: 111
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6416269cf1cd25220800000000000000
+      internalID: 2473281174460588358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_9
+      rect:
+        serializedVersion: 2
+        x: 362
+        y: 398
+        width: 51
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe412e76ded31b4f0800000000000000
+      internalID: -814801967717935889
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_10
+      rect:
+        serializedVersion: 2
+        x: 406
+        y: 350
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab10c6904a5593bd0800000000000000
+      internalID: -2649992742709755462
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_11
+      rect:
+        serializedVersion: 2
+        x: 846
+        y: 332
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 353f33fd75762f190800000000000000
+      internalID: -7930162366741482669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_12
+      rect:
+        serializedVersion: 2
+        x: 876
+        y: 286
+        width: 57
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f2aa9aacf228da430800000000000000
+      internalID: 3795833202718386735
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_13
+      rect:
+        serializedVersion: 2
+        x: 311
+        y: 241
+        width: 63
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9d6c1443a9c05a450800000000000000
+      internalID: 6099295126784427737
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_14
+      rect:
+        serializedVersion: 2
+        x: 863
+        y: 140
+        width: 16
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6138f3b2b3a91120800000000000000
+      internalID: 2385117465588281711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_15
+      rect:
+        serializedVersion: 2
+        x: 625
+        y: 98
+        width: 13
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10ea8a4ab9e40c480800000000000000
+      internalID: -8881012034785202687
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_16
+      rect:
+        serializedVersion: 2
+        x: 721
+        y: 95
+        width: 17
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c594d12e6b5494b50800000000000000
+      internalID: 6577865382531254620
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_17
+      rect:
+        serializedVersion: 2
+        x: 830
+        y: 106
+        width: 18
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c1cc8917a8761500800000000000000
+      internalID: 366613078760800711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_18
+      rect:
+        serializedVersion: 2
+        x: 580
+        y: 89
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6edd4dc8633491170800000000000000
+      internalID: 8149618902273678822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_19
+      rect:
+        serializedVersion: 2
+        x: 579
+        y: 62
+        width: 11
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c1c13d7555a2b5a90800000000000000
+      internalID: -7324213822953939940
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_spawn_00006_20
+      rect:
+        serializedVersion: 2
+        x: 305
+        y: 19
+        width: 28
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e91250194c9032fc0800000000000000
+      internalID: -3520959743822323298
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      egg_spawn_00006_0: 7759002450580518039
+      egg_spawn_00006_1: 2796834243719155964
+      egg_spawn_00006_10: -2649992742709755462
+      egg_spawn_00006_11: -7930162366741482669
+      egg_spawn_00006_12: 3795833202718386735
+      egg_spawn_00006_13: 6099295126784427737
+      egg_spawn_00006_14: 2385117465588281711
+      egg_spawn_00006_15: -8881012034785202687
+      egg_spawn_00006_16: 6577865382531254620
+      egg_spawn_00006_17: 366613078760800711
+      egg_spawn_00006_18: 8149618902273678822
+      egg_spawn_00006_19: -7324213822953939940
+      egg_spawn_00006_2: -2048555917332181147
+      egg_spawn_00006_20: -3520959743822323298
+      egg_spawn_00006_3: -1117689330303392580
+      egg_spawn_00006_4: -4956815221662705284
+      egg_spawn_00006_5: -5153328053566592372
+      egg_spawn_00006_6: 4277312077775286855
+      egg_spawn_00006_7: -1590175708478173922
+      egg_spawn_00006_8: 2473281174460588358
+      egg_spawn_00006_9: -814801967717935889
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

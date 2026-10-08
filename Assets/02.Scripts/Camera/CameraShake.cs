@@ -1,120 +1,450 @@
 using Com.LuisPedroFonseca.ProCamera2D;
 using UnityEngine;
-using System.Collections;
 
+/// <summary>
+/// 카메라 연출 (흔들림 / 밀기 / 줌). 메인 카메라에 하나만 둠.
+/// - GameEvents의 플레이어 피격 / 패링 / 마무리 공격에 자동으로 반응
+/// - 그 외(보스 패턴 등)에서는 CameraShake.Shake / Kick / Zoom 으로 호출
+/// - 시간은 실제 시간 기준이라 히트스톱 중에도 움직임 (일시정지 중에는 멈춤)
+/// - 겹치면 흔들림 / 줌은 더 강한 쪽을 유지, 밀기는 마지막 것으로 교체
+/// CameraFollow가 위치를 정한 뒤(실행 순서 10) 오프셋과 줌만 얹음.
+/// </summary>
 [DefaultExecutionOrder(10)]
 public class CameraShake : MonoBehaviour
 {
-    [Header("Settings")]
-    [SerializeField] private float _duration = 0.1f;
+    private static CameraShake _instance;
 
-    [SerializeField] private float _damageMultiplier = 0.02f;
-    [SerializeField] private float _maxMagnitude = 0.3f;
+    [Header("플레이어 피격")]
+    [Tooltip("Magnitude는 최대 세기. 실제 세기 = 데미지 x 아래 배율 (최대값까지)")]
+    [SerializeField]
+    private CameraShakeSettings _playerHitShake = new CameraShakeSettings(0.1f, 0.3f);
+
+    [Tooltip("피격 데미지 1당 흔들림 세기")]
+    [SerializeField, Min(0f)]
+    private float _damageMultiplier = 0.02f;
 
     [Header("패링")]
-    [SerializeField] private float _parryDuration = 0.12f;
-    [SerializeField] private float _parryMagnitude = 0.15f;
+    [SerializeField]
+    private CameraShakeSettings _parryShake = new CameraShakeSettings(0.12f, 0.12f);
+
+    [SerializeField]
+    private CameraZoomSettings _parryZoom = new CameraZoomSettings(0.06f, 0.03f, 0.1f, 0.25f, 0.15f, 1.5f);
 
     [Header("마무리 공격")]
-    [SerializeField] private float _finisherDuration = 0.25f;
-    [SerializeField] private float _finisherMagnitude = 0.35f;
+    [Tooltip("타격 순간 타격 지점 쪽으로 줌 인")]
+    [SerializeField]
+    private CameraZoomSettings _finisherZoom = new CameraZoomSettings(0.15f, 0.05f, 0.2f, 0.55f, 0.35f, 2.5f);
 
+    [Tooltip("적이 날아가는 방향으로 카메라가 밀림")]
+    [SerializeField]
+    private CameraKickSettings _finisherKick = new CameraKickSettings(0.5f, 0.5f, 0.2f);
+
+    [Tooltip("타격감용 약한 흔들림")]
+    [SerializeField]
+    private CameraShakeSettings _finisherShake = new CameraShakeSettings(0.15f, 0.08f);
+
+    [Header("공통")]
+    [Tooltip("세로 흔들림 비율 (멀미 방지)")]
+    [SerializeField, Range(0f, 1f)]
+    private float _verticalShakeRatio = 0.3f;
+
+    private ProCamera2D _proCamera;
     private ProCamera2DShake _proCameraShake;
-    private Vector3 _shakeOffset = Vector3.zero;
+    private Camera _camera;
+    private CameraFollow _follow;
+    private float _baseOrthographicSize;
+    private bool _isZoomApplied;
+    private Vector3 _lastOffset;
+
+    // 일시정지 중에는 멈추는 실제 시간
+    private float _clock;
+
+    // 흔들림
+    private float _shakeStartTime;
+    private CameraShakeSettings _shake;
+
+    // 밀기
+    private float _kickStartTime;
+    private CameraKickSettings _kick;
+    private Vector2 _kickDirection;
+
+    // 줌
+    private float _zoomStartTime;
+    private CameraZoomSettings _zoom;
+    private Vector2 _focusVector;
+    private bool _isZooming;
 
     private void Awake()
     {
+        _proCamera = GetComponent<ProCamera2D>();
         _proCameraShake = GetComponent<ProCamera2DShake>();
+
+        _camera = GetComponent<Camera>();
+        if (_camera == null)
+        {
+            _camera = Camera.main;
+        }
+
+        _follow = GetComponent<CameraFollow>();
+
+        if (_camera != null)
+        {
+            _baseOrthographicSize = _camera.orthographicSize;
+        }
     }
 
     private void OnEnable()
     {
-        GameEvents.OnPlayerHit += PlayerHitCameraShake;
-        GameEvents.OnParry += ParryCameraShake;
-        GameEvents.OnFinisher += FinisherCameraShake;
+        if (_instance != null && _instance != this)
+        {
+            Debug.LogWarning($"{name}: CameraShake가 씬에 여러 개 있습니다. 메인 카메라에 하나만 남겨 주세요.", this);
+        }
+
+        _instance = this;
+
+        GameEvents.OnPlayerHit += HandlePlayerHit;
+        GameEvents.OnParry += HandleParry;
+        GameEvents.OnFinisher += HandleFinisher;
     }
 
     private void OnDisable()
     {
-        GameEvents.OnPlayerHit -= PlayerHitCameraShake;
-        GameEvents.OnParry -= ParryCameraShake;
-        GameEvents.OnFinisher -= FinisherCameraShake;
-        ResetShake();
+        GameEvents.OnPlayerHit -= HandlePlayerHit;
+        GameEvents.OnParry -= HandleParry;
+        GameEvents.OnFinisher -= HandleFinisher;
+
+        StopAll();
+
+        if (_instance == this)
+        {
+            _instance = null;
+        }
     }
 
-    private Coroutine _cameraShakeRoutine;
+    #region 외부 호출용
+
+    /// <summary>점점 약해지는 흔들림</summary>
+    public static void Shake(CameraShakeSettings settings)
+    {
+        if (_instance != null)
+        {
+            _instance.StartShake(settings);
+        }
+    }
+
+    public static void Shake(float duration, float magnitude)
+    {
+        Shake(new CameraShakeSettings(duration, magnitude));
+    }
+
+    /// <summary>direction 쪽으로 밀었다가 돌아옴</summary>
+    public static void Kick(Vector2 direction, CameraKickSettings settings)
+    {
+        if (_instance != null)
+        {
+            _instance.StartKick(direction, settings);
+        }
+    }
+
+    /// <summary>제자리 줌</summary>
+    public static void Zoom(CameraZoomSettings settings)
+    {
+        if (_instance != null)
+        {
+            _instance.StartZoom(settings, null);
+        }
+    }
+
+    /// <summary>focusPoint 쪽으로 이동하면서 줌</summary>
+    public static void Zoom(CameraZoomSettings settings, Vector2 focusPoint)
+    {
+        if (_instance != null)
+        {
+            _instance.StartZoom(settings, focusPoint);
+        }
+    }
+
+    /// <summary>모든 카메라 연출을 바로 끝냄</summary>
+    public static void Stop()
+    {
+        if (_instance != null)
+        {
+            _instance.StopAll();
+        }
+    }
+
+    #endregion
+
+    #region 이벤트 반응
+
+    private void HandlePlayerHit(HitData hitData)
+    {
+        float magnitude = Mathf.Min(hitData.Damage * _damageMultiplier, _playerHitShake.Magnitude);
+        StartShake(new CameraShakeSettings(_playerHitShake.Duration, magnitude));
+    }
+
+    private void HandleParry(HitData hitData)
+    {
+        StartShake(_parryShake);
+        StartZoom(_parryZoom, hitData.HitPoint);
+    }
+
+    private void HandleFinisher(Vector2 point)
+    {
+        StartZoom(_finisherZoom, point);
+        StartShake(_finisherShake);
+
+        // 날아가는 방향 = 플레이어 → 타격 지점
+        float directionX = 1f;
+        Transform player = _follow != null ? _follow.Target : null;
+        if (player != null)
+        {
+            float diff = point.x - player.position.x;
+            directionX = Mathf.Abs(diff) > 0.01f ? Mathf.Sign(diff) : Mathf.Sign(player.localScale.x);
+        }
+
+        StartKick(new Vector2(directionX, 0f), _finisherKick);
+    }
+
+    #endregion
+
+    #region 시작
+
+    private void StartShake(CameraShakeSettings settings)
+    {
+        if (settings.Duration <= 0f || settings.Magnitude <= 0f)
+        {
+            return;
+        }
+
+        // 지금 남은 흔들림보다 약하면 무시 (강한 흔들림을 약한 것이 끊지 않도록)
+        if (settings.Magnitude < GetCurrentShakeStrength())
+        {
+            return;
+        }
+
+        _shake = settings;
+        _shakeStartTime = _clock;
+
+        if (_proCameraShake != null && _proCameraShake.isActiveAndEnabled)
+        {
+            _proCameraShake.StopShaking();
+            _proCameraShake.Shake(settings.Duration,
+                new Vector2(settings.Magnitude, settings.Magnitude * _verticalShakeRatio), smoothness: 0.03f);
+        }
+    }
+
+    private void StartKick(Vector2 direction, CameraKickSettings settings)
+    {
+        if (settings.Distance <= 0f || direction.sqrMagnitude < 0.0001f)
+        {
+            return;
+        }
+
+        _kick = settings;
+        _kickDirection = direction.normalized;
+        _kickStartTime = _clock;
+    }
+
+    private void StartZoom(CameraZoomSettings settings, Vector2? focusPoint)
+    {
+        if (Mathf.Approximately(settings.Amount, 0f) || settings.TotalTime <= 0f)
+        {
+            return;
+        }
+
+        // 지금 줌보다 약하면 무시
+        if (_isZooming && Mathf.Abs(settings.Amount) < Mathf.Abs(_zoom.Amount * GetZoomWeight()))
+        {
+            return;
+        }
+
+        _zoom = settings;
+        _zoomStartTime = _clock;
+        _isZooming = true;
+        _focusVector = Vector2.zero;
+
+        if (focusPoint.HasValue && settings.FocusStrength > 0f)
+        {
+            Vector2 basePosition = transform.position - _lastOffset;
+            Vector2 toFocus = (focusPoint.Value - basePosition) * settings.FocusStrength;
+            _focusVector = Vector2.ClampMagnitude(toFocus, settings.MaxFocusDistance);
+        }
+    }
+
+    private void StopAll()
+    {
+        if (_proCameraShake != null && _proCameraShake.isActiveAndEnabled)
+            _proCameraShake.StopShaking();
+
+        _shake = default;
+        _kick = default;
+        _isZooming = false;
+
+        if (_follow == null)
+        {
+            transform.position -= _lastOffset;
+        }
+
+        _lastOffset = Vector3.zero;
+        RestoreZoom();
+    }
+
+    #endregion
 
     private void LateUpdate()
     {
+        if (!PauseController.IsPaused)
+        {
+            _clock += Time.unscaledDeltaTime;
+        }
+
+        // 추적 카메라는 매 프레임 기준 위치를 새로 쓰므로 오프셋을 다시 빼지 않는다.
+        if ((_follow == null || !_follow.isActiveAndEnabled) &&
+            (_proCamera == null || !_proCamera.isActiveAndEnabled))
+        {
+            transform.position -= _lastOffset;
+        }
+
+        float zoomWeight = GetZoomWeight();
+        Vector3 offset = GetShakeOffset() + GetKickOffset() + (Vector3)(_focusVector * zoomWeight);
+
+        transform.position += offset;
+        _lastOffset = offset;
+
+        ApplyZoom(zoomWeight);
+    }
+
+    #region 계산
+
+    private float GetCurrentShakeStrength()
+    {
+        if (_shake.Duration <= 0f)
+        {
+            return 0f;
+        }
+
+        float t = (_clock - _shakeStartTime) / _shake.Duration;
+        if (t >= 1f)
+        {
+            return 0f;
+        }
+
+        float decay = 1f - t;
+        return _shake.Magnitude * decay * decay;
+    }
+
+    private Vector3 GetShakeOffset()
+    {
+        // ProCamera2D의 Shake 확장이 흔들림을 적용할 때는 중복으로 흔들지 않는다.
         if (_proCameraShake != null && _proCameraShake.isActiveAndEnabled)
+            return Vector3.zero;
+
+        float strength = GetCurrentShakeStrength();
+        if (strength <= 0f)
+        {
+            return Vector3.zero;
+        }
+
+        Vector2 random = Random.insideUnitCircle * strength;
+        return new Vector3(random.x, random.y * _verticalShakeRatio, 0f);
+    }
+
+    private Vector3 GetKickOffset()
+    {
+        if (_kick.Distance <= 0f)
+        {
+            return Vector3.zero;
+        }
+
+        float t = (_clock - _kickStartTime) / _kick.Duration;
+        if (t >= 1f)
+        {
+            _kick = default;
+            return Vector3.zero;
+        }
+
+        // 빠르게 밀렸다가 천천히 돌아옴
+        float weight = t < _kick.PushRatio
+            ? Mathf.SmoothStep(0f, 1f, t / _kick.PushRatio)
+            : 1f - Mathf.SmoothStep(0f, 1f, (t - _kick.PushRatio) / (1f - _kick.PushRatio));
+
+        return (Vector3)(_kickDirection * (_kick.Distance * weight));
+    }
+
+    /// <summary>줌 진행도 0~1 (들어감 → 유지 → 돌아옴)</summary>
+    private float GetZoomWeight()
+    {
+        if (!_isZooming)
+        {
+            return 0f;
+        }
+
+        float elapsed = _clock - _zoomStartTime;
+
+        if (elapsed < _zoom.InTime)
+        {
+            return Mathf.SmoothStep(0f, 1f, elapsed / _zoom.InTime);
+        }
+
+        elapsed -= _zoom.InTime;
+        if (elapsed < _zoom.HoldTime)
+        {
+            return 1f;
+        }
+
+        elapsed -= _zoom.HoldTime;
+        if (elapsed < _zoom.OutTime)
+        {
+            return 1f - Mathf.SmoothStep(0f, 1f, elapsed / _zoom.OutTime);
+        }
+
+        _isZooming = false;
+        return 0f;
+    }
+
+    private void ApplyZoom(float zoomWeight)
+    {
+        if (_camera == null || !_camera.orthographic)
+        {
             return;
-
-        if (_shakeOffset != Vector3.zero)
-        {
-            transform.position += _shakeOffset;
         }
-    }
 
-    private void PlayerHitCameraShake(HitData hitData)
-    {
-        float magnitude = Mathf.Min(hitData.Damage * _damageMultiplier, _maxMagnitude);
-        StartShake(_duration, magnitude);
-    }
-
-    private void ParryCameraShake(HitData hitData)
-    {
-        StartShake(_parryDuration, _parryMagnitude);
-    }
-
-    private void FinisherCameraShake(Vector2 point)
-    {
-        StartShake(_finisherDuration, _finisherMagnitude);
-    }
-
-    private void StartShake(float duration, float magnitude)
-    {
-        if (_proCameraShake != null && _proCameraShake.isActiveAndEnabled)
+        if (!_isZooming)
         {
-            _proCameraShake.StopShaking();
-            _proCameraShake.Shake(duration, new Vector2(magnitude, magnitude * 0.3f), smoothness: 0.03f);
+            RestoreZoom();
+
+            // 줌 중이 아닐 때는 다른 곳에서 바꾼 크기를 기준으로 삼음
+            _baseOrthographicSize = _camera.orthographicSize;
             return;
         }
 
-        if (_cameraShakeRoutine != null)
-        {
-            StopCoroutine(_cameraShakeRoutine);
-        }
-
-        _cameraShakeRoutine = StartCoroutine(DoShake(duration, magnitude));
+        SetOrthographicSize(_baseOrthographicSize * (1f - (_zoom.Amount * zoomWeight)));
+        _isZoomApplied = true;
     }
 
-    private IEnumerator DoShake(float duration, float magnitude)
+    private void SetOrthographicSize(float size)
     {
-        float timer = 0f;
-
-        while (timer < duration)
+        if (_proCamera != null && _proCamera.isActiveAndEnabled)
         {
-            timer += Time.deltaTime;
-
-            Vector2 randomCircle = Random.insideUnitCircle * magnitude;
-            // 멀미 방지를 위해 Y축은 30%만 반영
-            _shakeOffset = new Vector3(randomCircle.x, randomCircle.y * 0.3f, 0f);
-
-            yield return null;
+            _proCamera.UpdateScreenSize(size);
         }
-
-        _shakeOffset = Vector3.zero;
+        else
+        {
+            _camera.orthographicSize = size;
+        }
     }
 
-    private void ResetShake()
+    private void RestoreZoom()
     {
-        if (_proCameraShake != null && _proCameraShake.isActiveAndEnabled)
-            _proCameraShake.StopShaking();
-
-        if (_cameraShakeRoutine != null)
+        if (!_isZoomApplied || _camera == null)
         {
-            _shakeOffset = Vector3.zero;
-            _cameraShakeRoutine = null;
+            return;
         }
+
+        SetOrthographicSize(_baseOrthographicSize);
+        _isZoomApplied = false;
     }
+
+    #endregion
 }

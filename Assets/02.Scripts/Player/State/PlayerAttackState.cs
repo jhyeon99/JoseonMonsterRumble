@@ -9,7 +9,6 @@ public class PlayerAttackState : PlayerBaseState
     private const float LedgeRayOriginYOffset = 0.1f;
     private const int LedgeCheckSteps = 5;
     private const float AttackSafetyTimeout = 5.0f;
-    private const float DodgeCancelNormalizedTime = 0.2f;
 
     private const string AnimStateAttack = "Player_Attack";
     private const string AnimStateAttack1st = "Player_Attack_1st";
@@ -48,11 +47,40 @@ public class PlayerAttackState : PlayerBaseState
     private bool _hasEndedHit;
 
     private Collider2D _playerCollider;
+    private int _startingComboIndex = 0;
 
     public PlayerAttackState(Player player, StateMachine stateMachine)
         : base(player, stateMachine)
     {
         _playerCollider = _player.GetComponent<Collider2D>();
+    }
+
+    public void SetStartingComboIndex(int index)
+    {
+        _startingComboIndex = Mathf.Clamp(index, 0, 2);
+    }
+
+    public bool IsThirdAttackSuperArmorActive()
+    {
+        Animator animator = _player.Animator;
+        if (_currentComboIndex != 2 || animator == null)
+        {
+            return false;
+        }
+
+        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+        if (!stateInfo.IsName(AnimStateAttack3rd))
+        {
+            return false;
+        }
+
+        if (!animator.IsInTransition(0))
+        {
+            return true;
+        }
+
+        AnimatorStateInfo nextStateInfo = animator.GetNextAnimatorStateInfo(0);
+        return !nextStateInfo.IsName(AnimStateAttack3rdRecover);
     }
 
     public override void Enter()
@@ -61,19 +89,33 @@ public class PlayerAttackState : PlayerBaseState
 
         _elapsedTime = 0f;
         _comboElapsedTime = 0f;
-        _currentComboIndex = 0;
+        _currentComboIndex = _startingComboIndex;
+        _startingComboIndex = 0;
         _hasEnteredAttackAnimation = false;
         _hasBufferedAttackInput = false;
         _isGroundedAtStart = _player.IsGrounded;
 
         _rigidbody2D.linearVelocity = new Vector2(0f, _rigidbody2D.linearVelocity.y);
 
-        SetupForwardMotion(0);
+        SetupForwardMotion(_currentComboIndex);
 
         _player.SetRunning(false);
-        _player.TriggerAttack();
-        _player.Attack.StartAttackStep(0);
-        SetupHitWindow(0);
+
+        if (_currentComboIndex == 1)
+        {
+            _player.TriggerAttack2();
+        }
+        else if (_currentComboIndex == 2)
+        {
+            _player.TriggerAttack3();
+        }
+        else
+        {
+            _player.TriggerAttack();
+        }
+
+        _player.Attack.StartAttackStep(_currentComboIndex);
+        SetupHitWindow(_currentComboIndex);
     }
 
     private void SetupForwardMotion(int index)
@@ -343,18 +385,21 @@ public class PlayerAttackState : PlayerBaseState
                 }
             }
 
-            // 현재 진행 중인 콤보의 리커버 상태일 때만 후속 처리 (회피 캔슬 및 종료)
+            // 회피 캔슬: 현재 콤보의 Recover 애니메이션이 시작되면 (Recover로 넘어가는 전이 중 포함) 바로 가능
+            // Recover 시작 직전에 누른 입력도 입력 버퍼(0.1초) 안이면 시작하자마자 회피
+            bool isEnteringComboRecover = inTransition && IsCurrentComboRecoverState(nextInfo);
+            if ((isCurrentComboRecover || isEnteringComboRecover) &&
+                _player.IsGrounded &&
+                _player.Movement.CanDodge &&
+                _inputHandler.TryUseDodgeInput())
+            {
+                _stateMachine.ChangeState(_player.DodgeState);
+                return;
+            }
+
+            // 현재 진행 중인 콤보의 리커버 상태일 때만 종료 처리
             if (isCurrentComboRecover)
             {
-                if (stateInfo.normalizedTime >= DodgeCancelNormalizedTime)
-                {
-                    if (_inputHandler.TryUseDodgeInput() && _player.IsGrounded && _player.Movement.CanDodge)
-                    {
-                        _stateMachine.ChangeState(_player.DodgeState);
-                        return;
-                    }
-                }
-
                 if (!inTransition && stateInfo.normalizedTime >= 1.0f)
                 {
                     EndAttack();
@@ -417,6 +462,7 @@ public class PlayerAttackState : PlayerBaseState
         base.Exit();
 
         _hasBufferedAttackInput = false;
+        _startingComboIndex = 0;
         _player.Attack.StopAttack();
     }
 
