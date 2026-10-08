@@ -244,7 +244,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 2.5
+  m_GravityScale: 3.5
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -320,12 +320,12 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _knockbackUpVelocity: 6
+  _knockbackUpVelocity: 4
   _knockbackDeceleration: 30
   _coyoteTime: 0.1
   _groundCheckLockout: 0.1
-  _fallGravityMultiplier: 3
-  _lowJumpGravityMultiplier: 4
+  _fallGravityMultiplier: 2
+  _lowJumpGravityMultiplier: 2
   _maxFallSpeed: 15
   _addPlatformVelocityMultiplier: 1
   _landingJumpDelay: 0.1
