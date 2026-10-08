@@ -8,6 +8,10 @@ using UnityEngine;
 [RequireComponent(typeof(EffectPool))]
 public class EffectManager : MonoBehaviour
 {
+    [Header("적 피격 이펙트 크기")]
+    [SerializeField, Min(0f)] private float _lightEnemyHitScale = 0.8f;
+    [SerializeField, Min(0f)] private float _heavyEnemyHitScale = 1.3f;
+
     private static EffectManager _instance = null;
     public static EffectManager Instance => _instance;
 
@@ -37,11 +41,13 @@ public class EffectManager : MonoBehaviour
 
         // HitStop, CameraShake와 같은 방식으로 플레이어 피격 이벤트 구독
         GameEvents.OnPlayerHit += PlayPlayerHit;
+        GameEvents.OnEnemyHit += PlayEnemyHit;
     }
 
     private void OnDisable()
     {
         GameEvents.OnPlayerHit -= PlayPlayerHit;
+        GameEvents.OnEnemyHit -= PlayEnemyHit;
     }
 
     /// <summary>플레이어 피격 위치에 피격 이펙트 재생</summary>
@@ -51,13 +57,19 @@ public class EffectManager : MonoBehaviour
         Play(EffectType.PlayerHit, hitData.HitPoint, hitData.AttackDirection.x < 0f);
     }
 
+    public void PlayEnemyHit(HitData hitData)
+    {
+        float scale = hitData.IsHeavyImpact ? _heavyEnemyHitScale : _lightEnemyHitScale;
+        Play(EffectType.EnemyHit, hitData.HitPoint, hitData.AttackDirection.x < 0f, scale);
+    }
+
     /// <summary>
     /// 상황별 메서드가 아직 없는 이펙트용. 가능하면 상황별 메서드를 추가해서 사용.
     /// </summary>
-    public void Play(EffectType type, Vector2 position, bool flipX = false)
+    public void Play(EffectType type, Vector2 position, bool flipX = false, float scale = 1f)
     {
         if (_pool == null) return;
 
-        _pool.Play(type, position, flipX);
+        _pool.Play(type, position, flipX, scale);
     }
 }

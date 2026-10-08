@@ -1,8 +1,19 @@
 using UnityEngine;
 
+public enum EnemyHitAnimationMode
+{
+    AllDamage,
+    ThirdComboOrParry,
+    ThirdComboOrReflectedProjectile,
+}
+
 public class EnemyAnimation : MonoBehaviour
 {
+    private const int ThirdComboStep = 3;
+
     [SerializeField] private Animator _animator;
+    [SerializeField] private EnemyHitAnimationMode _hitAnimationMode = EnemyHitAnimationMode.AllDamage;
+
     private readonly int _isRunning = Animator.StringToHash("isRunning");
     private readonly int _attack = Animator.StringToHash("attack");
     private readonly int _hit = Animator.StringToHash("hit");
@@ -19,6 +30,31 @@ public class EnemyAnimation : MonoBehaviour
 
     public void PlayAttack() => _animator.SetTrigger(_attack);
     public void PlayHit() => _animator.SetTrigger(_hit);
+
+    public void PlayDamageHit(HitData hitData)
+    {
+        if (ShouldPlayDamageHit(hitData))
+        {
+            PlayHit();
+        }
+    }
+
+    public void PlayParriedHit()
+    {
+        if (_hitAnimationMode == EnemyHitAnimationMode.ThirdComboOrParry)
+        {
+            PlayHit();
+        }
+    }
+
+    public void PlayLaunchHit()
+    {
+        if (_hitAnimationMode == EnemyHitAnimationMode.AllDamage)
+        {
+            PlayHit();
+        }
+    }
+
     public void PlayDie() => _animator.SetTrigger(_die);
 
     public void SetGroggy(bool isGroggy)
@@ -33,6 +69,18 @@ public class EnemyAnimation : MonoBehaviour
         {
             _animator.SetBool(_isGroggy, isGroggy);
         }
+    }
+
+    private bool ShouldPlayDamageHit(HitData hitData)
+    {
+        return _hitAnimationMode switch
+        {
+            EnemyHitAnimationMode.AllDamage => true,
+            EnemyHitAnimationMode.ThirdComboOrParry => hitData.ComboStep == ThirdComboStep,
+            EnemyHitAnimationMode.ThirdComboOrReflectedProjectile =>
+                hitData.ComboStep == ThirdComboStep || hitData.IsReflectedProjectile,
+            _ => false,
+        };
     }
 
     private bool HasParameter(int nameHash)

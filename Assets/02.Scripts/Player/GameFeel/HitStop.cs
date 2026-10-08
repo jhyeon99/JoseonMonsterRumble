@@ -43,6 +43,13 @@ public class HitStop : MonoBehaviour
     [SerializeField, Min(0f)]
     private float _playerHitMaxDuration = 0.2f;
 
+    [Header("적 피격")]
+    [SerializeField]
+    private HitStopSettings _enemyLightHit = new HitStopSettings(0.035f, 0.08f);
+
+    [SerializeField]
+    private HitStopSettings _enemyHeavyHit = new HitStopSettings(0.075f, 0.02f);
+
     [Header("패링")]
     [SerializeField]
     private HitStopSettings _parry = new HitStopSettings(0.12f, 0.02f);
@@ -68,6 +75,7 @@ public class HitStop : MonoBehaviour
         _instance = this;
 
         GameEvents.OnPlayerHit += HandlePlayerHit;
+        GameEvents.OnEnemyHit += HandleEnemyHit;
         GameEvents.OnParry += HandleParry;
         GameEvents.OnFinisher += HandleFinisher;
     }
@@ -75,6 +83,7 @@ public class HitStop : MonoBehaviour
     private void OnDisable()
     {
         GameEvents.OnPlayerHit -= HandlePlayerHit;
+        GameEvents.OnEnemyHit -= HandleEnemyHit;
         GameEvents.OnParry -= HandleParry;
         GameEvents.OnFinisher -= HandleFinisher;
 
@@ -118,6 +127,12 @@ public class HitStop : MonoBehaviour
     {
         float duration = _playerHit.Duration + (hitData.Damage * _playerHitDamageBonus);
         Begin(Mathf.Min(duration, _playerHitMaxDuration), _playerHit.TimeScale);
+    }
+
+    private void HandleEnemyHit(HitData hitData)
+    {
+        HitStopSettings settings = hitData.IsHeavyImpact ? _enemyHeavyHit : _enemyLightHit;
+        Begin(settings.Duration, settings.TimeScale);
     }
 
     private void HandleParry(HitData hitData)

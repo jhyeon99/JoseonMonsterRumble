@@ -22,6 +22,10 @@ public class CameraShake : MonoBehaviour
     [SerializeField, Min(0f)]
     private float _damageMultiplier = 0.02f;
 
+    [Header("적 강타")]
+    [SerializeField]
+    private CameraShakeSettings _enemyHeavyHitShake = new CameraShakeSettings(0.08f, 0.04f);
+
     [Header("패링")]
     [SerializeField]
     private CameraShakeSettings _parryShake = new CameraShakeSettings(0.12f, 0.12f);
@@ -97,6 +101,7 @@ public class CameraShake : MonoBehaviour
         _instance = this;
 
         GameEvents.OnPlayerHit += HandlePlayerHit;
+        GameEvents.OnEnemyHit += HandleEnemyHit;
         GameEvents.OnParry += HandleParry;
         GameEvents.OnFinisher += HandleFinisher;
     }
@@ -104,6 +109,7 @@ public class CameraShake : MonoBehaviour
     private void OnDisable()
     {
         GameEvents.OnPlayerHit -= HandlePlayerHit;
+        GameEvents.OnEnemyHit -= HandleEnemyHit;
         GameEvents.OnParry -= HandleParry;
         GameEvents.OnFinisher -= HandleFinisher;
 
@@ -175,6 +181,14 @@ public class CameraShake : MonoBehaviour
     {
         float magnitude = Mathf.Min(hitData.Damage * _damageMultiplier, _playerHitShake.Magnitude);
         StartShake(new CameraShakeSettings(_playerHitShake.Duration, magnitude));
+    }
+
+    private void HandleEnemyHit(HitData hitData)
+    {
+        if (hitData.IsHeavyImpact)
+        {
+            StartShake(_enemyHeavyHitShake);
+        }
     }
 
     private void HandleParry(HitData hitData)
