@@ -54,6 +54,17 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField, Min(0f)]
     private float _defeatDuration = 2f;
 
+    [Tooltip("켜면 마무리 공격에 맞았을 때 지상 적처럼 회전하며 작아지고 흐려지면서 날아감")]
+    [SerializeField]
+    private bool _launchOnFinisher = true;
+
+    [Tooltip("켜면 아래 날려 보내기 설정을 사용. 끄면 플레이어 마무리 공격(PlayerFinisher)의 설정을 그대로 사용 (지상 적과 동일)")]
+    [SerializeField]
+    private bool _overrideLaunchSettings = false;
+
+    [SerializeField]
+    private LaunchSettings _launchSettings = LaunchSettings.Default;
+
     [Tooltip("처치 연출 뒤 보스 오브젝트를 끔")]
     [SerializeField]
     private bool _disableOnDefeat = true;
@@ -597,7 +608,13 @@ public class Boss : MonoBehaviour, IFinishable
             return;
         }
 
-        ChangeState(new BossDefeatedState(this));
+        if (!_launchOnFinisher)
+        {
+            ChangeState(new BossDefeatedState(this));
+            return;
+        }
+
+        ChangeState(new BossDefeatedState(this, _overrideLaunchSettings ? _launchSettings : launch));
     }
 
     #endregion
