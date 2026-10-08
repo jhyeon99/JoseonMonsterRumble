@@ -56,6 +56,11 @@ public class LaunchedState : EnemyState
         _currentCenter = _startCenter;
         _spinAngle = 0f;
 
+        if (ItemPool.Instance != null)
+        {
+            ItemPool.Instance.SpawnDeathSouls(_startCenter, 5);
+        }
+
         // 물리와 충돌을 끄고 직접 움직임
         Rigidbody2D rb = _enemy.EnemyRb;
         rb.linearVelocity = Vector2.zero;
@@ -149,17 +154,6 @@ public class LaunchedState : EnemyState
     private void Finish()
     {
         _isFinished = true;
-
-        if (ItemPool.Instance != null)
-        {
-            SoulItem soulItem = ItemPool.Instance.GetSoulItem();
-            if (soulItem != null)
-            {
-                // 날아간 위치에서 소울이 생겨 플레이어에게 흡수됨
-                soulItem.transform.position = _currentCenter;
-            }
-        }
-
         _enemy.gameObject.SetActive(false);
     }
 }
