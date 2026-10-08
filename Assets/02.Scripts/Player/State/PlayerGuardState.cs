@@ -52,21 +52,10 @@ public class PlayerGuardState : PlayerBaseState
             return;
         }
 
-        // 패링 성공 직후 공격키 → 즉시 3타 공격으로 반격
-        if (_inputHandler.TryUseAttackInput())
+        // 공격키: 앞에 그로기 적이 있으면 마무리 공격 (보스 짧은 그로기는 대상 아님)
+        if (_inputHandler.TryUseAttackInput() && _player.TryEnterFinisher())
         {
-            if (_player.Guard.CanParryCounter)
-            {
-                _player.Guard.ConsumeParryCounter();
-                _player.AttackState.SetStartingComboIndex(2);
-                _stateMachine.ChangeState(_player.AttackState);
-                return;
-            }
-
-            if (_player.TryEnterFinisher())
-            {
-                return;
-            }
+            return;
         }
 
         if (_inputHandler.TryUseDodgeInput() && _player.Movement.CanDodge)
@@ -160,13 +149,8 @@ public class PlayerGuardState : PlayerBaseState
 
         if (_inputHandler.TryUseAttackInput() && _player.IsGrounded)
         {
-            if (_player.Guard.CanParryCounter)
-            {
-                _player.Guard.ConsumeParryCounter();
-                _player.AttackState.SetStartingComboIndex(2);
-                _stateMachine.ChangeState(_player.AttackState);
-            }
-            else if (!_player.TryEnterFinisher())
+            // 앞에 그로기 적이 있으면 마무리 공격, 아니면 일반 공격
+            if (!_player.TryEnterFinisher())
             {
                 _stateMachine.ChangeState(_player.AttackState);
             }
