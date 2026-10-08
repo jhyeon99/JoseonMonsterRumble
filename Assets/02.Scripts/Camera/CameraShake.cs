@@ -1,3 +1,4 @@
+using Com.LuisPedroFonseca.ProCamera2D;
 using UnityEngine;
 using System.Collections;
 
@@ -18,7 +19,13 @@ public class CameraShake : MonoBehaviour
     [SerializeField] private float _finisherDuration = 0.25f;
     [SerializeField] private float _finisherMagnitude = 0.35f;
 
+    private ProCamera2DShake _proCameraShake;
     private Vector3 _shakeOffset = Vector3.zero;
+
+    private void Awake()
+    {
+        _proCameraShake = GetComponent<ProCamera2DShake>();
+    }
 
     private void OnEnable()
     {
@@ -39,6 +46,9 @@ public class CameraShake : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (_proCameraShake != null && _proCameraShake.isActiveAndEnabled)
+            return;
+
         if (_shakeOffset != Vector3.zero)
         {
             transform.position += _shakeOffset;
@@ -63,6 +73,13 @@ public class CameraShake : MonoBehaviour
 
     private void StartShake(float duration, float magnitude)
     {
+        if (_proCameraShake != null && _proCameraShake.isActiveAndEnabled)
+        {
+            _proCameraShake.StopShaking();
+            _proCameraShake.Shake(duration, new Vector2(magnitude, magnitude * 0.3f), smoothness: 0.03f);
+            return;
+        }
+
         if (_cameraShakeRoutine != null)
         {
             StopCoroutine(_cameraShakeRoutine);
@@ -91,6 +108,9 @@ public class CameraShake : MonoBehaviour
 
     private void ResetShake()
     {
+        if (_proCameraShake != null && _proCameraShake.isActiveAndEnabled)
+            _proCameraShake.StopShaking();
+
         if (_cameraShakeRoutine != null)
         {
             _shakeOffset = Vector3.zero;
