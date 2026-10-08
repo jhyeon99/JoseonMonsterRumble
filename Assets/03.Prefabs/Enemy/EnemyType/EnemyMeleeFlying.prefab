@@ -180,7 +180,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.23113292, y: 0.0015525818}
+  m_Offset: {x: 0.12308979, y: 0.012622058}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -190,7 +190,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 3.2144327, y: 1.5886993}
+  m_Size: {x: 2.4174318, y: 0.5924479}
   m_EdgeRadius: 0
 --- !u!1 &2319009342568745602
 GameObject:
@@ -341,6 +341,9 @@ MonoBehaviour:
   _uCurveBottomOffset: 1
   _uCurveUpOffset: 1
   _rotationSpeed: 40
+  _hitSlowDelay: 0.17
+  _hitSlowRatio: 0.3
+  _hitSlowDuration: 1
   _patrolWaitDuration: 1
   _patrolYHeight: 0
 --- !u!114 &799531199018240034
@@ -356,6 +359,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMeleeCombat
   _attackCollider: {fileID: 4388550775144492332}
+  _attackName: "\uB3CC\uC9C4 \uACF5\uACA9"
+  _defense:
+    Parryable: 1
+    Unblockable: 0
+    ParryWindowOverride: 0
+    GuardGaugeCost: 0
+  _groggyDuration: 2
 --- !u!114 &8097650395703628782
 MonoBehaviour:
   m_ObjectHideFlags: 0
