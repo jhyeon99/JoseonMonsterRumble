@@ -113,6 +113,13 @@ MonoBehaviour:
   _type: 1
   _curveHeight: 5
   _returnPoolTimer: 8
+  _trailPrefab: {fileID: 2073882973139500243}
+  _defense:
+    Parryable: 1
+    Unblockable: 0
+    ParryWindowOverride: 0
+    GuardGaugeCost: 25
+  _reflectToShooter: 1
 --- !u!61 &6406752446465230335
 BoxCollider2D:
   m_ObjectHideFlags: 0
