@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AttackDataTableSO
   Data:
   - Damage: 20
-    HitStartRatio: 0.5
+    HitStartRatio: 0.4
     HitEndRatio: 0.9
     KnockbackForce: 3
-    HitboxOffset: {x: 0, y: 0}
-    HitboxSize: {x: 2.3, y: 1}
+    HitboxOffset: {x: 0.42, y: 0.54}
+    HitboxSize: {x: 2.88, y: 3.3}
     ForwardDisplacementCurve:
       serializedVersion: 2
       m_Curve:
@@ -64,11 +64,11 @@ MonoBehaviour:
     ComboStartNormalizedTime: 0.7
     ComboEndNormalizedTime: 0.5
   - Damage: 25
-    HitStartRatio: 0.7
+    HitStartRatio: 0.5
     HitEndRatio: 0.9
     KnockbackForce: 5
-    HitboxOffset: {x: 0, y: 0}
-    HitboxSize: {x: 1, y: 1}
+    HitboxOffset: {x: -0.2, y: 0.21}
+    HitboxSize: {x: 4.06, y: 1}
     ForwardDisplacementCurve:
       serializedVersion: 2
       m_Curve:
@@ -105,11 +105,11 @@ MonoBehaviour:
     ComboStartNormalizedTime: 0.9
     ComboEndNormalizedTime: 0.5
   - Damage: 45
-    HitStartRatio: 0.5
+    HitStartRatio: 0.4
     HitEndRatio: 0.8
     KnockbackForce: 3
-    HitboxOffset: {x: 0, y: 0}
-    HitboxSize: {x: 2, y: 2}
+    HitboxOffset: {x: -0.34, y: 0.66}
+    HitboxSize: {x: 4.4, y: 3.57}
     ForwardDisplacementCurve:
       serializedVersion: 2
       m_Curve:

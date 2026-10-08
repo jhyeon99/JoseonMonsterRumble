@@ -396,6 +396,10 @@ MonoBehaviour:
   _enemyLayer:
     serializedVersion: 2
     m_Bits: 128
+  _hitPointCenterRatio: 0.35
+  _showAllHitboxesInEditor: 1
+  _previewComboIndex: 0
+  _drawSolidHitbox: 1
   _currentCombo: 0
   _isHitboxActive: 0
 --- !u!114 &2678545030457979146
