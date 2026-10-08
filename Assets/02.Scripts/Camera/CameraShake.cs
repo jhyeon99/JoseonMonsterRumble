@@ -185,7 +185,8 @@ public class CameraShake : MonoBehaviour
 
     private void HandleParry(HitData hitData)
     {
-        StartShake(_parryShake);
+        // 패링 히트스톱 중에도 성공 순간부터 실제 시간 기준으로 흔든다.
+        StartShake(_parryShake, ignoreTimeScale: true);
         StartZoom(_parryZoom, hitData.HitPoint);
     }
 
@@ -210,7 +211,7 @@ public class CameraShake : MonoBehaviour
 
     #region 시작
 
-    private void StartShake(CameraShakeSettings settings)
+    private void StartShake(CameraShakeSettings settings, bool ignoreTimeScale = false)
     {
         if (settings.Duration <= 0f || settings.Magnitude <= 0f)
         {
@@ -230,7 +231,8 @@ public class CameraShake : MonoBehaviour
         {
             _proCameraShake.StopShaking();
             _proCameraShake.Shake(settings.Duration,
-                new Vector2(settings.Magnitude, settings.Magnitude * _verticalShakeRatio), smoothness: 0.03f);
+                new Vector2(settings.Magnitude, settings.Magnitude * _verticalShakeRatio),
+                smoothness: 0.03f, ignoreTimeScale: ignoreTimeScale);
         }
     }
 
