@@ -72,6 +72,11 @@ public sealed class StageManager : MonoBehaviour
         {
             RestartStage();
         }
+
+        if (Input.GetKeyDown(KeyCode.F12))
+        {
+            SceneManager.LoadScene("Test_Boss");
+        }
     }
 #endif
 
