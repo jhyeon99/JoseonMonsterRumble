@@ -21,7 +21,6 @@ public class AttackPrepareGroundState : EnemyState
             // (휴식 → 추적 → 공격 준비가 한 프레임에 이어지면 Flip이 돌기 전에 잠겨서 뒤를 보고 공격하던 문제)
             FacePlayer();
             _enemy.Animation.PlayAttack();
-            _enemy.DirectionLock.LockDirection();
         }
     }
 

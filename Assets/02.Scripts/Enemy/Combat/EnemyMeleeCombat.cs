@@ -4,6 +4,7 @@ using UnityEngine;
 public class EnemyMeleeCombat : EnemyCombat, IParryable
 {
     [SerializeField] private Collider2D _attackCollider;
+    [SerializeField] private string _attackName = "근접 공격";
 
     [Header("가드 / 패링")]
 
@@ -55,7 +56,8 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
             hitPoint,
             Enemy.GetDirectionToPlayer(),
             _defense,
-            this
+            this,
+            _attackName
         );
 
         // 가드 / 패링으로 막히면 false

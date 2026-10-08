@@ -38,7 +38,6 @@ public class EnemyHealth : MonoBehaviour, IDamageable
             }
 
             _enemy.HitFlash.Flash();
-            _enemy.Animation.PlayHit();
             OnHit?.Invoke(hitData);
             _enemy.StateMachine.ChangeState(new KnockbackState(_enemy, hitData));
             return true;
