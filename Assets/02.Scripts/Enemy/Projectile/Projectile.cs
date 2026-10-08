@@ -270,8 +270,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
             return;
         }
 
-        IDamageable damageable = other.GetComponentInParent<IDamageable>();
-        if (damageable == null)
+        if (!EnemyHurtbox.TryGetDamageTarget(other, out IDamageable damageable))
         {
             return;
         }
