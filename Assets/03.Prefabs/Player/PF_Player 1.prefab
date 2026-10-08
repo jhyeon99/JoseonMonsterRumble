@@ -79,7 +79,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1918527705
-  m_SortingLayer: 5
+  m_SortingLayer: 6
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: f498d2b7bd3954b4db84a9434181dad0, type: 3}
@@ -244,7 +244,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 1.5
+  m_GravityScale: 3.5
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -467,7 +467,6 @@ MonoBehaviour:
   _blockKnockbackDeceleration: 50
   _parryWindow: 0.2
   _parryCooldown: 0.2
-  _parryCounterWindow: 0.8
   _reflectSpeed: 15
   _reflectDamageMultiplier: 2
   _logResult: 1
