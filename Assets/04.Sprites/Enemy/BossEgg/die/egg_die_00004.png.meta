@@ -1,0 +1,819 @@
+fileFormatVersion: 2
+guid: 97d08fcbee392644aa82ac7f832ea133
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8028821448868504013
+    second: egg_die_00004_0
+  - first:
+      213: 9123063236140903494
+    second: egg_die_00004_1
+  - first:
+      213: 942158694161898741
+    second: egg_die_00004_2
+  - first:
+      213: 2957124416687688206
+    second: egg_die_00004_3
+  - first:
+      213: 6805282367232720617
+    second: egg_die_00004_4
+  - first:
+      213: 3285019242929919544
+    second: egg_die_00004_5
+  - first:
+      213: 1997568321816874094
+    second: egg_die_00004_6
+  - first:
+      213: -1386715696154761456
+    second: egg_die_00004_7
+  - first:
+      213: -6449441421542271932
+    second: egg_die_00004_8
+  - first:
+      213: 3570428919586117604
+    second: egg_die_00004_9
+  - first:
+      213: 2579168240464310405
+    second: egg_die_00004_10
+  - first:
+      213: -1315333115995780918
+    second: egg_die_00004_11
+  - first:
+      213: -3922128331400639554
+    second: egg_die_00004_12
+  - first:
+      213: 7252299028837388394
+    second: egg_die_00004_13
+  - first:
+      213: -81933128385651113
+    second: egg_die_00004_14
+  - first:
+      213: 2580382200954052431
+    second: egg_die_00004_15
+  - first:
+      213: 3059726891043312684
+    second: egg_die_00004_16
+  - first:
+      213: -6785005759061460173
+    second: egg_die_00004_17
+  - first:
+      213: -8854588885258746321
+    second: egg_die_00004_18
+  - first:
+      213: -126231466235895000
+    second: egg_die_00004_19
+  - first:
+      213: -5148743985852309617
+    second: egg_die_00004_20
+  - first:
+      213: 9113045404292529415
+    second: egg_die_00004_21
+  - first:
+      213: 2156171741765641108
+    second: egg_die_00004_22
+  - first:
+      213: 8611092296212851793
+    second: egg_die_00004_23
+  - first:
+      213: -3589586929956848656
+    second: egg_die_00004_24
+  - first:
+      213: -2744893711036611853
+    second: egg_die_00004_25
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 200
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: egg_die_00004_0
+      rect:
+        serializedVersion: 2
+        x: 486
+        y: 574
+        width: 11
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33ed7274e65e39090800000000000000
+      internalID: -8028821448868504013
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_1
+      rect:
+        serializedVersion: 2
+        x: 748
+        y: 550
+        width: 31
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64caa9d5da1ab9e70800000000000000
+      internalID: 9123063236140903494
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_2
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 540
+        width: 25
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fcd09f2758331d00800000000000000
+      internalID: 942158694161898741
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_3
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 545
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0acd4d4df0d90920800000000000000
+      internalID: 2957124416687688206
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_4
+      rect:
+        serializedVersion: 2
+        x: 645
+        y: 556
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9eeb22fc148317e50800000000000000
+      internalID: 6805282367232720617
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_5
+      rect:
+        serializedVersion: 2
+        x: 399
+        y: 520
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 836192fb89bb69d20800000000000000
+      internalID: 3285019242929919544
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_6
+      rect:
+        serializedVersion: 2
+        x: 701
+        y: 167
+        width: 299
+        height: 374
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6cc77c1ec9c8bb10800000000000000
+      internalID: 1997568321816874094
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_7
+      rect:
+        serializedVersion: 2
+        x: 549
+        y: 471
+        width: 34
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 017ac36eb6561cce0800000000000000
+      internalID: -1386715696154761456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_8
+      rect:
+        serializedVersion: 2
+        x: 601
+        y: 487
+        width: 24
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 444584d923bfe76a0800000000000000
+      internalID: -6449441421542271932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_9
+      rect:
+        serializedVersion: 2
+        x: 295
+        y: 456
+        width: 14
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e756b77f26bc8130800000000000000
+      internalID: 3570428919586117604
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_10
+      rect:
+        serializedVersion: 2
+        x: 657
+        y: 454
+        width: 32
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 58038d489db0bc320800000000000000
+      internalID: 2579168240464310405
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_11
+      rect:
+        serializedVersion: 2
+        x: 258
+        y: 419
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac883cbff7ffebde0800000000000000
+      internalID: -1315333115995780918
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_12
+      rect:
+        serializedVersion: 2
+        x: 620
+        y: 390
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ebb8e5b101dc199c0800000000000000
+      internalID: -3922128331400639554
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_13
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 318
+        width: 141
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6053cada8755a460800000000000000
+      internalID: 7252299028837388394
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_14
+      rect:
+        serializedVersion: 2
+        x: 466
+        y: 340
+        width: 41
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75e9c3bf04aecdef0800000000000000
+      internalID: -81933128385651113
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_15
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 354
+        width: 26
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f4f5b98b0fb5fc320800000000000000
+      internalID: 2580382200954052431
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_16
+      rect:
+        serializedVersion: 2
+        x: 487
+        y: 261
+        width: 128
+        height: 74
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c24d8527565567a20800000000000000
+      internalID: 3059726891043312684
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_17
+      rect:
+        serializedVersion: 2
+        x: 618
+        y: 310
+        width: 37
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33b792ce531d6d1a0800000000000000
+      internalID: -6785005759061460173
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_18
+      rect:
+        serializedVersion: 2
+        x: 390
+        y: 262
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f26c70e825e2e1580800000000000000
+      internalID: -8854588885258746321
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_19
+      rect:
+        serializedVersion: 2
+        x: 318
+        y: 230
+        width: 22
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 823688776298f3ef0800000000000000
+      internalID: -126231466235895000
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_20
+      rect:
+        serializedVersion: 2
+        x: 645
+        y: 231
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8f18d3cf9cfb88b0800000000000000
+      internalID: -5148743985852309617
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_21
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 194
+        width: 13
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70dbcd0238a087e70800000000000000
+      internalID: 9113045404292529415
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_22
+      rect:
+        serializedVersion: 2
+        x: 607
+        y: 203
+        width: 25
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4932da676c24ced10800000000000000
+      internalID: 2156171741765641108
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_23
+      rect:
+        serializedVersion: 2
+        x: 610
+        y: 135
+        width: 252
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15caed3e1deb08770800000000000000
+      internalID: 8611092296212851793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_24
+      rect:
+        serializedVersion: 2
+        x: 307
+        y: 181
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0fb7985a4b93f2ec0800000000000000
+      internalID: -3589586929956848656
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: egg_die_00004_25
+      rect:
+        serializedVersion: 2
+        x: 544
+        y: 171
+        width: 37
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f2857f76bd28e9d0800000000000000
+      internalID: -2744893711036611853
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      egg_die_00004_0: -8028821448868504013
+      egg_die_00004_1: 9123063236140903494
+      egg_die_00004_10: 2579168240464310405
+      egg_die_00004_11: -1315333115995780918
+      egg_die_00004_12: -3922128331400639554
+      egg_die_00004_13: 7252299028837388394
+      egg_die_00004_14: -81933128385651113
+      egg_die_00004_15: 2580382200954052431
+      egg_die_00004_16: 3059726891043312684
+      egg_die_00004_17: -6785005759061460173
+      egg_die_00004_18: -8854588885258746321
+      egg_die_00004_19: -126231466235895000
+      egg_die_00004_2: 942158694161898741
+      egg_die_00004_20: -5148743985852309617
+      egg_die_00004_21: 9113045404292529415
+      egg_die_00004_22: 2156171741765641108
+      egg_die_00004_23: 8611092296212851793
+      egg_die_00004_24: -3589586929956848656
+      egg_die_00004_25: -2744893711036611853
+      egg_die_00004_3: 2957124416687688206
+      egg_die_00004_4: 6805282367232720617
+      egg_die_00004_5: 3285019242929919544
+      egg_die_00004_6: 1997568321816874094
+      egg_die_00004_7: -1386715696154761456
+      egg_die_00004_8: -6449441421542271932
+      egg_die_00004_9: 3570428919586117604
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
