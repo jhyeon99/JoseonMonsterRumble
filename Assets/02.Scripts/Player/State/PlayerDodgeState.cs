@@ -44,7 +44,7 @@ public class PlayerDodgeState : PlayerBaseState
 
         _elapsedTime += Time.deltaTime;
 
-        if (!_isInvincibleEnded && _elapsedTime >= _player.Movement.DodgeDuration)
+        if (!_isInvincibleEnded && _elapsedTime >= _player.Movement.DodgeInvincibleDuration)
         {
             _player.Health.SetInvincible(false);
             _isInvincibleEnded = true;
