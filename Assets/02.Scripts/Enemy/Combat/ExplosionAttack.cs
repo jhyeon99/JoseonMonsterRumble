@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class ExplosionAttack : MonoBehaviour
 {
+    [SerializeField] private string _attackName = "폭발 공격";
+
     private Enemy _enemy;
     private Collider2D _explosionCollider;
     private float _currentDamage;
@@ -24,7 +26,10 @@ public class ExplosionAttack : MonoBehaviour
             _currentDamage,
             _enemy.Data.KnockbackForce,
             hitPoint,
-            _enemy.GetDirectionToPlayer()
+            _enemy.GetDirectionToPlayer(),
+            default,
+            null,
+            _attackName
         );
 
         damageable.TakeDamage(hitData);

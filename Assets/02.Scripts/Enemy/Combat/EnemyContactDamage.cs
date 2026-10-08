@@ -9,6 +9,7 @@
 public class EnemyContactDamage : MonoBehaviour
 {
     [Header("접촉 데미지")]
+    [SerializeField] private string _attackName = "접촉 피해";
     [SerializeField, Min(0f)]
     private float _damage = 10f;
 
@@ -79,7 +80,7 @@ public class EnemyContactDamage : MonoBehaviour
 
         Vector2 hitPoint = other.ClosestPoint(_zone.bounds.center);
 
-        var hitData = new HitData(_damage, _knockbackForce, hitPoint, attackDirection, _defense);
+        var hitData = new HitData(_damage, _knockbackForce, hitPoint, attackDirection, _defense, null, _attackName);
         damageable.TakeDamage(hitData);
         _nextHitTime = Time.time + _hitInterval;
     }
