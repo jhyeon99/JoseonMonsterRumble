@@ -24,7 +24,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     [SerializeField, Min(0.05f)] private float _parrySuccessDuration = 0.25f;
 
     [Header("Player-side hint")]
-    [SerializeField] private Vector2 _hintOffset = new Vector2(170f, 80f);
+    [SerializeField] private Vector2 _hintOffset = new Vector2(-220f, 80f);
     [SerializeField] private Vector2 _hintSize = new Vector2(340f, 100f);
     [SerializeField, Min(12)] private int _hintFontSize = 24;
     [SerializeField] private Color _hintTextColor = Color.white;
@@ -47,6 +47,15 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     [SerializeField, TextArea] private string _retryText = "한 번 더 막아보자.";
     [SerializeField, TextArea] private string _finisherText = "지금이다!";
     [SerializeField, TextArea] private string _completeText = "좋아. 계속 가보자.";
+
+    [Header("Editable instructions")]
+    [Tooltip("{count}는 현재 타격 수, {total}은 목표 타격 수로 표시됩니다.")]
+    [SerializeField, TextArea] private string _comboInstruction = "일반 공격  {count} / {total}";
+    [SerializeField, TextArea] private string _parryInstruction = "공격이 닿기 직전에 막기";
+    [SerializeField, TextArea] private string _parryTimingInstruction = "↓ 가드 / 패링";
+    [SerializeField, TextArea] private string _retryInstruction = "닿기 직전에 ↓";
+    [SerializeField, TextArea] private string _parrySuccessText = "막았다!";
+    [SerializeField, TextArea] private string _finisherInstruction = "가까이 가서 X로 마무리 공격";
 
     private PlayerInputHandler _input;
     private EnemyMeleeCombat _combat;
@@ -205,7 +214,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         Phase = "Combo";
         _comboStep = 0;
         SetPlayerControl(true);
-        Show(_comboText, "일반 공격  0 / 3", "X");
+        ShowComboProgress();
         while (_comboStep < 3) yield return null;
         SetPlayerControl(false);
         while (_player.StateMachine.CurrentState == _player.AttackState) yield return null;
@@ -219,12 +228,12 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
             _combat.StopAttack();
             SetPlayerControl(true);
             Phase = "Windup";
-            Show(_parryText, "공격이 닿기 직전에 막기", "↓");
+            Show(_parryText, _parryInstruction, "↓");
             _enemy.Animation.PlayAttack();
             // The guide stays beside the player; movement, guard and game time remain active.
             yield return new WaitForSeconds(Mathf.Max(0.05f, _enemy.Data.AttackPrepareTime));
             Phase = "ParryAttempt";
-            Show(_parryTimingText, "↓ 가드 / 패링", "↓");
+            Show(_parryTimingText, _parryTimingInstruction, "↓");
             // Use the original attack/guard/parry path. Zero damage keeps practice safe.
             _combat.IncreaseDamage(-100f);
             _combat.Attack();
@@ -246,7 +255,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
             _combat.StopAttack();
             if (!_parried)
             {
-                Show(_retryText, "닿기 직전에 ↓", "↓");
+                Show(_retryText, _retryInstruction, "↓");
                 yield return new WaitForSeconds(_dialogueDuration);
             }
         }
@@ -254,12 +263,12 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         Phase = "ParrySuccess";
         _enemy.TryHoldGroggy();
         SetPlayerControl(false);
-        Show("막았다!", "", "");
+        Show(_parrySuccessText, "", "");
         yield return new WaitForSeconds(_parrySuccessDuration);
 
         Phase = "Finisher";
         SetPlayerControl(true);
-        Show(_finisherText, "가까이 가서 X로 마무리 공격", "X");
+        Show(_finisherText, _finisherInstruction, "X");
         // Keep movement and attack input active. The player's normal states find a target
         // on each attack press, so an out-of-range attempt never locks the tutorial.
         while (_enemy != null && !_enemy.IsDefeated) yield return null;
@@ -463,7 +472,14 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     {
         if (Phase != "Combo" || hitData.ComboStep < 1 || hitData.ComboStep > 3) return;
         _comboStep++;
-        Show(_comboText, $"일반 공격  {_comboStep} / 3", "X");
+        ShowComboProgress();
+    }
+
+    private void ShowComboProgress()
+    {
+        string instruction = (_comboInstruction ?? "").Replace("{count}", _comboStep.ToString())
+            .Replace("{total}", "3");
+        Show(_comboText, instruction, "X");
     }
 
     private void HandleParry(HitData hitData)
