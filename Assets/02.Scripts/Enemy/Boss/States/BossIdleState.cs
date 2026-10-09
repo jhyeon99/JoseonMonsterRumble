@@ -26,7 +26,9 @@ public class BossIdleState : BossState
         _boss.FacePlayer();
 
         _timer -= Time.deltaTime;
-        if (_timer > 0f)
+
+        // 체력 비율 발동 패턴은 대기 시간 없이 바로
+        if (_timer > 0f && !_boss.HasForcedPattern)
         {
             return;
         }
