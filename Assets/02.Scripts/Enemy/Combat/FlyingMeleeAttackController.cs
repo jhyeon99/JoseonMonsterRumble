@@ -12,6 +12,13 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
     private const float VisualTurnSpeed = 120f;
     private const float HorizontalDirectionTolerance = 0.01f;
     private const float TargetUpperBodyRatio = 0.5f;
+    private const float FlightTiltSmoothTime = 0.25f;
+    private const float FlightTiltTurnSpeed = 35f;
+    private const float FlightVelocityResponse = 5f;
+    private const float FlightSpeedDeadZone = 0.5f;
+    private const float ForwardSpeedTilt = 0.8f;
+    private const float SpeedChangeTilt = 1.5f;
+    private const float VerticalSpeedTilt = 2f;
     private static readonly int HitTagHash = Animator.StringToHash("Hit");
 
     [SerializeField] private FlyingMeleeAttackData _data;
@@ -19,6 +26,7 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
     [SerializeField] private Collider2D _bodyCollider;
     [SerializeField] private EnemyContactDamage _contactDamage;
     [SerializeField, Range(0f, 30f)] private float _maxVisualTilt = 15f;
+    [SerializeField, Range(0f, 15f)] private float _maxFlightVisualTilt = 7f;
 
     [Header("애니메이션 표현 상태")]
     [SerializeField] private string _idleState = "Base Layer.inmyunjo_Idle";
@@ -37,6 +45,8 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
     private Vector2 _bodyPadding;
     private Transform _visualRoot;
     private FlyingMeleeAttackPhase _visualPhase;
+    private Vector2 _smoothedFlightVelocity;
+    private float _flightTiltVelocity;
     private int _idleHash;
     private int _prepareHash;
     private int _strikeHash;
@@ -75,6 +85,44 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
         Bounds bodyBounds = _bodyCollider.bounds;
         Vector2 centerOffset = (Vector2)bodyBounds.center - _rigidbody.position;
         _bodyPadding = (Vector2)bodyBounds.extents + new Vector2(Mathf.Abs(centerOffset.x), Mathf.Abs(centerOffset.y));
+    }
+
+    private void LateUpdate()
+    {
+        if (!_isConfigured || _visualRoot == null || Time.deltaTime <= 0f)
+        {
+            return;
+        }
+        EnemyState state = _enemy.StateMachine.CurrentState;
+        AnimatorStateInfo animationState = _animator.GetCurrentAnimatorStateInfo(AnimationLayer);
+        bool isReaction = state is DeadState || state is KnockbackState || _enemy.IsGroggy || animationState.tagHash == HitTagHash;
+        bool isFlight = !isReaction && animationState.fullPathHash == _idleHash &&
+            (_visualPhase == FlyingMeleeAttackPhase.Completed || _visualPhase == FlyingMeleeAttackPhase.Hovering ||
+                _visualPhase == FlyingMeleeAttackPhase.Positioning);
+        if (!isFlight)
+        {
+            _smoothedFlightVelocity = Vector2.zero;
+            _flightTiltVelocity = 0f;
+            // 돌진은 기존 경로 기울기를 유지하고, 피격·사망 외형에는 비행 기울기를 남기지 않는다.
+            if (isReaction)
+            {
+                _visualRoot.localRotation = Quaternion.identity;
+            }
+            return;
+        }
+
+        Vector2 velocity = _rigidbody.linearVelocity;
+        float facing = Mathf.Sign(transform.localScale.x);
+        float speedChange = (velocity.x - _smoothedFlightVelocity.x) * facing;
+        float forwardSpeed = Mathf.Sign(velocity.x) * Mathf.Max(0f, Mathf.Abs(velocity.x) - FlightSpeedDeadZone) * facing;
+        float verticalSpeed = Mathf.Sign(velocity.y) * Mathf.Max(0f, Mathf.Abs(velocity.y) - FlightSpeedDeadZone);
+        float tilt = Mathf.Clamp(-forwardSpeed * ForwardSpeedTilt - speedChange * SpeedChangeTilt +
+            verticalSpeed * VerticalSpeedTilt, -_maxFlightVisualTilt, _maxFlightVisualTilt);
+        _smoothedFlightVelocity = Vector2.Lerp(_smoothedFlightVelocity, velocity,
+            1f - Mathf.Exp(-FlightVelocityResponse * Time.deltaTime));
+        float angle = Mathf.SmoothDampAngle(_visualRoot.localEulerAngles.z, tilt, ref _flightTiltVelocity,
+            FlightTiltSmoothTime, FlightTiltTurnSpeed, Time.deltaTime);
+        _visualRoot.localRotation = Quaternion.Euler(0f, 0f, angle);
     }
 
     public bool CanStartAttack()
@@ -125,6 +173,24 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
             lowestBodyY = Mathf.Min(lowestBodyY, _contactCollider.bounds.min.y);
         }
         return targetHeight + _rigidbody.position.y - lowestBodyY + CollisionSkin;
+    }
+
+    public float CalculateAllowedPrepareRetreatDistance(Vector2 direction)
+    {
+        Vector2 start = _rigidbody.position;
+        Vector2 end = ClampPosition(start + direction * _data.PrepareRetreatDistance);
+        Vector2 available = end - start;
+        float distance = _data.PrepareRetreatDistance;
+        if (Mathf.Abs(direction.x) > DirectionTolerance)
+        {
+            distance = Mathf.Min(distance, Mathf.Max(0f, available.x / direction.x));
+        }
+        if (Mathf.Abs(direction.y) > DirectionTolerance)
+        {
+            distance = Mathf.Min(distance, Mathf.Max(0f, available.y / direction.y));
+        }
+        return _airSensor.CalculateAllowedTravelDistance(direction, distance, CollisionSkin,
+            Mathf.Abs(direction.y) <= DirectionTolerance);
     }
 
     public bool IsAtPosition(Vector2 position)
@@ -195,6 +261,11 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
         scale.y = Mathf.Abs(scale.y);
         transform.localScale = scale;
         transform.rotation = Quaternion.identity;
+        if (_visualPhase == FlyingMeleeAttackPhase.Completed || _visualPhase == FlyingMeleeAttackPhase.Hovering ||
+            _visualPhase == FlyingMeleeAttackPhase.Positioning)
+        {
+            return;
+        }
         float tilt = _visualPhase == FlyingMeleeAttackPhase.Striking
             ? Mathf.Clamp(Mathf.Atan2(direction.y, Mathf.Abs(direction.x)) * Mathf.Rad2Deg, -_maxVisualTilt, _maxVisualTilt)
             : 0f;
@@ -209,6 +280,8 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
     public void StopAttackPresentation()
     {
         _visualPhase = FlyingMeleeAttackPhase.Completed;
+        _smoothedFlightVelocity = Vector2.zero;
+        _flightTiltVelocity = 0f;
         if (_visualRoot != null)
         {
             _visualRoot.localRotation = Quaternion.identity;
@@ -295,5 +368,6 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
             _combat.StopAttack();
             RestoreContactDamage();
         }
+        StopAttackPresentation();
     }
 }

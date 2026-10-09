@@ -30,6 +30,7 @@ public class FlyingMeleeAttackData : ScriptableObject
     [SerializeField] private FlyingMeleeAttackTiming _horizontalTiming = new FlyingMeleeAttackTiming();
 
     [Header("준비 위치")]
+    [SerializeField, Min(0f)] private float _prepareRetreatDistance = 0.6f;
     [SerializeField, Min(0.1f)] private float _approachDistance = 3f;
     [SerializeField, Min(0.1f)] private float _diveHeight = 2f;
     [SerializeField, Min(0.1f)] private float _positioningSpeed = 5f;
@@ -42,6 +43,7 @@ public class FlyingMeleeAttackData : ScriptableObject
     [SerializeField, Range(0.1f, 1f)] private float _hitSpeedRatio = 0.6f;
     [SerializeField, Min(0f)] private float _hitSlowTime = 0.12f;
 
+    public float PrepareRetreatDistance => _prepareRetreatDistance;
     public float ApproachDistance => _approachDistance;
     public float DiveHeight => _diveHeight;
     public float PositioningSpeed => _positioningSpeed;
