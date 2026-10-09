@@ -14,6 +14,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     public bool IsAlive => _currentHp > 0f;
     public bool IsDamaged => IsAlive && _currentHp < _enemy.Data.MaxHp;
     public float CurrentHp => _currentHp;
+    public float LastDamageTime { get; private set; } = float.NegativeInfinity;
 
     private void Awake()
     {
@@ -27,6 +28,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
         bool shouldKnockback = hitData.KnockbackForce > 0f && !_enemy.IsGroggy;
         _currentHp -= hitData.Damage;
+        if (hitData.Damage > 0f) LastDamageTime = Time.time;
         Debug.Log($"현재 체력 {_currentHp}");
         GameEvents.TriggerEnemyHit(hitData);
 
