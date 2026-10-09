@@ -16,6 +16,30 @@ public class EnemyHealth : MonoBehaviour, IDamageable, IKillable
     public float CurrentHp => _currentHp;
     public bool CanDieInKillZone => _enemy.MoveType is EnemyGroundMove;
 
+    private float _shieldHp;
+    public float ShieldHp => _shieldHp;
+    public bool HasShield => _shieldHp > 0f;
+
+    public void Heal(float amount)
+    {
+        if (!IsAlive || _enemy.IsDefeated || amount <= 0f)
+        {
+            return;
+        }
+
+        _currentHp = Mathf.Min(_currentHp + amount, _enemy.Data.MaxHp);
+    }
+
+    public void SetShield(float amount)
+    {
+        _shieldHp = Mathf.Max(0f, amount);
+    }
+
+    public void ClearShield()
+    {
+        _shieldHp = 0f;
+    }
+
     private void Awake()
     {
         _enemy = GetComponent<Enemy>();
@@ -25,6 +49,20 @@ public class EnemyHealth : MonoBehaviour, IDamageable, IKillable
     public bool TakeDamage(HitData hitData)
     {
         if (_enemy.IsDefeated) return false;
+
+        if (_shieldHp > 0f)
+        {
+            if (hitData.IsTalisman || hitData.IsHeavyImpact)
+            {
+                _shieldHp = 0f;
+            }
+            else
+            {
+                float damageToShield = Mathf.Min(_shieldHp, hitData.Damage);
+                _shieldHp -= damageToShield;
+                hitData.Damage -= damageToShield;
+            }
+        }
 
         bool shouldKnockback = hitData.KnockbackForce > 0f && !_enemy.IsGroggy;
         _currentHp -= hitData.Damage;
@@ -37,7 +75,6 @@ public class EnemyHealth : MonoBehaviour, IDamageable, IKillable
             return true;
         }
 
-        _enemy.HitFlash.Flash();
         _enemy.Animation.PlayDamageHit(hitData);
         OnHit?.Invoke(hitData);
 

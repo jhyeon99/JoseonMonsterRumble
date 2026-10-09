@@ -529,7 +529,6 @@ GameObject:
   - component: {fileID: 7165762390576756721}
   - component: {fileID: 7719512815199251269}
   - component: {fileID: -3618497924999448453}
-  - component: {fileID: 5526695924598419246}
   - component: {fileID: 1892738677565765542}
   - component: {fileID: 721203627900600272}
   - component: {fileID: 1900000006}
@@ -660,7 +659,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyGroundMove
   IsBackMove: 0
-  _knockbackDeceleration: 20
+  _knockbackDeceleration: 30
   _lightHitKnockbackMultiplier: 0.65
   _groundSensor: {fileID: 1292940093020702429}
   _walkEndClip: {fileID: 7400000, guid: 11a6eeb020a67b3448abc63f9b37e018, type: 2}
@@ -735,20 +734,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 728a422b81f2dc84abbffee7b8ef4ec0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
---- !u!114 &5526695924598419246
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9071619103714574906}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e950c96884d53654e965e9f8e0aed5dc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HitFlash
-  _flashColor: {r: 1, g: 0, b: 0, a: 1}
-  _flashDuration: 0.1
 --- !u!114 &1892738677565765542
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -762,7 +747,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMoveArea
   CenterOffset: {x: -0.66, y: 2.5}
-  AreaSize: {x: 16.4, y: 6}
+  AreaSize: {x: 16.8, y: 6}
+  _useCustomDetectionArea: 1
+  _detectionAreaSize: {x: 28.1, y: 6.1}
   _chaseReleaseMargin: 1
   AreaColor: {r: 0, g: 1, b: 0, a: 0.3}
 --- !u!114 &721203627900600272

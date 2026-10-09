@@ -6,6 +6,52 @@ public class BuffEnemy : Enemy
     private Enemy _targetAttacker;
     public Enemy TargetAttacker => _targetAttacker;
 
+    [Header("4색 버프 데이터")]
+    [SerializeField] private SO_BuffTypeData _assignedBuffData;
+    [SerializeField] private SO_BuffTypeData[] _availableBuffs;
+    public SO_BuffTypeData CurrentBuffData { get; private set; }
+
+    private EnemyBuffVisualLink _visualLink;
+    public EnemyBuffVisualLink VisualLink => _visualLink;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        _visualLink = GetComponent<EnemyBuffVisualLink>();
+        if (_visualLink == null)
+        {
+            _visualLink = gameObject.AddComponent<EnemyBuffVisualLink>();
+        }
+
+        InitializeBuffData();
+    }
+
+    private void InitializeBuffData()
+    {
+        if (_assignedBuffData != null)
+        {
+            CurrentBuffData = _assignedBuffData;
+        }
+        else
+        {
+            if (_availableBuffs == null || _availableBuffs.Length == 0)
+            {
+                _availableBuffs = Resources.LoadAll<SO_BuffTypeData>("Buffs");
+            }
+
+            if (_availableBuffs != null && _availableBuffs.Length > 0)
+            {
+                int randomIndex = Random.Range(0, _availableBuffs.Length);
+                CurrentBuffData = _availableBuffs[randomIndex];
+            }
+        }
+
+        if (CurrentBuffData != null && _visualLink != null)
+        {
+            _visualLink.ApplyBuffData(CurrentBuffData);
+        }
+    }
+
     protected override void Start()
     {
         base.Start();
@@ -29,7 +75,7 @@ public class BuffEnemy : Enemy
             return;
         }
 
-        Enemy newTarget = EnemyManager.Instance.GetDamagedAttackerWithoutBuffer();
+        Enemy newTarget = EnemyManager.Instance.GetTargetAttackerForBuff();
 
         if (newTarget != null)
         {

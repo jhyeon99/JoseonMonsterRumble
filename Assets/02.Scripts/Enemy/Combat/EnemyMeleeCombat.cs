@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 using System;
 
@@ -93,7 +93,7 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
             Enemy.Data.KnockbackForce,
             hitPoint,
             Enemy.GetDirectionToPlayer(),
-            _defense,
+            GetEffectiveDefense(_defense),
             this,
             0,
             _attackName

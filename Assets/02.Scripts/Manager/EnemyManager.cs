@@ -39,13 +39,30 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
-    public Enemy GetDamagedAttackerWithoutBuffer()
+    public Enemy GetTargetAttackerForBuff()
     {
-        return ActiveEnemies.Find(e =>
+        Enemy damagedAttacker = ActiveEnemies.Find(e =>
             e.Type == EnemyType.Attacker &&
+            e.Health.IsAlive &&
             e.Health.IsDamaged &&
             !e.IsTargetedForBuff
         );
+
+        if (damagedAttacker != null)
+        {
+            return damagedAttacker;
+        }
+
+        return ActiveEnemies.Find(e =>
+            e.Type == EnemyType.Attacker &&
+            e.Health.IsAlive &&
+            !e.IsTargetedForBuff
+        );
+    }
+
+    public Enemy GetDamagedAttackerWithoutBuffer()
+    {
+        return GetTargetAttackerForBuff();
     }
 
     private void CheckAttackersLive()
