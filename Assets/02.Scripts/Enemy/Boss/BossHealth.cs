@@ -90,7 +90,8 @@ public class BossHealth : MonoBehaviour, IDamageable
 
     public bool TakeDamage(HitData hitData)
     {
-        if (!_boss.CanTakeDamage || hitData.Damage <= 0f)
+        // 소환 패턴 중에는 직접 공격 무효 (올챙이 기믹 데미지만)
+        if (!_boss.CanTakeDirectDamage || hitData.Damage <= 0f)
         {
             return false;
         }

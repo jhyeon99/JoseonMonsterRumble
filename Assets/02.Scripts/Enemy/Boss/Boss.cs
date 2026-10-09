@@ -54,6 +54,17 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField, Min(0f)]
     private float _defeatDuration = 2f;
 
+    [Tooltip("켜면 마무리 공격에 맞았을 때 지상 적처럼 회전하며 작아지고 흐려지면서 날아감")]
+    [SerializeField]
+    private bool _launchOnFinisher = true;
+
+    [Tooltip("켜면 아래 날려 보내기 설정을 사용. 끄면 플레이어 마무리 공격(PlayerFinisher)의 설정을 그대로 사용 (지상 적과 동일)")]
+    [SerializeField]
+    private bool _overrideLaunchSettings = false;
+
+    [SerializeField]
+    private LaunchSettings _launchSettings = LaunchSettings.Default;
+
     [Tooltip("처치 연출 뒤 보스 오브젝트를 끔")]
     [SerializeField]
     private bool _disableOnDefeat = true;
@@ -116,6 +127,7 @@ public class Boss : MonoBehaviour, IFinishable
     private readonly List<BossPattern> _candidates = new List<BossPattern>();
     private readonly HashSet<int> _animatorParameters = new HashSet<int>();
     private readonly List<GameObject> _minions = new List<GameObject>();
+    private readonly List<AnimatorClipInfo> _clipInfos = new List<AnimatorClipInfo>();
 
     private BossHealth _health;
     private Animator _animator;
@@ -123,6 +135,8 @@ public class Boss : MonoBehaviour, IFinishable
     private Collider2D _bodyCollider;
     private Transform _player;
     private BossPattern _lastPattern;
+    private bool _isAnimatorPaused;
+    private float _animatorSpeedBeforePause = 1f;
 
     #region 프로퍼티
 
@@ -154,6 +168,27 @@ public class Boss : MonoBehaviour, IFinishable
     /// <summary>지금 상태에서 데미지를 받는지</summary>
     public bool CanTakeDamage => CurrentState != null && CurrentState.CanTakeDamage;
 
+    /// <summary>플레이어의 직접 공격을 받는지 (소환 패턴 중에는 막힘, 기믹 데미지는 CanTakeDamage 기준)</summary>
+    public bool CanTakeDirectDamage =>
+        CanTakeDamage && !(CurrentState is BossPatternState patternState && patternState.Pattern.BlocksDirectDamage);
+
+    /// <summary>지금 바로 써야 하는 패턴(체력 비율 발동 등)이 있는지</summary>
+    public bool HasForcedPattern
+    {
+        get
+        {
+            foreach (BossPattern pattern in _patterns)
+            {
+                if (pattern != null && pattern.IsForced && pattern.CanUse())
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
     /// <summary>바라보는 방향 (1 = 오른쪽, -1 = 왼쪽)</summary>
     public float FacingX => (transform.localScale.x >= 0f) == _spriteFacesRight ? 1f : -1f;
 
@@ -161,7 +196,7 @@ public class Boss : MonoBehaviour, IFinishable
     public Vector2 CenterPosition =>
         _bodyCollider != null ? (Vector2)_bodyCollider.bounds.center : (Vector2)transform.position;
 
-    /// <summary>살아 있는 소환물 수 (독 방울 + 아기)</summary>
+    /// <summary>살아 있는 소환물 수 (독 방울 + 올챙이)</summary>
     public int MinionCount
     {
         get
@@ -183,7 +218,21 @@ public class Boss : MonoBehaviour, IFinishable
         _bodyCollider = GetComponent<Collider2D>();
         GroundY = transform.position.y;
 
+        // 보스는 스크립트로만 움직임. Dynamic이면 중력 / 플레이어와의 충돌로 튀어 오를 수 있음
+        if (_body != null && _body.bodyType != RigidbodyType2D.Kinematic)
+        {
+            Debug.LogWarning($"{name}: 보스 Rigidbody2D를 Kinematic으로 바꿉니다. 프리팹에서도 Kinematic으로 설정해 주세요.", this);
+            _body.bodyType = RigidbodyType2D.Kinematic;
+            _body.linearVelocity = Vector2.zero;
+        }
+
         CacheAnimatorParameters();
+
+        // 애니메이터가 루트에 있으면 클립의 위치 키가 보스 이동을 덮어씀 (점프하는 것처럼 보임)
+        if (_animator != null && _animator.gameObject == gameObject)
+        {
+            Debug.LogWarning($"{name}: Animator가 보스 루트에 있습니다. 애니메이션에 위치(Position) 키가 있으면 패턴 이동과 충돌하니 스프라이트 자식으로 옮겨 주세요.", this);
+        }
 
         GetComponentsInChildren(true, _patterns);
         foreach (BossPattern pattern in _patterns)
@@ -318,9 +367,20 @@ public class Boss : MonoBehaviour, IFinishable
         selected = null;
         _candidates.Clear();
 
+        // 체력 비율 발동 등 무조건 써야 하는 패턴이 먼저
         foreach (BossPattern pattern in _patterns)
         {
-            if (pattern != null && pattern.CanUse())
+            if (pattern != null && pattern.IsForced && pattern.CanUse())
+            {
+                selected = pattern;
+                _lastPattern = selected;
+                return true;
+            }
+        }
+
+        foreach (BossPattern pattern in _patterns)
+        {
+            if (pattern != null && !pattern.IsForced && pattern.CanUse())
             {
                 _candidates.Add(pattern);
             }
@@ -475,6 +535,135 @@ public class Boss : MonoBehaviour, IFinishable
         }
     }
 
+    /// <summary>애니메이터가 지금 이 클립을 재생 중인지 (전이 중이면 다음 상태도 확인)</summary>
+    public bool IsPlayingClip(AnimationClip clip)
+    {
+        if (_animator == null || clip == null || !_animator.isActiveAndEnabled)
+        {
+            return false;
+        }
+
+        _clipInfos.Clear();
+        _animator.GetCurrentAnimatorClipInfo(0, _clipInfos);
+        if (ContainsClip(_clipInfos, clip))
+        {
+            return true;
+        }
+
+        if (_animator.IsInTransition(0))
+        {
+            _clipInfos.Clear();
+            _animator.GetNextAnimatorClipInfo(0, _clipInfos);
+            return ContainsClip(_clipInfos, clip);
+        }
+
+        return false;
+    }
+
+    public bool HasAnimator => _animator != null && _animator.runtimeAnimatorController != null;
+
+    /// <summary>이 클립을 재생 중인 상태의 해시와 진행도(0~1)를 가져옴 (전이 중이면 다음 상태도 확인)</summary>
+    public bool TryGetClipState(AnimationClip clip, out int stateHash, out float normalizedTime)
+    {
+        stateHash = 0;
+        normalizedTime = 0f;
+        if (_animator == null || clip == null || !_animator.isActiveAndEnabled)
+        {
+            return false;
+        }
+
+        AnimatorStateInfo info;
+        _clipInfos.Clear();
+        _animator.GetCurrentAnimatorClipInfo(0, _clipInfos);
+        if (ContainsClip(_clipInfos, clip))
+        {
+            info = _animator.GetCurrentAnimatorStateInfo(0);
+        }
+        else if (_animator.IsInTransition(0))
+        {
+            _clipInfos.Clear();
+            _animator.GetNextAnimatorClipInfo(0, _clipInfos);
+            if (!ContainsClip(_clipInfos, clip))
+            {
+                return false;
+            }
+
+            info = _animator.GetNextAnimatorStateInfo(0);
+        }
+        else
+        {
+            return false;
+        }
+
+        stateHash = info.fullPathHash;
+        normalizedTime = clip.isLooping ? Mathf.Repeat(info.normalizedTime, 1f) : Mathf.Clamp01(info.normalizedTime);
+        return true;
+    }
+
+    /// <summary>애니메이터를 멈추고 해당 상태의 특정 지점(0~1) 포즈로 고정 (역재생 등 직접 시간을 조절할 때)</summary>
+    public void PoseAnimator(int stateHash, float normalizedTime)
+    {
+        if (_animator == null)
+        {
+            return;
+        }
+
+        if (!_isAnimatorPaused)
+        {
+            _isAnimatorPaused = true;
+            _animatorSpeedBeforePause = _animator.speed;
+        }
+
+        _animator.speed = 0f;
+        _animator.Play(stateHash, 0, normalizedTime);
+    }
+
+    /// <summary>PoseAnimator로 멈춘 애니메이터를 원래 속도로 되돌림</summary>
+    public void ResumeAnimator()
+    {
+        if (!_isAnimatorPaused)
+        {
+            return;
+        }
+
+        _isAnimatorPaused = false;
+        if (_animator != null)
+        {
+            _animator.speed = _animatorSpeedBeforePause;
+        }
+    }
+
+    /// <summary>애니메이터 상태를 이름으로 바로 재생. 상태가 없으면 false</summary>
+    public bool PlayState(string stateName)
+    {
+        if (_animator == null || string.IsNullOrEmpty(stateName))
+        {
+            return false;
+        }
+
+        int hash = Animator.StringToHash(stateName);
+        if (!_animator.HasState(0, hash))
+        {
+            return false;
+        }
+
+        _animator.Play(hash, 0, 0f);
+        return true;
+    }
+
+    private static bool ContainsClip(List<AnimatorClipInfo> infos, AnimationClip clip)
+    {
+        for (int i = 0; i < infos.Count; i++)
+        {
+            if (infos[i].clip == clip)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>예약된 트리거 취소 (패턴이 끊겼을 때 공격 애니메이션이 뒤늦게 재생되지 않도록)</summary>
     public void ResetTrigger(string parameter)
     {
@@ -542,7 +731,13 @@ public class Boss : MonoBehaviour, IFinishable
             return;
         }
 
-        ChangeState(new BossDefeatedState(this));
+        if (!_launchOnFinisher)
+        {
+            ChangeState(new BossDefeatedState(this));
+            return;
+        }
+
+        ChangeState(new BossDefeatedState(this, _overrideLaunchSettings ? _launchSettings : launch));
     }
 
     #endregion
