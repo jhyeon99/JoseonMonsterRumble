@@ -18,6 +18,18 @@ public class EnemyBuffMove : EnemyMoveType
     [SerializeField] private float _decelerateDistance = 5f;
     [SerializeField] private float _arrivalDistance = 0.45f;
 
+    [Header("배회 물리 파라미터")]
+    [SerializeField] private float _wanderRadius = 2.5f;
+    [SerializeField] private float _wanderSpeed = 1.6f;
+    [SerializeField] private float _wanderHoverAmplitude = 0.3f;
+    [SerializeField] private float _wanderHoverFrequency = 2.0f;
+
+    private Vector2 _spawnPosition;
+    private Vector2 _wanderDirection = Vector2.right;
+    private float _wanderDirectionTimer;
+    private const float WanderDirectionInterval = 2.0f;
+    private const float GroundCheckDistance = 0.6f;
+
     private float _orbitAngle;
     private float _orbitDirection = 1f;
     private float _floatTime;
@@ -30,6 +42,7 @@ public class EnemyBuffMove : EnemyMoveType
     protected override void Awake()
     {
         base.Awake();
+        _spawnPosition = transform.position;
         InitializeOrbit();
     }
 
@@ -124,6 +137,17 @@ public class EnemyBuffMove : EnemyMoveType
     private Vector2 GetChaseStartPosition(Enemy target)
     {
         InitializeOrbit();
+        Vector2 center = GetTargetCenter(target);
+        Vector2 dynamicRadius = CalculateDynamicOrbitRadius(target);
+
+        Vector2 diff = Rigidbody.position - center;
+        float angleRad = Mathf.Atan2(diff.y / Mathf.Max(0.1f, dynamicRadius.y), diff.x / Mathf.Max(0.1f, dynamicRadius.x));
+        _orbitAngle = angleRad * Mathf.Rad2Deg;
+        if (_orbitAngle < 0f)
+        {
+            _orbitAngle += 360f;
+        }
+
         return CalculateOrbitPosition(target, _orbitAngle, _floatTime);
     }
 
@@ -179,6 +203,36 @@ public class EnemyBuffMove : EnemyMoveType
 
         float direction = target.transform.position.x - transform.position.x;
         Flip(direction);
+    }
+
+    public override void PatrolIdleMove()
+    {
+        _wanderDirectionTimer -= Time.fixedDeltaTime;
+        if (_wanderDirectionTimer <= 0f)
+        {
+            _wanderDirectionTimer = WanderDirectionInterval;
+            float randomAngle = Random.Range(0f, Mathf.PI * 2f);
+            _wanderDirection = new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle)).normalized;
+        }
+
+        Vector2 offsetFromSpawn = Rigidbody.position - _spawnPosition;
+        if (offsetFromSpawn.magnitude > _wanderRadius)
+        {
+            _wanderDirection = -offsetFromSpawn.normalized;
+        }
+
+        int groundMask = Constants.Layers.GroundMask;
+        RaycastHit2D hit = Physics2D.Raycast(Rigidbody.position, _wanderDirection, GroundCheckDistance, groundMask);
+        if (hit.collider != null)
+        {
+            _wanderDirection = Vector2.Reflect(_wanderDirection, hit.normal).normalized;
+        }
+
+        float hoverY = Mathf.Sin(Time.time * _wanderHoverFrequency) * _wanderHoverAmplitude;
+        var wanderVelocity = new Vector2(_wanderDirection.x * _wanderSpeed, (_wanderDirection.y * _wanderSpeed) + hoverY);
+
+        Rigidbody.linearVelocity = wanderVelocity;
+        Flip(_wanderDirection.x);
     }
 
     public override void StopMove()

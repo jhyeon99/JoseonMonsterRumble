@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: SO_Buff_Red
   m_EditorClassIdentifier: Assembly-CSharp::SO_BuffTypeData
   _buffType: 0
-  _flameColor: {r: 1, g: 0.25, b: 0.25, a: 1}
-  _linkStartColor: {r: 1, g: 0.35, b: 0.2, a: 0.95}
-  _linkEndColor: {r: 0.9, g: 0.15, b: 0.1, a: 0.85}
-  _targetAuraColor: {r: 1, g: 0.2, b: 0.2, a: 1}
+  _flameColor: {r: 0.92, g: 0.08, b: 0.08, a: 1}
+  _flameInnerColor: {r: 1, g: 0.55, b: 0.15, a: 1}
+  _linkStartColor: {r: 1, g: 0.55, b: 0.15, a: 0.95}
+  _linkEndColor: {r: 0.85, g: 0.08, b: 0.08, a: 0.85}
+  _targetAuraColor: {r: 0.95, g: 0.2, b: 0.1, a: 1}
   _attackDamageMultiplier: 2
   _healPercentPerSecond: 0.05
   _extraGuardGaugeCost: 45

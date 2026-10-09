@@ -261,7 +261,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 701cbabab077439eb6eea967b09f5d98, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -422,7 +422,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67e31fc00b69018488701decf044acff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuffEnemy
-  _selfDestructDelay: 3
   _enemyType: 1
   _data: {fileID: 11400000, guid: 2fad875db8129d84e982006d0afedb46, type: 2}
   _assignedBuffData: {fileID: 0}
@@ -431,6 +430,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 48081a73c37a4c88940d756be670133a, type: 2}
   - {fileID: 11400000, guid: 6d3a0de14298400c9cdaf0dca6cde43a, type: 2}
   - {fileID: 11400000, guid: c1f95b47455e44a6bd044c42488e8c0f, type: 2}
+  _selfDestructDelay: 2
 --- !u!114 &3743613202740329121
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -88,10 +88,6 @@ public class BuffEnemy : Enemy
             _targetAttacker.Health.OnDeath += HandleTargetDeath;
             StateMachine.ChangeState(new ChaseEnemyState(this, _targetAttacker));
         }
-        else
-        {
-            MoveType.StopMove();
-        }
     }
 
     private void HandleAllAttackersKilled()

@@ -159,11 +159,14 @@ public class SelfDestructState : EnemyState
         // 주파수의 적분으로 위상을 누적해 점멸 속도만 연속적으로 높인다.
         float flashCycles = InitialFlashFrequency * elapsed +
             (FinalFlashFrequency - InitialFlashFrequency) * elapsed * warningProgress * 0.5f;
-        bool isRedFlash = Mathf.Sin(flashCycles * Mathf.PI * 2f) >= 0f;
-        _spriteRenderer.color = isRedFlash ? Color.red : _originalColor;
+        bool isFlash = Mathf.Sin(flashCycles * Mathf.PI * 2f) >= 0f;
 
-        float currentScaleFactor = Mathf.Lerp(1f, MaxScaleMultiplier, warningProgress);
-        _spriteRenderer.transform.localScale = _originalScale * currentScaleFactor;
+        // 사령관 지시: 자폭 사인을 붉은색(Color.red)으로 점멸
+        _spriteRenderer.color = isFlash ? Color.red : _originalColor;
+
+        float baseScaleMultiplier = Mathf.Lerp(1f, MaxScaleMultiplier, warningProgress);
+        float pulseBoost = isFlash ? 1.08f : 1f;
+        _spriteRenderer.transform.localScale = _originalScale * (baseScaleMultiplier * pulseBoost);
     }
 
     public override void FixedUpdate()
