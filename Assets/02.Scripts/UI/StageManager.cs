@@ -27,6 +27,7 @@ public sealed class StageManager : MonoBehaviour
     private float _displayDuration = 0.8f;
 
     [Header("디버그 (에디터 전용)")]
+
     [Tooltip("TODO: 테스트용. 에디터에서만 R 키로 스테이지 재시작 (빌드에는 포함되지 않음)")]
 #pragma warning disable 0414 // 빌드에서는 사용하지 않는 필드 (직렬화 구조를 에디터와 맞추기 위해 남겨둠)
     [SerializeField]
@@ -56,6 +57,11 @@ public sealed class StageManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
         SceneManager.sceneLoaded += HandleSceneLoaded;
+
+        if (_deathScreen == null)
+        {
+            _deathScreen = FindFirstObjectByType<DeathScreenView>(FindObjectsInactive.Include);
+        }
 
         if (_deathScreen == null)
         {
@@ -131,15 +137,21 @@ public sealed class StageManager : MonoBehaviour
     /// </summary>
     public void RestartStage()
     {
-        TryStartRespawn(false);
+        TryStartRespawn(false, string.Empty);
     }
 
     private void HandlePlayerDied()
     {
-        TryStartRespawn(true);
+        string causeOfDeath = _playerHealth != null ? _playerHealth.LastFatalHitData.AttackName : string.Empty;
+        if (string.IsNullOrWhiteSpace(causeOfDeath))
+        {
+            causeOfDeath = "알 수 없는 원인";
+        }
+
+        TryStartRespawn(true, causeOfDeath);
     }
 
-    private void TryStartRespawn(bool waitForDeath)
+    private void TryStartRespawn(bool waitForDeath, string causeOfDeath = "")
     {
         if (_isRespawning)
         {
@@ -156,10 +168,10 @@ public sealed class StageManager : MonoBehaviour
             return;
         }
 
-        StartCoroutine(RespawnRoutine(activeScene.name, waitForDeath));
+        StartCoroutine(RespawnRoutine(activeScene.name, waitForDeath, causeOfDeath));
     }
 
-    private IEnumerator RespawnRoutine(string sceneName, bool waitForDeath)
+    private IEnumerator RespawnRoutine(string sceneName, bool waitForDeath, string causeOfDeath)
     {
         _isRespawning = true;
 
@@ -168,8 +180,14 @@ public sealed class StageManager : MonoBehaviour
             yield return new WaitForSecondsRealtime(_deathDelay);
         }
 
+        if (_deathScreen == null)
+        {
+            _deathScreen = FindFirstObjectByType<DeathScreenView>(FindObjectsInactive.Include);
+        }
+
         if (_deathScreen != null)
         {
+            _deathScreen.SetCauseOfDeath($"{causeOfDeath}에 의해 사망");
             yield return _deathScreen.FadeIn();
         }
 
@@ -215,6 +233,11 @@ public sealed class StageManager : MonoBehaviour
 
     private void InitializeScene(Scene scene, bool preserveCheckpoint)
     {
+        if (_deathScreen == null)
+        {
+            _deathScreen = FindFirstObjectByType<DeathScreenView>(FindObjectsInactive.Include);
+        }
+
         RespawnPoint[] points = FindSceneRespawnPoints(scene);
         if (points.Length == 0)
         {

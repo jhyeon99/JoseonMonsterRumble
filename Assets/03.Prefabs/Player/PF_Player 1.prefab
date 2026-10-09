@@ -244,7 +244,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 3.5
+  m_GravityScale: 2.5
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -320,12 +320,13 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _knockbackUpVelocity: 4
-  _knockbackDeceleration: 30
+  _knockbackUpVelocity: 5
+  _knockbackDeceleration: 20
+  _knockbackHorizontalMultiplier: 10
   _coyoteTime: 0.1
   _groundCheckLockout: 0.1
-  _fallGravityMultiplier: 2
-  _lowJumpGravityMultiplier: 2
+  _fallGravityMultiplier: 2.5
+  _lowJumpGravityMultiplier: 3.5
   _maxFallSpeed: 15
   _addPlatformVelocityMultiplier: 1
   _landingJumpDelay: 0.1
@@ -395,6 +396,10 @@ MonoBehaviour:
   _enemyLayer:
     serializedVersion: 2
     m_Bits: 128
+  _hitPointCenterRatio: 0.35
+  _showAllHitboxesInEditor: 1
+  _previewComboIndex: 0
+  _drawSolidHitbox: 1
   _currentCombo: 0
   _isHitboxActive: 0
 --- !u!114 &2678545030457979146
@@ -439,8 +444,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerRangedAttack
   _flipTarget: {fileID: 1668539038824801414}
   _slotRoot: {fileID: 128689173627535363}
-  _chargeInterval: 0.4
-  _minimumChargeInterval: 0.12
+  _chargeInterval: 0.22
+  _minimumChargeInterval: 0.1
   _soulCostPerTalisman: 1
   _damageIncreasePercent: 0
 --- !u!114 &8959979308618455522

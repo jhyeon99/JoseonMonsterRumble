@@ -22,9 +22,14 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     private bool _isInvincible;
     public bool IsInvincible => _isInvincible;
 
+    public HitData LastFatalHitData { get; private set; }
+
+    private const string DefaultKillReason = "처형 / 즉사";
+
     private SpriteRenderer _spriteRenderer;
     private Coroutine _invincibleRoutine;
     private PlayerGuard _guard;
+    private Player _player;
 
     public event Action<float, float> OnHealthChanged;
     public event Action OnDied;
@@ -35,6 +40,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     private void Awake()
     {
         _currentHealth = _maxHealth;
+        _isDead = false;
+        LastFatalHitData = default;
         _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
 
@@ -42,6 +49,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     {
         // Player.Awake에서 PlayerGuard를 추가하는 경우가 있어서 Awake가 아닌 Start에서 가져옴
         TryGetComponent(out _guard);
+        TryGetComponent(out _player);
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
     }
 
@@ -54,13 +62,21 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
         GameEvents.TriggerPlayerHit(hitdata);
         _currentHealth = Mathf.Max(_currentHealth - hitdata.Damage, 0f);
-        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
 
         if (_currentHealth <= 0f)
         {
+            if (string.IsNullOrWhiteSpace(hitdata.AttackName))
+            {
+                hitdata.AttackName = "치명적인 피해";
+            }
+
+            LastFatalHitData = hitdata;
+            OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
             Die();
             return true;
         }
+
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
 
         OnHit?.Invoke(hitdata);
 
@@ -69,7 +85,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
             flash.Flash();
         }
 
-        StartInvincible();
+        bool isSuperArmor = _player != null && _player.IsSuperArmorActive();
+        if (!isSuperArmor)
+        {
+            StartInvincible();
+        }
         return true;
     }
 
@@ -78,6 +98,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         _currentHealth = Mathf.Min(_currentHealth + amount, _maxHealth);
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
     }
+
 
     public void AddPotion()
     {
@@ -98,7 +119,22 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     public void Kill()
     {
+        Kill(DefaultKillReason);
+    }
+
+    public void Kill(string reason)
+    {
         if (_isDead) return;
+
+        LastFatalHitData = new HitData(
+            damage: _currentHealth,
+            knockbackForce: 0f,
+            hitPoint: transform.position,
+            attackDirection: Vector2.zero,
+            defense: default,
+            source: null,
+            attackName: string.IsNullOrWhiteSpace(reason) ? DefaultKillReason : reason
+        );
 
         _currentHealth = 0f;
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
