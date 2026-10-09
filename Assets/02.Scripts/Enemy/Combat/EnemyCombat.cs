@@ -12,6 +12,8 @@ public abstract class EnemyCombat : MonoBehaviour
 
     public abstract void Attack();
 
+    public virtual void StopAttack() { }
+
     public void IncreaseDamage(float increaseValue)
     {
         DamageIncreaseValue = increaseValue;

@@ -1,8 +1,21 @@
 using UnityEngine;
 
+public enum EnemyHitAnimationMode
+{
+    AllDamage,
+    ThirdComboOrParry,
+    ThirdComboOrReflectedProjectile,
+}
+
 public class EnemyAnimation : MonoBehaviour
 {
+    private const int ThirdComboStep = 3;
+    private const int AnimationLayer = 0;
+    private static readonly int HitTagHash = Animator.StringToHash("Hit");
+
     [SerializeField] private Animator _animator;
+    [SerializeField] private EnemyHitAnimationMode _hitAnimationMode = EnemyHitAnimationMode.AllDamage;
+
     private readonly int _isRunning = Animator.StringToHash("isRunning");
     private readonly int _attack = Animator.StringToHash("attack");
     private readonly int _hit = Animator.StringToHash("hit");
@@ -19,6 +32,59 @@ public class EnemyAnimation : MonoBehaviour
 
     public void PlayAttack() => _animator.SetTrigger(_attack);
     public void PlayHit() => _animator.SetTrigger(_hit);
+
+    public void PlayDamageHit(HitData hitData)
+    {
+        if (_animator == null)
+        {
+            return;
+        }
+
+        if (hitData.IsTalisman)
+        {
+            if (!IsPlayingHit())
+            {
+                _animator.ResetTrigger(_attack);
+                PlayHit();
+            }
+
+            return;
+        }
+
+        if (ShouldPlayDamageHit(hitData))
+        {
+            PlayHit();
+        }
+    }
+
+    public bool IsPlayingHit()
+    {
+        if (_animator == null)
+        {
+            return false;
+        }
+
+        return _animator.GetCurrentAnimatorStateInfo(AnimationLayer).tagHash == HitTagHash ||
+            (_animator.IsInTransition(AnimationLayer) &&
+             _animator.GetNextAnimatorStateInfo(AnimationLayer).tagHash == HitTagHash);
+    }
+
+    public void PlayParriedHit()
+    {
+        if (_hitAnimationMode == EnemyHitAnimationMode.ThirdComboOrParry)
+        {
+            PlayHit();
+        }
+    }
+
+    public void PlayLaunchHit()
+    {
+        if (_hitAnimationMode == EnemyHitAnimationMode.AllDamage)
+        {
+            PlayHit();
+        }
+    }
+
     public void PlayDie() => _animator.SetTrigger(_die);
 
     public void SetGroggy(bool isGroggy)
@@ -33,6 +99,18 @@ public class EnemyAnimation : MonoBehaviour
         {
             _animator.SetBool(_isGroggy, isGroggy);
         }
+    }
+
+    private bool ShouldPlayDamageHit(HitData hitData)
+    {
+        return _hitAnimationMode switch
+        {
+            EnemyHitAnimationMode.AllDamage => true,
+            EnemyHitAnimationMode.ThirdComboOrParry => hitData.ComboStep == ThirdComboStep,
+            EnemyHitAnimationMode.ThirdComboOrReflectedProjectile =>
+                hitData.ComboStep == ThirdComboStep || hitData.IsReflectedProjectile,
+            _ => false,
+        };
     }
 
     private bool HasParameter(int nameHash)
