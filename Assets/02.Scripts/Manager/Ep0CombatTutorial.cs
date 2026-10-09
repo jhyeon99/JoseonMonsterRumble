@@ -24,6 +24,15 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     [SerializeField, Min(0.01f)] private float _zoomDuration = 0.35f;
     [SerializeField, Min(0.05f)] private float _parrySuccessDuration = 0.25f;
 
+    [Tooltip("정지 안내를 끝낸 뒤 실제 공격 판정까지 남길 시간. 패링을 직접 맞추는 구간입니다.")]
+    [SerializeField, Min(0.05f)] private float _parryResumeLeadTime = 0.35f;
+
+    [Header("Player-side hint")]
+    [SerializeField] private Vector2 _hintOffset = new Vector2(170f, 80f);
+    [SerializeField] private Vector2 _hintSize = new Vector2(340f, 100f);
+    [SerializeField, Min(12)] private int _hintFontSize = 24;
+    [SerializeField] private Color _hintTextColor = Color.white;
+
     [Header("Editable UI in the prefab")]
     [SerializeField] private GameObject _panel;
     [SerializeField] private Text _dialogue;
@@ -60,7 +69,6 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     private bool _hasCameraSize;
     private int _comboStep;
     private bool _parried;
-    private bool _hitPending;
     private bool _running;
     private bool _complete;
 
@@ -93,7 +101,6 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     {
         GameEvents.OnParry += HandleParry;
         if (_initialized && _enemy != null) _enemy.Health.OnHit += HandleEnemyHit;
-        if (_initialized && _combat != null) _combat.OnHitDeferred += HandleHitDeferred;
     }
 
     private IEnumerator Start()
@@ -119,18 +126,10 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         }
 
         _input = _player.GetComponent<PlayerInputHandler>();
-        _combat.OnHitDeferred += HandleHitDeferred;
         _dialogue.alignment = TextAnchor.MiddleCenter;
         _instruction.alignment = TextAnchor.MiddleCenter;
         _keyLabel.alignment = TextAnchor.MiddleCenter;
-        CopyOpeningDialogueStyle();
-        // Use one centered text block, just like the opening sound caption.
-        RectTransform textRect = _dialogue.rectTransform;
-        textRect.anchorMin = Vector2.zero;
-        textRect.anchorMax = Vector2.one;
-        textRect.offsetMin = new Vector2(40f, 28f);
-        textRect.offsetMax = new Vector2(-40f, -28f);
-        _instruction.gameObject.SetActive(false);
+        ConfigurePlayerHint();
         _hitStop = FindFirstObjectByType<HitStop>();
         foreach (EnemyContactDamage contact in _enemy.GetComponentsInChildren<EnemyContactDamage>())
             contact.enabled = false;
@@ -173,6 +172,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     private void LateUpdate()
     {
         if (_frozen) Time.timeScale = 0f;
+        UpdateHintPosition();
         if (_running && _player != null && _player.Health.IsDead)
         {
             StopAllCoroutines();
@@ -189,7 +189,6 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         _hasCameraSize = true;
         _parried = false;
         _normalInputWasEnabled = _input.enabled;
-        CopyOpeningDialogueStyle();
         _player.RangedAttack.CancelCharge();
         _player.StateMachine.ChangeState(_player.IdleState);
         SetPlayerControl(false);
@@ -204,19 +203,12 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         Phase = "Combo";
         _comboStep = 0;
         SetPlayerControl(true);
-        Show(_comboText, "X를 연속으로 눌러 3연속 공격  ·  0 / 3", "X");
+        Show(_comboText, "일반 공격  0 / 3", "X");
         while (_comboStep < 3) yield return null;
         SetPlayerControl(false);
         while (_player.StateMachine.CurrentState == _player.AttackState) yield return null;
 
-        Phase = "ParryExplanation";
         _player.StateMachine.ChangeState(_player.IdleState);
-        FaceEachOther();
-        Freeze();
-        Show(_parryText, "", "");
-        yield return WaitRealtime(_dialogueDuration);
-        Unfreeze();
-
         while (!_parried)
         {
             yield return WaitForNeutralPlayer();
@@ -224,39 +216,30 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
             _enemy.StateMachine.ChangeState(new WaitingState(_enemy));
             _combat.StopAttack();
             Phase = "Windup";
-            Show("", "몬스터의 공격을 지켜보세요", "");
+            Show(_parryText, "공격이 닿기 직전에 막기", "↓");
             _enemy.Animation.PlayAttack();
-            yield return new WaitForSeconds(Mathf.Max(0.05f, _enemy.Data.AttackPrepareTime));
-            _hitPending = false;
-            _combat.DeferNextPlayerHit();
-            _combat.Attack();
+            float prepareTime = Mathf.Max(0.05f, _enemy.Data.AttackPrepareTime);
+            float leadTime = Mathf.Min(_parryResumeLeadTime, prepareTime);
+            yield return new WaitForSeconds(Mathf.Max(0f, prepareTime - leadTime));
 
-            // Freeze on the real physics contact, not on an estimated animation delay.
-            float remaining = _enemy.Data.AttackDurationTime + 0.2f;
-            while (!_hitPending && remaining > 0f)
-            {
-                remaining -= Time.deltaTime;
-                yield return null;
-            }
-            if (_hitPending)
-            {
-                yield return ZoomTo(_parryCameraSize, GetFocusPosition());
-                yield return WaitForKey(KeyCode.DownArrow);
-                SetPlayerControl(true);
-                Unfreeze();
-                Phase = "ParryAttempt";
-                _player.StateMachine.ChangeState(_player.GuardState);
-                // The prompt accepted a fresh real press. Open the ordinary guard window now.
-                _player.Guard.BeginGuard(true);
-                // Resolve in this same frame: a tap cannot expire before the hit is checked.
-                _combat.ResolveDeferredHit();
-            }
+            // Explain before contact, then let the original guard/input timing run freely.
+            Phase = "ParryPrompt";
+            Freeze();
+            Show(_parryTimingText, "Enter로 시작", "↓");
+            yield return ZoomTo(_parryCameraSize, GetFocusPosition());
+            yield return WaitForKey(KeyCode.Return);
+            SetPlayerControl(true);
+            Unfreeze();
+            Phase = "ParryAttempt";
+            Show("", "닿기 직전에 ↓", "↓");
+            yield return new WaitForSeconds(leadTime);
+            _combat.Attack();
+            while (_combat.IsAttacking && !_parried) yield return null;
             _combat.StopAttack();
             if (!_parried)
             {
-                SetPlayerControl(false);
-                Show(_retryText, "공격이 닿는 순간 ↓를 눌러 막아보세요", "↓");
-                yield return new WaitForSeconds(0.7f);
+                Show(_retryText, "닿기 직전에 ↓", "↓");
+                yield return new WaitForSeconds(_dialogueDuration);
             }
         }
 
@@ -268,12 +251,12 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
         Phase = "FinisherPrompt";
         Freeze();
-        Show(_finisherText, "패링으로 빈틈이 생긴 적에게 X로 마무리 공격", "X");
+        Show(_finisherText, "지금 공격!", "X");
         yield return WaitForKey(KeyCode.X);
         SetPlayerControl(true);
         Unfreeze();
         Phase = "Finisher";
-        Show("", "가까이 다가가 X로 마무리 공격", "X");
+        Show("", "가까이 가서 마무리 공격", "X");
         // Use the real target detection and finisher, rather than launching on a key press.
         _player.TryEnterFinisher();
         while (_enemy != null && !_enemy.IsDefeated) yield return null;
@@ -329,47 +312,56 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         _input.TryUseGuardInput();
     }
 
-    private void CopyOpeningDialogueStyle()
+    private void ConfigurePlayerHint()
     {
-        // Read the opening's existing UI, including inactive panels, without modifying its script.
-        Canvas[] canvases = FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-        foreach (Canvas canvas in canvases)
+        RectTransform panelRect = _panel.GetComponent<RectTransform>();
+        panelRect.anchorMin = new Vector2(0.5f, 0.5f);
+        panelRect.anchorMax = panelRect.anchorMin;
+        panelRect.pivot = panelRect.anchorMin;
+        panelRect.sizeDelta = _hintSize;
+        Image background = _panel.GetComponent<Image>();
+        if (background != null) background.enabled = false;
+        Outline border = _panel.GetComponent<Outline>();
+        if (border != null) border.enabled = false;
+        _instruction.gameObject.SetActive(false);
+        RectTransform textRect = _dialogue.rectTransform;
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = new Vector2(84f, 4f);
+        textRect.offsetMax = new Vector2(-4f, -4f);
+        _dialogue.fontSize = _hintFontSize;
+        _dialogue.color = _hintTextColor;
+        _dialogue.raycastTarget = false;
+        Outline textOutline = _dialogue.GetComponent<Outline>();
+        if (textOutline == null) textOutline = _dialogue.gameObject.AddComponent<Outline>();
+        textOutline.effectColor = new Color(0f, 0f, 0f, 0.85f);
+        textOutline.effectDistance = new Vector2(1f, -1f);
+        RectTransform keyRect = _keyPrompt.GetComponent<RectTransform>();
+        keyRect.anchorMin = new Vector2(0f, 0.5f);
+        keyRect.anchorMax = keyRect.anchorMin;
+        keyRect.pivot = new Vector2(0.5f, 0.5f);
+        keyRect.anchoredPosition = new Vector2(40f, 0f);
+        keyRect.sizeDelta = new Vector2(64f, 44f);
+        _keyLabel.fontSize = _hintFontSize;
+    }
+
+    private void UpdateHintPosition()
+    {
+        if (!_initialized || !_panel.activeSelf || _player == null || _camera == null) return;
+        RectTransform panelRect = _panel.GetComponent<RectTransform>();
+        var parent = panelRect.parent as RectTransform;
+        if (parent == null) return;
+        Camera view = _camera.GetComponent<Camera>();
+        Collider2D body = _player.GetComponent<Collider2D>();
+        Vector3 worldPosition = body != null ? body.bounds.center : _player.transform.position;
+        Vector3 screenPosition = view.WorldToScreenPoint(worldPosition);
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, screenPosition, null, out Vector2 localPosition))
         {
-            if (canvas.name != "PrologueDialogue") continue;
-            Transform source = canvas.transform.Find("DialoguePanel");
-            if (source == null) continue;
-            RectTransform from = source.GetComponent<RectTransform>();
-            RectTransform to = _panel.GetComponent<RectTransform>();
-            to.anchorMin = from.anchorMin;
-            to.anchorMax = from.anchorMax;
-            to.pivot = from.pivot;
-            to.offsetMin = from.offsetMin;
-            to.offsetMax = from.offsetMax;
-            Image fromImage = source.GetComponent<Image>();
-            Image toImage = _panel.GetComponent<Image>();
-            toImage.sprite = fromImage.sprite;
-            toImage.color = fromImage.color;
-            toImage.type = fromImage.type;
-            Outline fromOutline = source.GetComponent<Outline>();
-            if (fromOutline != null)
-            {
-                Outline toOutline = _panel.GetComponent<Outline>();
-                if (toOutline == null) toOutline = _panel.AddComponent<Outline>();
-                toOutline.effectColor = fromOutline.effectColor;
-                toOutline.effectDistance = fromOutline.effectDistance;
-                toOutline.enabled = fromOutline.enabled;
-            }
-            Text subtitle = source.Find("Subtitle").GetComponent<Text>();
-            foreach (Text label in new[] { _dialogue, _instruction })
-            {
-                label.font = subtitle.font;
-                label.fontSize = subtitle.fontSize;
-                label.fontStyle = subtitle.fontStyle;
-                label.lineSpacing = subtitle.lineSpacing;
-                label.color = subtitle.color;
-                label.alignment = TextAnchor.MiddleCenter;
-            }
-            return;
+            Vector2 position = localPosition + _hintOffset;
+            Vector2 halfSize = panelRect.sizeDelta * 0.5f;
+            position.x = Mathf.Clamp(position.x, parent.rect.xMin + halfSize.x, parent.rect.xMax - halfSize.x);
+            position.y = Mathf.Clamp(position.y, parent.rect.yMin + halfSize.y, parent.rect.yMax - halfSize.y);
+            panelRect.anchoredPosition = position;
         }
     }
 
@@ -461,19 +453,8 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     private void HandleEnemyHit(HitData hitData)
     {
         if (Phase != "Combo" || hitData.ComboStep < 1 || hitData.ComboStep > 3) return;
-        if (hitData.ComboStep == 1) _comboStep = 1;
-        else if (hitData.ComboStep == _comboStep + 1) _comboStep++;
-        else _comboStep = 0;
-        Show(_comboText, $"X를 연속으로 눌러 3연속 공격  ·  {_comboStep} / 3", "X");
-    }
-
-    private void HandleHitDeferred()
-    {
-        if (!_running || Phase != "Windup") return;
-        _hitPending = true;
-        Phase = "ParryPrompt";
-        Freeze();
-        Show(_parryTimingText, "지금 ↓를 눌러 패링", "↓");
+        _comboStep++;
+        Show(_comboText, $"일반 공격  {_comboStep} / 3", "X");
     }
 
     private void HandleParry(HitData hitData)
@@ -486,6 +467,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     private void Show(string dialogue, string instruction, string key)
     {
         _panel.SetActive(true);
+        UpdateHintPosition();
         _dialogue.text = string.IsNullOrEmpty(dialogue) ? instruction :
             string.IsNullOrEmpty(instruction) ? dialogue : dialogue + "\n" + instruction;
         _instruction.text = "";
@@ -527,7 +509,6 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     {
         StopAllCoroutines();
         GameEvents.OnParry -= HandleParry;
-        if (_combat != null) _combat.OnHitDeferred -= HandleHitDeferred;
         if (_initialized && _enemy != null) _enemy.Health.OnHit -= HandleEnemyHit;
         ReleaseControl();
         if (_initialized && _enemy != null && !_enemy.IsDefeated)
