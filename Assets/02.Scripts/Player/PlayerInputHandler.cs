@@ -2,10 +2,6 @@ using UnityEngine;
 
 public class PlayerInputHandler : MonoBehaviour
 {
-    private bool _tutorialActive;
-    private bool _tutorialAttack;
-    private bool _tutorialGuard;
-    private bool _tutorialMovement;
     private float _moveInputX;
     public float MoveInputX => _moveInputX;
 
@@ -41,25 +37,6 @@ public class PlayerInputHandler : MonoBehaviour
     public bool TryUseRangedAttackInput() => _rangedAttackBuffer.TryUse();
     public bool TryUseGuardInput() => _guardBuffer.TryUse();
 
-    /// <summary>튜토리얼 단계에서 허용하는 조작만 받습니다. 종료 시 active=false로 복구합니다.</summary>
-    public void SetTutorialControls(bool active, bool attack, bool guard, bool movement)
-    {
-        _tutorialActive = active;
-        _tutorialAttack = attack;
-        _tutorialGuard = guard;
-        _tutorialMovement = movement;
-        ClearInputState();
-    }
-
-    /// <summary>정지 안내에서 실제로 누른 키를 재개 프레임의 입력 버퍼로 전달합니다.</summary>
-    public void CaptureTutorialKey(KeyCode key)
-    {
-        GetKeyInput();
-        if (!_tutorialActive) return;
-        if (key == KeyCode.DownArrow && _tutorialGuard) _guardBuffer.Press();
-        if (key == KeyCode.X && _tutorialAttack) _attackBuffer.Press();
-    }
-
     public void ClearInputState()
     {
         _moveInputX = 0f;
@@ -70,9 +47,6 @@ public class PlayerInputHandler : MonoBehaviour
         _isRangedAttackKeyDown = false;
         _isRangedAttackKeyUp = false;
         _isPotionKeyDown = false;
-        _isGuardKeyDown = false;
-        _isGuardKey = false;
-        _guardBuffer.Clear();
         _jumpBuffer.Clear();
         _dodgeBuffer.Clear();
         _attackBuffer.Clear();
@@ -97,20 +71,6 @@ public class PlayerInputHandler : MonoBehaviour
         _isGuardKeyDown = Input.GetKeyDown(KeyCode.DownArrow);
         _isGuardKey = Input.GetKey(KeyCode.DownArrow);
 
-
-        if (_tutorialActive)
-        {
-            if (!_tutorialMovement) _moveInputX = 0f;
-            _isJumpKeyDown = false;
-            _isJumpKey = false;
-            _isDodgeKeyDown = false;
-            _isRangedAttackKeyDown = false;
-            _isRangedAttackKeyUp = false;
-            _isPotionKeyDown = false;
-            _isAttackKeyDown &= _tutorialAttack;
-            _isGuardKeyDown &= _tutorialGuard;
-            _isGuardKey &= _tutorialGuard;
-        }
 
         if (_isJumpKeyDown)
         {

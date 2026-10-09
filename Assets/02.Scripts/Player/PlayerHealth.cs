@@ -16,7 +16,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     [SerializeField] private float _invincibleTime = 1.0f;
 
-    private bool _tutorialProtection;
     private bool _isDead;
     public bool IsDead => _isDead;
 
@@ -54,17 +53,12 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
     }
 
-    /// <summary>연습 중 피해는 막되, 가드와 패링은 실제 판정으로 처리합니다.</summary>
-    public void SetTutorialProtection(bool active) => _tutorialProtection = active;
-
     public bool TakeDamage(HitData hitdata)
     {
         if (IsDead || _isInvincible) return false;
 
         // 가드 중이면 데미지 대신 가드 / 패링 처리
         if (_guard != null && _guard.TryHandleHit(hitdata) != GuardResult.None) return false;
-
-        if (_tutorialProtection) return false;
 
         GameEvents.TriggerPlayerHit(hitdata);
         _currentHealth = Mathf.Max(_currentHealth - hitdata.Damage, 0f);

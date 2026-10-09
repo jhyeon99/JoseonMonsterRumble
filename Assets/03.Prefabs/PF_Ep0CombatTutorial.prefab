@@ -57,7 +57,6 @@ MonoBehaviour:
   _dialogueDuration: 1.2
   _parryCameraSize: 5.5
   _zoomDuration: 0.35
-  _parryLeadTime: 0.06
   _parrySuccessDuration: 0.25
   _panel: {fileID: 1201}
   _dialogue: {fileID: 1304}
@@ -196,7 +195,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 48}
-  m_SizeDelta: {x: -128, y: 230}
+  m_SizeDelta: {x: -128, y: 280}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &1203
 CanvasRenderer:
@@ -219,7 +218,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier:
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.96}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -268,10 +267,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1202}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.42}
+  m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -66, y: -12}
-  m_SizeDelta: {x: -220, y: -28}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: -80, y: -56}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1303
 CanvasRenderer:
@@ -303,12 +302,12 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 21bb382be0384decb2eb04b15aecb846, type: 3}
-    m_FontSize: 42
+    m_FontSize: 48
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 42
-    m_Alignment: 3
+    m_MaxSize: 48
+    m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
@@ -332,7 +331,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1402
 RectTransform:
   m_ObjectHideFlags: 0
@@ -382,12 +381,12 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 21bb382be0384decb2eb04b15aecb846, type: 3}
-    m_FontSize: 30
+    m_FontSize: 48
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 30
-    m_Alignment: 3
+    m_MaxSize: 48
+    m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
@@ -537,11 +536,11 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 21bb382be0384decb2eb04b15aecb846, type: 3}
-    m_FontSize: 42
+    m_FontSize: 48
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 42
+    m_MaxSize: 48
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -557,15 +556,15 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1002}
     m_Modifications:
-    - target: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
+    - target: {fileID: 9071619103714574906, guid: ea0c4d3e53f74103bc3eafbedee454de, type: 3}
       propertyPath: m_Name
       value: TutorialMonster
       objectReference: {fileID: 0}
-    - target: {fileID: 5470014724525197126, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
+    - target: {fileID: 5470014724525197126, guid: ea0c4d3e53f74103bc3eafbedee454de, type: 3}
       propertyPath: m_LocalScale.x
       value: -0.7
       objectReference: {fileID: 0}
-    - target: {fileID: 5470014724525197126, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
+    - target: {fileID: 5470014724525197126, guid: ea0c4d3e53f74103bc3eafbedee454de, type: 3}
       propertyPath: m_LocalScale.y
       value: 0.7
       objectReference: {fileID: 0}
@@ -573,15 +572,15 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
+  m_SourcePrefab: {fileID: 100100000, guid: ea0c4d3e53f74103bc3eafbedee454de, type: 3}
 --- !u!4 &2001 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 5470014724525197126, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
+  m_CorrespondingSourceObject: {fileID: 5470014724525197126, guid: ea0c4d3e53f74103bc3eafbedee454de, type: 3}
   m_PrefabInstance: {fileID: 2000}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &2002 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 305485781356309695, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
+  m_CorrespondingSourceObject: {fileID: 305485781356309695, guid: ea0c4d3e53f74103bc3eafbedee454de, type: 3}
   m_PrefabInstance: {fileID: 2000}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
