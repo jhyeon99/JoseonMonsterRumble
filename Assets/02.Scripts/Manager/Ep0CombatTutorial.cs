@@ -233,9 +233,9 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
             Phase = "ParryPrompt";
             _player.StateMachine.ChangeState(_player.IdleState);
             Freeze();
-            Show("Enter로 공격 재개", "재개 후 ↓로 패링", "Enter");
+            Show("잠시 후 공격 재개", "닿기 직전에 ↓", "↓");
             yield return ZoomTo(_parryCameraSize, GetFocusPosition());
-            yield return WaitForKey(KeyCode.Return);
+            yield return WaitRealtime(_dialogueDuration);
             Unfreeze();
             SetPlayerControl(true);
             Phase = "ParryAttempt";
