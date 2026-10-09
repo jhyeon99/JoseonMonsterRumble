@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public enum PatrolYHeightType
 {
@@ -8,6 +8,12 @@ public enum PatrolYHeightType
 
 public class EnemyFlyingMove : EnemyMoveType
 {
+    private const float FlightAcceleration = 8f;
+    private const float ChaseDistanceMargin = 1f;
+    private const float CollisionSkin = 0.02f;
+    private const float MinimumFlightSpeed = 0.0001f;
+    private enum MeleeFlightMode { Hovering, Approaching }
+    private MeleeFlightMode _meleeFlightMode;
     [Header("U자 돌진 설정")]
 
     [SerializeField] private float _uCurveBottomOffset = 0.4f;
@@ -32,6 +38,14 @@ public class EnemyFlyingMove : EnemyMoveType
     private float _chargeDuration = 1f;
     private EnemyRotation _enemyRotation;
     private EnemyFlip _enemyFlip;
+    private FlyingMeleeAttackController _meleeAttack;
+
+    [Header("호버링 및 원거리 이동 설정")]
+    [SerializeField] private float _hoverAmplitude = 0.4f;
+    [SerializeField] private float _hoverFrequency = 2.5f;
+    [SerializeField, Range(0f, 1f)] private float _flyOverChance = 0.25f;
+    private bool _isPerformingFlyOver = false;
+    private float _flyOverTimer = 0f;
 
     [Header("패트롤 설정")]
 
@@ -47,6 +61,7 @@ public class EnemyFlyingMove : EnemyMoveType
         base.Awake();
         _enemyRotation = GetComponent<EnemyRotation>();
         _enemyFlip = GetComponent<EnemyFlip>();
+        _meleeAttack = GetComponent<FlyingMeleeAttackController>();
     }
 
     /// <summary>
@@ -205,25 +220,196 @@ public class EnemyFlyingMove : EnemyMoveType
 
     public override void Move(Vector2 direction)
     {
+        if (_meleeAttack != null)
+        {
+            _meleeAttack.TryMoveToPosition(Rigidbody.position + direction * Enemy.Data.MoveSpeed * Time.fixedDeltaTime,
+                Enemy.Data.MoveSpeed);
+            return;
+        }
         Vector2 desiredVelocity = direction * Enemy.Data.MoveSpeed;
         Rigidbody.linearVelocity = GetAngleRestrictedVelocity(desiredVelocity, out bool isAllowed);
     }
 
     public override bool TryMoveToSearchPosition(Vector2 position)
     {
+        if (_meleeAttack != null)
+        {
+            position = _meleeAttack.ClampPosition(position);
+            return !_meleeAttack.IsAtPosition(position) && _meleeAttack.TryMoveToPosition(position, Enemy.Data.MoveSpeed);
+        }
         position.y = Mathf.Min(position.y, GetMaxAllowedY());
         return base.TryMoveToSearchPosition(position);
     }
 
     public override void BackMove(Vector2 direction)
     {
-        Vector2 desiredVelocity = -(direction * Enemy.Data.MoveSpeed);
-        Rigidbody.linearVelocity = GetAngleRestrictedVelocity(desiredVelocity, out _);
+        if (_meleeAttack != null)
+        {
+            Move(-direction);
+            return;
+        }
+        if (Enemy != null && Enemy.Combat is EnemyRangedCombat)
+        {
+            float dirSign = direction.x >= 0f ? -1f : 1f;
+
+            // 경계 접근 시 공간 재확보 (상승 및 중앙 회피)
+            if (IsEndPosition(direction))
+            {
+                Vector2 reclaimVelocity = new Vector2(dirSign * 0.3f, 1.0f).normalized * Enemy.Data.MoveSpeed;
+                Rigidbody.linearVelocity = GetAngleRestrictedVelocity(reclaimVelocity, out _);
+                return;
+            }
+
+            // 간헐적 선회 기동 갱신
+            _flyOverTimer -= Time.fixedDeltaTime;
+            if (_flyOverTimer <= 0f)
+            {
+                _isPerformingFlyOver = Random.value < _flyOverChance;
+                _flyOverTimer = 1.0f;
+            }
+
+            Vector2 desiredVelocity;
+            if (_isPerformingFlyOver)
+            {
+                // 선회 기동: 대각선 위로 호를 그리며 이동
+                desiredVelocity = new Vector2(dirSign * 0.8f, 0.9f).normalized * Enemy.Data.MoveSpeed;
+            }
+            else
+            {
+                // 기본 수평 후퇴
+                desiredVelocity = new Vector2(dirSign * Enemy.Data.MoveSpeed, 0f);
+            }
+
+            Rigidbody.linearVelocity = GetAngleRestrictedVelocity(desiredVelocity, out _);
+            return;
+        }
+
+        Vector2 defaultVelocity = -(direction * Enemy.Data.MoveSpeed);
+        Rigidbody.linearVelocity = GetAngleRestrictedVelocity(defaultVelocity, out _);
+    }
+
+    public void HoverInPlace()
+    {
+        float hoverY = Mathf.Cos(Time.time * _hoverFrequency) * _hoverAmplitude;
+        var hoverVelocity = new Vector2(0f, hoverY);
+        if (_meleeAttack != null)
+        {
+            ApplyMeleeFlightVelocity(hoverVelocity);
+            return;
+        }
+        Rigidbody.linearVelocity = GetAngleRestrictedVelocity(hoverVelocity, out _);
+    }
+
+    public void ResetMeleeFlight()
+    {
+        _meleeFlightMode = MeleeFlightMode.Hovering;
+    }
+
+    public void UpdateMeleeChaseFlight()
+    {
+        float distance = Enemy.GetDistanceToPlayer();
+        if (distance > Enemy.Data.AttackDetectRange + ChaseDistanceMargin)
+        {
+            _meleeFlightMode = MeleeFlightMode.Approaching;
+        }
+        else if (distance <= Enemy.Data.AttackDetectRange)
+        {
+            _meleeFlightMode = MeleeFlightMode.Hovering;
+        }
+        if (_meleeFlightMode == MeleeFlightMode.Hovering)
+        {
+            HoverInPlace();
+            return;
+        }
+        Vector2 offset = _meleeAttack.GetTargetPosition() + Vector2.up * _meleeAttack.Data.DiveHeight - Rigidbody.position;
+        ApplyMeleeFlightVelocity(offset.normalized * Enemy.Data.MoveSpeed);
+    }
+
+    private void ApplyMeleeFlightVelocity(Vector2 desiredVelocity)
+    {
+        var velocity = Vector2.MoveTowards(Rigidbody.linearVelocity, desiredVelocity, FlightAcceleration * Time.fixedDeltaTime);
+        velocity = CalculateSafeKnockbackVelocity(velocity);
+        float distance = velocity.magnitude * Time.fixedDeltaTime;
+        if (distance > MinimumFlightSpeed && Enemy.AirSensor != null)
+        {
+            float allowedDistance = Enemy.AirSensor.CalculateAllowedTravelDistance(velocity.normalized, distance, CollisionSkin);
+            velocity *= allowedDistance / distance;
+        }
+        Rigidbody.linearVelocity = velocity;
+        if (Enemy.Target != null)
+        {
+            _meleeAttack.FaceDirection(Enemy.GetDirectionToPlayer());
+        }
+    }
+
+    public void MoveCircleHover(Vector2 direction)
+    {
+        float dirSign = direction.x >= 0f ? -1f : 1f;
+        float hoverY = Mathf.Cos(Time.time * _hoverFrequency) * (_hoverAmplitude * 0.5f);
+        var arcVelocity = new Vector2(dirSign * 0.6f * Enemy.Data.MoveSpeed, 0.7f * Enemy.Data.MoveSpeed + hoverY);
+        Rigidbody.linearVelocity = GetAngleRestrictedVelocity(arcVelocity, out _);
+    }
+
+    public void MoveDisengage(Vector2 direction)
+    {
+        float dirSign = direction.x >= 0f ? -1f : 1f;
+        float hoverY = Mathf.Cos(Time.time * _hoverFrequency) * _hoverAmplitude;
+        var disengageVelocity = new Vector2(dirSign * Enemy.Data.MoveSpeed * 1.15f, hoverY);
+        Rigidbody.linearVelocity = GetAngleRestrictedVelocity(disengageVelocity, out _);
     }
 
     public override void StopMove()
     {
         Rigidbody.linearVelocity = Vector2.zero;
+        if (_meleeAttack != null)
+        {
+            _meleeAttack.ResetVisualTilt();
+        }
+    }
+
+    public override Vector2 CalculateSafeKnockbackVelocity(Vector2 velocity)
+    {
+        if (_meleeAttack == null)
+        {
+            return base.CalculateSafeKnockbackVelocity(velocity);
+        }
+        Vector2 nextPosition = _meleeAttack.ClampPosition(Rigidbody.position + velocity * Time.fixedDeltaTime);
+        Vector2 allowedVelocity = (nextPosition - Rigidbody.position) / Time.fixedDeltaTime;
+        velocity.x = Mathf.Sign(velocity.x) * Mathf.Min(Mathf.Abs(velocity.x), Mathf.Max(0f, allowedVelocity.x * Mathf.Sign(velocity.x)));
+        velocity.y = Mathf.Sign(velocity.y) * Mathf.Min(Mathf.Abs(velocity.y), Mathf.Max(0f, allowedVelocity.y * Mathf.Sign(velocity.y)));
+        return velocity;
+    }
+
+    public override void KnockbackPhysicsUpdate(bool isHorizontalOnly)
+    {
+        base.KnockbackPhysicsUpdate(isHorizontalOnly);
+        if (_meleeAttack != null)
+        {
+            Rigidbody.linearVelocity = CalculateSafeKnockbackVelocity(Rigidbody.linearVelocity);
+        }
+    }
+
+    public override bool IsEndPosition(Vector2 direction)
+    {
+        if (Enemy == null || Enemy.MoveArea == null)
+        {
+            return false;
+        }
+
+        Vector2 center = Enemy.MoveArea.StartPosition + Enemy.MoveArea.CenterOffset;
+        float halfWidth = Enemy.MoveArea.AreaSize.x * 0.5f;
+        float margin = 1.2f;
+
+        if (direction.x > 0f && Rigidbody.position.x <= center.x - halfWidth + margin)
+        {
+            return true;
+        }
+        if (direction.x < 0f && Rigidbody.position.x >= center.x + halfWidth - margin)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private Vector2 GetAngleRestrictedVelocity(Vector2 desiredVelocity, out bool isAllowed)
@@ -309,6 +495,10 @@ public class EnemyFlyingMove : EnemyMoveType
         var rightPos = new Vector2(center.x + halfWidth, targetY);
 
         Vector2 targetPos = _isMovingRight ? rightPos : leftPos;
+        if (_meleeAttack != null)
+        {
+            targetPos = _meleeAttack.ClampPosition(targetPos);
+        }
 
         if (_isPatrolWaiting)
         {
@@ -325,6 +515,16 @@ public class EnemyFlyingMove : EnemyMoveType
             return;
         }
 
+        if (_meleeAttack != null)
+        {
+            _meleeAttack.TryMoveToPosition(targetPos, Enemy.Data.MoveSpeed);
+            if (_meleeAttack.IsAtPosition(targetPos))
+            {
+                _isPatrolWaiting = true;
+                _patrolWaitTimer = 0f;
+            }
+            return;
+        }
         Vector2 moveVector = targetPos - Rigidbody.position;
         HandleFlip(moveVector);
 
@@ -344,6 +544,11 @@ public class EnemyFlyingMove : EnemyMoveType
     public override void MoveToInitialPosition()
     {
         Vector2 startPos = Enemy.MoveArea.StartPosition;
+        if (_meleeAttack != null)
+        {
+            _meleeAttack.TryMoveToPosition(startPos, Enemy.Data.MoveSpeed);
+            return;
+        }
         Vector2 direction = (startPos - Rigidbody.position).normalized;
 
         Vector2 velocity = direction * Enemy.Data.MoveSpeed;

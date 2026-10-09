@@ -2,13 +2,16 @@ using UnityEngine;
 
 public class EnemyRotation : MonoBehaviour
 {
+    [SerializeField] private float _rangedMaxPitchAngle = 30f;
     private Enemy _enemy;
     private bool? _wasRight = null; // 이전 프레임의 플레이어 X축 방향 추적
+    private FlyingMeleeAttackController _flyingMeleeAttack;
 
 
     private void Awake()
     {
         _enemy = GetComponent<Enemy>();
+        _flyingMeleeAttack = GetComponent<FlyingMeleeAttackController>();
     }
 
     private void Update()
@@ -19,6 +22,12 @@ public class EnemyRotation : MonoBehaviour
     private void Rotation()
     {
         if (_enemy == null || _enemy.Target == null) return;
+
+        if (_flyingMeleeAttack != null)
+        {
+            _flyingMeleeAttack.FaceDirection(_enemy.GetDirectionToPlayer());
+            return;
+        }
 
         Vector2 relPos = transform.position - _enemy.Target.position;
         if (relPos.sqrMagnitude < 0.0001f) return;
@@ -42,9 +51,18 @@ public class EnemyRotation : MonoBehaviour
 
             if (_enemy.Combat is EnemyRangedCombat)
             {
-                transform.rotation = isRight
-                    ? Quaternion.Euler(0f, 0f, angle - 164f)
-                    : Quaternion.Euler(0f, 0f, angle - 196f);
+                if (isRight)
+                {
+                    float delta = Mathf.DeltaAngle(0f, angle);
+                    float clampedDelta = Mathf.Clamp(delta, -_rangedMaxPitchAngle, _rangedMaxPitchAngle);
+                    transform.rotation = Quaternion.Euler(0f, 0f, clampedDelta - 164f);
+                }
+                else
+                {
+                    float delta = Mathf.DeltaAngle(180f, angle);
+                    float clampedDelta = Mathf.Clamp(delta, -_rangedMaxPitchAngle, _rangedMaxPitchAngle);
+                    transform.rotation = Quaternion.Euler(0f, 0f, clampedDelta - 16f);
+                }
             }
             else
             {
@@ -69,6 +87,12 @@ public class EnemyRotation : MonoBehaviour
     public void ForceRotateToPlayer()
     {
         if (_enemy == null || _enemy.Target == null) return;
+
+        if (_flyingMeleeAttack != null)
+        {
+            _flyingMeleeAttack.FaceDirection(_enemy.GetDirectionToPlayer());
+            return;
+        }
 
         Vector2 direction = _enemy.GetDirectionToPlayer();
         if (direction.sqrMagnitude < 0.0001f) return;

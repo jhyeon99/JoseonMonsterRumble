@@ -1,9 +1,18 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class AttackRecoveryState : EnemyState
 {
+    private enum FlyingRecoveryMode
+    {
+        DisengageRetreat,
+        CircleHover,
+        GentleBobbing
+    }
+
     private readonly Enemy _enemy;
     private float _recoveryTimer = 0;
+    private FlyingRecoveryMode _flyingRecoveryMode;
+    private float _targetRetreatDistance;
 
     public AttackRecoveryState(Enemy enemy)
     {
@@ -19,6 +28,25 @@ public class AttackRecoveryState : EnemyState
             _enemy.MoveType.StopMove();
             _enemy.Animation.SetRunning(false);
             _enemy.DirectionLock.LockDirection();
+            return;
+        }
+
+        if (_enemy.MoveType is EnemyFlyingMove)
+        {
+            float roll = Random.value;
+            if (roll < 0.40f)
+            {
+                _flyingRecoveryMode = FlyingRecoveryMode.DisengageRetreat;
+                _targetRetreatDistance = Random.Range(7.5f, 8.5f);
+            }
+            else if (roll < 0.75f)
+            {
+                _flyingRecoveryMode = FlyingRecoveryMode.CircleHover;
+            }
+            else
+            {
+                _flyingRecoveryMode = FlyingRecoveryMode.GentleBobbing;
+            }
         }
     }
 
@@ -28,23 +56,53 @@ public class AttackRecoveryState : EnemyState
         {
             return;
         }
-        if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackRecoverRange)
+
+        if (_enemy.MoveType is EnemyFlyingMove flyingMove)
         {
-            if (!_enemy.MoveType.IsEndPosition(_enemy.GetDirectionToPlayer()))
-            {
-                _enemy.Animation.SetRunning(true);
-                _enemy.MoveType.BackMove(_enemy.GetDirectionToPlayer());
-            }
-            else
-            {
-                _enemy.Animation.SetRunning(false);
-                _enemy.MoveType.RequestStopMove();
-            }
+            HandleFlyingRecoveryPhysics(flyingMove);
         }
-        else
+    }
+
+    private void HandleFlyingRecoveryPhysics(EnemyFlyingMove flyingMove)
+    {
+        Vector2 toPlayerDir = _enemy.GetDirectionToPlayer();
+        Vector2 retreatDir = -toPlayerDir;
+
+        bool isBlocked = _enemy.AirSensor != null &&
+            !_enemy.AirSensor.CanFlyAhead(_enemy.MoveArea, _enemy.transform.position, retreatDir, 1.0f);
+
+        if (isBlocked || flyingMove.IsEndPosition(toPlayerDir))
         {
             _enemy.Animation.SetRunning(false);
-            _enemy.MoveType.RequestStopMove();
+            flyingMove.HoverInPlace();
+            return;
+        }
+
+        switch (_flyingRecoveryMode)
+        {
+            case FlyingRecoveryMode.DisengageRetreat:
+                if (_enemy.GetDistanceToPlayer() < _targetRetreatDistance)
+                {
+                    _enemy.Animation.SetRunning(true);
+                    flyingMove.MoveDisengage(toPlayerDir);
+                }
+                else
+                {
+                    _enemy.Animation.SetRunning(false);
+                    flyingMove.HoverInPlace();
+                }
+                break;
+
+            case FlyingRecoveryMode.CircleHover:
+                _enemy.Animation.SetRunning(true);
+                flyingMove.MoveCircleHover(toPlayerDir);
+                break;
+
+            case FlyingRecoveryMode.GentleBobbing:
+            default:
+                _enemy.Animation.SetRunning(false);
+                flyingMove.HoverInPlace();
+                break;
         }
     }
 

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class AttackState : EnemyState
 {
@@ -7,6 +7,8 @@ public class AttackState : EnemyState
     private float _attackTimer = 0;
     private float _projectileTimer = 0;
     private bool _hasAttacked = false;
+    private const float SoftLockLeadTime = 0.2f;
+    private bool _isSoftLocked = false;
     private AnimationPlayback _animationPlayback;
 
     public AttackState(Enemy enemy)
@@ -17,13 +19,24 @@ public class AttackState : EnemyState
     public override void Enter()
     {
         Debug.Log("공격 시작");
+        _enemy.MoveType.StopMove();
+        _enemy.Animation.SetRunning(false);
         if (_enemy.MoveType is EnemyGroundMove groundMove && _enemy.Combat is EnemyRangedCombat)
         {
-            groundMove.StopMove();
-            _enemy.Animation.SetRunning(false);
             groundMove.FaceTarget();
         }
-        _enemy.DirectionLock.LockDirection();
+
+        if (_enemy.Combat is EnemyRangedCombat)
+        {
+            _isSoftLocked = false;
+            _enemy.DirectionLock.UnlockDirection();
+        }
+        else
+        {
+            _isSoftLocked = true;
+            _enemy.DirectionLock.LockDirection();
+        }
+
         _attackTimer = _enemy.Data.AttackDurationTime + _enemy.Data.AttackDelayTime;
         _projectileTimer = _enemy.Data.AttackDurationTime;
         _hasAttacked = false;
@@ -45,6 +58,10 @@ public class AttackState : EnemyState
         {
             _enemy.MoveType.QuadraticChargePhysicsUpdate();
         }
+        else
+        {
+            _enemy.MoveType.StopMove();
+        }
     }
 
     public override void Update()
@@ -63,11 +80,18 @@ public class AttackState : EnemyState
         }
         _projectileTimer -= Time.deltaTime;
         _attackTimer -= Time.deltaTime;
-        if (_enemy.Combat is EnemyRangedCombat)
+        if (_enemy.Combat is EnemyRangedCombat rangedCombat)
         {
+            if (!_isSoftLocked && _projectileTimer <= SoftLockLeadTime)
+            {
+                _isSoftLocked = true;
+                _enemy.DirectionLock.LockDirection();
+                rangedCombat.OnTelegraph();
+            }
+
             if (!_hasAttacked && _projectileTimer <= 0)
             {
-                _enemy.Combat.Attack();
+                rangedCombat.Attack();
                 _hasAttacked = true;
             }
         }
@@ -92,10 +116,11 @@ public class AttackState : EnemyState
     public override void Exit()
     {
         Debug.Log("공격 종료");
-        if (!(_enemy.MoveType is EnemyGroundMove) && !_enemy.Data.HasStationaryAttackCycle)
+        if (_enemy.Combat is EnemyRangedCombat || (!(_enemy.MoveType is EnemyGroundMove) && !_enemy.Data.HasStationaryAttackCycle))
         {
             _enemy.DirectionLock.UnlockDirection();
         }
+        _isSoftLocked = false;
         if (_enemy.Combat is EnemyMeleeCombat)
         {
             _enemy.Combat.StopAttack();
