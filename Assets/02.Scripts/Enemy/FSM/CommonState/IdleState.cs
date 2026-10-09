@@ -33,7 +33,7 @@ public class IdleState : EnemyState
     {
         if (_enemy.MoveArea != null && _enemy.Target != null)
         {
-            if (_enemy.MoveArea.IsPositionInArea(_enemy.Target.position))
+            if (_enemy.MoveArea.IsPositionDetected(_enemy.Target.position))
             {
                 _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
             }

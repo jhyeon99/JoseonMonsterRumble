@@ -53,7 +53,7 @@ public class AttackRecoveryState : EnemyState
         _recoveryTimer -= Time.deltaTime;
         if (_enemy.MoveArea != null && _enemy.Target != null)
         {
-            if (!_enemy.MoveArea.IsPositionInArea(_enemy.Target.position))
+            if (!_enemy.MoveArea.IsPositionInChaseArea(_enemy.Target.position))
             {
                 _enemy.DirectionLock.LockDirection();
             }
@@ -61,7 +61,15 @@ public class AttackRecoveryState : EnemyState
 
         if (_recoveryTimer <= 0)
         {
-            _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
+            if (_enemy.MoveArea != null &&
+                _enemy.Target != null && !_enemy.MoveArea.IsPositionInChaseArea(_enemy.Target.position))
+            {
+                _enemy.StateMachine.ChangeState(new AlertState(_enemy));
+            }
+            else
+            {
+                _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
+            }
         }
     }
 
@@ -71,7 +79,7 @@ public class AttackRecoveryState : EnemyState
         _enemy.MoveType.IsBackMove = false;
         if (_enemy.MoveArea != null && _enemy.Target != null)
         {
-            if (!_enemy.MoveArea.IsPositionInArea(_enemy.Target.position))
+            if (!_enemy.MoveArea.IsPositionInChaseArea(_enemy.Target.position))
             {
                 _enemy.transform.rotation = Quaternion.identity;
                 Vector3 scale = _enemy.transform.localScale;

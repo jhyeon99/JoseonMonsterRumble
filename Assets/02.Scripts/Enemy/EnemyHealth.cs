@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class EnemyHealth : MonoBehaviour, IDamageable
+public class EnemyHealth : MonoBehaviour, IDamageable, IKillable
 {
     private const int FirstComboStep = 1;
     private const int SecondComboStep = 2;
@@ -14,6 +14,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     public bool IsAlive => _currentHp > 0f;
     public bool IsDamaged => IsAlive && _currentHp < _enemy.Data.MaxHp;
     public float CurrentHp => _currentHp;
+    public bool CanDieInKillZone => _enemy.MoveType is EnemyGroundMove;
 
     private void Awake()
     {
@@ -32,10 +33,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
 
         if (_currentHp <= 0f)
         {
-            _currentHp = 0f;
-            _enemy.MoveType.ResetLightKnockback();
-            OnDeath?.Invoke();
-            _enemy.StateMachine.ChangeState(new DeadState(_enemy));
+            Die();
             return true;
         }
 
@@ -54,6 +52,24 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         }
 
         return true;
+    }
+
+    public void Kill()
+    {
+        if (!IsAlive || _enemy.IsDefeated)
+        {
+            return;
+        }
+
+        Die();
+    }
+
+    private void Die()
+    {
+        _currentHp = 0f;
+        _enemy.MoveType.ResetLightKnockback();
+        OnDeath?.Invoke();
+        _enemy.StateMachine.ChangeState(new DeadState(_enemy));
     }
 
     /// <summary>마무리 공격으로 날려 보냄. 체력과 관계없이 사망 처리 (OnDeath 발생)</summary>

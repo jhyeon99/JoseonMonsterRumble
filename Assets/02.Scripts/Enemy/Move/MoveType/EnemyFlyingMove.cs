@@ -190,7 +190,7 @@ public class EnemyFlyingMove : EnemyMoveType
 
         Rigidbody.linearVelocity = Vector2.zero;
 
-        if (Enemy.MoveArea.IsPositionInArea(Enemy.Target.position))
+        if (Enemy.MoveArea.IsPositionInChaseArea(Enemy.Target.position))
         {
             RotateToPlayer();
         }
@@ -207,6 +207,12 @@ public class EnemyFlyingMove : EnemyMoveType
     {
         Vector2 desiredVelocity = direction * Enemy.Data.MoveSpeed;
         Rigidbody.linearVelocity = GetAngleRestrictedVelocity(desiredVelocity, out bool isAllowed);
+    }
+
+    public override bool TryMoveToSearchPosition(Vector2 position)
+    {
+        position.y = Mathf.Min(position.y, GetMaxAllowedY());
+        return base.TryMoveToSearchPosition(position);
     }
 
     public override void BackMove(Vector2 direction)
