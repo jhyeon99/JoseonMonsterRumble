@@ -15,6 +15,7 @@ public sealed class FlyingMeleeAttackState : EnemyState
     private Vector2 _pathDisplacement;
     private Vector2 _lastRequestedPosition;
     private float _entrySide;
+    private float _prepareRetreatDistance;
 
     public FlyingMeleeAttackState(Enemy enemy, FlyingMeleeAttackController attack)
     {
@@ -167,6 +168,7 @@ public sealed class FlyingMeleeAttackState : EnemyState
             return;
         }
         _path = new FlyingMeleeAttackPath(_pattern, start, _aim, end);
+        _prepareRetreatDistance = _attack.CalculateAllowedPrepareRetreatDistance(-_path.CalculateDirection(0f));
         _lastRequestedPosition = start;
         _pathDisplacement = Vector2.zero;
         SetPhase(FlyingMeleeAttackPhase.Preparing);
@@ -191,6 +193,10 @@ public sealed class FlyingMeleeAttackState : EnemyState
         // 약한 밀림 중 중단된 뒤에도 실제 변위를 반영하여 이전 좌표로 되돌아가지 않는다.
         _pathDisplacement += _enemy.EnemyRb.position - _lastRequestedPosition;
         Vector2 nextPosition = _path.CalculatePosition(progress) + _pathDisplacement;
+        if (_timeline.Phase == FlyingMeleeAttackPhase.Preparing)
+        {
+            nextPosition += _path.CalculatePrepareRetreatOffset(_timeline.PrepareProgress, _prepareRetreatDistance);
+        }
         bool canMove = _attack.TryMove(nextPosition, _path.CalculateDirection(progress));
         _lastRequestedPosition = nextPosition;
         return canMove;
@@ -243,5 +249,6 @@ public sealed class FlyingMeleeAttackState : EnemyState
         _positioningTarget = Vector2.zero;
         _aim = Vector2.zero;
         _entrySide = 0f;
+        _prepareRetreatDistance = 0f;
     }
 }
