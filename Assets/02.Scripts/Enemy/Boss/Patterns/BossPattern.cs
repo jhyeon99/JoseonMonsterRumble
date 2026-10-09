@@ -77,6 +77,7 @@ public abstract class BossPattern : MonoBehaviour
     private float _startTime;
     private Coroutine _routine;
     private Action _onFinished;
+    private int _patternStateHash;
 
     protected Boss Boss { get; private set; }
 
@@ -214,6 +215,8 @@ public abstract class BossPattern : MonoBehaviour
                 Debug.LogWarning($"{name}: {PatternName} 클립({_animationClip.name})이 재생되지 않아 트리거 기준으로 진행합니다. 트리거 이름 / 애니메이터 전이를 확인하세요.", this);
             }
 
+            // 반복 재생(ReplayAnimation)용. 애니메이션이 끝나 대기 상태로 넘어간 뒤에도 다시 재생할 수 있도록 기억
+            _patternStateHash = Boss.TryGetClipState(_animationClip, out int stateHash, out float _) ? stateHash : 0;
             _startTime = Time.time;
         }
 
@@ -337,6 +340,11 @@ public abstract class BossPattern : MonoBehaviour
         if (clip != null && Boss.TryGetClipState(clip, out int stateHash, out float _))
         {
             Boss.PlayStateFromStart(stateHash);
+        }
+        else if (_patternStateHash != 0)
+        {
+            // 이미 끝나서 다른 상태로 넘어갔으면 처음 재생했던 패턴 상태를 다시 재생
+            Boss.PlayStateFromStart(_patternStateHash);
         }
 
         _startTime = Time.time;
