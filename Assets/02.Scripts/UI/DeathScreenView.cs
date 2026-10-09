@@ -1,4 +1,5 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 
 [RequireComponent(typeof(CanvasGroup))]
@@ -6,6 +7,7 @@ public sealed class DeathScreenView : MonoBehaviour
 {
     [SerializeField, Min(0f)] private float _fadeInDuration = 0.35f;
     [SerializeField, Min(0f)] private float _fadeOutDuration = 0.5f;
+    [SerializeField] private TextMeshProUGUI _causeOfDeathText;
 
     private CanvasGroup _canvasGroup;
 
@@ -13,6 +15,14 @@ public sealed class DeathScreenView : MonoBehaviour
     {
         _canvasGroup = GetComponent<CanvasGroup>();
         HideImmediate();
+    }
+
+    public void SetCauseOfDeath(string text)
+    {
+        if (_causeOfDeathText != null)
+        {
+            _causeOfDeathText.text = text;
+        }
     }
 
     public IEnumerator FadeIn()
@@ -37,6 +47,11 @@ public sealed class DeathScreenView : MonoBehaviour
         _canvasGroup.alpha = 0f;
         _canvasGroup.interactable = false;
         _canvasGroup.blocksRaycasts = false;
+
+        if (_causeOfDeathText != null)
+        {
+            _causeOfDeathText.text = string.Empty;
+        }
     }
 
     private IEnumerator FadeTo(float targetAlpha, float duration)

@@ -26,6 +26,14 @@ public class PlayerGuard : MonoBehaviour
     [SerializeField, Min(0f)]
     private float _drainPerSecond = 30f;
 
+    [Tooltip("일반 가드 피격 후 지속 소모를 멈추는 시간")]
+    [SerializeField, Min(0f)]
+    private float _postBlockDrainPauseDuration = 0.3f;
+
+    [Tooltip("지속 소모 정지를 적용할 최소 피격 게이지 감소 비율")]
+    [SerializeField, Range(0f, 1f)]
+    private float _postBlockDrainPauseMinimumRatio = 0.1f;
+
     [Tooltip("가드를 쓰지 않을 때 초당 회복량")]
     [SerializeField, Min(0f)]
     private float _recoverPerSecond = 40f;
@@ -78,6 +86,7 @@ public class PlayerGuard : MonoBehaviour
     [SerializeField, ReadOnly] private bool _isGuarding;
 
     private float _recoverTimer;
+    private float _drainResumeTime = float.NegativeInfinity;
 
     // 이번 가드의 패링 판정 시작 시각 (판정이 없으면 -Infinity)
     private float _parryWindowStartTime = float.NegativeInfinity;
@@ -94,6 +103,7 @@ public class PlayerGuard : MonoBehaviour
     public float ReflectDamageMultiplier => _reflectDamageMultiplier;
     public float BlockKnockbackSpeed => _blockKnockbackSpeed;
     public float BlockKnockbackDeceleration => _blockKnockbackDeceleration;
+    public float BlockDrainPauseRemaining => Mathf.Max(0f, _drainResumeTime - Time.time);
 
     /// <summary>기본 판정 시간 기준으로 지금 패링 판정 중인지 (UI, 디버그용)</summary>
     public bool IsParryWindowOpen => _isGuarding && Time.time - _parryWindowStartTime <= _parryWindow;
@@ -124,6 +134,7 @@ public class PlayerGuard : MonoBehaviour
     {
         _isGuarding = false;
         _parryWindowStartTime = float.NegativeInfinity;
+        _drainResumeTime = float.NegativeInfinity;
     }
 
     private void Update()
@@ -132,6 +143,11 @@ public class PlayerGuard : MonoBehaviour
 
         if (_isGuarding)
         {
+            if (BlockDrainPauseRemaining > 0f)
+            {
+                return;
+            }
+
             ChangeGauge(-_drainPerSecond * deltaTime);
             return;
         }
@@ -234,6 +250,7 @@ public class PlayerGuard : MonoBehaviour
             ChangeGauge(-defense.GuardGaugeCost);
         }
 
+        StartPostBlockDrainPause(defense.GuardGaugeCost);
         OnBlocked?.Invoke(hitData);
         Log(defense.Parryable ? "가드 (패링 타이밍 아님)" : "가드");
 
@@ -250,6 +267,22 @@ public class PlayerGuard : MonoBehaviour
     {
         float window = defense.ParryWindowOverride > 0f ? defense.ParryWindowOverride : _parryWindow;
         return Time.time - _parryWindowStartTime <= window;
+    }
+
+    private void StartPostBlockDrainPause(float guardGaugeCost)
+    {
+        if (_postBlockDrainPauseDuration <= 0f || _maxGauge <= 0f)
+        {
+            return;
+        }
+
+        float gaugeLossRatio = guardGaugeCost / _maxGauge;
+        if (gaugeLossRatio < _postBlockDrainPauseMinimumRatio)
+        {
+            return;
+        }
+
+        _drainResumeTime = Time.time + _postBlockDrainPauseDuration;
     }
 
     // AttackDirection은 공격자 → 플레이어 방향. 바라보는 방향과 반대면 정면에서 온 공격

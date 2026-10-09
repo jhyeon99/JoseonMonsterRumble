@@ -15,23 +15,29 @@ public sealed class StageManager : MonoBehaviour
     public static StageManager Instance { get; private set; }
 
     [Header("사망 / 재시작 연출")]
-    [SerializeField] private DeathScreenView _deathScreen;
+    [SerializeField]
+    private DeathScreenView _deathScreen;
 
     [Tooltip("사망 후 화면이 어두워지기 시작할 때까지 대기 (사망 모션을 보여주는 시간)")]
-    [SerializeField, Min(0f)] private float _deathDelay = 0.8f;
+    [SerializeField, Min(0f)]
+    private float _deathDelay = 0.8f;
 
     [Tooltip("화면이 완전히 어두워진 뒤 씬을 다시 로드하기 전까지 유지하는 시간")]
-    [SerializeField, Min(0f)] private float _displayDuration = 0.8f;
+    [SerializeField, Min(0f)]
+    private float _displayDuration = 0.8f;
 
     [Header("디버그 (에디터 전용)")]
+
     [Tooltip("TODO: 테스트용. 에디터에서만 R 키로 스테이지 재시작 (빌드에는 포함되지 않음)")]
 #pragma warning disable 0414 // 빌드에서는 사용하지 않는 필드 (직렬화 구조를 에디터와 맞추기 위해 남겨둠)
-    [SerializeField] private bool _enableDebugRestartKey = false;
+    [SerializeField]
+    private bool _enableDebugRestartKey = false;
 #pragma warning restore 0414
 
     [Header("적 정리 (임시)")]
     [Tooltip("세이브 포인트 x + 이 값보다 왼쪽에 있는 적을 제거. 음수로 하면 세이브 포인트 바로 왼쪽 적은 남김")]
-    [SerializeField] private float _enemyClearOffsetX = 0f;
+    [SerializeField]
+    private float _enemyClearOffsetX = 0f;
 
     private PlayerHealth _playerHealth;
     private string _activeSceneName;
@@ -55,6 +61,11 @@ public sealed class StageManager : MonoBehaviour
 
         if (_deathScreen == null)
         {
+            _deathScreen = FindFirstObjectByType<DeathScreenView>(FindObjectsInactive.Include);
+        }
+
+        if (_deathScreen == null)
+        {
             Debug.LogWarning($"{name}: Death Screen 참조가 없습니다.", this);
         }
     }
@@ -64,10 +75,9 @@ public sealed class StageManager : MonoBehaviour
         InitializeScene(SceneManager.GetActiveScene(), false);
     }
 
-#if UNITY_EDITOR
     private void Update()
     {
-        // TODO: 테스트용 임시 코드. 에디터에서만 동작 (빌드에는 포함되지 않음)
+        // TODO: 테스트용 임시 코드.
         // 일시정지 메뉴에 재시작 버튼이 생기면 제거
         if (_enableDebugRestartKey && Input.GetKeyDown(KeyCode.R) && !PauseController.IsPaused)
         {
@@ -79,7 +89,6 @@ public sealed class StageManager : MonoBehaviour
             TryLoadStageScene("Test_Boss");
         }
     }
-#endif
 
     private void OnDestroy()
     {
@@ -129,7 +138,7 @@ public sealed class StageManager : MonoBehaviour
     /// </summary>
     public void RestartStage()
     {
-        TryStartRespawn(false);
+        TryStartRespawn(false, string.Empty);
     }
 
     /// <summary>지정한 스테이지 씬으로 전환한다. 중복 전환과 리스폰 중 전환은 막는다.</summary>
@@ -173,10 +182,16 @@ public sealed class StageManager : MonoBehaviour
 
     private void HandlePlayerDied()
     {
-        TryStartRespawn(true);
+        string causeOfDeath = _playerHealth != null ? _playerHealth.LastFatalHitData.AttackName : string.Empty;
+        if (string.IsNullOrWhiteSpace(causeOfDeath))
+        {
+            causeOfDeath = "알 수 없는 원인";
+        }
+
+        TryStartRespawn(true, causeOfDeath);
     }
 
-    private void TryStartRespawn(bool waitForDeath)
+    private void TryStartRespawn(bool waitForDeath, string causeOfDeath = "")
     {
         if (_isRespawning || _isChangingScene)
         {
@@ -193,10 +208,10 @@ public sealed class StageManager : MonoBehaviour
             return;
         }
 
-        StartCoroutine(RespawnRoutine(activeScene.name, waitForDeath));
+        StartCoroutine(RespawnRoutine(activeScene.name, waitForDeath, causeOfDeath));
     }
 
-    private IEnumerator RespawnRoutine(string sceneName, bool waitForDeath)
+    private IEnumerator RespawnRoutine(string sceneName, bool waitForDeath, string causeOfDeath)
     {
         _isRespawning = true;
 
@@ -205,8 +220,14 @@ public sealed class StageManager : MonoBehaviour
             yield return new WaitForSecondsRealtime(_deathDelay);
         }
 
+        if (_deathScreen == null)
+        {
+            _deathScreen = FindFirstObjectByType<DeathScreenView>(FindObjectsInactive.Include);
+        }
+
         if (_deathScreen != null)
         {
+            _deathScreen.SetCauseOfDeath($"{causeOfDeath}에 의해 사망");
             yield return _deathScreen.FadeIn();
         }
 
@@ -252,6 +273,11 @@ public sealed class StageManager : MonoBehaviour
 
     private void InitializeScene(Scene scene, bool preserveCheckpoint)
     {
+        if (_deathScreen == null)
+        {
+            _deathScreen = FindFirstObjectByType<DeathScreenView>(FindObjectsInactive.Include);
+        }
+
         RespawnPoint[] points = FindSceneRespawnPoints(scene);
         if (points.Length == 0)
         {

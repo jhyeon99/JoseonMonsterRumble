@@ -4,6 +4,7 @@ using UnityEngine;
 public class EnemyMeleeCombat : EnemyCombat, IParryable
 {
     [SerializeField] private Collider2D _attackCollider;
+    [SerializeField] private string _attackName = "근접 공격";
 
     [Header("가드 / 패링")]
 
@@ -12,7 +13,6 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
     [Tooltip("패링당했을 때 그로기 시간 (초)")]
     [SerializeField, Min(0f)]
     private float _groggyDuration = 2f;
-
     private Coroutine _attackCoroutine;
     private float _currentDamage;
     public float CurrentDamage => _currentDamage;
@@ -55,13 +55,20 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
             hitPoint,
             Enemy.GetDirectionToPlayer(),
             _defense,
-            this
+            this,
+            0,
+            _attackName
         );
 
         // 가드 / 패링으로 막히면 false
         if (damageable.TakeDamage(hitData))
         {
             _attackCollider.enabled = false;
+            if (Enemy.MoveType is EnemyFlyingMove flyingMove)
+            {
+                flyingMove.ApplyHitSlowdown();
+            }
+
             Debug.Log($"플레이어에게 근접공격으로 {_currentDamage}만큼 피해를 입힘.");
         }
     }
@@ -70,11 +77,12 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
     {
         // 패링당하면 공격 판정을 바로 끄고 그로기
         StopAttack();
+        Enemy.Animation.PlayParriedHit();
         Enemy.EnterGroggy(_groggyDuration);
         Debug.Log($"{name}: 근접 공격이 패링당함 → 그로기 {_groggyDuration}초");
     }
 
-    private void StopAttack()
+    public override void StopAttack()
     {
         if (_attackCoroutine != null)
         {
@@ -83,6 +91,11 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
         }
 
         _attackCollider.enabled = false;
+    }
+
+    private void OnDisable()
+    {
+        StopAttack();
     }
 
     public void CalculateDamage(float percentage)
