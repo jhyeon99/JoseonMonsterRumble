@@ -39,6 +39,19 @@ public class BossTonguePattern : BossPattern
     [SerializeField, Min(0f)]
     private float _minLength = 0.2f;
 
+    [Header("사정거리")]
+    [Tooltip("켜면 혀를 끝까지 뻗었을 때 닿는 거리(Tip X 기준) 안에 플레이어가 있을 때만 사용")]
+    [SerializeField]
+    private bool _useTongueLengthAsRange = true;
+
+    [Tooltip("혀 길이 기준 사정거리에 더하는 여유 (월드 거리). 음수면 더 가까워야 사용")]
+    [SerializeField]
+    private float _rangeMargin = 0f;
+
+    [Tooltip("혀 길이를 쓰지 않을 때 사정거리 (보스 중심에서 플레이어까지 가로 거리). 0이면 거리 제한 없음")]
+    [SerializeField, Min(0f)]
+    private float _manualRange = 0f;
+
     private BoxCollider2D _box;
     private Vector2 _originalSize;
     private Vector2 _originalOffset;
@@ -67,6 +80,37 @@ public class BossTonguePattern : BossPattern
         {
             Debug.LogWarning($"{name}: 혀 판정에 BoxCollider2D가 없어 길이 늘이기를 사용하지 않습니다.", this);
         }
+    }
+
+    /// <summary>층 / 쿨타임 조건에 더해, 플레이어가 혀 사정거리 안에 있을 때만 사용</summary>
+    public override bool CanUse()
+    {
+        if (!base.CanUse())
+        {
+            return false;
+        }
+
+        float range = GetRange();
+        if (range <= 0f || Boss.Player == null)
+        {
+            return true;
+        }
+
+        // 패턴 시작 때 플레이어 쪽으로 돌아보므로 방향과 관계없이 가로 거리만 비교
+        float distance = Mathf.Abs(Boss.Player.position.x - Boss.Position.x);
+        return distance <= range;
+    }
+
+    /// <summary>사정거리 (보스 중심 → 혀 끝 가로 거리 + 여유). 0이면 제한 없음</summary>
+    private float GetRange()
+    {
+        if (_useTongueLengthAsRange && _hitbox != null)
+        {
+            Vector3 tip = _hitbox.transform.TransformPoint(new Vector3(_tipX, 0f, 0f));
+            return Mathf.Max(0f, Mathf.Abs(tip.x - Boss.Position.x) + _rangeMargin);
+        }
+
+        return _manualRange;
     }
 
     protected override IEnumerator Execute()
@@ -157,6 +201,18 @@ public class BossTonguePattern : BossPattern
         Gizmos.DrawLine(root, tip);
         Gizmos.DrawWireSphere(root, 0.15f);
         Gizmos.DrawWireSphere(tip, 0.15f);
+
+        // 사정거리 (보스 중심 기준 좌우)
+        Boss boss = GetComponentInParent<Boss>();
+        if (boss != null && _useTongueLengthAsRange)
+        {
+            float range = Mathf.Abs(tip.x - boss.transform.position.x) + _rangeMargin;
+            Vector3 center = boss.transform.position;
+            Gizmos.color = new Color(1f, 0.3f, 0.6f, 0.35f);
+            Gizmos.DrawLine(center + Vector3.left * range + Vector3.down * 0.5f, center + Vector3.left * range + Vector3.up * 3f);
+            Gizmos.DrawLine(center + Vector3.right * range + Vector3.down * 0.5f, center + Vector3.right * range + Vector3.up * 3f);
+            Gizmos.color = new Color(1f, 0.3f, 0.6f, 0.9f);
+        }
 
         // 최대로 뻗었을 때 판정 범위
         Matrix4x4 previous = Gizmos.matrix;
