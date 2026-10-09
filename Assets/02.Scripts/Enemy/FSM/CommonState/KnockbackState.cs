@@ -32,7 +32,7 @@ public class KnockbackState : EnemyState
         Vector2 knockbackVelocity = Vector2.up * verticalVelocity;
         knockbackVelocity.x = Mathf.Sign(_hitData.AttackDirection.x) * _hitData.KnockbackForce;
 
-        _enemy.EnemyRb.linearVelocity = knockbackVelocity;
+        _enemy.EnemyRb.linearVelocity = _enemy.MoveType.CalculateSafeKnockbackVelocity(knockbackVelocity);
         _minKnockbackTimer = _hitData.IsTalisman ? 0f : MinKnockbackDuration;
     }
 

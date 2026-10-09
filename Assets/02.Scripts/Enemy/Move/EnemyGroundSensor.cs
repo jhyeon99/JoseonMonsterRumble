@@ -9,6 +9,7 @@ public class EnemyGroundSensor : MonoBehaviour
     private const float GroundNormalThreshold = 0.7f;
     private const float ProbeSize = 0.05f;
     private const float ProbeLift = 0.1f;
+    private const int EdgeSearchIterations = 8;
 
     [Header("절벽 안전 감지 설정")]
     [SerializeField, Min(0f)] private float _edgeMargin = 0.1f;
@@ -19,6 +20,8 @@ public class EnemyGroundSensor : MonoBehaviour
     private ContactFilter2D _groundFilter;
     private Collider2D _bodyCollider;
     private Rigidbody2D _rigidbody;
+    private float _supportedBottomY;
+    private bool _hasSupportedBottom;
 
     public float EdgeMargin => _edgeMargin;
     public float GroundProbeDepth => _groundProbeDepth;
@@ -66,10 +69,86 @@ public class EnemyGroundSensor : MonoBehaviour
             if (contact.normal.y <= GroundNormalThreshold) continue;
             if (contact.normalImpulse <= 0f) continue;
 
+            if (_bodyCollider != null)
+            {
+                _supportedBottomY = _bodyCollider.bounds.min.y;
+                _hasSupportedBottom = true;
+            }
             return true;
         }
 
         return false;
+    }
+
+    /// <summary>떠오르기 전 지면 높이에서 경로를 검사하여 절벽을 넘지 않는 수평 속도를 반환한다.</summary>
+    public float CalculateSafeKnockbackSpeed(float speed)
+    {
+        EnsureInitialized();
+        IsGrounded();
+        if (speed == 0f || !_hasSupportedBottom || _bodyCollider == null || _rigidbody == null)
+        {
+            return 0f;
+        }
+
+        Bounds bounds = _bodyCollider.bounds;
+        float direction = Mathf.Sign(speed);
+        float frontX = bounds.center.x + direction * (bounds.extents.x + _edgeMargin);
+        float distance = Mathf.Abs(speed) * Time.fixedDeltaTime;
+        float safeDistance = 0f;
+
+        // 끝점뿐 아니라 경로도 검사하여 강한 넉백으로 좁은 틈을 건너가지 않게 한다.
+        while (safeDistance < distance)
+        {
+            float nextDistance = Mathf.Min(safeDistance + ProbeSize, distance);
+            if (HasGroundBelow(frontX + direction * nextDistance, _supportedBottomY))
+            {
+                safeDistance = nextDistance;
+                continue;
+            }
+
+            float blockedDistance = nextDistance;
+            for (int i = 0; i < EdgeSearchIterations; i++)
+            {
+                float middleDistance = (safeDistance + blockedDistance) * 0.5f;
+                if (HasGroundBelow(frontX + direction * middleDistance, _supportedBottomY))
+                {
+                    safeDistance = middleDistance;
+                }
+                else
+                {
+                    blockedDistance = middleDistance;
+                }
+            }
+            break;
+        }
+
+        return direction * safeDistance / Time.fixedDeltaTime;
+    }
+
+    private bool HasGroundBelow(float x, float bottomY)
+    {
+        var origin = new Vector2(x, bottomY + ProbeLift);
+        return HasGroundBelow(origin);
+    }
+
+    private bool HasGroundBelow(Vector2 origin)
+    {
+        int count = Physics2D.BoxCast(origin, Vector2.one * ProbeSize, 0f, Vector2.down,
+            _groundFilter, _groundHits, ProbeLift + _groundProbeDepth);
+        for (int i = 0; i < count; i++)
+        {
+            if (_groundHits[i].normal.y > GroundNormalThreshold)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void OnDisable()
+    {
+        _hasSupportedBottom = false;
+        _supportedBottomY = 0f;
     }
 
     /// <summary>
@@ -102,23 +181,6 @@ public class EnemyGroundSensor : MonoBehaviour
             bounds.center.x + direction * (bounds.extents.x + _edgeMargin + lookAhead),
             bounds.min.y + ProbeLift);
 
-        int count = Physics2D.BoxCast(
-            origin,
-            Vector2.one * ProbeSize,
-            0f,
-            Vector2.down,
-            _groundFilter,
-            _groundHits,
-            ProbeLift + _groundProbeDepth);
-
-        for (int i = 0; i < count; i++)
-        {
-            if (_groundHits[i].normal.y > GroundNormalThreshold)
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return HasGroundBelow(origin);
     }
 }

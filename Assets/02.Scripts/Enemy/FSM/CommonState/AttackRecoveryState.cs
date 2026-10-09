@@ -14,7 +14,7 @@ public class AttackRecoveryState : EnemyState
     {
         Debug.Log("휴식 시작");
         _recoveryTimer = _enemy.Data.AttackRecoveryTime;
-        if (_enemy.Data.HasStationaryAttackCycle)
+        if (_enemy.MoveType is EnemyGroundMove || _enemy.Data.HasStationaryAttackCycle)
         {
             _enemy.MoveType.StopMove();
             _enemy.Animation.SetRunning(false);
@@ -24,7 +24,7 @@ public class AttackRecoveryState : EnemyState
 
     public override void FixedUpdate()
     {
-        if (_enemy.Data.HasStationaryAttackCycle)
+        if (_enemy.MoveType is EnemyGroundMove || _enemy.Data.HasStationaryAttackCycle)
         {
             return;
         }
@@ -77,6 +77,11 @@ public class AttackRecoveryState : EnemyState
     {
         Debug.Log("휴식 종료");
         _enemy.MoveType.IsBackMove = false;
+        _recoveryTimer = 0f;
+        if (_enemy.MoveType is EnemyGroundMove)
+        {
+            return;
+        }
         if (_enemy.MoveArea != null && _enemy.Target != null)
         {
             if (!_enemy.MoveArea.IsPositionInChaseArea(_enemy.Target.position))

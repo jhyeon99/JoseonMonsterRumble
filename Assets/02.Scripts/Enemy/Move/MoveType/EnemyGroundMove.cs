@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class EnemyGroundMove : EnemyMoveType
 {
-    private const float GroundNormalThreshold = 0.7f;
     private const float LandingVelocityThreshold = 0.1f;
     private const float PositionTolerance = 0.1f;
     private const int StopCurveSamples = 32;
@@ -23,9 +22,9 @@ public class EnemyGroundMove : EnemyMoveType
     public bool IsWalkStopped => _walkMotionState == WalkMotionState.Stopped &&
         (!Enemy.Data.UseWalkAnimationMotion || Enemy.Animation.GetWalkPhase(out _) == EnemyWalkPhase.None);
 
-    public bool HasWalkFacingControl => Enemy.Data.UseWalkAnimationMotion &&
+    public bool HasWalkFacingControl =>
         (Enemy.StateMachine.CurrentState is IdleState || Enemy.StateMachine.CurrentState is ChaseState ||
-         Enemy.StateMachine.CurrentState is ReturnToStartState || Enemy.StateMachine.CurrentState is AttackRecoveryState ||
+         Enemy.StateMachine.CurrentState is ReturnToStartState || Enemy.StateMachine.CurrentState is GroundRangedSpacingState ||
          Enemy.StateMachine.CurrentState is AlertState);
 
     protected override void Awake()
@@ -67,12 +66,17 @@ public class EnemyGroundMove : EnemyMoveType
 
     public override void KnockbackPhysicsUpdate(bool isHorizontalOnly)
     {
-        if (!isHorizontalOnly)
+        if (isHorizontalOnly)
         {
-            return;
+            UpdateHorizontalKnockback();
         }
+        Rigidbody.linearVelocity = CalculateSafeKnockbackVelocity(Rigidbody.linearVelocity);
+    }
 
-        UpdateHorizontalKnockback();
+    public override Vector2 CalculateSafeKnockbackVelocity(Vector2 velocity)
+    {
+        velocity.x = _groundSensor != null ? _groundSensor.CalculateSafeKnockbackSpeed(velocity.x) : 0f;
+        return velocity;
     }
 
     public override bool IsKnockbackFinished(bool isHorizontalOnly)
@@ -145,6 +149,16 @@ public class EnemyGroundMove : EnemyMoveType
         _walkStepDistance = Mathf.Abs(directionX);
     }
 
+    public void MoveToTargetPosition(Vector2 position)
+    {
+        MoveToPosition(position);
+    }
+
+    public void FaceTarget()
+    {
+        HandleFlip(Enemy.GetDirectionToPlayer().x);
+    }
+
     public override bool IsArrivedAtStart()
     {
         return Mathf.Abs(Rigidbody.position.x - Enemy.MoveArea.StartPosition.x) <= PositionTolerance && IsGrounded();
@@ -199,11 +213,7 @@ public class EnemyGroundMove : EnemyMoveType
             StartWalk(speed);
             return;
         }
-        if (Enemy.StateMachine.CurrentState is IdleState || Enemy.StateMachine.CurrentState is ReturnToStartState ||
-            Enemy.StateMachine.CurrentState is AlertState)
-        {
-            HandleFlip(speed);
-        }
+        HandleFlip(speed);
         Enemy.Animation.SetRunning(true);
         Rigidbody.linearVelocity = new Vector2(speed, Rigidbody.linearVelocity.y);
     }
@@ -256,7 +266,7 @@ public class EnemyGroundMove : EnemyMoveType
         // 전투·사망 상태의 속도는 해당 상태가 소유한다. 걷기 속도로 덮어쓰지 않는다.
         EnemyState state = Enemy.StateMachine.CurrentState;
         if (!(state is IdleState || state is ChaseState ||
-              state is ReturnToStartState || state is AttackRecoveryState || state is AlertState))
+              state is ReturnToStartState || state is GroundRangedSpacingState || state is AlertState))
         {
             ResetWalkMotion();
             return;
@@ -322,6 +332,12 @@ public class EnemyGroundMove : EnemyMoveType
     private float CalculateStopLookAhead(float speed)
     {
         return Mathf.Abs(speed) * (_walkStopTravelTime + Time.fixedDeltaTime);
+    }
+
+    public bool CanMoveInDirection(float direction)
+    {
+        float speed = direction * Enemy.Data.MoveSpeed;
+        return IsGrounded() && CanMoveAhead(speed, CalculateStopLookAhead(speed));
     }
 
     private bool CanMoveAhead(float speed, float lookAhead)

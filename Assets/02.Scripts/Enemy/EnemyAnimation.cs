@@ -15,6 +15,7 @@ public class EnemyAnimation : MonoBehaviour
     private const int AnimationLayer = 0;
     private static readonly int HitTagHash = Animator.StringToHash("Hit");
     private static readonly int AttackTagHash = Animator.StringToHash("Attack");
+    private static readonly int ProvokeTagHash = Animator.StringToHash("Provoke");
     private static readonly int WalkStartTagHash = Animator.StringToHash("WalkStart");
     private static readonly int WalkLoopTagHash = Animator.StringToHash("WalkLoop");
     private static readonly int WalkEndTagHash = Animator.StringToHash("WalkEnd");
@@ -24,6 +25,7 @@ public class EnemyAnimation : MonoBehaviour
 
     private readonly int _isRunning = Animator.StringToHash("isRunning");
     private readonly int _attack = Animator.StringToHash("attack");
+    private readonly int _provoke = Animator.StringToHash("provoke");
     private readonly int _hit = Animator.StringToHash("hit");
     private readonly int _die = Animator.StringToHash("die");
     private readonly int _isGroggy = Animator.StringToHash("isGroggy");
@@ -54,6 +56,9 @@ public class EnemyAnimation : MonoBehaviour
     }
 
     public void PlayAttack() => _animator.SetTrigger(_attack);
+    public void ResetAttackTrigger() => _animator.ResetTrigger(_attack);
+    public void PlayProvoke() => _animator.SetTrigger(_provoke);
+    public void ResetProvokeTrigger() => _animator.ResetTrigger(_provoke);
     public void PlayHit() => _animator.SetTrigger(_hit);
 
     public void PlayDamageHit(HitData hitData)
@@ -83,6 +88,8 @@ public class EnemyAnimation : MonoBehaviour
     public bool IsPlayingHit() => IsPlayingTaggedState(HitTagHash);
 
     public bool IsPlayingAttack() => IsPlayingTaggedState(AttackTagHash);
+
+    public bool IsPlayingProvoke() => IsPlayingTaggedState(ProvokeTagHash);
 
     private bool IsPlayingTaggedState(int tagHash)
     {
