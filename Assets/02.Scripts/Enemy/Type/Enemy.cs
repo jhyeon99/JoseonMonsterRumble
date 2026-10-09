@@ -49,7 +49,7 @@ public abstract class Enemy : MonoBehaviour, IFinishable
     public bool IsGroggy => _stateMachine.CurrentState is GroggyState;
 
     /// <summary>죽는 중이거나 날아가는 중 (더 이상 행동 / 피격 / 공격하지 않음)</summary>
-    public bool IsDefeated => _stateMachine.CurrentState is DeadState || _stateMachine.CurrentState is LaunchedState;
+    public bool IsDefeated => _stateMachine?.CurrentState is DeadState || _stateMachine?.CurrentState is LaunchedState;
 
     /// <summary>그로기 시작 (패링당했을 때 공격 컴포넌트가 호출)</summary>
     public void EnterGroggy(float duration)
@@ -100,9 +100,17 @@ public abstract class Enemy : MonoBehaviour, IFinishable
 
     #endregion
 
+    protected virtual void OnEnable()
+    {
+        // 최초 등록은 Start에서 초기화가 끝난 뒤 수행한다.
+        if (_stateMachine?.CurrentState != null && EnemyManager.Instance != null)
+            EnemyManager.Instance.AddEnemy(this);
+    }
+
     protected virtual void OnDisable()
     {
-        EnemyManager.Instance.RemoveEnemy(this);
+        if (EnemyManager.Instance != null)
+            EnemyManager.Instance.RemoveEnemy(this);
     }
 
     protected virtual void Awake()

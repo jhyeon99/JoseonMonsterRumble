@@ -25,6 +25,13 @@ public class EnemyAnimation : MonoBehaviour
     // 그로기 모션이 애니메이터에 추가되기 전에도 경고 없이 동작하도록 파라미터 유무를 한 번만 확인
     private bool? _hasGroggyParam;
 
+    private void Awake()
+    {
+        // AI 상태와 Animator 상태를 재활성화 후에도 함께 유지한다.
+        if (_animator != null)
+            _animator.keepAnimatorStateOnDisable = true;
+    }
+
     public void SetRunning(bool isRunning)
     {
         _animator.SetBool(_isRunning, isRunning);

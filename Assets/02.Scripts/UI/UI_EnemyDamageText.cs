@@ -10,9 +10,9 @@ public class UI_EnemyDamageText : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _textPrefab;
     [SerializeField, Min(0.01f)] private float _duration = 0.8f;
     [SerializeField] private float _riseDistance = 60f;
-    [SerializeField] private Vector2 _offset = new Vector2(0f, 30f);
+    [SerializeField] private Vector2 _offset = new Vector2(10f, 30f);
     [SerializeField] private Color _textColor = Color.white;
-    [SerializeField, Min(1f)] private float _fontSize = 28f;
+    [SerializeField, Min(1f)] private float _fontSize = 56f;
     private Canvas _canvas;
     private RectTransform _container;
     private readonly List<TextMeshProUGUI> _activeTexts = new List<TextMeshProUGUI>();
@@ -35,7 +35,8 @@ public class UI_EnemyDamageText : MonoBehaviour
         GameEvents.OnEnemyHit -= ShowDamage;
         StopAllCoroutines();
         foreach (TextMeshProUGUI text in _activeTexts)
-            if (text != null) Destroy(text.gameObject);
+            if (text != null)
+                Destroy(text.gameObject);
         _activeTexts.Clear();
     }
 
@@ -60,6 +61,7 @@ public class UI_EnemyDamageText : MonoBehaviour
             text.alignment = TextAlignmentOptions.Center;
             text.rectTransform.sizeDelta = new Vector2(160f, 60f);
         }
+
         text.text = hitData.Damage.ToString("0.#");
         text.raycastTarget = false;
         text.gameObject.SetActive(true);
@@ -80,12 +82,13 @@ public class UI_EnemyDamageText : MonoBehaviour
             Vector3 screenPosition = worldCamera.WorldToScreenPoint(position);
             if (screenPosition.z <= 0f) break;
             if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                _container, screenPosition, uiCamera, out Vector2 localPosition))
+                    _container, screenPosition, uiCamera, out Vector2 localPosition))
                 text.rectTransform.localPosition = localPosition + _offset + Vector2.up * (_riseDistance * progress);
             text.color = new Color(color.r, color.g, color.b, color.a * (1f - progress));
             elapsed += Time.unscaledDeltaTime;
             yield return null;
         }
+
         _activeTexts.Remove(text);
         if (text != null) Destroy(text.gameObject);
     }
