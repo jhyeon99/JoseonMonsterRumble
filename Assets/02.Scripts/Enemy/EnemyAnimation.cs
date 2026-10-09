@@ -15,7 +15,6 @@ public class EnemyAnimation : MonoBehaviour
     private const int AnimationLayer = 0;
     private static readonly int HitTagHash = Animator.StringToHash("Hit");
     private static readonly int AttackTagHash = Animator.StringToHash("Attack");
-    private static readonly int ProvokeTagHash = Animator.StringToHash("Provoke");
     private static readonly int WalkStartTagHash = Animator.StringToHash("WalkStart");
     private static readonly int WalkLoopTagHash = Animator.StringToHash("WalkLoop");
     private static readonly int WalkEndTagHash = Animator.StringToHash("WalkEnd");
@@ -88,8 +87,6 @@ public class EnemyAnimation : MonoBehaviour
     public bool IsPlayingHit() => IsPlayingTaggedState(HitTagHash);
 
     public bool IsPlayingAttack() => IsPlayingTaggedState(AttackTagHash);
-
-    public bool IsPlayingProvoke() => IsPlayingTaggedState(ProvokeTagHash);
 
     private bool IsPlayingTaggedState(int tagHash)
     {

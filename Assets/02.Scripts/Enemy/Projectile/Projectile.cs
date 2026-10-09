@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public abstract class Projectile : MonoBehaviour, IParryable
@@ -10,7 +9,6 @@ public abstract class Projectile : MonoBehaviour, IParryable
     private string _attackName;
 
     [SerializeField] private ProjectileType _type;
-    [SerializeField] private float _curveHeight = 5f;
     [SerializeField] private float _returnPoolTimer = 5f;
 
     [Header("가드 / 패링")]
@@ -30,7 +28,6 @@ public abstract class Projectile : MonoBehaviour, IParryable
     private float _returnPoolTime = 0f;
     public ProjectileType Type => _type;
     protected float Speed { get; private set; }
-    protected Vector2 ControlPoint { get; private set; }
     protected Vector2 MuzzlePosition { get; private set; }
     protected Vector2 PlayerPosition { get; private set; }
     protected float _t;
@@ -44,14 +41,15 @@ public abstract class Projectile : MonoBehaviour, IParryable
 
     // 반사 상태
     private int _originalLayer;
-    private Transform _muzzleTransform;
     private Collider2D _shooterCollider;
     private bool _isReflected;
     private Vector2 _reflectDirection;
     private float _reflectSpeed;
     public bool IsReflected => _isReflected;
+    protected Vector2 ReflectDirection => _reflectDirection;
+    protected bool ShouldIgnoreReturnGround => _ignoreGroundWhenReturning && IsReturningToShooter();
 
-    private void Awake()
+    protected virtual void Awake()
     {
         Speed = _data.ProjectileSpeed;
         _projectileDamage = _data.ProjectileDamage;
@@ -59,11 +57,11 @@ public abstract class Projectile : MonoBehaviour, IParryable
         _originalLayer = gameObject.layer;
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         if (_isReflected)
         {
-            MoveReflected();
+            MoveReflected(Time.deltaTime);
         }
         else
         {
@@ -73,7 +71,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
         ReturnProjectile();
     }
 
-    private void ReturnProjectile()
+    protected void ReturnProjectile()
     {
         _returnPoolTime -= Time.deltaTime;
         if (_returnPoolTime <= 0f)
@@ -86,7 +84,6 @@ public abstract class Projectile : MonoBehaviour, IParryable
     public virtual void OnSpawn(Transform muzzlePoint, Transform playerPoint, float damageIncreaseValue)
     {
         MuzzlePosition = muzzlePoint.position;
-        _muzzleTransform = muzzlePoint;
         _shooterCollider = FindShooterCollider(muzzlePoint);
         Transform player = playerPoint;
 
@@ -95,7 +92,6 @@ public abstract class Projectile : MonoBehaviour, IParryable
             PlayerPosition = player.position;
         }
 
-        ControlPoint = (MuzzlePosition + PlayerPosition) / 2f + new Vector2(0f, _curveHeight);
         _t = 0f;
         _isLaunching = true;
         _returnPoolTime = _returnPoolTimer;
@@ -128,27 +124,23 @@ public abstract class Projectile : MonoBehaviour, IParryable
 
         if (other.TryGetComponent<IDamageable>(out IDamageable damageable))
         {
-            var hitData = new HitData(
-                _projectileDamage,
-                _data.KnockbackForce,
-                hitPoint,
-                HitDirection,
-                _defense,
-                this,
-                0,
-                AttackName
-            );
-
-            damageable.TakeDamage(hitData);
-
-            // 패링당해 반사됐으면 사라지지 않고 되돌아감
-            if (_isReflected)
-            {
-                return;
-            }
+            ApplyHit(damageable, hitPoint);
+            return;
         }
 
         gameObject.SetActive(false);
+    }
+
+    protected void ApplyHit(IDamageable damageable, Vector2 hitPoint)
+    {
+        var hitData = new HitData(_projectileDamage, _data.KnockbackForce, hitPoint,
+            HitDirection, _defense, this, 0, AttackName);
+        damageable.TakeDamage(hitData);
+        // 무적과 가드에는 소멸하고, 피해 처리 중 패링됐을 때만 반사를 유지한다.
+        if (!_isReflected)
+        {
+            gameObject.SetActive(false);
+        }
     }
 
     public void IncreaseDamage(float percentage)
@@ -236,7 +228,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
         return bounds.Contains(position);
     }
 
-    private void MoveReflected()
+    protected void MoveReflected(float deltaTime)
     {
         // 쏜 적 몸에 도착했는데도 남아 있으면 (이미 쓰러진 적 등) 더 따라가지 않고 직진
         if (IsReturningToShooter() && IsInsideShooter())
@@ -251,7 +243,12 @@ public abstract class Projectile : MonoBehaviour, IParryable
             UpdateReflectRotation();
         }
 
-        transform.position += (Vector3)(_reflectDirection * _reflectSpeed * Time.deltaTime);
+        MoveProjectile(_reflectDirection * _reflectSpeed * deltaTime);
+    }
+
+    protected virtual void MoveProjectile(Vector2 displacement)
+    {
+        transform.position += (Vector3)displacement;
     }
 
     private void UpdateReflectRotation()
@@ -261,7 +258,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
         transform.rotation = Quaternion.Euler(0f, 0f, angle);
     }
 
-    private void HandleReflectedHit(Collider2D other)
+    protected void HandleReflectedHit(Collider2D other)
     {
         // 벽 / 바닥에 닿으면 사라짐 (쏜 적에게 되돌아가는 중이면 통과)
         if ((Constants.Layers.GroundAllMask & (1 << other.gameObject.layer)) != 0)
@@ -286,10 +283,15 @@ public abstract class Projectile : MonoBehaviour, IParryable
             return;
         }
 
+        ApplyReflectedHit(damageable, other.ClosestPoint(transform.position));
+    }
+
+    protected void ApplyReflectedHit(IDamageable damageable, Vector2 hitPoint)
+    {
         var hitData = new HitData(
             _projectileDamage,
             _data.KnockbackForce,
-            other.ClosestPoint(transform.position),
+            hitPoint,
             _reflectDirection,
             attackName: "반사된 투사체",
             isReflectedProjectile: true
