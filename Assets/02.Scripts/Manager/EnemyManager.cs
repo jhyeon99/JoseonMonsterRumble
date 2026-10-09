@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using System;
 using System.Collections.Generic;
 
@@ -8,6 +9,7 @@ public class EnemyManager : MonoBehaviour
     public static EnemyManager Instance => _instance;
     public List<Enemy> ActiveEnemies { get; private set; } = new List<Enemy>();
     public event Action OnAllAttackersKilled;
+    private readonly HashSet<Enemy> _allEnemies = new HashSet<Enemy>();
 
     [Header("버프 대상 카메라 범위")]
     [SerializeField] private Camera _buffCamera;
@@ -22,15 +24,53 @@ public class EnemyManager : MonoBehaviour
         }
         _instance = this;
         DontDestroyOnLoad(gameObject);
+        CacheSceneEnemies();
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+        SceneManager.sceneUnloaded += HandleSceneUnloaded;
     }
 
     private void OnDestroy()
     {
-        if (_instance == this) _instance = null;
+        if (_instance != this) return;
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+        SceneManager.sceneUnloaded -= HandleSceneUnloaded;
+        _instance = null;
+    }
+
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        CacheSceneEnemies();
+    }
+
+    private void HandleSceneUnloaded(Scene scene)
+    {
+        _allEnemies.RemoveWhere(enemy => enemy == null);
+        ActiveEnemies.RemoveAll(enemy => enemy == null);
+    }
+
+    private void CacheSceneEnemies()
+    {
+        // 최초 초기화와 씬 로드 때만 Awake가 실행되지 않은 비활성 적까지 등록한다.
+        _allEnemies.RemoveWhere(enemy => enemy == null);
+        Enemy[] enemies = FindObjectsByType<Enemy>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (Enemy enemy in enemies) RegisterEnemy(enemy);
+    }
+
+    public void RegisterEnemy(Enemy enemy)
+    {
+        if (enemy != null) _allEnemies.Add(enemy);
+    }
+
+    public void UnregisterEnemy(Enemy enemy)
+    {
+        _allEnemies.Remove(enemy);
+        ActiveEnemies.Remove(enemy);
     }
 
     public void AddEnemy(Enemy enemy)
     {
+        if (enemy == null) return;
+        RegisterEnemy(enemy);
         if (!ActiveEnemies.Contains(enemy)) ActiveEnemies.Add(enemy);
     }
 
@@ -88,11 +128,10 @@ public class EnemyManager : MonoBehaviour
 
     public bool HasAnyAttacker()
     {
-        // 카메라 밖 비활성화된 생존자와 아직 Awake가 실행되지 않은 적도 포함한다.
-        Enemy[] enemies = FindObjectsByType<Enemy>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-        foreach (Enemy enemy in enemies)
+        // 비활성화된 적도 유지하는 캐시를 순회하며, 조회 시 배열을 생성하지 않는다.
+        foreach (Enemy enemy in _allEnemies)
         {
-            if (enemy.Type == EnemyType.Attacker && !enemy.IsDefeated &&
+            if (enemy != null && enemy.Type == EnemyType.Attacker && !enemy.IsDefeated &&
                 (enemy.Health == null || enemy.Health.IsAlive)) return true;
         }
         return false;
