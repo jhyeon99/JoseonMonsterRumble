@@ -92,8 +92,9 @@ public abstract class EnemyMoveType : MonoBehaviour
 
         Vector2 velocity = Rigidbody.linearVelocity;
         velocity.x = _lightKnockbackSpeed;
+        velocity = CalculateSafeKnockbackVelocity(velocity);
         Rigidbody.linearVelocity = velocity;
-        _lightKnockbackSpeed = Mathf.MoveTowards(_lightKnockbackSpeed, 0f,
+        _lightKnockbackSpeed = Mathf.MoveTowards(velocity.x, 0f,
             _knockbackDeceleration * Time.fixedDeltaTime);
         return true;
     }
@@ -111,6 +112,11 @@ public abstract class EnemyMoveType : MonoBehaviour
     }
 
     protected virtual void HandleLightKnockbackEnd(Vector2 displacement) { }
+
+    public virtual Vector2 CalculateSafeKnockbackVelocity(Vector2 velocity)
+    {
+        return velocity;
+    }
 
     protected void ResetLightKnockbackOrigin()
     {

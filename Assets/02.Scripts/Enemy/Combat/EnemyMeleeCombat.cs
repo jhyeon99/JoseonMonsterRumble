@@ -15,11 +15,19 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
     private float _groggyDuration = 2f;
     private Coroutine _attackCoroutine;
     private float _currentDamage;
+    private Transform _heightTarget;
+    private Collider2D _heightTargetCollider;
+    private BoxCollider2D _groundAttackBox;
     public float CurrentDamage => _currentDamage;
 
     protected override void Awake()
     {
         base.Awake();
+        _groundAttackBox = _attackCollider as BoxCollider2D;
+        if (TryGetComponent<EnemyGroundMove>(out _) && _groundAttackBox == null)
+        {
+            Debug.LogError("EnemyMeleeCombat: 지상 공격 높이 확인에는 BoxCollider2D가 필요합니다.", this);
+        }
         _attackCollider.enabled = false;
     }
 
@@ -29,6 +37,24 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
         CalculateDamage(DamageIncreaseValue);
 
         _attackCoroutine = StartCoroutine(AttackRoutine());
+    }
+
+    public bool IsTargetInAttackHeight(Transform target)
+    {
+        if (target != _heightTarget)
+        {
+            _heightTarget = target;
+            _heightTargetCollider = target != null ? target.GetComponent<Collider2D>() : null;
+        }
+        if (_heightTargetCollider == null || _groundAttackBox == null)
+        {
+            return false;
+        }
+        // 비활성 공격 콜라이더의 bounds는 비어 있으므로 로컬 모양으로 높이를 계산한다.
+        float centerY = _groundAttackBox.transform.TransformPoint(_groundAttackBox.offset).y;
+        float halfHeight = _groundAttackBox.size.y * Mathf.Abs(_groundAttackBox.transform.lossyScale.y) * 0.5f;
+        Bounds targetBounds = _heightTargetCollider.bounds;
+        return targetBounds.max.y >= centerY - halfHeight && targetBounds.min.y <= centerY + halfHeight;
     }
 
     private IEnumerator AttackRoutine()

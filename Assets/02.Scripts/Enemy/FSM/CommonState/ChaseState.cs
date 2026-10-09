@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class ChaseState : EnemyState
 {
@@ -23,15 +23,26 @@ public class ChaseState : EnemyState
 
     public override void FixedUpdate()
     {
-        if (!(_enemy.MoveType is EnemyGroundMove))
+        if (_enemy.Target == null || (_enemy.MoveType is EnemyGroundMove && (ShouldFlee() || CanStartAttack())))
         {
-            _enemy.Animation.SetRunning(true);
+            return;
         }
+        if (_enemy.MoveType is EnemyGroundMove groundMove)
+        {
+            groundMove.MoveToTargetPosition(_enemy.Target.position);
+            return;
+        }
+        _enemy.Animation.SetRunning(true);
         _enemy.MoveType.Move(_enemy.GetDirectionToPlayer());
     }
 
     public override void Update()
     {
+        if (_enemy.Target == null)
+        {
+            _enemy.StateMachine.ChangeState(new AlertState(_enemy, _lastSeenPosition));
+            return;
+        }
         if (_enemy.MoveArea != null && _enemy.Target != null)
         {
             if (!_enemy.MoveArea.IsPositionInChaseArea(_enemy.Target.position))
@@ -44,34 +55,45 @@ public class ChaseState : EnemyState
             _lastSeenPosition = _enemy.Target.position;
         }
 
-        if (_enemy.Combat is EnemyMeleeCombat)
+        if (ShouldFlee())
         {
-            if (_enemy.GetDistanceXToPlayer() <= _enemy.Data.AttackDetectRange)
+            _exitMotion = ExitMotion.Continue;
+            _enemy.StateMachine.ChangeState(new GroundRangedSpacingState(_enemy));
+            return;
+        }
+        if (CanStartAttack())
+        {
+            if (_enemy.MoveType is EnemyGroundMove)
             {
-                if (_enemy.MoveType is EnemyGroundMove)
+                if (_enemy.Combat is EnemyRangedCombat && Random.value < _enemy.Data.ProvokeChance)
                 {
-                    _enemy.StateMachine.ChangeState(new AttackPrepareGroundState(_enemy));
+                    _enemy.StateMachine.ChangeState(new EnemyProvokeState(_enemy));
+                    return;
                 }
-                else if (_enemy.MoveType is EnemyFlyingMove)
-                {
-                    _enemy.StateMachine.ChangeState(new AttackPrepareFlyingState(_enemy));
-                }
+                _enemy.StateMachine.ChangeState(AttackPrepareGroundState.CreateAttackEntryState(_enemy));
+            }
+            else if (_enemy.MoveType is EnemyFlyingMove)
+            {
+                _enemy.StateMachine.ChangeState(new AttackPrepareFlyingState(_enemy));
             }
         }
-        else
+    }
+
+    private bool ShouldFlee()
+    {
+        return _enemy.MoveType is EnemyGroundMove && _enemy.Combat is EnemyRangedCombat &&
+            _enemy.Data.RangedFleeStartDistance > 0f &&
+            _enemy.GetDistanceXToPlayer() < _enemy.Data.RangedFleeStartDistance;
+    }
+
+    private bool CanStartAttack()
+    {
+        if (_enemy.Combat is EnemyMeleeCombat melee)
         {
-            if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
-            {
-                if (_enemy.MoveType is EnemyGroundMove)
-                {
-                    _enemy.StateMachine.ChangeState(new AttackPrepareGroundState(_enemy));
-                }
-                else if (_enemy.MoveType is EnemyFlyingMove)
-                {
-                    _enemy.StateMachine.ChangeState(new AttackPrepareFlyingState(_enemy));
-                }
-            }
+            return _enemy.GetDistanceXToPlayer() <= _enemy.Data.AttackDetectRange &&
+                (!(_enemy.MoveType is EnemyGroundMove) || melee.IsTargetInAttackHeight(_enemy.Target));
         }
+        return _enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange;
     }
 
     public override void Exit()

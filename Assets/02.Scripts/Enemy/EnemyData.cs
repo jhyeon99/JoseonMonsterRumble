@@ -63,6 +63,22 @@ public class EnemyData : ScriptableObject
     public float AttackDelayTime => _attackDelayTime;
     public float AttackRecoveryTime => _attackRecoveryTime;
     public bool HasStationaryAttackCycle => _attackCycleMode == EnemyAttackCycleMode.StationaryCommitted;
+
+    [Header("지상 원거리 안전거리")]
+    [SerializeField, Min(0f)] private float _rangedFleeStartDistance;
+    [SerializeField, Min(0f)] private float _rangedFleeEndDistance;
+    public float RangedFleeStartDistance => _rangedFleeStartDistance;
+    public float RangedFleeEndDistance => Mathf.Max(_rangedFleeStartDistance, _rangedFleeEndDistance);
+
+    [Header("지상 원거리 공격 전 짧은 대기")]
+    [SerializeField, Range(0f, 1f)] private float _rangedAttackIdleChance;
+    [SerializeField, Min(0f)] private float _rangedAttackIdleDuration;
+    public float RangedAttackIdleChance => _rangedAttackIdleChance;
+    public float RangedAttackIdleDuration => _rangedAttackIdleDuration;
+
+    [Header("원거리 적 도발")]
+    [SerializeField, Range(0f, 1f)] private float _provokeChance;
+    public float ProvokeChance => _provokeChance;
     [Space(50)]
     [Header("원거리 적 이동 제한 범위")]
 

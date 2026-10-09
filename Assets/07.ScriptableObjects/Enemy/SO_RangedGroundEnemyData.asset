@@ -13,17 +13,72 @@ MonoBehaviour:
   m_Name: SO_RangedGroundEnemyData
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   _maxHp: 100
-  _moveSpeed: 1.7
+  _moveSpeed: 6
   _dieTime: 1.875
+  _useWalkAnimationMotion: 1
+  _walkStartSpeedCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _walkEndSpeedCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   _meleeAttackDamage: 0
   _chargeSpeed: 0
   _knockbackForce: 0
   _attackDetectRange: 7
+  _attackCycleMode: 0
   _attackRecoverRange: 0
   _attackPrepareTime: 1.5
   _attackDurationTime: 0.8333
   _attackDelayTime: 0.8333
   _attackRecoveryTime: 1
+  _rangedFleeStartDistance: 3
+  _rangedFleeEndDistance: 5
+  _rangedAttackIdleChance: 0.08
+  _rangedAttackIdleDuration: 0.35
+  _provokeChance: 0.15
   _attackAngle: 0
   _attackBuffAmount: 0
   _moveToEnemySpeed: 0
