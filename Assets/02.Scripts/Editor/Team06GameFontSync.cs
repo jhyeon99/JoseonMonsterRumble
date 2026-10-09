@@ -8,7 +8,7 @@ public static class Team06GameFontSync
 {
     private const string RequestPath = "Library/Team06GameFontSync.request";
     private const string ReportPath = "Library/Team06GameFontSync-report.txt";
-    private const string FontPath = "Assets/05.Art/Fonts/Brush/brushkorean.ttf";
+    private const string FontPath = "Assets/09.Fonts/Brush/brushkorean.ttf";
 
     static Team06GameFontSync()
     {
