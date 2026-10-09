@@ -113,6 +113,12 @@ public abstract class Enemy : MonoBehaviour, IFinishable
             EnemyManager.Instance.RemoveEnemy(this);
     }
 
+    protected virtual void OnDestroy()
+    {
+        if (EnemyManager.Instance != null)
+            EnemyManager.Instance.UnregisterEnemy(this);
+    }
+
     protected virtual void Awake()
     {
         _stateMachine = new EnemyStateMachine();
@@ -127,6 +133,8 @@ public abstract class Enemy : MonoBehaviour, IFinishable
         _enemyCollider = GetComponent<Collider2D>();
         _rightAngle = Data.AttackAngle;
         _leftAngle = 180f - Data.AttackAngle;
+        if (EnemyManager.Instance != null)
+            EnemyManager.Instance.RegisterEnemy(this);
     }
 
     protected virtual void Start()
