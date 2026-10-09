@@ -25,6 +25,16 @@ public class EnemyGroundSensor : MonoBehaviour
 
     private void Awake()
     {
+        EnsureInitialized();
+    }
+
+    private void EnsureInitialized()
+    {
+        if (_bodyCollider != null && _rigidbody != null)
+        {
+            return;
+        }
+
         _groundFilter.SetLayerMask(Constants.Layers.GroundAllMask);
         _groundFilter.useTriggers = false;
 
@@ -42,6 +52,8 @@ public class EnemyGroundSensor : MonoBehaviour
     /// </summary>
     public bool IsGrounded()
     {
+        EnsureInitialized();
+
         if (_rigidbody == null)
         {
             return false;
@@ -66,6 +78,8 @@ public class EnemyGroundSensor : MonoBehaviour
     /// </summary>
     public bool CanMoveAhead(EnemyMoveArea moveArea, float speed, float lookAhead)
     {
+        EnsureInitialized();
+
         if (_bodyCollider == null || _rigidbody == null)
         {
             return false;

@@ -32,9 +32,9 @@ public class EnemyGroundMove : EnemyMoveType
     {
         base.Awake();
 
-        if (_groundSensor == null)
+        if (_groundSensor == null && !TryGetComponent(out _groundSensor))
         {
-            TryGetComponent(out _groundSensor);
+            _groundSensor = gameObject.AddComponent<EnemyGroundSensor>();
         }
     }
 
