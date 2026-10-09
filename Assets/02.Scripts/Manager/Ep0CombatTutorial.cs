@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using Com.LuisPedroFonseca.ProCamera2D;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,12 +20,8 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     [SerializeField, Min(0.1f)] private float _dialogueDuration = 1.2f;
 
     [Header("Parry camera and timing")]
-    [SerializeField, Min(0.5f)] private float _parryCameraSize = 5.5f;
     [SerializeField, Min(0.01f)] private float _zoomDuration = 0.35f;
     [SerializeField, Min(0.05f)] private float _parrySuccessDuration = 0.25f;
-
-    [Tooltip("정지 안내를 끝낸 뒤 실제 공격 판정까지 남길 시간. 패링을 직접 맞추는 구간입니다.")]
-    [SerializeField, Min(0.05f)] private float _parryResumeLeadTime = 0.35f;
 
     [Header("Player-side hint")]
     [SerializeField] private Vector2 _hintOffset = new Vector2(170f, 80f);
@@ -53,7 +49,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     [SerializeField, TextArea] private string _completeText = "좋아. 계속 가보자.";
 
     private PlayerInputHandler _input;
-    private Ep0TutorialMeleeCombat _combat;
+    private EnemyMeleeCombat _combat;
     private HitStop _hitStop;
     private bool _initialized;
     private bool _enemyReady;
@@ -225,24 +221,28 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
             Phase = "Windup";
             Show(_parryText, "공격이 닿기 직전에 막기", "↓");
             _enemy.Animation.PlayAttack();
-            float prepareTime = Mathf.Max(0.05f, _enemy.Data.AttackPrepareTime);
-            float leadTime = Mathf.Min(_parryResumeLeadTime, prepareTime);
-            yield return new WaitForSeconds(Mathf.Max(0f, prepareTime - leadTime));
-
-            // Explain before contact, then let the original guard/input timing run freely.
-            Phase = "ParryPrompt";
-            _player.StateMachine.ChangeState(_player.IdleState);
-            Freeze();
-            Show("잠시 후 공격 재개", "닿기 직전에 ↓", "↓");
-            yield return ZoomTo(_parryCameraSize, GetFocusPosition());
-            yield return WaitRealtime(_dialogueDuration);
-            Unfreeze();
-            SetPlayerControl(true);
+            // The guide stays beside the player; movement, guard and game time remain active.
+            yield return new WaitForSeconds(Mathf.Max(0.05f, _enemy.Data.AttackPrepareTime));
             Phase = "ParryAttempt";
             Show(_parryTimingText, "↓ 가드 / 패링", "↓");
-            yield return new WaitForSeconds(leadTime);
+            // Use the original attack/guard/parry path. Zero damage keeps practice safe.
+            _combat.IncreaseDamage(-100f);
             _combat.Attack();
-            while (_combat.IsAttacking && !_parried) yield return null;
+            float attackTime = 0f;
+            while (!_parried && attackTime < _enemy.Data.AttackDurationTime)
+            {
+                // The original combat enters GroggyState before broadcasting the parry event.
+                // Also observe that state so a successful native parry cannot become a retry.
+                if (_enemy.IsGroggy)
+                {
+                    _parried = true;
+                    _enemy.TryHoldGroggy();
+                    break;
+                }
+
+                attackTime += Time.deltaTime;
+                yield return null;
+            }
             _combat.StopAttack();
             if (!_parried)
             {
@@ -257,16 +257,11 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         Show("막았다!", "", "");
         yield return new WaitForSeconds(_parrySuccessDuration);
 
-        Phase = "FinisherPrompt";
-        Freeze();
-        Show(_finisherText, "지금 공격!", "X");
-        yield return WaitForKey(KeyCode.X);
-        SetPlayerControl(true);
-        Unfreeze();
         Phase = "Finisher";
-        Show("", "가까이 가서 마무리 공격", "X");
-        // Use the real target detection and finisher, rather than launching on a key press.
-        _player.TryEnterFinisher();
+        SetPlayerControl(true);
+        Show(_finisherText, "가까이 가서 X로 마무리 공격", "X");
+        // Keep movement and attack input active. The player's normal states find a target
+        // on each attack press, so an out-of-range attempt never locks the tutorial.
         while (_enemy != null && !_enemy.IsDefeated) yield return null;
         _complete = true;
         Show(_completeText, "", "");
@@ -280,7 +275,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     private IEnumerator WaitForNeutralPlayer()
     {
-        SetPlayerControl(false);
+        SetPlayerControl(true);
         while (!_player.IsGrounded || _player.StateMachine.CurrentState == _player.AttackState ||
                _player.StateMachine.CurrentState == _player.HitState)
         {
@@ -288,16 +283,6 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         }
 
         _player.StateMachine.ChangeState(_player.IdleState);
-    }
-
-    private IEnumerator WaitForKey(KeyCode key)
-    {
-        while (Input.GetKey(key) || (key == KeyCode.Return && Input.GetKey(KeyCode.KeypadEnter))) yield return null;
-        while (PauseController.IsPaused ||
-               !(Input.GetKeyDown(key) || (key == KeyCode.Return && Input.GetKeyDown(KeyCode.KeypadEnter))))
-        {
-            yield return null;
-        }
     }
 
     private IEnumerator WaitRealtime(float duration)
@@ -443,11 +428,6 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         }
     }
 
-    private Vector2 GetFocusPosition()
-    {
-        return ((Vector2)_player.transform.position + _enemy.GetEnemyCenterPosition()) * 0.5f + Vector2.up;
-    }
-
     private Vector2 GetPlayerCameraPosition()
     {
         return (Vector2)_player.transform.position + new Vector2(_camera.OffsetX, _camera.OffsetY);
@@ -515,7 +495,11 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     private void ReleaseControl()
     {
         Unfreeze();
-        if (_combat != null) _combat.StopAttack();
+        if (_combat != null)
+        {
+            _combat.StopAttack();
+            _combat.NormalDamage();
+        }
         if (_input != null)
         {
             if (_running) SetPlayerControl(_normalInputWasEnabled);

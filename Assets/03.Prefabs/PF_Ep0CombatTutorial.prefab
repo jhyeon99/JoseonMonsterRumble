@@ -556,31 +556,35 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1002}
     m_Modifications:
-    - target: {fileID: 9071619103714574906, guid: ea0c4d3e53f74103bc3eafbedee454de, type: 3}
+    - target: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
       propertyPath: m_Name
       value: TutorialMonster
       objectReference: {fileID: 0}
-    - target: {fileID: 5470014724525197126, guid: ea0c4d3e53f74103bc3eafbedee454de, type: 3}
-      propertyPath: m_LocalScale.x
-      value: -0.7
-      objectReference: {fileID: 0}
-    - target: {fileID: 5470014724525197126, guid: ea0c4d3e53f74103bc3eafbedee454de, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.7
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 1800000004, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
+      propertyPath: _health
+      value: 
+      objectReference: {fileID: 2003}
+    - target: {fileID: 1900000006, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
+      propertyPath: _health
+      value: 
+      objectReference: {fileID: 2003}
+    m_RemovedComponents:
+    - {fileID: -3618497924999448453, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: ea0c4d3e53f74103bc3eafbedee454de, type: 3}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2003}
+  m_SourcePrefab: {fileID: 100100000, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
 --- !u!4 &2001 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 5470014724525197126, guid: ea0c4d3e53f74103bc3eafbedee454de, type: 3}
+  m_CorrespondingSourceObject: {fileID: 5470014724525197126, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
   m_PrefabInstance: {fileID: 2000}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &2002 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 305485781356309695, guid: ea0c4d3e53f74103bc3eafbedee454de, type: 3}
+  m_CorrespondingSourceObject: {fileID: 305485781356309695, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
   m_PrefabInstance: {fileID: 2000}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
@@ -589,3 +593,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd19472239a593843990a9339450c262, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::AttackEnemy
+--- !u!1 &2005 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
+  m_PrefabInstance: {fileID: 2000}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2005}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08d19a3313944a8597605b407658fbc7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Ep0TutorialEnemyHealth
