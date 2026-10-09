@@ -297,6 +297,30 @@ public abstract class BossPattern : MonoBehaviour
         return false;
     }
 
+    /// <summary>지금 재생 중인 이 패턴의 클립 (없으면 null)</summary>
+    protected AnimationClip GetPlayingPatternClip()
+    {
+        if (Boss.IsPlayingClip(_animationClip))
+        {
+            return _animationClip;
+        }
+
+        if (_followingClips == null)
+        {
+            return null;
+        }
+
+        foreach (AnimationClip clip in _followingClips)
+        {
+            if (clip != null && Boss.IsPlayingClip(clip))
+            {
+                return clip;
+            }
+        }
+
+        return null;
+    }
+
     /// <summary>트리거를 보내기 직전 (방향 전환 등)</summary>
     protected virtual void OnPatternStart()
     {

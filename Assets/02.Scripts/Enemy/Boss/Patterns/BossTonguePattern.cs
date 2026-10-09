@@ -5,6 +5,7 @@ using UnityEngine;
 /// 혓바닥 공격. 2층용 / 3층용으로 컴포넌트를 두 개 붙이고 각각 판정과 층을 지정.
 /// 애니메이션 시작 ~ 판정 시작: 예고 / 판정 시작 ~ 끝: 혀 판정
 /// 혀 길이 늘이기를 켜면 판정(BoxCollider2D)이 혀를 따라 입에서 끝까지 늘었다 줄어듦.
+/// 패링당하면 그 지점부터 애니메이션을 역재생해 혀를 바로 거둬들이고, 다 감기면 패턴 종료.
 /// </summary>
 public class BossTonguePattern : BossPattern
 {
@@ -52,7 +53,22 @@ public class BossTonguePattern : BossPattern
     [SerializeField, Min(0f)]
     private float _manualRange = 0f;
 
+    [Header("패링 시 혀 회수 (역재생)")]
+    [Tooltip("켜면 패링당한 지점부터 애니메이션을 거꾸로 재생해 혀를 거둬들이고, 처음까지 감기면 패턴 종료")]
+    [SerializeField]
+    private bool _retractOnParry = true;
+
+    [Tooltip("역재생 속도 (1 = 원래 클립 속도, 2 = 두 배 빠르게)")]
+    [SerializeField, Min(0.1f)]
+    private float _retractSpeed = 1f;
+
+    [Tooltip("역재생이 끝난 뒤 재생할 애니메이터 상태 이름 (보통 대기 상태)")]
+    [SerializeField]
+    private string _retractEndState = "Idle";
+
     private BoxCollider2D _box;
+    private bool _parried;
+    private bool _retracted;
     private Vector2 _originalSize;
     private Vector2 _originalOffset;
 
@@ -69,6 +85,8 @@ public class BossTonguePattern : BossPattern
             enabled = false;
             return;
         }
+
+        _hitbox.OnParriedByPlayer += HandleParried;
 
         _box = _hitbox.GetComponent<BoxCollider2D>();
         if (_box != null)
@@ -113,35 +131,102 @@ public class BossTonguePattern : BossPattern
         return _manualRange;
     }
 
+    private void OnDestroy()
+    {
+        if (_hitbox != null)
+        {
+            _hitbox.OnParriedByPlayer -= HandleParried;
+        }
+    }
+
+    private void HandleParried()
+    {
+        _parried = true;
+    }
+
+    protected override void OnPatternStart()
+    {
+        base.OnPatternStart();
+        _parried = false;
+        _retracted = false;
+    }
+
+    /// <summary>역재생으로 끝냈으면 남은 패턴 길이를 기다리지 않음</summary>
+    protected override bool WaitForDurationAfterExecute => !_retracted;
+
     protected override IEnumerator Execute()
     {
-        if (!_stretchHitbox || _box == null)
-        {
-            yield return RunHitWindow(_hitbox);
-            yield break;
-        }
+        bool stretch = _stretchHitbox && _box != null;
 
         _hitbox.SetTelegraph(true);
         yield return WaitUntilProgress(HitStartRatio);
 
         _hitbox.SetTelegraph(false);
-        ApplyExtension(0f);
+        if (stretch)
+        {
+            ApplyExtension(0f);
+        }
+
+        _parried = false;
         _hitbox.Activate();
 
         float span = Mathf.Max(0.0001f, HitEndRatio - HitStartRatio);
-        while (Progress < HitEndRatio)
+        while (Progress < HitEndRatio && !_parried)
         {
-            float t = Mathf.Clamp01((Progress - HitStartRatio) / span);
-            ApplyExtension(_extendCurve.Evaluate(t));
+            if (stretch)
+            {
+                float t = Mathf.Clamp01((Progress - HitStartRatio) / span);
+                ApplyExtension(_extendCurve.Evaluate(t));
+            }
+
             yield return null;
         }
 
         _hitbox.Deactivate();
         RestoreCollider();
+
+        if (_parried && _retractOnParry)
+        {
+            yield return Retract();
+        }
+    }
+
+    /// <summary>패링당한 지점부터 애니메이션을 거꾸로 재생해 혀를 거둬들임</summary>
+    private IEnumerator Retract()
+    {
+        AnimationClip clip = GetPlayingPatternClip();
+        if (clip == null || !Boss.TryGetClipState(clip, out int stateHash, out float time))
+        {
+            yield break;
+        }
+
+        _retracted = true;
+        float rate = _retractSpeed / Mathf.Max(0.01f, clip.length);
+        Boss.PoseAnimator(stateHash, time);
+
+        while (time > 0f)
+        {
+            yield return null;
+            time = Mathf.Max(0f, time - (rate * Time.deltaTime));
+            Boss.PoseAnimator(stateHash, time);
+        }
+
+        Boss.ResumeAnimator();
+
+        if (!Boss.PlayState(_retractEndState))
+        {
+            Debug.LogWarning($"{name}: {PatternName} 역재생 후 재생할 상태({_retractEndState})가 애니메이터에 없습니다. Retract End State 이름을 확인하세요.", this);
+        }
     }
 
     protected override void Cleanup()
     {
+        // 역재생 도중 그로기 / 페이즈 전환으로 끊겨도 애니메이터가 멈춘 채 남지 않도록
+        if (Boss != null)
+        {
+            Boss.ResumeAnimator();
+        }
+
         if (_hitbox != null)
         {
             _hitbox.Deactivate();

@@ -135,6 +135,8 @@ public class Boss : MonoBehaviour, IFinishable
     private Collider2D _bodyCollider;
     private Transform _player;
     private BossPattern _lastPattern;
+    private bool _isAnimatorPaused;
+    private float _animatorSpeedBeforePause = 1f;
 
     #region 프로퍼티
 
@@ -527,6 +529,95 @@ public class Boss : MonoBehaviour, IFinishable
     }
 
     public bool HasAnimator => _animator != null && _animator.runtimeAnimatorController != null;
+
+    /// <summary>이 클립을 재생 중인 상태의 해시와 진행도(0~1)를 가져옴 (전이 중이면 다음 상태도 확인)</summary>
+    public bool TryGetClipState(AnimationClip clip, out int stateHash, out float normalizedTime)
+    {
+        stateHash = 0;
+        normalizedTime = 0f;
+        if (_animator == null || clip == null || !_animator.isActiveAndEnabled)
+        {
+            return false;
+        }
+
+        AnimatorStateInfo info;
+        _clipInfos.Clear();
+        _animator.GetCurrentAnimatorClipInfo(0, _clipInfos);
+        if (ContainsClip(_clipInfos, clip))
+        {
+            info = _animator.GetCurrentAnimatorStateInfo(0);
+        }
+        else if (_animator.IsInTransition(0))
+        {
+            _clipInfos.Clear();
+            _animator.GetNextAnimatorClipInfo(0, _clipInfos);
+            if (!ContainsClip(_clipInfos, clip))
+            {
+                return false;
+            }
+
+            info = _animator.GetNextAnimatorStateInfo(0);
+        }
+        else
+        {
+            return false;
+        }
+
+        stateHash = info.fullPathHash;
+        normalizedTime = clip.isLooping ? Mathf.Repeat(info.normalizedTime, 1f) : Mathf.Clamp01(info.normalizedTime);
+        return true;
+    }
+
+    /// <summary>애니메이터를 멈추고 해당 상태의 특정 지점(0~1) 포즈로 고정 (역재생 등 직접 시간을 조절할 때)</summary>
+    public void PoseAnimator(int stateHash, float normalizedTime)
+    {
+        if (_animator == null)
+        {
+            return;
+        }
+
+        if (!_isAnimatorPaused)
+        {
+            _isAnimatorPaused = true;
+            _animatorSpeedBeforePause = _animator.speed;
+        }
+
+        _animator.speed = 0f;
+        _animator.Play(stateHash, 0, normalizedTime);
+    }
+
+    /// <summary>PoseAnimator로 멈춘 애니메이터를 원래 속도로 되돌림</summary>
+    public void ResumeAnimator()
+    {
+        if (!_isAnimatorPaused)
+        {
+            return;
+        }
+
+        _isAnimatorPaused = false;
+        if (_animator != null)
+        {
+            _animator.speed = _animatorSpeedBeforePause;
+        }
+    }
+
+    /// <summary>애니메이터 상태를 이름으로 바로 재생. 상태가 없으면 false</summary>
+    public bool PlayState(string stateName)
+    {
+        if (_animator == null || string.IsNullOrEmpty(stateName))
+        {
+            return false;
+        }
+
+        int hash = Animator.StringToHash(stateName);
+        if (!_animator.HasState(0, hash))
+        {
+            return false;
+        }
+
+        _animator.Play(hash, 0, 0f);
+        return true;
+    }
 
     private static bool ContainsClip(List<AnimatorClipInfo> infos, AnimationClip clip)
     {
