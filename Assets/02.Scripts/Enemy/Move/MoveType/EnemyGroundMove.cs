@@ -33,15 +33,23 @@ public class EnemyGroundMove : EnemyMoveType
         return false;
     }
 
-    // 지상 적은 중력으로 떨어지므로 넉백 중 속도를 건드리지 않음
-    public override void KnockbackPhysicsUpdate()
+    public override void KnockbackPhysicsUpdate(bool isHorizontalOnly)
     {
+        if (!isHorizontalOnly)
+        {
+            return;
+        }
+
+        UpdateHorizontalKnockback();
     }
 
-    // PlayerJumpState와 같은 착지 판정: 땅에 닿아 있고 올라가는 중이 아닐 때.
-    // 넉백 직후 아직 땅에 붙어 있어도 위쪽 속도가 남아 있어서 바로 끝나지 않음
-    public override bool IsKnockbackFinished()
+    public override bool IsKnockbackFinished(bool isHorizontalOnly)
     {
+        if (isHorizontalOnly)
+        {
+            return IsHorizontalKnockbackStopped();
+        }
+
         return IsGrounded() && Rigidbody.linearVelocity.y <= LandingVelocityThreshold;
     }
 
@@ -89,16 +97,20 @@ public class EnemyGroundMove : EnemyMoveType
     public override void BackMove(Vector2 direction)
     {
         IsBackMove = true;
+        Rigidbody.linearVelocity = new Vector2(-direction.x * Enemy.Data.MoveSpeed, Rigidbody.linearVelocity.y);
+    }
+
+    public override bool IsEndPosition(Vector2 direction)
+    {
         float nextX = Rigidbody.position.x - direction.x * Enemy.Data.MoveSpeed * Time.fixedDeltaTime;
         float clampX = Enemy.MoveArea.ClampX(nextX);
 
         if (Mathf.Abs(nextX - clampX) > 0.0001f)
         {
-            Rigidbody.linearVelocity = new Vector2(0f, Rigidbody.linearVelocity.y);
-            return;
+            return true;
         }
 
-        Rigidbody.linearVelocity = new Vector2(-direction.x * Enemy.Data.MoveSpeed, Rigidbody.linearVelocity.y);
+        return false;
     }
 
     public override void StopMove()

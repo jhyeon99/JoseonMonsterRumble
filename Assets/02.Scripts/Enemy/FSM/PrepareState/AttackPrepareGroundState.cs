@@ -21,7 +21,6 @@ public class AttackPrepareGroundState : EnemyState
             // (휴식 → 추적 → 공격 준비가 한 프레임에 이어지면 Flip이 돌기 전에 잠겨서 뒤를 보고 공격하던 문제)
             FacePlayer();
             _enemy.Animation.PlayAttack();
-            _enemy.DirectionLock.LockDirection();
         }
     }
 
@@ -31,8 +30,21 @@ public class AttackPrepareGroundState : EnemyState
         {
             if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
             {
-                _enemy.Animation.SetRunning(true);
-                _enemy.MoveType.BackMove(_enemy.GetDirectionToPlayer());
+                if (!_enemy.MoveType.IsEndPosition(_enemy.GetDirectionToPlayer()))
+                {
+                    _enemy.Animation.SetRunning(true);
+                    _enemy.MoveType.BackMove(_enemy.GetDirectionToPlayer());
+                }
+                else
+                {
+                    _enemy.Animation.SetRunning(false);
+                    _enemy.MoveType.StopMove();
+                }
+            }
+            else
+            {
+                _enemy.Animation.SetRunning(false);
+                _enemy.MoveType.StopMove();
             }
         }
     }
@@ -64,20 +76,17 @@ public class AttackPrepareGroundState : EnemyState
     {
         _enemy.MoveType.IsBackMove = false;
         _enemy.MoveType.StopMove();
-        if (_enemy.Combat is EnemyRangedCombat)
+        Vector3 scale = _enemy.transform.localScale;
+        if (_enemy.GetDirectionToPlayer().x > 0f)
         {
-            Vector3 scale = _enemy.transform.localScale;
-            if (_enemy.GetDirectionToPlayer().x > 0f)
-            {
-                scale.x = Mathf.Abs(scale.x);
-            }
-            else if (_enemy.GetDirectionToPlayer().x < 0f)
-            {
-                scale.x = -Mathf.Abs(scale.x);
-            }
-
-            _enemy.transform.localScale = scale;
+            scale.x = Mathf.Abs(scale.x);
         }
+        else if (_enemy.GetDirectionToPlayer().x < 0f)
+        {
+            scale.x = -Mathf.Abs(scale.x);
+        }
+
+        _enemy.transform.localScale = scale;
 
         Debug.Log("적 공격 준비 완료");
     }

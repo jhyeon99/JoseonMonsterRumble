@@ -11,7 +11,6 @@ public class PlayerSoul : MonoBehaviour, ISoulSource
 
     public event Action<float, float> OnSoulChanged;
 
-#if UNITY_EDITOR
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.F1))
@@ -19,7 +18,6 @@ public class PlayerSoul : MonoBehaviour, ISoulSource
             AddSoul(1f);
         }
     }
-#endif
 
     public void AddSoul(float amount)
     {
