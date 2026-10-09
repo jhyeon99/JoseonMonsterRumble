@@ -20,6 +20,10 @@ public class AttackPrepareGroundState : EnemyState
             // 뒤로 물러나던 방향(플레이어 반대)을 보고 있을 수 있으므로, 방향을 잠그기 전에 플레이어 쪽을 보게 함
             // (휴식 → 추적 → 공격 준비가 한 프레임에 이어지면 Flip이 돌기 전에 잠겨서 뒤를 보고 공격하던 문제)
             FacePlayer();
+            if (_enemy.Data.HasStationaryAttackCycle)
+            {
+                _enemy.DirectionLock.LockDirection();
+            }
             _enemy.Animation.PlayAttack();
         }
     }
@@ -76,17 +80,19 @@ public class AttackPrepareGroundState : EnemyState
     {
         _enemy.MoveType.IsBackMove = false;
         _enemy.MoveType.StopMove();
-        Vector3 scale = _enemy.transform.localScale;
-        if (_enemy.GetDirectionToPlayer().x > 0f)
+        if (!_enemy.Data.HasStationaryAttackCycle)
         {
-            scale.x = Mathf.Abs(scale.x);
+            Vector3 scale = _enemy.transform.localScale;
+            if (_enemy.GetDirectionToPlayer().x > 0f)
+            {
+                scale.x = Mathf.Abs(scale.x);
+            }
+            else if (_enemy.GetDirectionToPlayer().x < 0f)
+            {
+                scale.x = -Mathf.Abs(scale.x);
+            }
+            _enemy.transform.localScale = scale;
         }
-        else if (_enemy.GetDirectionToPlayer().x < 0f)
-        {
-            scale.x = -Mathf.Abs(scale.x);
-        }
-
-        _enemy.transform.localScale = scale;
 
         Debug.Log("적 공격 준비 완료");
     }

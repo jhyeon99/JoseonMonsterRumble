@@ -1,5 +1,11 @@
 using UnityEngine;
 
+public enum EnemyAttackCycleMode
+{
+    RetreatRecovery = 0,
+    StationaryCommitted = 1,
+}
+
 [CreateAssetMenu(fileName = "EnemyData", menuName = "Scriptable Objects/EnemyData")]
 public class EnemyData : ScriptableObject
 {
@@ -11,6 +17,22 @@ public class EnemyData : ScriptableObject
     public float MaxHp => _maxHp;
     public float MoveSpeed => _moveSpeed;
     public float DieTime => _dieTime;
+
+    [Header("걷기 애니메이션 이동")]
+    [SerializeField] private bool _useWalkAnimationMotion;
+    [SerializeField]
+    private AnimationCurve _walkStartSpeedCurve =
+        AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+    [SerializeField]
+    private AnimationCurve _walkEndSpeedCurve =
+        AnimationCurve.EaseInOut(0f, 1f, 1f, 0f);
+    public bool UseWalkAnimationMotion => _useWalkAnimationMotion;
+
+    public float CalculateWalkSpeedRatio(EnemyWalkPhase phase, float progress)
+    {
+        AnimationCurve curve = phase == EnemyWalkPhase.Start ? _walkStartSpeedCurve : _walkEndSpeedCurve;
+        return Mathf.Clamp01(curve.Evaluate(Mathf.Clamp01(progress)));
+    }
 
     [Space(50)]
     [Header("근접 적 능력치")]
@@ -28,6 +50,7 @@ public class EnemyData : ScriptableObject
 
     [SerializeField]
     private float _attackDetectRange;
+    [SerializeField] private EnemyAttackCycleMode _attackCycleMode;
     [SerializeField] private float _attackRecoverRange;
     [SerializeField] private float _attackPrepareTime;
     [SerializeField] private float _attackDurationTime;
@@ -39,6 +62,7 @@ public class EnemyData : ScriptableObject
     public float AttackDurationTime => _attackDurationTime;
     public float AttackDelayTime => _attackDelayTime;
     public float AttackRecoveryTime => _attackRecoveryTime;
+    public bool HasStationaryAttackCycle => _attackCycleMode == EnemyAttackCycleMode.StationaryCommitted;
     [Space(50)]
     [Header("원거리 적 이동 제한 범위")]
 

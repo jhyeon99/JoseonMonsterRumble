@@ -33,6 +33,13 @@ public abstract class EnemyMoveType : MonoBehaviour
     public abstract void BackMove(Vector2 direction);
     public abstract void StopMove();
 
+    public virtual void RequestStopMove()
+    {
+        StopMove();
+    }
+
+    public virtual void UpdateWalkPhysics() { }
+
     public bool TryStartLightKnockback(HitData hitData)
     {
         if (_lightHitKnockbackMultiplier <= 0f)

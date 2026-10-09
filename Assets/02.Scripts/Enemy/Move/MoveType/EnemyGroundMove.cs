@@ -7,6 +7,11 @@ public class EnemyGroundMove : EnemyMoveType
 
     private readonly ContactPoint2D[] _groundContacts = new ContactPoint2D[8];
     private ContactFilter2D _groundFilter;
+    private enum WalkMotionState { Stopped, Moving, Stopping }
+    private WalkMotionState _walkMotionState;
+    private float _requestedWalkVelocity;
+    private float _walkStopVelocity;
+    private float _walkStepDistance = float.PositiveInfinity;
 
     protected override void Awake()
     {
@@ -72,6 +77,13 @@ public class EnemyGroundMove : EnemyMoveType
 
         HandleFlip(directionX);
 
+        if (Enemy.Data.UseWalkAnimationMotion)
+        {
+            Move(new Vector2(Mathf.Sign(directionX), 0f));
+            _walkStepDistance = Mathf.Abs(directionX);
+            return;
+        }
+
         var targetPos = new Vector2(targetX, Rigidbody.position.y);
 
         var nextPos =
@@ -84,6 +96,12 @@ public class EnemyGroundMove : EnemyMoveType
         Vector2 startPos = Enemy.MoveArea.StartPosition;
         float directionX = startPos.x - Rigidbody.position.x;
         HandleFlip(directionX);
+        if (Enemy.Data.UseWalkAnimationMotion)
+        {
+            Move(new Vector2(Mathf.Sign(directionX), 0f));
+            _walkStepDistance = Mathf.Abs(directionX);
+            return;
+        }
         var nextPos = Vector2.MoveTowards(Rigidbody.position, startPos, Enemy.Data.MoveSpeed * Time.fixedDeltaTime);
         Rigidbody.MovePosition(nextPos);
     }
@@ -91,12 +109,22 @@ public class EnemyGroundMove : EnemyMoveType
     public override void Move(Vector2 direction)
     {
         IsBackMove = false;
+        if (Enemy.Data.UseWalkAnimationMotion)
+        {
+            StartWalk(direction.x * Enemy.Data.MoveSpeed);
+            return;
+        }
         Rigidbody.linearVelocity = new Vector2(direction.x * Enemy.Data.MoveSpeed, Rigidbody.linearVelocity.y);
     }
 
     public override void BackMove(Vector2 direction)
     {
         IsBackMove = true;
+        if (Enemy.Data.UseWalkAnimationMotion)
+        {
+            StartWalk(-direction.x * Enemy.Data.MoveSpeed);
+            return;
+        }
         Rigidbody.linearVelocity = new Vector2(-direction.x * Enemy.Data.MoveSpeed, Rigidbody.linearVelocity.y);
     }
 
@@ -116,7 +144,102 @@ public class EnemyGroundMove : EnemyMoveType
     public override void StopMove()
     {
         IsBackMove = false;
+        ResetWalkMotion();
         Rigidbody.linearVelocity = new Vector2(0f, Rigidbody.linearVelocity.y);
+    }
+
+    public override void RequestStopMove()
+    {
+        if (!Enemy.Data.UseWalkAnimationMotion)
+        {
+            base.RequestStopMove();
+            return;
+        }
+        if (_walkMotionState == WalkMotionState.Moving)
+        {
+            _walkStopVelocity = Rigidbody.linearVelocity.x;
+            _requestedWalkVelocity = 0f;
+            _walkMotionState = WalkMotionState.Stopping;
+        }
+        Enemy.Animation.SetRunning(false);
+    }
+
+    public override void UpdateWalkPhysics()
+    {
+        if (!Enemy.Data.UseWalkAnimationMotion || _walkMotionState == WalkMotionState.Stopped)
+        {
+            return;
+        }
+
+        // 전투·사망 상태의 속도는 해당 상태가 소유한다. 걷기 속도로 덮어쓰지 않는다.
+        EnemyState state = Enemy.StateMachine.CurrentState;
+        if (!(state is IdleState || state is ChaseState ||
+              state is ReturnToStartState || state is AttackRecoveryState))
+        {
+            ResetWalkMotion();
+            return;
+        }
+
+        EnemyWalkPhase phase = Enemy.Animation.GetWalkPhase(out float progress);
+        float speed = _walkMotionState == WalkMotionState.Stopping
+            ? _walkStopVelocity : _requestedWalkVelocity;
+        switch (phase)
+        {
+            case EnemyWalkPhase.Start:
+                if (_walkMotionState == WalkMotionState.Moving)
+                {
+                    speed *= Enemy.Data.CalculateWalkSpeedRatio(phase, progress);
+                }
+                break;
+            case EnemyWalkPhase.Loop:
+                break;
+            case EnemyWalkPhase.End:
+                speed = _walkMotionState == WalkMotionState.Stopping
+                    ? _walkStopVelocity * Enemy.Data.CalculateWalkSpeedRatio(phase, progress) : 0f;
+                break;
+            default:
+                speed = 0f;
+                if (_walkMotionState == WalkMotionState.Stopping)
+                {
+                    ResetWalkMotion();
+                }
+                break;
+        }
+
+        if (_walkMotionState == WalkMotionState.Moving)
+        {
+            float maxSpeed = _walkStepDistance / Time.fixedDeltaTime;
+            speed = Mathf.Clamp(speed, -maxSpeed, maxSpeed);
+        }
+        if (Enemy.MoveArea != null)
+        {
+            float nextX = Rigidbody.position.x + speed * Time.fixedDeltaTime;
+            speed = (Enemy.MoveArea.ClampX(nextX) - Rigidbody.position.x) / Time.fixedDeltaTime;
+        }
+        Rigidbody.linearVelocity = new Vector2(speed, Rigidbody.linearVelocity.y);
+    }
+
+    private void StartWalk(float velocity)
+    {
+        _requestedWalkVelocity = velocity;
+        _walkStopVelocity = 0f;
+        _walkStepDistance = float.PositiveInfinity;
+        _walkMotionState = WalkMotionState.Moving;
+        Enemy.Animation.SetRunning(true);
+    }
+
+    private void ResetWalkMotion()
+    {
+        _walkMotionState = WalkMotionState.Stopped;
+        _requestedWalkVelocity = 0f;
+        _walkStopVelocity = 0f;
+        _walkStepDistance = float.PositiveInfinity;
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        ResetWalkMotion();
     }
 
     private void HandleFlip(float directionX)
