@@ -7,6 +7,12 @@ public class EnemyMoveArea : MonoBehaviour
     public Vector2 CenterOffset;
     public Vector2 AreaSize = new Vector2(3f, 3f);
 
+    [Header("플레이어 감지 범위 설정")]
+    [Tooltip("체크 시 감지 범위를 이동 범위와 다르게 독립 설정합니다. 체크 해제 시 AreaSize를 사용합니다.")]
+    [SerializeField] private bool _useCustomDetectionArea;
+    [SerializeField] private Vector2 _detectionAreaSize = new Vector2(3f, 3f);
+    public Vector2 DetectionAreaSize => _useCustomDetectionArea ? _detectionAreaSize : AreaSize;
+
     [SerializeField, Min(0f)] private float _chaseReleaseMargin;
 
     [Header("영역 색상")]
@@ -23,22 +29,22 @@ public class EnemyMoveArea : MonoBehaviour
 
     public bool IsPositionInArea(Vector2 targetPosition)
     {
-        return IsPositionInBounds(targetPosition, StartPosition + CenterOffset, 0f);
+        return IsPositionInBounds(targetPosition, StartPosition + CenterOffset, AreaSize, 0f);
     }
 
     public bool IsPositionDetected(Vector2 targetPosition)
     {
-        return IsPositionInBounds(targetPosition, (Vector2)transform.position + CenterOffset, 0f);
+        return IsPositionInBounds(targetPosition, (Vector2)transform.position + CenterOffset, DetectionAreaSize, 0f);
     }
 
     public bool IsPositionInChaseArea(Vector2 targetPosition)
     {
-        return IsPositionInBounds(targetPosition, (Vector2)transform.position + CenterOffset, _chaseReleaseMargin);
+        return IsPositionInBounds(targetPosition, (Vector2)transform.position + CenterOffset, DetectionAreaSize, _chaseReleaseMargin);
     }
 
-    private bool IsPositionInBounds(Vector2 targetPosition, Vector2 center, float margin)
+    private bool IsPositionInBounds(Vector2 targetPosition, Vector2 center, Vector2 size, float margin)
     {
-        Vector2 halfSize = AreaSize * 0.5f + Vector2.one * margin;
+        Vector2 halfSize = size * 0.5f + Vector2.one * margin;
 
         Vector2 minBounds = center - halfSize;
         Vector2 maxBounds = center + halfSize;
@@ -82,13 +88,14 @@ public class EnemyMoveArea : MonoBehaviour
 
         Gizmos.color = Color.cyan;
         Vector2 detectionCenter = (Vector2)transform.position + CenterOffset;
+        Vector2 currentDetectionSize = DetectionAreaSize;
         var detectionPosition = new Vector3(detectionCenter.x, detectionCenter.y, transform.position.z);
-        Gizmos.DrawWireCube(detectionPosition, new Vector3(AreaSize.x, AreaSize.y, 0.1f));
+        Gizmos.DrawWireCube(detectionPosition, new Vector3(currentDetectionSize.x, currentDetectionSize.y, 0.1f));
 
         if (_chaseReleaseMargin > 0f)
         {
             Gizmos.color = Color.yellow;
-            Vector2 chaseSize = AreaSize + Vector2.one * (_chaseReleaseMargin * 2f);
+            Vector2 chaseSize = currentDetectionSize + Vector2.one * (_chaseReleaseMargin * 2f);
             Gizmos.DrawWireCube(detectionPosition,
                 new Vector3(chaseSize.x, chaseSize.y, 0.1f));
         }
