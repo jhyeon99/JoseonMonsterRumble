@@ -56,13 +56,25 @@ public class EnemyData : ScriptableObject
     [SerializeField] private float _attackDurationTime;
     [SerializeField] private float _attackDelayTime;
     [SerializeField] private float _attackRecoveryTime;
+    [SerializeField, Min(0f)] private float _attackRangeJitter;
     public float AttackDetectRange => _attackDetectRange;
     public float AttackRecoverRange => _attackRecoverRange;
     public float AttackPrepareTime => _attackPrepareTime;
     public float AttackDurationTime => _attackDurationTime;
     public float AttackDelayTime => _attackDelayTime;
     public float AttackRecoveryTime => _attackRecoveryTime;
+    public float AttackRangeJitter => _attackRangeJitter;
     public bool HasStationaryAttackCycle => _attackCycleMode == EnemyAttackCycleMode.StationaryCommitted;
+
+    public float CalculateRandomAttackDetectRange()
+    {
+        if (_attackRangeJitter <= 0f)
+        {
+            return _attackDetectRange;
+        }
+
+        return Mathf.Max(2.0f, _attackDetectRange + Random.Range(-_attackRangeJitter, _attackRangeJitter));
+    }
 
     [Header("지상 원거리 안전거리")]
     [SerializeField, Min(0f)] private float _rangedFleeStartDistance;

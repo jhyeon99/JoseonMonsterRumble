@@ -63,7 +63,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: f510d04513cb47dc8c36ac8524ac3e7a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1918527705
-  m_SortingLayer: 5
+  m_SortingLayer: 6
   m_SortingOrder: 2
   m_MaskInteraction: 0
   m_Sprite: {fileID: -4346244404228752641, guid: d41957100d7f3734fb83677bbd6e2efe,
@@ -112,15 +112,14 @@ MonoBehaviour:
   _data: {fileID: 11400000, guid: d98ecf8c9b6a7fa4ba204938bc05baa0, type: 2}
   _attackName: "\uD654\uC0B4 \uACF5\uACA9"
   _type: 1
-  _curveHeight: 5
   _returnPoolTimer: 8
-  _trailPrefab: {fileID: 2073882973139500243}
   _defense:
     Parryable: 1
     Unblockable: 0
     ParryWindowOverride: 0
     GuardGaugeCost: 25
   _reflectToShooter: 1
+  _ignoreGroundWhenReturning: 1
 --- !u!61 &6406752446465230335
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -245,7 +244,7 @@ TrailRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1918527705
-  m_SortingLayer: 5
+  m_SortingLayer: 6
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Time: 0.1
@@ -396,7 +395,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1918527705
-  m_SortingLayer: 5
+  m_SortingLayer: 6
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: -4346244404228752641, guid: d41957100d7f3734fb83677bbd6e2efe,
@@ -488,7 +487,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1918527705
-  m_SortingLayer: 5
+  m_SortingLayer: 6
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: -4346244404228752641, guid: d41957100d7f3734fb83677bbd6e2efe,

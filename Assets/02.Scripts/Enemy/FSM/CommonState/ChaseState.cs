@@ -7,6 +7,7 @@ public class ChaseState : EnemyState
     private readonly Enemy _enemy;
     private Vector2 _lastSeenPosition;
     private ExitMotion _exitMotion;
+    private float _effectiveAttackRange;
 
     public ChaseState(Enemy enemy)
     {
@@ -18,6 +19,7 @@ public class ChaseState : EnemyState
         Debug.Log("추적 시작");
         _exitMotion = ExitMotion.Stop;
         _enemy.DirectionLock.UnlockDirection();
+        _effectiveAttackRange = _enemy.Data.CalculateRandomAttackDetectRange();
         _lastSeenPosition = _enemy.Target != null ? (Vector2)_enemy.Target.position : (Vector2)_enemy.transform.position;
     }
 
@@ -30,6 +32,11 @@ public class ChaseState : EnemyState
         if (_enemy.MoveType is EnemyGroundMove groundMove)
         {
             groundMove.MoveToTargetPosition(_enemy.Target.position);
+            return;
+        }
+        if (_enemy.Combat is EnemyMeleeCombat flyingMelee && flyingMelee.FlyingAttack != null)
+        {
+            flyingMelee.FlyingAttack.UpdateChaseFlight();
             return;
         }
         _enemy.Animation.SetRunning(true);
@@ -74,7 +81,14 @@ public class ChaseState : EnemyState
             }
             else if (_enemy.MoveType is EnemyFlyingMove)
             {
-                _enemy.StateMachine.ChangeState(new AttackPrepareFlyingState(_enemy));
+                if (_enemy.Combat is EnemyMeleeCombat flyingMelee && flyingMelee.FlyingAttack != null)
+                {
+                    _enemy.StateMachine.ChangeState(new FlyingMeleeAttackState(_enemy, flyingMelee.FlyingAttack));
+                }
+                else
+                {
+                    _enemy.StateMachine.ChangeState(new AttackPrepareFlyingState(_enemy));
+                }
             }
         }
     }
@@ -90,9 +104,33 @@ public class ChaseState : EnemyState
     {
         if (_enemy.Combat is EnemyMeleeCombat melee)
         {
+            if (melee.FlyingAttack != null)
+            {
+                return melee.FlyingAttack.CanStartAttack();
+            }
             return _enemy.GetDistanceXToPlayer() <= _enemy.Data.AttackDetectRange &&
                 (!(_enemy.MoveType is EnemyGroundMove) || melee.IsTargetInAttackHeight(_enemy.Target));
         }
+
+        if (_enemy.Combat is EnemyRangedCombat && _enemy.MoveType is EnemyFlyingMove)
+        {
+            float targetRange = _effectiveAttackRange > 0f ? _effectiveAttackRange : _enemy.Data.AttackDetectRange;
+            if (_enemy.GetDistanceToPlayer() > targetRange)
+            {
+                return false;
+            }
+
+            if (_enemy.AirSensor != null && _enemy.Target != null)
+            {
+                if (!_enemy.AirSensor.HasLineOfSight(_enemy.Target.position))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         return _enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange;
     }
 

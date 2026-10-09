@@ -207,12 +207,18 @@ public abstract class Projectile : MonoBehaviour, IParryable
         return _reflectToShooter && _shooterCollider != null && _shooterCollider.isActiveAndEnabled;
     }
 
-    /// <summary>총구에서 위로 올라가며 쏜 적 본체(IDamageable)의 콜라이더를 찾음</summary>
+    /// <summary>총구에서 위로 올라가며 쏜 적 본체의 피격 콜라이더를 찾음</summary>
     private static Collider2D FindShooterCollider(Transform muzzlePoint)
     {
         if (muzzlePoint == null)
         {
             return null;
+        }
+
+        EnemyHurtbox hurtbox = muzzlePoint.GetComponentInParent<Enemy>()?.GetComponentInChildren<EnemyHurtbox>();
+        if (hurtbox != null)
+        {
+            return hurtbox.GetComponent<Collider2D>();
         }
 
         IDamageable shooter = muzzlePoint.GetComponentInParent<IDamageable>();

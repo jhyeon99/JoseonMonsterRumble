@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class AttackPrepareFlyingState : EnemyState
 {
@@ -25,13 +25,39 @@ public class AttackPrepareFlyingState : EnemyState
     {
         if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
         {
-            _enemy.Animation.SetRunning(true);
-            _enemy.MoveType.BackMove(_enemy.GetDirectionToPlayer());
+            Vector2 retreatDirection = -_enemy.GetDirectionToPlayer();
+            bool isBlocked = _enemy.AirSensor != null &&
+                !_enemy.AirSensor.CanFlyAhead(_enemy.MoveArea, _enemy.transform.position, retreatDirection, 1.0f);
+
+            if (isBlocked)
+            {
+                _enemy.Animation.SetRunning(false);
+                if (_enemy.MoveType is EnemyFlyingMove flyingMove)
+                {
+                    flyingMove.HoverInPlace();
+                }
+                else
+                {
+                    _enemy.MoveType.StopMove();
+                }
+            }
+            else
+            {
+                _enemy.Animation.SetRunning(true);
+                _enemy.MoveType.BackMove(_enemy.GetDirectionToPlayer());
+            }
         }
         else
         {
             _enemy.Animation.SetRunning(false);
-            _enemy.MoveType.StopMove();
+            if (_enemy.MoveType is EnemyFlyingMove flyingMove)
+            {
+                flyingMove.HoverInPlace();
+            }
+            else
+            {
+                _enemy.MoveType.StopMove();
+            }
         }
     }
 

@@ -23,8 +23,8 @@ public abstract class Enemy : MonoBehaviour, IFinishable
     private EnemyHealth _health;
     private IAttackDirectionLock _directionLock;
     private Rigidbody2D _enemyRb;
-    private HitFlash _hitFlash;
     private EnemyMoveArea _moveArea;
+    private EnemyAirSensor _airSensor;
     private Collider2D _enemyCollider;
     private float _radius;
     private float _rightAngle;
@@ -38,8 +38,8 @@ public abstract class Enemy : MonoBehaviour, IFinishable
     public EnemyHealth Health => _health;
     public IAttackDirectionLock DirectionLock => _directionLock;
     public Rigidbody2D EnemyRb => _enemyRb;
-    public HitFlash HitFlash => _hitFlash;
     public EnemyMoveArea MoveArea => _moveArea;
+    public EnemyAirSensor AirSensor => _airSensor;
     public float Radius => _radius;
     public bool IsTargetedForBuff { get; set; } = false;
     public float RightAngle => _rightAngle;
@@ -114,8 +114,8 @@ public abstract class Enemy : MonoBehaviour, IFinishable
         _health = GetComponent<EnemyHealth>();
         _directionLock = GetComponent<IAttackDirectionLock>();
         _enemyRb = GetComponent<Rigidbody2D>();
-        _hitFlash = GetComponent<HitFlash>();
         _moveArea = GetComponent<EnemyMoveArea>();
+        _airSensor = GetComponent<EnemyAirSensor>();
         _enemyCollider = GetComponent<Collider2D>();
         _rightAngle = Data.AttackAngle;
         _leftAngle = 180f - Data.AttackAngle;
