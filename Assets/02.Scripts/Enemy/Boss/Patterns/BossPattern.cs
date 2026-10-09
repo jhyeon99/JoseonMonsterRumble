@@ -327,6 +327,21 @@ public abstract class BossPattern : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// 지금 재생 중인 패턴 애니메이션을 처음부터 다시 재생하고 진행도(Progress)도 0부터 다시 셈.
+    /// 같은 동작을 여러 번 반복하는 패턴용 (연속 찍기 등). 애니메이터 전이 설정 불필요
+    /// </summary>
+    protected void ReplayAnimation()
+    {
+        AnimationClip clip = GetPlayingPatternClip();
+        if (clip != null && Boss.TryGetClipState(clip, out int stateHash, out float _))
+        {
+            Boss.PlayStateFromStart(stateHash);
+        }
+
+        _startTime = Time.time;
+    }
+
     /// <summary>트리거를 보내기 직전 (방향 전환 등)</summary>
     protected virtual void OnPatternStart()
     {

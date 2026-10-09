@@ -2,10 +2,11 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 플레이어 찍기 → 좌우 바늘. (1층 공격) 애니메이션 하나에 점프 / 찍기 / 바늘이 모두 들어 있는 기준.
+/// 플레이어 연속 찍기 → 마지막 찍기 후 좌우 바늘. (1층 공격) 애니메이션 하나에 점프 / 찍기 / 바늘이 모두 들어 있는 기준.
 /// - 0 ~ 판정 시작: 점프해서 플레이어 위로 이동 (최고점 비율까지 올라가고, 판정 시작에 착지)
 /// - 판정 시작 ~ 끝: 찍기 판정 (패링 시 그로기를 켜 두면 타이밍 가드로 보스 그로기)
-/// - 바늘 비율: 좌우로 바늘 발사
+/// - 마지막이 아닌 찍기: 다음 찍기 비율에서 애니메이션을 처음부터 다시 재생해 다시 점프
+/// - 마지막 찍기: 바늘 비율에서 좌우로 바늘 발사
 /// </summary>
 public class BossStompPattern : BossPattern
 {
@@ -25,6 +26,18 @@ public class BossStompPattern : BossPattern
     private float _edgeMargin = 2f;
 
     [Header("찍기")]
+    [Tooltip("연속으로 찍는 횟수. 바늘은 마지막 찍기 후에만 발사")]
+    [SerializeField, Min(1)]
+    private int _stompCount = 3;
+
+    [Tooltip("마지막이 아닌 찍기에서 다음 점프를 시작하는 지점 (애니메이션 길이 대비 비율). 판정 끝보다 앞이면 판정 끝 사용")]
+    [SerializeField, Range(0f, 1f)]
+    private float _nextStompRatio = 0f;
+
+    [Tooltip("찍기 사이 추가 대기 (초)")]
+    [SerializeField, Min(0f)]
+    private float _delayBetweenStomps = 0f;
+
     [Tooltip("찍기 판정 (보스 발밑). 패링 시 그로기를 켜 두기")]
     [SerializeField]
     private BossHitbox _stompHitbox;
@@ -56,7 +69,7 @@ public class BossStompPattern : BossPattern
 
     private void Reset()
     {
-        SetDefaults("찍기 → 바늘", BossPhaseMask.Both, BossFloorMask.Floor1);
+        SetDefaults("연속 찍기 → 바늘", BossPhaseMask.Both, BossFloorMask.Floor1);
     }
 
     protected override void OnInitialize()
@@ -74,6 +87,38 @@ public class BossStompPattern : BossPattern
     }
 
     protected override IEnumerator Execute()
+    {
+        int count = Mathf.Max(1, _stompCount);
+        float nextStompRatio = Mathf.Max(_nextStompRatio, HitEndRatio);
+
+        for (int i = 0; i < count; i++)
+        {
+            if (i > 0)
+            {
+                if (_delayBetweenStomps > 0f)
+                {
+                    yield return new WaitForSeconds(_delayBetweenStomps);
+                }
+
+                // 같은 애니메이션을 처음부터 다시 재생 (진행도도 0부터)
+                Boss.FacePlayer();
+                ReplayAnimation();
+            }
+
+            yield return Stomp();
+
+            if (i < count - 1)
+            {
+                yield return WaitUntilProgress(nextStompRatio);
+            }
+        }
+
+        // 마지막 찍기 후에만 좌우 바늘 (패링당했으면 그로기로 넘어가 여기까지 오지 않음)
+        yield return FireNeedles();
+    }
+
+    /// <summary>점프 → 착지 → 찍기 판정 (판정 끝까지)</summary>
+    private IEnumerator Stomp()
     {
         float startX = Boss.Position.x;
         float groundY = Boss.GroundY;
@@ -108,8 +153,10 @@ public class BossStompPattern : BossPattern
         _stompHitbox.Activate();
         yield return WaitUntilProgress(HitEndRatio);
         _stompHitbox.Deactivate();
+    }
 
-        // 좌우 바늘 (패링당했으면 그로기로 넘어가 여기까지 오지 않음)
+    private IEnumerator FireNeedles()
+    {
         if (_needlePrefab == null || _needleCountPerSide <= 0)
         {
             yield break;
