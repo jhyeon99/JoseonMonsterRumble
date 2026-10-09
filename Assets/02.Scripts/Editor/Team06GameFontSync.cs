@@ -8,7 +8,7 @@ public static class Team06GameFontSync
 {
     private const string RequestPath = "Library/Team06GameFontSync.request";
     private const string ReportPath = "Library/Team06GameFontSync-report.txt";
-    private const string FontPath = "Assets/05.Art/Fonts/Team06/Team06-InkKR-Regular.ttf";
+    private const string FontPath = "Assets/05.Art/Fonts/Brush/brushkorean.ttf";
 
     static Team06GameFontSync()
     {
@@ -33,7 +33,7 @@ public static class Team06GameFontSync
         EditorApplication.update -= ApplyRequestedFonts;
     }
 
-    [MenuItem("Tools/Team06/Apply Imported Dialogue Font")]
+    [MenuItem("Tools/Fonts/Apply brushkorean Dialogue Font")]
     private static void ApplyImportedDialogueFont()
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode) return;
@@ -60,7 +60,7 @@ public static class Team06GameFontSync
                     if (property == null) continue;
                     if (property.objectReferenceValue != font)
                     {
-                        Undo.RecordObject(controller, "Apply Team06 dialogue font");
+                        Undo.RecordObject(controller, "Apply brushkorean dialogue font");
                         property.objectReferenceValue = font;
                         serialized.ApplyModifiedProperties();
                     }
