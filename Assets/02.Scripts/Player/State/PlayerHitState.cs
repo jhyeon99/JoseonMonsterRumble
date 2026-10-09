@@ -44,8 +44,14 @@ public class PlayerHitState : PlayerBaseState
             // 무빙 플랫폼에서 떨어져 나가도록 (JumpState와 동일)
             _player.Movement.SetMovingPlatform(null);
 
+            float horizontalSpeed = Mathf.Clamp(
+                _hitData.KnockbackForce * _player.Movement.KnockbackHorizontalMultiplier,
+                5f,
+                9f
+            );
+
             _rigidbody2D.linearVelocity = new Vector2(
-                dirX * _hitData.KnockbackForce,
+                dirX * horizontalSpeed,
                 _player.Movement.KnockbackUpVelocity);
         }
         else

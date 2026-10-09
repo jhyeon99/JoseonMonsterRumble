@@ -9,8 +9,9 @@
 public class EnemyContactDamage : MonoBehaviour
 {
     [Header("접촉 데미지")]
-    [SerializeField, Min(0f)]
-    private float _damage = 10f;
+
+    [SerializeField] private string _attackName = "접촉 피해";
+    [SerializeField, Min(0f)] private float _damage = 10f;
 
     [Tooltip("0이면 넉백 없이 제자리 경직")]
     [SerializeField, Min(0f)]
@@ -21,6 +22,7 @@ public class EnemyContactDamage : MonoBehaviour
     private float _hitInterval = 0.5f;
 
     [Header("가드 / 패링")]
+
     [Tooltip("기본은 패링 불가, 가드 가능")]
     [SerializeField]
     private AttackDefense _defense;
@@ -79,7 +81,7 @@ public class EnemyContactDamage : MonoBehaviour
 
         Vector2 hitPoint = other.ClosestPoint(_zone.bounds.center);
 
-        var hitData = new HitData(_damage, _knockbackForce, hitPoint, attackDirection, _defense);
+        var hitData = new HitData(_damage, _knockbackForce, hitPoint, attackDirection, _defense, null, 0, _attackName);
         damageable.TakeDamage(hitData);
         _nextHitTime = Time.time + _hitInterval;
     }
