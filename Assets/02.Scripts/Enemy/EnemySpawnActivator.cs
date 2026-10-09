@@ -19,6 +19,13 @@ public class EnemySpawnActivator : MonoBehaviour
     {
         if (_camera == null)
             _camera = Camera.main;
+        
+        
+        if (_target == null)
+        {
+            GameObject player = GameObject.FindWithTag(Constants.Tags.Player);
+            if (player != null) _target = player.transform;
+        }
 
         // 비활성화된 오브젝트도 포함해서 씬의 적을 탐색
         _enemies = FindObjectsByType<Enemy>(
