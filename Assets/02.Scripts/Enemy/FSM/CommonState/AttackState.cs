@@ -52,6 +52,11 @@ public class AttackState : EnemyState
 
         if (_attackTimer <= 0)
         {
+            // 타이머만 끝났다고 무기 회수 동작 중에 회복을 시작하지 않는다.
+            if (_enemy.Data.HasStationaryAttackCycle && _enemy.Animation.IsPlayingAttack())
+            {
+                return;
+            }
             _enemy.MoveType.StopMove();
             _enemy.StateMachine.ChangeState(new AttackRecoveryState(_enemy));
         }
@@ -60,7 +65,10 @@ public class AttackState : EnemyState
     public override void Exit()
     {
         Debug.Log("공격 종료");
-        _enemy.DirectionLock.UnlockDirection();
+        if (!_enemy.Data.HasStationaryAttackCycle)
+        {
+            _enemy.DirectionLock.UnlockDirection();
+        }
         if (_enemy.Combat is EnemyMeleeCombat)
         {
             _enemy.MoveType.StopQuadraticCharge();

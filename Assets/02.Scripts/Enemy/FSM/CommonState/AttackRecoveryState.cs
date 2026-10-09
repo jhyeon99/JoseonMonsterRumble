@@ -14,10 +14,20 @@ public class AttackRecoveryState : EnemyState
     {
         Debug.Log("휴식 시작");
         _recoveryTimer = _enemy.Data.AttackRecoveryTime;
+        if (_enemy.Data.HasStationaryAttackCycle)
+        {
+            _enemy.MoveType.StopMove();
+            _enemy.Animation.SetRunning(false);
+            _enemy.DirectionLock.LockDirection();
+        }
     }
 
     public override void FixedUpdate()
     {
+        if (_enemy.Data.HasStationaryAttackCycle)
+        {
+            return;
+        }
         if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackRecoverRange)
         {
             if (!_enemy.MoveType.IsEndPosition(_enemy.GetDirectionToPlayer()))
@@ -28,13 +38,13 @@ public class AttackRecoveryState : EnemyState
             else
             {
                 _enemy.Animation.SetRunning(false);
-                _enemy.MoveType.StopMove();
+                _enemy.MoveType.RequestStopMove();
             }
         }
         else
         {
             _enemy.Animation.SetRunning(false);
-            _enemy.MoveType.StopMove();
+            _enemy.MoveType.RequestStopMove();
         }
     }
 

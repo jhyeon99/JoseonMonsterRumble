@@ -7,11 +7,17 @@ public enum EnemyHitAnimationMode
     ThirdComboOrReflectedProjectile,
 }
 
+public enum EnemyWalkPhase { None, Start, Loop, End }
+
 public class EnemyAnimation : MonoBehaviour
 {
     private const int ThirdComboStep = 3;
     private const int AnimationLayer = 0;
     private static readonly int HitTagHash = Animator.StringToHash("Hit");
+    private static readonly int AttackTagHash = Animator.StringToHash("Attack");
+    private static readonly int WalkStartTagHash = Animator.StringToHash("WalkStart");
+    private static readonly int WalkLoopTagHash = Animator.StringToHash("WalkLoop");
+    private static readonly int WalkEndTagHash = Animator.StringToHash("WalkEnd");
 
     [SerializeField] private Animator _animator;
     [SerializeField] private EnemyHitAnimationMode _hitAnimationMode = EnemyHitAnimationMode.AllDamage;
@@ -28,6 +34,23 @@ public class EnemyAnimation : MonoBehaviour
     public void SetRunning(bool isRunning)
     {
         _animator.SetBool(_isRunning, isRunning);
+    }
+
+    public EnemyWalkPhase GetWalkPhase(out float progress)
+    {
+        AnimatorStateInfo state = _animator.IsInTransition(AnimationLayer)
+            ? _animator.GetNextAnimatorStateInfo(AnimationLayer)
+            : _animator.GetCurrentAnimatorStateInfo(AnimationLayer);
+        progress = Mathf.Clamp01(state.normalizedTime);
+        if (state.tagHash == WalkStartTagHash)
+        {
+            return EnemyWalkPhase.Start;
+        }
+        if (state.tagHash == WalkLoopTagHash)
+        {
+            return EnemyWalkPhase.Loop;
+        }
+        return state.tagHash == WalkEndTagHash ? EnemyWalkPhase.End : EnemyWalkPhase.None;
     }
 
     public void PlayAttack() => _animator.SetTrigger(_attack);
@@ -57,16 +80,20 @@ public class EnemyAnimation : MonoBehaviour
         }
     }
 
-    public bool IsPlayingHit()
+    public bool IsPlayingHit() => IsPlayingTaggedState(HitTagHash);
+
+    public bool IsPlayingAttack() => IsPlayingTaggedState(AttackTagHash);
+
+    private bool IsPlayingTaggedState(int tagHash)
     {
         if (_animator == null)
         {
             return false;
         }
 
-        return _animator.GetCurrentAnimatorStateInfo(AnimationLayer).tagHash == HitTagHash ||
+        return _animator.GetCurrentAnimatorStateInfo(AnimationLayer).tagHash == tagHash ||
             (_animator.IsInTransition(AnimationLayer) &&
-             _animator.GetNextAnimatorStateInfo(AnimationLayer).tagHash == HitTagHash);
+             _animator.GetNextAnimatorStateInfo(AnimationLayer).tagHash == tagHash);
     }
 
     public void PlayParriedHit()

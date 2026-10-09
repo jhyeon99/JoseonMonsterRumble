@@ -150,6 +150,7 @@ public abstract class Enemy : MonoBehaviour, IFinishable
         }
 
         _stateMachine.FixedUpdate();
+        _moveType.UpdateWalkPhysics();
     }
 
     public float GetDistanceToPlayer()
