@@ -432,7 +432,7 @@ MonoBehaviour:
     Parryable: 0
     Unblockable: 0
     ParryWindowOverride: 0
-    GuardGaugeCost: 0
+    GuardGaugeCost: 10
 --- !u!1 &4754600020612061745
 GameObject:
   m_ObjectHideFlags: 0
@@ -695,7 +695,7 @@ MonoBehaviour:
     Parryable: 1
     Unblockable: 0
     ParryWindowOverride: 0
-    GuardGaugeCost: 0
+    GuardGaugeCost: 35
   _groggyDuration: 2
 --- !u!114 &7165762390576756721
 MonoBehaviour:

@@ -12,19 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e124c741162c45cea477d0b79b596f93, type: 3}
   m_Name: SO_InmyunjoAttackData
   m_EditorClassIdentifier: Assembly-CSharp::FlyingMeleeAttackData
-  _horizontalAttackChance: 0.2
+  _horizontalAttackChance: 0.3
   _diveTiming:
-    _prepareTime: 0.85
-    _strikeTime: 1.25
-    _recoveryTime: 0.6
+    _prepareTime: 0.76
+    _strikeTime: 1
+    _recoveryTime: 0.5
   _horizontalTiming:
-    _prepareTime: 0.85
-    _strikeTime: 1.25
-    _recoveryTime: 0.6
-  _approachDistance: 6
-  _prepareRetreatDistance: 0.6
-  _diveHeight: 3.5
-  _positioningSpeed: 5
+    _prepareTime: 0.76
+    _strikeTime: 0.8
+    _recoveryTime: 0.3
+  _prepareRetreatDistance: 1.5
+  _approachDistance: 6.5
+  _diveHeight: 4
+  _positioningSpeed: 6
   _positioningTimeout: 3
   _hoverTime: 0.9
   _hitSpeedRatio: 0.6

@@ -15,7 +15,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
 
     [SerializeField] private AttackDefense _defense = new AttackDefense { Parryable = true, GuardGaugeCost = 25f };
 
-    [Header("패링 반사 (속도 / 데미지 배율은 PlayerGuard에서 설정)")]
+    [Header("패링 반사 (피해는 ProjectileData, 속도는 PlayerGuard에서 설정)")]
 
     [Tooltip("켜면 쏜 적의 몸(콜라이더 중심)을 따라가며 되돌아감. 끄거나 쏜 적이 없으면 맞은 방향의 반대로 직진")]
     [SerializeField]
@@ -160,10 +160,12 @@ public abstract class Projectile : MonoBehaviour, IParryable
         _isLaunching = false;
         _returnPoolTime = _returnPoolTimer;
 
-        // 반사 속도 / 데미지는 패링한 쪽(PlayerGuard) 설정을 따름. 없으면 원래 속도, 원래 데미지
+        // 별도 반사 피해가 없으면 기존 PlayerGuard 배율을 유지한다.
         PlayerGuard guard = parrier != null ? parrier.GetComponent<PlayerGuard>() : null;
         _reflectSpeed = guard != null ? guard.ReflectSpeed : Speed;
-        _projectileDamage *= guard != null ? guard.ReflectDamageMultiplier : 1f;
+        _projectileDamage = _data.ReflectedDamage > 0f
+            ? _data.ReflectedDamage
+            : _projectileDamage * (guard != null ? guard.ReflectDamageMultiplier : 1f);
         _reflectDirection = CalculateReflectDirection(hitData);
 
         // 적에게 맞도록 플레이어 투사체 레이어로 변경

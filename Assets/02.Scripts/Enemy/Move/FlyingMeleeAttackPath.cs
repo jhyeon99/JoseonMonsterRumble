@@ -33,11 +33,7 @@ public readonly struct FlyingMeleeAttackPath
     public Vector2 CalculatePosition(float progress)
     {
         float clampedProgress = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(progress));
-        if (_pattern == FlyingMeleeAttackPattern.Horizontal)
-        {
-            return Vector2.Lerp(_start, _end, clampedProgress);
-        }
-
+        // 수평 돌진도 조준점을 경로 중간에 둔다. 양쪽 거리가 달라도 준비 구간에서 표적을 지나치지 않는다.
         return clampedProgress <= HalfProgress
             ? CalculateQuadraticPosition(_start, _entryControl, _aim, clampedProgress * SegmentProgressScale)
             : CalculateQuadraticPosition(_aim, _exitControl, _end, (clampedProgress - HalfProgress) * SegmentProgressScale);

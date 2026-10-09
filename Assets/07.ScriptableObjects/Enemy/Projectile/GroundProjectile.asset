@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: GroundProjectile
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileData
   _attackName: "\uB3CC\uBA69\uC774 \uACF5\uACA9"
-  _projectileDamage: 10
+  _projectileDamage: 12
+  _reflectedDamage: 60
   _projectileSpeed: 14
   _knockbackForce: 3

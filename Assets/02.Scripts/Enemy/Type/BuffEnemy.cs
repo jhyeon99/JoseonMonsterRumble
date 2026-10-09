@@ -11,6 +11,10 @@ public class BuffEnemy : Enemy
     [SerializeField] private SO_BuffTypeData[] _availableBuffs;
     public SO_BuffTypeData CurrentBuffData { get; private set; }
 
+    [Header("자폭")]
+    [SerializeField, Min(0.1f)] private float _selfDestructDelay = 3f;
+    public float SelfDestructDelay => _selfDestructDelay;
+
     private EnemyBuffVisualLink _visualLink;
     public EnemyBuffVisualLink VisualLink => _visualLink;
 
@@ -71,7 +75,7 @@ public class BuffEnemy : Enemy
     {
         if (!EnemyManager.Instance.HasAnyAttacker())
         {
-            StateMachine.ChangeState(new EnragedState(this));
+            StartSelfDestruct();
             return;
         }
 
@@ -92,13 +96,23 @@ public class BuffEnemy : Enemy
 
     private void HandleAllAttackersKilled()
     {
-        StateMachine.ChangeState(new EnragedState(this));
+        StartSelfDestruct();
     }
 
     private void HandleTargetDeath()
     {
-        StateMachine.ChangeState(new EnragedState(this));
+        StartSelfDestruct();
         UnsubscribeTarget();
+    }
+
+    private void StartSelfDestruct()
+    {
+        if (IsDefeated || StateMachine.CurrentState is SelfDestructState)
+        {
+            return;
+        }
+
+        StateMachine.ChangeState(new SelfDestructState(this));
     }
 
     private void UnsubscribeTarget()

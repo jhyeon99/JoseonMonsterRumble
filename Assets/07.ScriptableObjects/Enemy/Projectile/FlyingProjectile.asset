@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: FlyingProjectile
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileData
   _attackName: "\uD654\uC0B4 \uACF5\uACA9"
-  _projectileDamage: 10
+  _projectileDamage: 12
+  _reflectedDamage: 60
   _projectileSpeed: 20
   _knockbackForce: 3

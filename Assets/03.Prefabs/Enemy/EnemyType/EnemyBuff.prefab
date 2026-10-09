@@ -175,6 +175,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExplosionAttack
   _attackName: "\uD3ED\uBC1C \uACF5\uACA9"
+  _attackDefense:
+    Parryable: 0
+    Unblockable: 1
+    ParryWindowOverride: 0
+    GuardGaugeCost: 0
 --- !u!1 &2057356393512570043
 GameObject:
   m_ObjectHideFlags: 0
@@ -417,6 +422,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67e31fc00b69018488701decf044acff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuffEnemy
+  _selfDestructDelay: 3
   _enemyType: 1
   _data: {fileID: 11400000, guid: 2fad875db8129d84e982006d0afedb46, type: 2}
   _assignedBuffData: {fileID: 0}
