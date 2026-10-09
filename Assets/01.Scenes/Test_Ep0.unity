@@ -11446,6 +11446,52 @@ SortingGroup:
   m_SortingOrder: 31
   m_SortAtRoot: 0
   m_Sort3DAs2D: 0
+--- !u!1001 &2100900000
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1002, guid: 338365823df44498b60c62ebd118d693, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 203.56
+      objectReference: {fileID: 0}
+    - target: {fileID: 1002, guid: 338365823df44498b60c62ebd118d693, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.79
+      objectReference: {fileID: 0}
+    - target: {fileID: 1002, guid: 338365823df44498b60c62ebd118d693, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1003, guid: 338365823df44498b60c62ebd118d693, type: 3}
+      propertyPath: _player
+      value:
+      objectReference: {fileID: 1338688473}
+    - target: {fileID: 1003, guid: 338365823df44498b60c62ebd118d693, type: 3}
+      propertyPath: _startPoint
+      value:
+      objectReference: {fileID: 1284737110}
+    - target: {fileID: 1003, guid: 338365823df44498b60c62ebd118d693, type: 3}
+      propertyPath: _camera
+      value:
+      objectReference: {fileID: 388751932}
+    - target: {fileID: 1003, guid: 338365823df44498b60c62ebd118d693, type: 3}
+      propertyPath: _prologue
+      value:
+      objectReference: {fileID: 1875812139}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 338365823df44498b60c62ebd118d693, type: 3}
+--- !u!4 &2100900001 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1002, guid: 338365823df44498b60c62ebd118d693, type: 3}
+  m_PrefabInstance: {fileID: 2100900000}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -11470,3 +11516,4 @@ SceneRoots:
   - {fileID: 1605987697}
   - {fileID: 704680630}
   - {fileID: 1969148100}
+  - {fileID: 2100900001}
