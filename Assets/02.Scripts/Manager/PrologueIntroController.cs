@@ -86,6 +86,7 @@ public class PrologueIntroController : MonoBehaviour
     [SerializeField, Min(0.01f)] private float _fadeToBlack = 0.5f;
     [SerializeField, Min(0.01f)] private float _revealLocation2 = 0.75f;
 
+    private readonly List<AudioSource> _openingSoundSources = new List<AudioSource>();
     private PlayerInputHandler _input;
     private Rigidbody2D _body;
     private CanvasGroup _fade;
@@ -262,6 +263,12 @@ public class PrologueIntroController : MonoBehaviour
         RestoreGameplayUi();
         IsIntroComplete = true;
         yield return FadeTo(0f, _openingFade);
+        yield return ContinueAfterOpening();
+    }
+
+    private IEnumerator ContinueAfterOpening()
+    {
+        _openingSoundSources.Clear();
         Phase = "Gameplay";
         float approachDirection = _jige.position.x >= _player.transform.position.x ? 1f : -1f;
         while ((_player.transform.position.x - (_jige.position.x - _jigeTriggerDistance * approachDirection)) * approachDirection < 0f)
@@ -429,10 +436,47 @@ public class PrologueIntroController : MonoBehaviour
 
     private void HandleJigeReached(int targetIndex) => _jigeReached = true;
 
-    private static void PlaySound(AudioClip clip, float gain = 1f)
+    private void PlaySound(AudioClip clip, float gain = 1f)
     {
-        if (clip != null) AudioManager.Instance.PlaySfx(clip, gain: gain);
+        if (clip == null) return;
+        AudioSource source = AudioManager.Instance.PlaySfxTracked(clip, gain: gain);
+        if (source != null) _openingSoundSources.Add(source);
     }
+
+    private void StopOpeningSounds()
+    {
+        foreach (AudioSource source in _openingSoundSources)
+            if (source != null) source.Stop();
+        _openingSoundSources.Clear();
+    }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    private void SkipOpeningForTesting()
+    {
+        StopAllCoroutines();
+        if (Phase == "Preparing")
+        {
+            _transitionDirection = _location2TransitionPoint.position.x >= _player.transform.position.x ? 1f : -1f;
+            _player.RangedAttack?.CancelCharge();
+            _player.StateMachine.ChangeState(_player.IdleState);
+            _body.linearVelocity = Vector2.zero;
+            _body.angularVelocity = 0f;
+        }
+        StopOpeningSounds();
+        ShowSubtitle("");
+        _exitChoice.SetActive(false);
+        _continuePrompt.SetActive(false);
+        SetContinueKeyPress(0f);
+        _fade.alpha = 0f;
+        _fade.blocksRaycasts = false;
+        _input.ClearInputState();
+        UnlockPlayer();
+        RestoreGameplayUi();
+        _camera.Reset(true, true, true);
+        IsIntroComplete = true;
+        StartCoroutine(ContinueAfterOpening());
+    }
+#endif
 
     private void ShowSubtitle(string text)
     {
@@ -484,6 +528,15 @@ public class PrologueIntroController : MonoBehaviour
 
     private void Update()
     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        bool isOpening = Phase == "Preparing" || Phase == "Scream" || Phase == "What" ||
+            Phase == "ExitChoice" || Phase == "DoorOpening";
+        if (_ready && isOpening && (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0)))
+        {
+            SkipOpeningForTesting();
+            return;
+        }
+#endif
         if (_exitChoice == null || !_exitChoice.activeSelf) return;
         bool hovered = RectTransformUtility.RectangleContainsScreenPoint(_exitChoiceRect, Input.mousePosition);
         if (_choicePanelSprite != null)
@@ -724,6 +777,7 @@ public class PrologueIntroController : MonoBehaviour
     private void OnDisable()
     {
         StopAllCoroutines();
+        StopOpeningSounds();
         if (_cinematics != null)
         {
             _cinematics.OnCinematicFinished.RemoveListener(HandleCinematicFinished);
