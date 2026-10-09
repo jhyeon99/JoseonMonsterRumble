@@ -7,7 +7,6 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     private const int SecondComboStep = 2;
     private Enemy _enemy;
     private float _currentHp;
-    private bool _tutorialProtection;
     public event Action OnDeath;
 
     // 사망하지 않은 피격 시 호출 (피격 연출용)
@@ -15,6 +14,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     public bool IsAlive => _currentHp > 0f;
     public bool IsDamaged => IsAlive && _currentHp < _enemy.Data.MaxHp;
     public float CurrentHp => _currentHp;
+    public float LastDamageTime { get; private set; } = float.NegativeInfinity;
 
     private void Awake()
     {
@@ -22,17 +22,13 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         _currentHp = _enemy.Data.MaxHp;
     }
 
-    /// <summary>튜토리얼 대상만 사망과 넉백을 막습니다. 마무리 Launch는 그대로 실행됩니다.</summary>
-    public void SetTutorialProtection(bool active) => _tutorialProtection = active;
-
     public bool TakeDamage(HitData hitData)
     {
         if (_enemy.IsDefeated) return false;
 
-        bool shouldKnockback = hitData.KnockbackForce > 0f && !_enemy.IsGroggy && !_tutorialProtection;
-        _currentHp = _tutorialProtection
-            ? Mathf.Max(1f, _currentHp - hitData.Damage)
-            : _currentHp - hitData.Damage;
+        bool shouldKnockback = hitData.KnockbackForce > 0f && !_enemy.IsGroggy;
+        _currentHp -= hitData.Damage;
+        if (hitData.Damage > 0f) LastDamageTime = Time.time;
         Debug.Log($"현재 체력 {_currentHp}");
         GameEvents.TriggerEnemyHit(hitData);
 
