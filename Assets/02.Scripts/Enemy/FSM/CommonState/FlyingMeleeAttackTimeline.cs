@@ -13,6 +13,8 @@ public enum FlyingMeleeAttackPhase
 /// <summary>공격 진행과 명중 감속을 한 시간 기준으로 계산한다. 애니메이션은 읽지 않는다.</summary>
 public sealed class FlyingMeleeAttackTimeline
 {
+    // 준비 구간은 조준점을 통과하는 경로 중간 이전에 끝난다. 돌진 시간으로 이 위치가 바뀌지 않는다.
+    private const float PreparationEndProgress = 0.4f;
     private readonly FlyingMeleeAttackTiming _timing;
     private readonly float _positioningTimeout;
     private readonly float _hoverTime;
@@ -24,9 +26,13 @@ public sealed class FlyingMeleeAttackTimeline
     public FlyingMeleeAttackPhase Phase { get; private set; }
     public float StrikeProgress => Mathf.Clamp01(_elapsedTime / _timing.StrikeTime);
     public float PrepareProgress => Mathf.Clamp01(_elapsedTime / _timing.PrepareTime);
-    public float TravelProgress => Mathf.Clamp01((Phase == FlyingMeleeAttackPhase.Preparing
-        ? Mathf.Min(_elapsedTime, _timing.PrepareTime)
-        : _timing.PrepareTime + _elapsedTime) / (_timing.PrepareTime + _timing.StrikeTime));
+    public float TravelProgress => Phase switch
+    {
+        FlyingMeleeAttackPhase.Preparing => PreparationEndProgress * PrepareProgress,
+        FlyingMeleeAttackPhase.Striking => PreparationEndProgress + (1f - PreparationEndProgress) * StrikeProgress,
+        FlyingMeleeAttackPhase.Recovering or FlyingMeleeAttackPhase.Completed => 1f,
+        _ => 0f,
+    };
     public bool HasPositioningTimedOut => _elapsedTime >= _positioningTimeout;
 
     public FlyingMeleeAttackTimeline(FlyingMeleeAttackData data, FlyingMeleeAttackPattern pattern)
