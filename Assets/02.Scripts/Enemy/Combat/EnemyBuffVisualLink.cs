@@ -65,6 +65,10 @@ public class EnemyBuffVisualLink : MonoBehaviour
         _lineRenderer.enabled = false;
     }
 
+    private static readonly int FlameColorPropId = Shader.PropertyToID("_FlameColor");
+    private static readonly int FlameInnerColorPropId = Shader.PropertyToID("_FlameInnerColor");
+    private MaterialPropertyBlock _propBlock;
+
     public void ApplyBuffData(SO_BuffTypeData data)
     {
         if (data == null)
@@ -79,7 +83,16 @@ public class EnemyBuffVisualLink : MonoBehaviour
 
         if (_selfRenderer != null)
         {
-            _selfRenderer.color = data.FlameColor;
+            _selfRenderer.color = Color.white;
+            if (_propBlock == null)
+            {
+                _propBlock = new MaterialPropertyBlock();
+            }
+
+            _selfRenderer.GetPropertyBlock(_propBlock);
+            _propBlock.SetColor(FlameColorPropId, data.FlameColor);
+            _propBlock.SetColor(FlameInnerColorPropId, data.FlameInnerColor);
+            _selfRenderer.SetPropertyBlock(_propBlock);
         }
 
         _startColor = data.LinkStartColor;

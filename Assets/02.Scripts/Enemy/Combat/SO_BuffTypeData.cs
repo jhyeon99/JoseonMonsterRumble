@@ -17,11 +17,13 @@ public class SO_BuffTypeData : ScriptableObject
 
     [Header("시각 색상 팔레트")]
     [SerializeField] private Color _flameColor = Color.white;
+    [SerializeField] private Color _flameInnerColor = Color.white;
     [SerializeField] private Color _linkStartColor = new Color(0.2f, 0.8f, 1f, 0.9f);
     [SerializeField] private Color _linkEndColor = new Color(0.1f, 0.5f, 1f, 0.8f);
     [SerializeField] private Color _targetAuraColor = new Color(0.35f, 0.85f, 1f, 1f);
 
     public Color FlameColor => _flameColor;
+    public Color FlameInnerColor => _flameInnerColor;
     public Color LinkStartColor => _linkStartColor;
     public Color LinkEndColor => _linkEndColor;
     public Color TargetAuraColor => _targetAuraColor;
