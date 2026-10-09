@@ -633,6 +633,18 @@ public class Boss : MonoBehaviour, IFinishable
         }
     }
 
+    /// <summary>애니메이터 상태를 해시로 처음부터 다시 재생. 상태가 없으면 false</summary>
+    public bool PlayStateFromStart(int stateHash)
+    {
+        if (_animator == null || !_animator.HasState(0, stateHash))
+        {
+            return false;
+        }
+
+        _animator.Play(stateHash, 0, 0f);
+        return true;
+    }
+
     /// <summary>애니메이터 상태를 이름으로 바로 재생. 상태가 없으면 false</summary>
     public bool PlayState(string stateName)
     {
