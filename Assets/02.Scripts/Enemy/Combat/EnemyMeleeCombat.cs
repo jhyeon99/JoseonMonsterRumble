@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using System;
 
 public class EnemyMeleeCombat : EnemyCombat, IParryable
 {
@@ -18,11 +19,15 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
     private Transform _heightTarget;
     private Collider2D _heightTargetCollider;
     private BoxCollider2D _groundAttackBox;
+    private FlyingMeleeAttackController _flyingAttack;
     public float CurrentDamage => _currentDamage;
+    public FlyingMeleeAttackController FlyingAttack => _flyingAttack;
+    public event Action OnAttackHit;
 
     protected override void Awake()
     {
         base.Awake();
+        _flyingAttack = GetComponent<FlyingMeleeAttackController>();
         _groundAttackBox = _attackCollider as BoxCollider2D;
         if (TryGetComponent<EnemyGroundMove>(out _) && _groundAttackBox == null)
         {
@@ -37,6 +42,14 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
         CalculateDamage(DamageIncreaseValue);
 
         _attackCoroutine = StartCoroutine(AttackRoutine());
+    }
+
+    // 공중 돌진은 공격 상태가 판정 수명을 관리한다. 지상의 시간 기반 Attack은 유지한다.
+    public void StartControlledAttack()
+    {
+        StopAttack();
+        CalculateDamage(DamageIncreaseValue);
+        _attackCollider.enabled = true;
     }
 
     public bool IsTargetInAttackHeight(Transform target)
@@ -90,10 +103,12 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
         if (damageable.TakeDamage(hitData))
         {
             _attackCollider.enabled = false;
-            if (Enemy.MoveType is EnemyFlyingMove flyingMove)
+            if (_flyingAttack == null && Enemy.MoveType is EnemyFlyingMove flyingMove)
             {
                 flyingMove.ApplyHitSlowdown();
             }
+
+            OnAttackHit?.Invoke();
 
             Debug.Log($"플레이어에게 근접공격으로 {_currentDamage}만큼 피해를 입힘.");
         }

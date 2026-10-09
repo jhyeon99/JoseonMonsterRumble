@@ -12,8 +12,18 @@ public class EnemyFlyingMove : EnemyMoveType
     private const float ChaseDistanceMargin = 1f;
     private const float CollisionSkin = 0.02f;
     private const float MinimumFlightSpeed = 0.0001f;
-    private enum MeleeFlightMode { Hovering, Approaching }
+    private const int DeathLandingCastCapacity = 8;
+    private const float LandingNormalThreshold = 0.7f;
+    private enum MeleeFlightMode { Hovering, Approaching, Falling, Landed }
     private MeleeFlightMode _meleeFlightMode;
+    [Header("근접 공중 몬스터 사망 추락")]
+    [SerializeField, Min(0f)] private float _deathGravityScale = 6.25f;
+    [SerializeField, Min(0.1f)] private float _deathMaxFallSpeed = 15f;
+    [SerializeField] private Transform _deathLandingPoint;
+    private readonly RaycastHit2D[] _deathLandingHits = new RaycastHit2D[DeathLandingCastCapacity];
+    private ContactFilter2D _deathGroundFilter;
+    private float _initialGravityScale;
+    private bool _initialSimulated;
     [Header("U자 돌진 설정")]
 
     [SerializeField] private float _uCurveBottomOffset = 0.4f;
@@ -62,6 +72,82 @@ public class EnemyFlyingMove : EnemyMoveType
         _enemyRotation = GetComponent<EnemyRotation>();
         _enemyFlip = GetComponent<EnemyFlip>();
         _meleeAttack = GetComponent<FlyingMeleeAttackController>();
+        _initialGravityScale = Rigidbody.gravityScale;
+        _initialSimulated = Rigidbody.simulated;
+        _deathGroundFilter.SetLayerMask(Constants.Layers.GroundAllMask);
+        _deathGroundFilter.useTriggers = false;
+        if (_meleeAttack != null && _deathLandingPoint == null)
+        {
+            Debug.LogError("EnemyFlyingMove: 사망 착지 기준점이 연결되지 않았습니다.", this);
+        }
+    }
+
+    public void StartDeathFall()
+    {
+        _meleeFlightMode = MeleeFlightMode.Falling;
+        Rigidbody.linearVelocity = Vector2.zero;
+        Rigidbody.angularVelocity = 0f;
+        Rigidbody.simulated = true;
+        Rigidbody.gravityScale = _deathGravityScale;
+    }
+
+    public void UpdateDeathFall()
+    {
+        if (_meleeFlightMode != MeleeFlightMode.Falling)
+        {
+            return;
+        }
+        Vector2 velocity = Rigidbody.linearVelocity;
+        velocity.y = Mathf.Max(velocity.y, -_deathMaxFallSpeed);
+        Rigidbody.linearVelocity = velocity;
+        if (_deathLandingPoint == null)
+        {
+            return;
+        }
+        // 다음 물리 이동까지 검사하여 얇은 플랫폼을 통과하기 전에 발 기준으로 착지한다.
+        float nextFallSpeed = Mathf.Min(_deathMaxFallSpeed,
+            Mathf.Max(0f, -velocity.y - Physics2D.gravity.y * Rigidbody.gravityScale * Time.fixedDeltaTime));
+        float distance = nextFallSpeed * Time.fixedDeltaTime + CollisionSkin;
+        Vector2 landingPoint = _deathLandingPoint.position;
+        Vector2 origin = landingPoint;
+        // 낮은 위치에서 죽어 발 기준점이 이미 지면 아래여도 위에서 표면을 찾는다.
+        origin.y = Mathf.Max(origin.y, Rigidbody.position.y);
+        distance += origin.y - landingPoint.y;
+        int count = Physics2D.Raycast(origin, Vector2.down, _deathGroundFilter, _deathLandingHits, distance);
+        float nearestDistance = float.MaxValue;
+        float groundY = origin.y;
+        for (int i = 0; i < count; i++)
+        {
+            RaycastHit2D hit = _deathLandingHits[i];
+            if (hit.normal.y < LandingNormalThreshold || hit.distance >= nearestDistance)
+            {
+                continue;
+            }
+            nearestDistance = hit.distance;
+            groundY = hit.point.y;
+        }
+        if (nearestDistance == float.MaxValue)
+        {
+            return;
+        }
+        Vector2 landedPosition = Rigidbody.position;
+        landedPosition.y += groundY - landingPoint.y;
+        Rigidbody.position = landedPosition;
+        Rigidbody.linearVelocity = Vector2.zero;
+        Rigidbody.simulated = false;
+        _meleeFlightMode = MeleeFlightMode.Landed;
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        if (_meleeFlightMode == MeleeFlightMode.Falling || _meleeFlightMode == MeleeFlightMode.Landed)
+        {
+            Rigidbody.gravityScale = _initialGravityScale;
+            Rigidbody.linearVelocity = Vector2.zero;
+            Rigidbody.simulated = _initialSimulated;
+            _meleeFlightMode = MeleeFlightMode.Hovering;
+        }
     }
 
     /// <summary>
@@ -222,8 +308,7 @@ public class EnemyFlyingMove : EnemyMoveType
     {
         if (_meleeAttack != null)
         {
-            _meleeAttack.TryMoveToPosition(Rigidbody.position + direction * Enemy.Data.MoveSpeed * Time.fixedDeltaTime,
-                Enemy.Data.MoveSpeed);
+            ApplyMeleeFlightVelocity(direction * Enemy.Data.MoveSpeed);
             return;
         }
         Vector2 desiredVelocity = direction * Enemy.Data.MoveSpeed;
@@ -235,7 +320,13 @@ public class EnemyFlyingMove : EnemyMoveType
         if (_meleeAttack != null)
         {
             position = _meleeAttack.ClampPosition(position);
-            return !_meleeAttack.IsAtPosition(position) && _meleeAttack.TryMoveToPosition(position, Enemy.Data.MoveSpeed);
+            if (_meleeAttack.IsAtPosition(position))
+            {
+                HoverInPlace();
+                return false;
+            }
+            ApplyMeleeFlightVelocity(Vector2.ClampMagnitude(position - Rigidbody.position, Enemy.Data.MoveSpeed));
+            return Rigidbody.linearVelocity.sqrMagnitude > MinimumFlightSpeed;
         }
         position.y = Mathf.Min(position.y, GetMaxAllowedY());
         return base.TryMoveToSearchPosition(position);
@@ -325,9 +416,10 @@ public class EnemyFlyingMove : EnemyMoveType
         ApplyMeleeFlightVelocity(offset.normalized * Enemy.Data.MoveSpeed);
     }
 
-    private void ApplyMeleeFlightVelocity(Vector2 desiredVelocity)
+    private void ApplyMeleeFlightVelocity(Vector2 desiredVelocity, bool faceTarget = true)
     {
-        var velocity = Vector2.MoveTowards(Rigidbody.linearVelocity, desiredVelocity, FlightAcceleration * Time.fixedDeltaTime);
+        Vector2 velocity = desiredVelocity;
+        velocity = Vector2.MoveTowards(Rigidbody.linearVelocity, velocity, FlightAcceleration * Time.fixedDeltaTime);
         velocity = CalculateSafeKnockbackVelocity(velocity);
         float distance = velocity.magnitude * Time.fixedDeltaTime;
         if (distance > MinimumFlightSpeed && Enemy.AirSensor != null)
@@ -336,9 +428,13 @@ public class EnemyFlyingMove : EnemyMoveType
             velocity *= allowedDistance / distance;
         }
         Rigidbody.linearVelocity = velocity;
-        if (Enemy.Target != null)
+        if (faceTarget && Enemy.Target != null)
         {
             _meleeAttack.FaceDirection(Enemy.GetDirectionToPlayer());
+        }
+        else
+        {
+            _meleeAttack.FaceDirection(desiredVelocity);
         }
     }
 
@@ -502,7 +598,14 @@ public class EnemyFlyingMove : EnemyMoveType
 
         if (_isPatrolWaiting)
         {
-            Rigidbody.linearVelocity = Vector2.zero;
+            if (_meleeAttack != null)
+            {
+                HoverInPlace();
+            }
+            else
+            {
+                Rigidbody.linearVelocity = Vector2.zero;
+            }
             _patrolWaitTimer += Time.fixedDeltaTime;
 
             if (_patrolWaitTimer >= _patrolWaitDuration)
@@ -517,7 +620,7 @@ public class EnemyFlyingMove : EnemyMoveType
 
         if (_meleeAttack != null)
         {
-            _meleeAttack.TryMoveToPosition(targetPos, Enemy.Data.MoveSpeed);
+            ApplyMeleeFlightVelocity(Vector2.ClampMagnitude(targetPos - Rigidbody.position, Enemy.Data.MoveSpeed), false);
             if (_meleeAttack.IsAtPosition(targetPos))
             {
                 _isPatrolWaiting = true;
@@ -546,7 +649,7 @@ public class EnemyFlyingMove : EnemyMoveType
         Vector2 startPos = Enemy.MoveArea.StartPosition;
         if (_meleeAttack != null)
         {
-            _meleeAttack.TryMoveToPosition(startPos, Enemy.Data.MoveSpeed);
+            ApplyMeleeFlightVelocity(Vector2.ClampMagnitude(startPos - Rigidbody.position, Enemy.Data.MoveSpeed), false);
             return;
         }
         Vector2 direction = (startPos - Rigidbody.position).normalized;

@@ -15,6 +15,7 @@ public class EnemyAnimation : MonoBehaviour
     private const int AnimationLayer = 0;
     private static readonly int HitTagHash = Animator.StringToHash("Hit");
     private static readonly int AttackTagHash = Animator.StringToHash("Attack");
+    private static readonly int DieTagHash = Animator.StringToHash("Die");
     private static readonly int WalkStartTagHash = Animator.StringToHash("WalkStart");
     private static readonly int WalkLoopTagHash = Animator.StringToHash("WalkLoop");
     private static readonly int WalkEndTagHash = Animator.StringToHash("WalkEnd");
@@ -116,7 +117,22 @@ public class EnemyAnimation : MonoBehaviour
         }
     }
 
-    public void PlayDie() => _animator.SetTrigger(_die);
+    public void PlayDie()
+    {
+        _animator.ResetTrigger(_attack);
+        _animator.ResetTrigger(_hit);
+        _animator.SetTrigger(_die);
+    }
+
+    public bool IsDeathAnimationComplete()
+    {
+        if (_animator == null || _animator.IsInTransition(AnimationLayer))
+        {
+            return false;
+        }
+        AnimatorStateInfo state = _animator.GetCurrentAnimatorStateInfo(AnimationLayer);
+        return state.tagHash == DieTagHash && state.normalizedTime >= 1f;
+    }
 
     public void SetGroggy(bool isGroggy)
     {

@@ -14,6 +14,10 @@ public class ReturnToStartState : EnemyState
         _enemy.DirectionLock.LockDirection();
         Debug.Log("시작 위치로 복귀 시작");
         _enemy.Animation.SetRunning(true);
+        if (_enemy.Combat is EnemyMeleeCombat melee && melee.FlyingAttack != null)
+        {
+            melee.FlyingAttack.PlayFlightAnimation();
+        }
     }
 
     public override void FixedUpdate()
