@@ -83,6 +83,12 @@ public abstract class BossPattern : MonoBehaviour
     public string PatternName => string.IsNullOrEmpty(_patternName) ? GetType().Name : _patternName;
     public float Weight => _weight;
 
+    /// <summary>true면 CanUse일 때 다른 패턴보다 먼저, 대기 시간 없이 바로 사용 (체력 비율 발동 패턴 등)</summary>
+    public virtual bool IsForced => false;
+
+    /// <summary>true면 이 패턴 중 보스가 플레이어의 직접 공격을 받지 않음 (기믹 데미지는 받음)</summary>
+    public virtual bool BlocksDirectDamage => false;
+
     /// <summary>패턴 전체 길이 (초) = 클립 길이 / 재생 속도</summary>
     public float Duration
     {

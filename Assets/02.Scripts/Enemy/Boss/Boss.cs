@@ -168,6 +168,27 @@ public class Boss : MonoBehaviour, IFinishable
     /// <summary>지금 상태에서 데미지를 받는지</summary>
     public bool CanTakeDamage => CurrentState != null && CurrentState.CanTakeDamage;
 
+    /// <summary>플레이어의 직접 공격을 받는지 (소환 패턴 중에는 막힘, 기믹 데미지는 CanTakeDamage 기준)</summary>
+    public bool CanTakeDirectDamage =>
+        CanTakeDamage && !(CurrentState is BossPatternState patternState && patternState.Pattern.BlocksDirectDamage);
+
+    /// <summary>지금 바로 써야 하는 패턴(체력 비율 발동 등)이 있는지</summary>
+    public bool HasForcedPattern
+    {
+        get
+        {
+            foreach (BossPattern pattern in _patterns)
+            {
+                if (pattern != null && pattern.IsForced && pattern.CanUse())
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
     /// <summary>바라보는 방향 (1 = 오른쪽, -1 = 왼쪽)</summary>
     public float FacingX => (transform.localScale.x >= 0f) == _spriteFacesRight ? 1f : -1f;
 
@@ -175,7 +196,7 @@ public class Boss : MonoBehaviour, IFinishable
     public Vector2 CenterPosition =>
         _bodyCollider != null ? (Vector2)_bodyCollider.bounds.center : (Vector2)transform.position;
 
-    /// <summary>살아 있는 소환물 수 (독 방울 + 아기)</summary>
+    /// <summary>살아 있는 소환물 수 (독 방울 + 올챙이)</summary>
     public int MinionCount
     {
         get
@@ -346,9 +367,20 @@ public class Boss : MonoBehaviour, IFinishable
         selected = null;
         _candidates.Clear();
 
+        // 체력 비율 발동 등 무조건 써야 하는 패턴이 먼저
         foreach (BossPattern pattern in _patterns)
         {
-            if (pattern != null && pattern.CanUse())
+            if (pattern != null && pattern.IsForced && pattern.CanUse())
+            {
+                selected = pattern;
+                _lastPattern = selected;
+                return true;
+            }
+        }
+
+        foreach (BossPattern pattern in _patterns)
+        {
+            if (pattern != null && !pattern.IsForced && pattern.CanUse())
             {
                 _candidates.Add(pattern);
             }
