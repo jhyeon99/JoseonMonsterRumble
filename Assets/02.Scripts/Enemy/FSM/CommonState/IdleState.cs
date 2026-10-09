@@ -13,7 +13,14 @@ public class IdleState : EnemyState
     {
         Debug.Log("Idle 시작");
         _enemy.DirectionLock.LockDirection();
-        _enemy.MoveType.StopMove();
+        if (_enemy.Combat is EnemyMeleeCombat melee && melee.FlyingAttack != null)
+        {
+            melee.FlyingAttack.PlayFlightAnimation();
+        }
+        else
+        {
+            _enemy.MoveType.StopMove();
+        }
         _enemy.Animation.SetRunning(true);
     }
 

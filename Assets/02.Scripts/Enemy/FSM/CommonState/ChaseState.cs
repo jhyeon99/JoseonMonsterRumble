@@ -19,6 +19,10 @@ public class ChaseState : EnemyState
         Debug.Log("추적 시작");
         _exitMotion = ExitMotion.Stop;
         _enemy.DirectionLock.UnlockDirection();
+        if (_enemy.Combat is EnemyMeleeCombat melee && melee.FlyingAttack != null)
+        {
+            melee.FlyingAttack.PlayFlightAnimation();
+        }
         _effectiveAttackRange = _enemy.Data.CalculateRandomAttackDetectRange();
         _lastSeenPosition = _enemy.Target != null ? (Vector2)_enemy.Target.position : (Vector2)_enemy.transform.position;
     }

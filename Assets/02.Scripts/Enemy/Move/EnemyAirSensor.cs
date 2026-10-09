@@ -57,7 +57,7 @@ public class EnemyAirSensor : MonoBehaviour
     }
 
     /// <summary>몸체 전체를 검사하여 지형과 충돌하지 않는 이동 거리를 반환합니다.</summary>
-    public float CalculateAllowedTravelDistance(Vector2 direction, float distance, float skin)
+    public float CalculateAllowedTravelDistance(Vector2 direction, float distance, float skin, bool includeOneWayPlatforms = false)
     {
         EnsureInitialized();
         if (_bodyCollider == null)
@@ -75,7 +75,7 @@ public class EnemyAirSensor : MonoBehaviour
         for (int i = 0; i < hitCount; i++)
         {
             RaycastHit2D hit = _hits[i];
-            if (hit.collider.gameObject.layer == Constants.Layers.OneWayPlatform &&
+            if (!includeOneWayPlatforms && hit.collider.gameObject.layer == Constants.Layers.OneWayPlatform &&
                 (direction.y >= 0f || hit.normal.y <= 0f || _bodyCollider.bounds.min.y < hit.collider.bounds.max.y - skin))
             {
                 continue;
@@ -86,7 +86,7 @@ public class EnemyAirSensor : MonoBehaviour
     }
 
     /// <summary>현재 위치와 무관하게 예정된 직선 경로 전체를 몸체 크기로 검사합니다.</summary>
-    public bool IsFlightPathClear(Vector2 start, Vector2 end, float skin)
+    public bool IsFlightPathClear(Vector2 start, Vector2 end, float skin, bool includeOneWayPlatforms = false)
     {
         EnsureInitialized();
         if (_bodyCollider == null)
@@ -105,7 +105,7 @@ public class EnemyAirSensor : MonoBehaviour
         for (int i = 0; i < hitCount; i++)
         {
             RaycastHit2D hit = _hits[i];
-            if (hit.collider.gameObject.layer == Constants.Layers.OneWayPlatform &&
+            if (!includeOneWayPlatforms && hit.collider.gameObject.layer == Constants.Layers.OneWayPlatform &&
                 (movement.y >= 0f || hit.normal.y <= 0f || origin.y - bounds.extents.y < hit.collider.bounds.max.y - skin))
             {
                 continue;
