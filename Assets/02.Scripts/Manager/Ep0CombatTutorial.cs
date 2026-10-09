@@ -97,6 +97,12 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        // Hide the authored legacy panel even if a missing reference prevents initialization.
+        if (_panel != null) _panel.SetActive(false);
+    }
+
     private void OnEnable()
     {
         GameEvents.OnParry += HandleParry;
@@ -215,6 +221,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
             FaceEachOther();
             _enemy.StateMachine.ChangeState(new WaitingState(_enemy));
             _combat.StopAttack();
+            SetPlayerControl(true);
             Phase = "Windup";
             Show(_parryText, "공격이 닿기 직전에 막기", "↓");
             _enemy.Animation.PlayAttack();
@@ -224,14 +231,15 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
             // Explain before contact, then let the original guard/input timing run freely.
             Phase = "ParryPrompt";
+            _player.StateMachine.ChangeState(_player.IdleState);
             Freeze();
-            Show(_parryTimingText, "Enter로 시작", "↓");
+            Show("Enter로 공격 재개", "재개 후 ↓로 패링", "Enter");
             yield return ZoomTo(_parryCameraSize, GetFocusPosition());
             yield return WaitForKey(KeyCode.Return);
-            SetPlayerControl(true);
             Unfreeze();
+            SetPlayerControl(true);
             Phase = "ParryAttempt";
-            Show("", "닿기 직전에 ↓", "↓");
+            Show(_parryTimingText, "↓ 가드 / 패링", "↓");
             yield return new WaitForSeconds(leadTime);
             _combat.Attack();
             while (_combat.IsAttacking && !_parried) yield return null;
@@ -284,8 +292,12 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     private IEnumerator WaitForKey(KeyCode key)
     {
-        while (Input.GetKey(key)) yield return null;
-        while (PauseController.IsPaused || !Input.GetKeyDown(key)) yield return null;
+        while (Input.GetKey(key) || (key == KeyCode.Return && Input.GetKey(KeyCode.KeypadEnter))) yield return null;
+        while (PauseController.IsPaused ||
+               !(Input.GetKeyDown(key) || (key == KeyCode.Return && Input.GetKeyDown(KeyCode.KeypadEnter))))
+        {
+            yield return null;
+        }
     }
 
     private IEnumerator WaitRealtime(float duration)
@@ -314,7 +326,24 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     private void ConfigurePlayerHint()
     {
+        Canvas canvas = _panel.GetComponentInParent<Canvas>();
+        RectTransform canvasRect = canvas.GetComponent<RectTransform>();
+        // The scene currently overrides this canvas to scale zero and non-stretch anchors.
+        canvasRect.localScale = Vector3.one;
+        canvasRect.anchorMin = Vector2.zero;
+        canvasRect.anchorMax = Vector2.one;
+        canvasRect.pivot = new Vector2(0.5f, 0.5f);
+        canvasRect.offsetMin = Vector2.zero;
+        canvasRect.offsetMax = Vector2.zero;
+        // The monster guide has its own text/key-only root. Never reopen the dialogue panel.
+        _panel.SetActive(false);
+        var hintRoot = new GameObject("PlayerTutorialHint", typeof(RectTransform));
+        hintRoot.transform.SetParent(_panel.transform.parent, false);
+        _dialogue.transform.SetParent(hintRoot.transform, false);
+        _keyPrompt.transform.SetParent(hintRoot.transform, false);
+        _panel = hintRoot;
         RectTransform panelRect = _panel.GetComponent<RectTransform>();
+        panelRect.localScale = Vector3.one;
         panelRect.anchorMin = new Vector2(0.5f, 0.5f);
         panelRect.anchorMax = panelRect.anchorMin;
         panelRect.pivot = panelRect.anchorMin;
@@ -472,7 +501,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
             string.IsNullOrEmpty(instruction) ? dialogue : dialogue + "\n" + instruction;
         _instruction.text = "";
         _keyPrompt.SetActive(!string.IsNullOrEmpty(key));
-        Sprite sprite = key == "X" ? _attackKeySprite : _parryKeySprite;
+        Sprite sprite = key == "X" ? _attackKeySprite : key == "↓" ? _parryKeySprite : null;
         if (_keyImage != null)
         {
             _keyImage.sprite = sprite;
