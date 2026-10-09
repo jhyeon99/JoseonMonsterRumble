@@ -6,7 +6,6 @@ public class EnemyProvokeState : EnemyState
     private const float ProvokeDuration = 2.6875f;
     private readonly Enemy _enemy;
     private float _timer;
-    private bool _hasStartedAnimation;
 
     public EnemyProvokeState(Enemy enemy)
     {
@@ -17,7 +16,6 @@ public class EnemyProvokeState : EnemyState
     {
         Debug.Log("적 도발 상태 진입");
         _timer = ProvokeDuration;
-        _hasStartedAnimation = false;
 
         _enemy.MoveType.StopMove();
         _enemy.Animation.SetRunning(false);
@@ -40,11 +38,6 @@ public class EnemyProvokeState : EnemyState
             return;
         }
 
-        if (!_hasStartedAnimation && _enemy.Animation.IsPlayingProvoke())
-        {
-            _hasStartedAnimation = true;
-        }
-
         _timer -= Time.deltaTime;
         if (_timer <= 0f)
         {
@@ -57,7 +50,6 @@ public class EnemyProvokeState : EnemyState
     {
         _enemy.Animation.ResetProvokeTrigger();
         _timer = 0f;
-        _hasStartedAnimation = false;
         Debug.Log("적 도발 상태 종료");
     }
 }
