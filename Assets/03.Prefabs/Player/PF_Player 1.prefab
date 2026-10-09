@@ -79,7 +79,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1918527705
-  m_SortingLayer: 5
+  m_SortingLayer: 6
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: f498d2b7bd3954b4db84a9434181dad0, type: 3}
@@ -244,11 +244,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-<<<<<<< Updated upstream
-  m_GravityScale: 1.5
-=======
   m_GravityScale: 2.5
->>>>>>> Stashed changes
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -324,12 +320,13 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _knockbackUpVelocity: 4
-  _knockbackDeceleration: 30
+  _knockbackUpVelocity: 5
+  _knockbackDeceleration: 20
+  _knockbackHorizontalMultiplier: 10
   _coyoteTime: 0.1
   _groundCheckLockout: 0.1
-  _fallGravityMultiplier: 3
-  _lowJumpGravityMultiplier: 4
+  _fallGravityMultiplier: 2.5
+  _lowJumpGravityMultiplier: 3.5
   _maxFallSpeed: 15
   _addPlatformVelocityMultiplier: 1
   _landingJumpDelay: 0.1
@@ -399,6 +396,10 @@ MonoBehaviour:
   _enemyLayer:
     serializedVersion: 2
     m_Bits: 128
+  _hitPointCenterRatio: 0.35
+  _showAllHitboxesInEditor: 1
+  _previewComboIndex: 0
+  _drawSolidHitbox: 1
   _currentCombo: 0
   _isHitboxActive: 0
 --- !u!114 &2678545030457979146
@@ -443,8 +444,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerRangedAttack
   _flipTarget: {fileID: 1668539038824801414}
   _slotRoot: {fileID: 128689173627535363}
-  _chargeInterval: 0.4
-  _minimumChargeInterval: 0.12
+  _chargeInterval: 0.22
+  _minimumChargeInterval: 0.1
   _soulCostPerTalisman: 1
   _damageIncreasePercent: 0
 --- !u!114 &8959979308618455522
@@ -461,6 +462,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerGuard
   _maxGauge: 100
   _drainPerSecond: 30
+  _postBlockDrainPauseDuration: 0.3
+  _postBlockDrainPauseMinimumRatio: 0.1
   _recoverPerSecond: 40
   _recoverDelay: 0.5
   _minGaugeToStart: 10
@@ -469,7 +472,6 @@ MonoBehaviour:
   _blockKnockbackDeceleration: 50
   _parryWindow: 0.2
   _parryCooldown: 0.2
-  _parryCounterWindow: 0.8
   _reflectSpeed: 15
   _reflectDamageMultiplier: 2
   _logResult: 1

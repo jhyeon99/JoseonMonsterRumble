@@ -13,11 +13,22 @@ public class ChaseState : EnemyState
     {
         Debug.Log("추적 시작");
         _enemy.DirectionLock.UnlockDirection();
-        _enemy.Animation.SetRunning(true);
     }
 
     public override void FixedUpdate()
     {
+        if (_enemy.MoveType is EnemyGroundMove)
+        {
+            if (_enemy.GetDistanceXToPlayer() <= _enemy.Data.AttackDetectRange)
+            {
+                if (_enemy.MoveType.IsEndPosition(_enemy.GetDirectionToPlayer()))
+                {
+                    _enemy.Animation.SetRunning(false);
+                    _enemy.MoveType.StopMove();
+                }
+            }
+        }
+        _enemy.Animation.SetRunning(true);
         _enemy.MoveType.Move(_enemy.GetDirectionToPlayer());
     }
 
@@ -32,15 +43,32 @@ public class ChaseState : EnemyState
             }
         }
 
-        if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
+        if (_enemy.Combat is EnemyMeleeCombat)
         {
-            if (_enemy.MoveType is EnemyGroundMove)
+            if (_enemy.GetDistanceXToPlayer() <= _enemy.Data.AttackDetectRange)
             {
-                _enemy.StateMachine.ChangeState(new AttackPrepareGroundState(_enemy));
+                if (_enemy.MoveType is EnemyGroundMove)
+                {
+                    _enemy.StateMachine.ChangeState(new AttackPrepareGroundState(_enemy));
+                }
+                else if (_enemy.MoveType is EnemyFlyingMove)
+                {
+                    _enemy.StateMachine.ChangeState(new AttackPrepareFlyingState(_enemy));
+                }
             }
-            else if (_enemy.MoveType is EnemyFlyingMove)
+        }
+        else
+        {
+            if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
             {
-                _enemy.StateMachine.ChangeState(new AttackPrepareFlyingState(_enemy));
+                if (_enemy.MoveType is EnemyGroundMove)
+                {
+                    _enemy.StateMachine.ChangeState(new AttackPrepareGroundState(_enemy));
+                }
+                else if (_enemy.MoveType is EnemyFlyingMove)
+                {
+                    _enemy.StateMachine.ChangeState(new AttackPrepareFlyingState(_enemy));
+                }
             }
         }
     }
