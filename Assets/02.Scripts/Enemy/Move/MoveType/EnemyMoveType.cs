@@ -22,6 +22,7 @@ public abstract class EnemyMoveType : MonoBehaviour
     private Vector2 _lightKnockbackStartPosition;
 
     private const float KnockbackStopSpeed = 0.1f;
+    private const float SearchPositionTolerance = 0.1f;
 
     protected virtual void Awake()
     {
@@ -39,6 +40,19 @@ public abstract class EnemyMoveType : MonoBehaviour
     }
 
     public virtual void UpdateWalkPhysics() { }
+
+    public virtual bool TryMoveToSearchPosition(Vector2 position)
+    {
+        Vector2 offset = position - Rigidbody.position;
+        if (offset.sqrMagnitude <= SearchPositionTolerance * SearchPositionTolerance)
+        {
+            return false;
+        }
+        Enemy.Animation.SetRunning(true);
+        Rigidbody.linearVelocity = offset.normalized *
+            Mathf.Min(Enemy.Data.MoveSpeed, offset.magnitude / Time.fixedDeltaTime);
+        return true;
+    }
 
     public bool TryStartLightKnockback(HitData hitData)
     {
@@ -178,7 +192,7 @@ public abstract class EnemyMoveType : MonoBehaviour
         return Mathf.Abs(Rigidbody.linearVelocity.x) <= KnockbackStopSpeed;
     }
 
-    public bool IsArrivedAtStart()
+    public virtual bool IsArrivedAtStart()
     {
         Vector2 startPos = Enemy.MoveArea.StartPosition;
         return Vector2.Distance(Rigidbody.position, startPos) < 0.1f;

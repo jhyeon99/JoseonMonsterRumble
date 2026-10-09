@@ -23,6 +23,13 @@ public class ReturnToStartState : EnemyState
 
     public override void Update()
     {
+        if (_enemy.MoveArea != null &&
+            _enemy.Target != null && _enemy.MoveArea.IsPositionDetected(_enemy.Target.position))
+        {
+            _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
+            return;
+        }
+
         if (_enemy.MoveType.IsArrivedAtStart())
         {
             _enemy.StateMachine.ChangeState(new IdleState(_enemy));

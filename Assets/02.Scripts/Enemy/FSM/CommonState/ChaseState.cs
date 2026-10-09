@@ -2,7 +2,11 @@
 
 public class ChaseState : EnemyState
 {
+    private enum ExitMotion { Stop, Continue }
+
     private readonly Enemy _enemy;
+    private Vector2 _lastSeenPosition;
+    private ExitMotion _exitMotion;
 
     public ChaseState(Enemy enemy)
     {
@@ -12,23 +16,17 @@ public class ChaseState : EnemyState
     public override void Enter()
     {
         Debug.Log("추적 시작");
+        _exitMotion = ExitMotion.Stop;
         _enemy.DirectionLock.UnlockDirection();
+        _lastSeenPosition = _enemy.Target != null ? (Vector2)_enemy.Target.position : (Vector2)_enemy.transform.position;
     }
 
     public override void FixedUpdate()
     {
-        if (_enemy.MoveType is EnemyGroundMove)
+        if (!(_enemy.MoveType is EnemyGroundMove))
         {
-            if (_enemy.GetDistanceXToPlayer() <= _enemy.Data.AttackDetectRange)
-            {
-                if (_enemy.MoveType.IsEndPosition(_enemy.GetDirectionToPlayer()))
-                {
-                    _enemy.Animation.SetRunning(false);
-                    _enemy.MoveType.StopMove();
-                }
-            }
+            _enemy.Animation.SetRunning(true);
         }
-        _enemy.Animation.SetRunning(true);
         _enemy.MoveType.Move(_enemy.GetDirectionToPlayer());
     }
 
@@ -36,11 +34,14 @@ public class ChaseState : EnemyState
     {
         if (_enemy.MoveArea != null && _enemy.Target != null)
         {
-            if (!_enemy.MoveArea.IsPositionInArea(_enemy.Target.position))
+            if (!_enemy.MoveArea.IsPositionInChaseArea(_enemy.Target.position))
             {
-                _enemy.StateMachine.ChangeState(new ReturnToStartState(_enemy));
+                // 마지막으로 본 위치를 사용한다. 이동 한계는 Alert의 목표 제한과 이동 코드가 처리한다.
+                _exitMotion = ExitMotion.Continue;
+                _enemy.StateMachine.ChangeState(new AlertState(_enemy, _lastSeenPosition));
                 return;
             }
+            _lastSeenPosition = _enemy.Target.position;
         }
 
         if (_enemy.Combat is EnemyMeleeCombat)
@@ -75,7 +76,12 @@ public class ChaseState : EnemyState
 
     public override void Exit()
     {
+        _lastSeenPosition = Vector2.zero;
         Debug.Log("추적 종료");
-        _enemy.Animation.SetRunning(false);
+        if (_exitMotion == ExitMotion.Stop)
+        {
+            _enemy.Animation.SetRunning(false);
+        }
+        _exitMotion = ExitMotion.Stop;
     }
 }
