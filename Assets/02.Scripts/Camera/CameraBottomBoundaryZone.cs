@@ -18,6 +18,7 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
 
     private static readonly Dictionary<ProCamera2D, CameraBoundaryState> States =
         new Dictionary<ProCamera2D, CameraBoundaryState>();
+
     private CameraBoundaryState _state;
 
     private void OnEnable()
@@ -27,7 +28,7 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
 
         if (!States.TryGetValue(_proCamera, out _state))
         {
-            var boundaries = _proCamera.GetComponent<ProCamera2DNumericBoundaries>();
+            ProCamera2DNumericBoundaries boundaries = _proCamera.GetComponent<ProCamera2DNumericBoundaries>();
             if (boundaries == null)
                 return;
 
@@ -141,10 +142,8 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
             return;
 
         float halfWidth = Mathf.Abs(transform.lossyScale.x) * 0.5f;
-        Vector3 left = new Vector3(transform.position.x - halfWidth,
-            _bottomEdge.position.y, transform.position.z);
-        Vector3 right = new Vector3(transform.position.x + halfWidth,
-            _bottomEdge.position.y, transform.position.z);
+        var left = new Vector3(transform.position.x - halfWidth, _bottomEdge.position.y, transform.position.z);
+        var right = new Vector3(transform.position.x + halfWidth, _bottomEdge.position.y, transform.position.z);
         Gizmos.color = Color.yellow;
         Gizmos.DrawLine(left, right);
     }
@@ -152,21 +151,17 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         Vector3 center = transform.position;
-        Vector3 size = new Vector3(Mathf.Abs(transform.lossyScale.x),
-            Mathf.Max(1f, Mathf.Abs(transform.lossyScale.y)), 0f);
+        var size = new Vector3(Mathf.Abs(transform.lossyScale.x), Mathf.Max(1f, Mathf.Abs(transform.lossyScale.y)), 0f);
         Gizmos.color = new Color(0.2f, 1f, 0.45f, 0.08f);
         Gizmos.DrawCube(center, size);
         Gizmos.color = new Color(0.2f, 1f, 0.45f, 1f);
         Gizmos.DrawWireCube(center, size);
-        UnityEditor.Handles.Label(center + Vector3.up * (size.y * 0.5f),
-            "이 X 구간에서 화면 하단 제한 적용");
+        UnityEditor.Handles.Label(center + Vector3.up * (size.y * 0.5f), "이 X 구간에서 화면 하단 제한 적용");
 
         if (_bottomEdge != null)
         {
-            Vector3 left = new Vector3(center.x - size.x * 0.5f,
-                _bottomEdge.position.y, center.z);
-            UnityEditor.Handles.Label(left,
-                "화면 하단 한계 Y = " + _bottomEdge.position.y.ToString("0.##"));
+            var left = new Vector3(center.x - size.x * 0.5f, _bottomEdge.position.y, center.z);
+            UnityEditor.Handles.Label(left, "화면 하단 한계 Y = " + _bottomEdge.position.y.ToString("0.##"));
         }
     }
 #endif
