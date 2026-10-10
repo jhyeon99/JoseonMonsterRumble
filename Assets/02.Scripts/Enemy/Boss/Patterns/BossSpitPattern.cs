@@ -12,9 +12,9 @@ using UnityEngine;
 public class BossSpitPattern : BossPattern
 {
     [Header("침뱉기")]
-    [Tooltip("ProjectilePool에 등록된 투사체 타입 (Flying = 직선, Ground = 곡사)")]
+    [Tooltip("ProjectilePool에 등록된 투사체 타입 (BossSpit = 보스 침 전용 직선, Flying = 직선, Ground = 곡사)")]
     [SerializeField]
-    private ProjectileType _projectileType = ProjectileType.Flying;
+    private ProjectileType _projectileType = ProjectileType.BossSpit;
 
     [Tooltip("발사 위치 (입). 반사된 투사체도 이쪽으로 돌아옴")]
     [SerializeField]
@@ -36,7 +36,7 @@ public class BossSpitPattern : BossPattern
     [SerializeField, Min(0f)]
     private float _delayBetweenShots = 0f;
 
-    [Tooltip("한 번에 여러 개를 뱉을 때 퍼지는 전체 각도 (도). 직선(Flying) 투사체만 적용, 곡사는 모두 플레이어 위치로 떨어짐")]
+    [Tooltip("한 번에 여러 개를 뱉을 때 퍼지는 전체 각도 (도). 직선(BossSpit / Flying) 투사체만 적용, 곡사(Ground)는 모두 플레이어 위치로 떨어짐")]
     [SerializeField, Range(0f, 180f)]
     private float _spreadAngle = 30f;
 
@@ -104,7 +104,8 @@ public class BossSpitPattern : BossPattern
     /// <summary>부채꼴에서 index번째 투사체의 각도 (가운데가 플레이어 방향)</summary>
     private float GetSpreadOffset(int index, int count)
     {
-        if (count <= 1 || _projectileType != ProjectileType.Flying)
+        // 곡사(Ground)는 모두 플레이어 위치로 떨어지므로 퍼뜨리지 않음 (직선 / 보스 침은 퍼짐)
+        if (count <= 1 || _projectileType == ProjectileType.Ground)
         {
             return 0f;
         }
