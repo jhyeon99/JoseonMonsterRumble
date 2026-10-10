@@ -24,7 +24,7 @@ public class BossSpitPattern : BossPattern
     [SerializeField]
     private int[] _shotCounts = { 3, 5, 3 };
 
-    [Tooltip("한 번 뱉는 애니메이션에서 실제로 발사하는 지점 (애니메이션 길이 대비 비율)")]
+    [Tooltip("한 번 뱉는 애니메이션에서 뱉기를 시작하는 지점 (애니메이션 길이 대비 비율). 입 이펙트가 여기서 나오고, Spit Delay 뒤에 침이 나감")]
     [SerializeField, Range(0f, 1f)]
     private float _fireRatio = 0.5f;
 
@@ -43,6 +43,19 @@ public class BossSpitPattern : BossPattern
     [Tooltip("한 번에 여러 개를 뱉을 때 하나씩 나가는 간격 (초). 0이면 동시에")]
     [SerializeField, Min(0f)]
     private float _projectileInterval = 0f;
+
+    [Header("입 이펙트")]
+    [Tooltip("켜면 뱉을 때마다 BossSpit 이펙트 재생 (EffectPool에 BossSpit 등록 필요)")]
+    [SerializeField]
+    private bool _playMouthVfx = true;
+
+    [Tooltip("입 이펙트가 나오는 위치. 비어 있으면 발사 위치(Muzzle) 사용")]
+    [SerializeField]
+    private Transform _vfxPoint;
+
+    [Tooltip("입 이펙트가 나온 뒤 침이 실제로 나가기까지 (초). 입 이펙트를 끄면 사용 안 함")]
+    [SerializeField, Min(0f)]
+    private float _spitDelay = 0.1f;
 
     [Tooltip("투사체 데미지 증가율 (%)")]
     [SerializeField]
@@ -83,6 +96,17 @@ public class BossSpitPattern : BossPattern
 
             yield return WaitUntilProgress(_fireRatio);
 
+            // 입 이펙트 먼저 → Spit Delay 뒤에 침 발사
+            if (_playMouthVfx)
+            {
+                PlayMouthVfx();
+
+                if (_spitDelay > 0f)
+                {
+                    yield return new WaitForSeconds(_spitDelay);
+                }
+            }
+
             int count = _shotCounts != null && shot < _shotCounts.Length ? Mathf.Max(1, _shotCounts[shot]) : 1;
             for (int i = 0; i < count; i++)
             {
@@ -98,6 +122,15 @@ public class BossSpitPattern : BossPattern
             {
                 yield return WaitUntilProgress(nextShotRatio);
             }
+        }
+    }
+
+    private void PlayMouthVfx()
+    {
+        if (EffectManager.Instance != null)
+        {
+            Transform point = _vfxPoint != null ? _vfxPoint : _muzzle;
+            EffectManager.Instance.PlayBossSpit(point.position, Boss.IsFacingRight);
         }
     }
 
