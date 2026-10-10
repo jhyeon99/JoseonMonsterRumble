@@ -102,6 +102,7 @@ public sealed class FlyingMeleeAttackState : EnemyState
                     break;
                 }
                 _timeline.Advance(Time.fixedDeltaTime);
+                UpdateParryWarning();
                 if (!MoveAlongPath(_timeline.TravelProgress))
                 {
                     StartRecovery();
@@ -172,6 +173,13 @@ public sealed class FlyingMeleeAttackState : EnemyState
         _lastRequestedPosition = start;
         _pathDisplacement = Vector2.zero;
         SetPhase(FlyingMeleeAttackPhase.Preparing);
+        UpdateParryWarning();
+    }
+
+    private void UpdateParryWarning()
+    {
+        float remaining = _attack.Data.GetTiming(_pattern).PrepareTime * (1f - _timeline.PrepareProgress);
+        _attack.UpdateParryWarning(remaining);
     }
 
     private void UpdateStrike()

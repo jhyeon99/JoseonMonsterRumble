@@ -91,13 +91,19 @@ Shader "Team06/FinisherInkShockwave"
                 half3 monochrome = lerp(scene, contrast.xxx, _ScreenFade);
                 half3 result = monochrome * (1.0 - ink);
                 // Restore colour from the same origin, not with a global fade.
-                float2 farthestCorner = max(_CenterAspect.xy, 1.0 - _CenterAspect.xy);
+                // Keep the approved reference-camera restoration speed in world units.
+                // Zero preserves compatibility with the material's default vector.
+                float referenceScale = _CenterAspect.w > 0.0 ? _CenterAspect.w : 1.0;
+                float2 referenceCenter = 0.5 + (_CenterAspect.xy - 0.5) / referenceScale;
+                float2 farthestCorner = max(referenceCenter, 1.0 - referenceCenter);
                 farthestCorner.x *= _CenterAspect.z;
-                float maximumRadius = length(farthestCorner) + RestorationGrungeWidth + RestorationEdgeWidth;
+                float edgeWidth = RestorationEdgeWidth * referenceScale;
+                float grungeWidth = RestorationGrungeWidth * referenceScale;
+                float maximumRadius = length(farthestCorner) * referenceScale + grungeWidth + edgeWidth;
                 float restorationRadius = smoothstep(0.0, 1.0, _RestorationProgress) * maximumRadius;
-                float grungeDistance = length(offset) + (outer - 0.5) * RestorationGrungeWidth;
-                float restored = (1.0 - smoothstep(restorationRadius - RestorationEdgeWidth,
-                    restorationRadius + RestorationEdgeWidth, grungeDistance)) * step(0.0001, _RestorationProgress);
+                float grungeDistance = length(offset) + (outer - 0.5) * grungeWidth;
+                float restored = (1.0 - smoothstep(restorationRadius - edgeWidth,
+                    restorationRadius + edgeWidth, grungeDistance)) * step(0.0001, _RestorationProgress);
                 if (_SubjectPass > 0.5)
                 {
                     half4 subject = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv) * _SubjectColor;

@@ -21,8 +21,11 @@ public class FinisherScreenImpact : MonoBehaviour
     private const float OverlayDepth = 1f;
     private const int SourceCapacity = 16;
     private const float ImpactCurveProgress = 0.52f;
-    private const float MinimumRadius = 0.22f;
-    private const float MaximumRadius = 0.55f;
+    private const float ReferenceViewportHeight = 10f;
+    // Preserve the approved TemplateStage size at orthographic size 5,
+    // but clamp in world units so other camera zooms cannot change the footprint.
+    private const float MinimumWorldRadius = 2.2f;
+    private const float MaximumWorldRadius = 5.5f;
     private const float SubjectRadiusPadding = 0.8f;
     private static readonly int CenterAspectId = Shader.PropertyToID("_CenterAspect");
     private static readonly int BurstId = Shader.PropertyToID("_Burst");
@@ -62,13 +65,18 @@ public class FinisherScreenImpact : MonoBehaviour
     private SpriteRenderer _shockwave;
     private SpriteRenderer _subjectOverlay;
     private SpriteRenderer _subjectSource;
+    private SpriteRenderer _attackerSource;
+    private Transform _attacker;
+    private Transform _target;
+    private Collider2D _attackerBody;
+    private Collider2D _targetBody;
     private Sprite _overlaySprite;
     private MaterialPropertyBlock _shockwaveProperties;
     private Vector3 _impactPosition;
     private PulseState _state;
     private float _elapsed;
     private float _anticipationProgress;
-    private float _subjectRadius;
+    private float _subjectWorldRadius;
 
     private void Awake()
     {
@@ -161,6 +169,7 @@ public class FinisherScreenImpact : MonoBehaviour
             InitializeOrigin(attacker, target);
             _state = PulseState.Preparing;
         }
+        UpdateOrigin();
         _anticipationProgress = Mathf.Clamp01(progress);
         UpdateVisuals();
     }
@@ -175,6 +184,10 @@ public class FinisherScreenImpact : MonoBehaviour
 
     private void InitializeOrigin(Transform attacker, Transform target)
     {
+        _attacker = attacker;
+        _target = target != null ? target : attacker;
+        _attackerBody = attacker != null ? attacker.GetComponent<Collider2D>() : null;
+        _targetBody = null;
         _subjectSource = GetBodyRenderer(target != null ? target : attacker);
         Bounds targetBounds = _subjectSource != null ? _subjectSource.bounds : new Bounds((target != null ? target : attacker).position, Vector3.one);
         if (target != null)
@@ -182,20 +195,27 @@ public class FinisherScreenImpact : MonoBehaviour
             EnemyHurtbox hurtbox = target.GetComponentInChildren<EnemyHurtbox>();
             if (hurtbox != null && hurtbox.TryGetComponent(out Collider2D bodyCollider))
             {
+                _targetBody = bodyCollider;
                 targetBounds = bodyCollider.bounds;
             }
         }
-        SpriteRenderer attackerRenderer = attacker != null ? GetBodyRenderer(attacker) : null;
-        Vector3 attackerCenter = attackerRenderer != null ? attackerRenderer.bounds.center : targetBounds.center;
-        // Use the body surface facing the attacker, not the monster's root at its feet.
-        _impactPosition = targetBounds.ClosestPoint(attackerCenter);
-        _impactPosition.y = targetBounds.center.y;
+        _attackerSource = attacker != null ? GetBodyRenderer(attacker) : null;
         Bounds subjects = targetBounds;
-        if (attackerRenderer != null)
+        if (_attackerSource != null)
         {
-            subjects.Encapsulate(attackerRenderer.bounds);
+            subjects.Encapsulate(_attackerSource.bounds);
         }
-        _subjectRadius = Mathf.Clamp(subjects.size.magnitude * SubjectRadiusPadding / (_camera.orthographicSize * 2f), MinimumRadius, MaximumRadius);
+        _subjectWorldRadius = Mathf.Clamp(subjects.size.magnitude * SubjectRadiusPadding, MinimumWorldRadius, MaximumWorldRadius);
+        UpdateOrigin();
+    }
+
+    private void UpdateOrigin()
+    {
+        Vector3 targetCenter = _targetBody != null ? _targetBody.bounds.center
+            : _subjectSource != null ? _subjectSource.bounds.center : _target != null ? _target.position : _impactPosition;
+        Vector3 attackerCenter = _attackerBody != null ? _attackerBody.bounds.center
+            : _attackerSource != null ? _attackerSource.bounds.center : _attacker != null ? _attacker.position : targetCenter;
+        _impactPosition = (attackerCenter + targetCenter) * 0.5f;
     }
 
     private SpriteRenderer GetBodyRenderer(Transform root)
@@ -262,8 +282,8 @@ public class FinisherScreenImpact : MonoBehaviour
         _shockwave.transform.localPosition = Vector3.forward * (_camera.nearClipPlane + OverlayDepth);
         _shockwave.transform.localScale = new Vector3(height * _camera.aspect, height, 1f);
         Vector3 center = _camera.WorldToViewportPoint(_impactPosition);
-        float outerRadius = Mathf.Max(0f, _expansion.Evaluate(progress)) * _subjectRadius * _shockwaveSize;
-        _shockwaveProperties.SetVector(CenterAspectId, new Vector4(center.x, center.y, _camera.aspect, 0f));
+        float outerRadius = Mathf.Max(0f, _expansion.Evaluate(progress)) * _subjectWorldRadius * _shockwaveSize / height;
+        _shockwaveProperties.SetVector(CenterAspectId, new Vector4(center.x, center.y, _camera.aspect, ReferenceViewportHeight / height));
         _shockwaveProperties.SetVector(BurstId, new Vector4(outerRadius, Mathf.Clamp01(_breakup.Evaluate(progress)), Mathf.Clamp01(_inkFade.Evaluate(progress)), progress));
         _shockwaveProperties.SetFloat(ScreenFadeId, Mathf.Clamp01(_screenFade.Evaluate(progress)));
         _shockwaveProperties.SetFloat(RestorationProgressId, restorationProgress);
@@ -299,7 +319,12 @@ public class FinisherScreenImpact : MonoBehaviour
             _subjectOverlay.enabled = false;
         }
         _subjectSource = null;
-        _subjectRadius = 0f;
+        _attackerSource = null;
+        _attacker = null;
+        _target = null;
+        _attackerBody = null;
+        _targetBody = null;
+        _subjectWorldRadius = 0f;
         _sources.Clear();
         _elapsed = 0f;
         _anticipationProgress = 0f;
