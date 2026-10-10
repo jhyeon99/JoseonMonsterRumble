@@ -38,6 +38,14 @@ public class ProjectilePool : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        if (_instance == this)
+        {
+            _instance = null;
+        }
+    }
+
     public Projectile GetProjectile(ProjectileType projectiletype, Transform muzzlePoint, Transform playerPoint,
         float damageIncreaseValue)
     {

@@ -9,6 +9,9 @@ public class UI_SoulOrbSettings : ScriptableObject
     [SerializeField] private Sprite _fullChargePreviewSprite;
     [SerializeField] private RuntimeAnimatorController _animatorController;
 
+    [Tooltip("Fill 스프라이트에서 실제 그림의 아래끝과 위끝. 이미지 아래를 0, 위를 1로 지정합니다.")]
+    [SerializeField] private Vector2 _fillVisibleHeightRange = new Vector2(0f, 1f);
+
     [Header("크기")]
     [SerializeField] private Vector3 _baseOrbScale = Vector3.one;
     [SerializeField] private Vector3 _fullChargeScale = Vector3.one;
@@ -31,6 +34,7 @@ public class UI_SoulOrbSettings : ScriptableObject
 
     public Sprite EmptySprite => _emptySprite;
     public Sprite FilledSprite => _filledSprite;
+    public Vector2 FillVisibleHeightRange => _fillVisibleHeightRange;
     public Sprite FullChargePreviewSprite => _fullChargePreviewSprite;
     public RuntimeAnimatorController AnimatorController => _animatorController;
     public Vector3 BaseOrbScale => _baseOrbScale;

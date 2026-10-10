@@ -19,11 +19,11 @@ public class EnemySpawnActivator : MonoBehaviour
     {
         if (_camera == null)
             _camera = Camera.main;
-        
-        
+
+
         if (_target == null)
         {
-            GameObject player = GameObject.FindWithTag(Constants.Tags.Player);
+            var player = GameObject.FindWithTag(Constants.Tags.Player);
             if (player != null) _target = player.transform;
         }
 

@@ -12,7 +12,7 @@ public abstract class EnemyMoveType : MonoBehaviour
 
     [Tooltip("넉백 속도를 초당 얼마나 줄일지. 속도가 거의 0이 되면 넉백 종료")]
     [SerializeField, Min(0.01f)]
-    private float _knockbackDeceleration = 20f;
+    private float _knockbackDeceleration = 12f;
 
     [Tooltip("1·2타의 실제 밀림 배율. 0이면 기존 넉백 처리를 사용")]
     [SerializeField, Min(0f)] private float _lightHitKnockbackMultiplier;
@@ -22,6 +22,7 @@ public abstract class EnemyMoveType : MonoBehaviour
     private Vector2 _lightKnockbackStartPosition;
 
     private const float KnockbackStopSpeed = 0.1f;
+    private const float SearchPositionTolerance = 0.1f;
 
     protected virtual void Awake()
     {
@@ -32,6 +33,26 @@ public abstract class EnemyMoveType : MonoBehaviour
     public abstract void Move(Vector2 direction);
     public abstract void BackMove(Vector2 direction);
     public abstract void StopMove();
+
+    public virtual void RequestStopMove()
+    {
+        StopMove();
+    }
+
+    public virtual void UpdateWalkPhysics() { }
+
+    public virtual bool TryMoveToSearchPosition(Vector2 position)
+    {
+        Vector2 offset = position - Rigidbody.position;
+        if (offset.sqrMagnitude <= SearchPositionTolerance * SearchPositionTolerance)
+        {
+            return false;
+        }
+        Enemy.Animation.SetRunning(true);
+        Rigidbody.linearVelocity = offset.normalized *
+            Mathf.Min(Enemy.Data.MoveSpeed, offset.magnitude / Time.fixedDeltaTime);
+        return true;
+    }
 
     public bool TryStartLightKnockback(HitData hitData)
     {
@@ -71,8 +92,9 @@ public abstract class EnemyMoveType : MonoBehaviour
 
         Vector2 velocity = Rigidbody.linearVelocity;
         velocity.x = _lightKnockbackSpeed;
+        velocity = CalculateSafeKnockbackVelocity(velocity);
         Rigidbody.linearVelocity = velocity;
-        _lightKnockbackSpeed = Mathf.MoveTowards(_lightKnockbackSpeed, 0f,
+        _lightKnockbackSpeed = Mathf.MoveTowards(velocity.x, 0f,
             _knockbackDeceleration * Time.fixedDeltaTime);
         return true;
     }
@@ -90,6 +112,11 @@ public abstract class EnemyMoveType : MonoBehaviour
     }
 
     protected virtual void HandleLightKnockbackEnd(Vector2 displacement) { }
+
+    public virtual Vector2 CalculateSafeKnockbackVelocity(Vector2 velocity)
+    {
+        return velocity;
+    }
 
     protected void ResetLightKnockbackOrigin()
     {
@@ -171,7 +198,7 @@ public abstract class EnemyMoveType : MonoBehaviour
         return Mathf.Abs(Rigidbody.linearVelocity.x) <= KnockbackStopSpeed;
     }
 
-    public bool IsArrivedAtStart()
+    public virtual bool IsArrivedAtStart()
     {
         Vector2 startPos = Enemy.MoveArea.StartPosition;
         return Vector2.Distance(Rigidbody.position, startPos) < 0.1f;
