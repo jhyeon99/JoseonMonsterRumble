@@ -195,10 +195,11 @@ public class BossStompPattern : BossPattern
         return 1;
     }
 
-    /// <summary>점프 → 착지 → 찍기 판정 (판정 끝까지)</summary>
+    /// <summary>점프 → 착지 → 찍기 판정 (판정 끝까지). 높은 곳(소환 위치 등)에서 시작하면 그 높이에서 뛰어내림</summary>
     private IEnumerator Stomp()
     {
         float startX = Boss.Position.x;
+        float startY = Boss.Position.y;
         float groundY = Boss.GroundY;
         float landRatio = Mathf.Max(HitStartRatio, 0.01f);
         float apexRatio = Mathf.Min(_apexRatio, landRatio * 0.95f);
@@ -219,7 +220,7 @@ public class BossStompPattern : BossPattern
             }
 
             float x = Mathf.Lerp(startX, targetX, Mathf.SmoothStep(0f, 1f, progress / landRatio));
-            float y = GetJumpY(progress, apexRatio, landRatio, groundY);
+            float y = GetJumpY(progress, apexRatio, landRatio, startY, groundY);
             Boss.MoveTo(new Vector2(x, y));
 
             ShowLandingMarker(progress >= apexRatio, targetX, groundY);
@@ -298,15 +299,15 @@ public class BossStompPattern : BossPattern
         }
     }
 
-    private float GetJumpY(float progress, float apexRatio, float landRatio, float groundY)
+    private float GetJumpY(float progress, float apexRatio, float landRatio, float startY, float groundY)
     {
-        float apexY = groundY + _jumpHeight;
+        float apexY = Mathf.Max(startY, groundY) + _jumpHeight;
 
         if (progress < apexRatio)
         {
             // 올라갈 때는 점점 느려짐
             float t = apexRatio > 0f ? progress / apexRatio : 1f;
-            return Mathf.Lerp(groundY, apexY, 1f - ((1f - t) * (1f - t)));
+            return Mathf.Lerp(startY, apexY, 1f - ((1f - t) * (1f - t)));
         }
 
         // 떨어질 때는 점점 빨라짐
