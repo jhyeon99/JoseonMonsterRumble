@@ -180,6 +180,8 @@ public class Boss : MonoBehaviour, IFinishable
     private Animator _animator;
     private Rigidbody2D _body;
     private Collider2D _bodyCollider;
+    private bool _isBodyCollisionOff;
+    private bool _bodyWasTrigger;
     private Transform _player;
     private BossPattern _lastPattern;
     private BossPattern _queuedPattern;
@@ -790,6 +792,39 @@ public class Boss : MonoBehaviour, IFinishable
     }
 
     /// <summary>예약된 트리거 취소 (패턴이 끊겼을 때 공격 애니메이션이 뒤늦게 재생되지 않도록)</summary>
+    /// <summary>
+    /// 몸통 콜라이더의 물리 충돌을 켜고 끔 (점프 중 플레이어를 밀어내지 않도록 등).
+    /// 끌 때는 트리거로 바꿔서 위치 / 크기(CenterPosition 등)는 그대로 유지
+    /// </summary>
+    public void SetBodyCollision(bool enabled)
+    {
+        if (_bodyCollider == null)
+        {
+            return;
+        }
+
+        if (!enabled)
+        {
+            if (_isBodyCollisionOff)
+            {
+                return;
+            }
+
+            _isBodyCollisionOff = true;
+            _bodyWasTrigger = _bodyCollider.isTrigger;
+            _bodyCollider.isTrigger = true;
+            return;
+        }
+
+        if (!_isBodyCollisionOff)
+        {
+            return;
+        }
+
+        _isBodyCollisionOff = false;
+        _bodyCollider.isTrigger = _bodyWasTrigger;
+    }
+
     /// <summary>
     /// 진행 중인 애니메이션을 모두 끊고 대기 상태로 즉시 전환.
     /// 남은 트리거 / Bool을 초기화하고, 멈춰 둔 애니메이터는 다시 재생. 바로 이어서 보낸 트리거가 대기 상태에서 평가됨

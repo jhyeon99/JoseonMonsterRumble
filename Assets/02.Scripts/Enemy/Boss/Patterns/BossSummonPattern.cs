@@ -41,6 +41,10 @@ public class BossSummonPattern : BossPattern
     [SerializeField, Min(0f)]
     private float _jumpHeight = 3f;
 
+    [Tooltip("점프하는 동안 몸통 충돌(플레이어 밀어내기)과 접촉 데미지를 끔")]
+    [SerializeField]
+    private bool _disableCollisionWhileJumping = true;
+
     [Tooltip("착지 후 angry 시작까지 대기 (초)")]
     [SerializeField, Min(0f)]
     private float _delayAfterLanding = 0.2f;
@@ -124,10 +128,15 @@ public class BossSummonPattern : BossPattern
     private bool[] _usedPhase2;
     private bool _pending;
     private bool _isRunning;
+    private bool _isJumping;
     private float _startHp;
 
     public override bool IsForced => true;
     public override bool BlocksDirectDamage => _blockDirectDamage && _isRunning;
+
+    /// <summary>점프 중에는 접촉 데미지 끔</summary>
+    public override bool DisablesContactDamage =>
+        base.DisablesContactDamage || (_isJumping && _disableCollisionWhileJumping);
 
     private void Reset()
     {
@@ -234,6 +243,8 @@ public class BossSummonPattern : BossPattern
             Boss.SetTrigger(_jumpTrigger);
         }
 
+        SetJumping(true);
+
         float apexY = Mathf.Max(start.y, target.y) + _jumpHeight;
         float elapsed = 0f;
         while (elapsed < _jumpDuration)
@@ -248,6 +259,8 @@ public class BossSummonPattern : BossPattern
 
         Boss.MoveTo(target);
         yield return new WaitForFixedUpdate();
+
+        SetJumping(false);
 
         if (!string.IsNullOrEmpty(_jumpTrigger))
         {
@@ -267,6 +280,16 @@ public class BossSummonPattern : BossPattern
         if (_delayAfterLanding > 0f)
         {
             yield return new WaitForSeconds(_delayAfterLanding);
+        }
+    }
+
+    private void SetJumping(bool jumping)
+    {
+        _isJumping = jumping;
+
+        if (_disableCollisionWhileJumping && Boss != null)
+        {
+            Boss.SetBodyCollision(!jumping);
         }
     }
 
@@ -463,6 +486,12 @@ public class BossSummonPattern : BossPattern
 
     protected override void Cleanup()
     {
+        // 점프 중에 끊겼으면 충돌 원래대로
+        if (_isJumping)
+        {
+            SetJumping(false);
+        }
+
         // 끝났거나 끊겼으면 남은 방울 / 올챙이 모두 제거하고, 복귀 패턴(찍기)을 바로 이어서 사용
         if (_isRunning && Boss != null)
         {
