@@ -359,6 +359,7 @@ public class Boss : MonoBehaviour, IFinishable
 
     private void OnDisable()
     {
+        StageBossFightGate.Cancel(this);
         ClearMinions();
     }
 
@@ -370,6 +371,11 @@ public class Boss : MonoBehaviour, IFinishable
     public void StartFight()
     {
         if (!(CurrentState is BossWaitState))
+        {
+            return;
+        }
+
+        if (StageBossFightGate.TryDefer(this))
         {
             return;
         }
