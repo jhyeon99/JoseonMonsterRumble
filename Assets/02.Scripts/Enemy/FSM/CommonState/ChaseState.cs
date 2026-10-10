@@ -75,7 +75,9 @@ public class ChaseState : EnemyState
         {
             if (_enemy.MoveType is EnemyGroundMove)
             {
-                if (_enemy.Combat is EnemyRangedCombat && Random.value < _enemy.Data.ProvokeChance)
+                if (_enemy.Combat is EnemyRangedCombat &&
+                    _enemy.GetDistanceToPlayer() >= _enemy.Data.RangedFleeEndDistance &&
+                    Random.value < _enemy.Data.ProvokeChance)
                 {
                     _enemy.StateMachine.ChangeState(new EnemyProvokeState(_enemy));
                     return;

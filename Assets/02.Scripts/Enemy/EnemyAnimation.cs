@@ -55,6 +55,22 @@ public class EnemyAnimation : MonoBehaviour
         }
     }
 
+    public void SetAnimationSpeed(float speed)
+    {
+        if (_animator != null)
+        {
+            _animator.speed = speed;
+        }
+    }
+
+    public void ResetAnimationSpeed()
+    {
+        if (_animator != null)
+        {
+            _animator.speed = 1f;
+        }
+    }
+
     public void SetRunning(bool isRunning)
     {
         _animator.SetBool(_isRunning, isRunning);
