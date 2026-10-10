@@ -43,6 +43,9 @@ public class BossHitbox : MonoBehaviour, IParryable
 
     public bool IsActive => _isActive;
 
+    /// <summary>패링당하면 보스가 그로기가 되는 판정인지 (반짝임 예고 대상)</summary>
+    public bool GroggyOnParry => _groggyOnParry;
+
     private void Awake()
     {
         _collider = GetComponent<Collider2D>();

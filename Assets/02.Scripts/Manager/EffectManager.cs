@@ -13,6 +13,12 @@ public class EffectManager : MonoBehaviour
     [SerializeField, Min(0f)] private float _heavyEnemyHitScale = 1.3f;
     [SerializeField, Min(0f)] private float _talismanHitScale = 0.65f;
 
+    [Header("보스 입 이펙트 (침뱉기 / 하울링)")]
+    [Tooltip("보스 입 이펙트 원본 이미지가 오른쪽을 보고 있으면 체크. 보스가 원본과 반대 방향을 보면 좌우 반전 (EffectPool에서 Allow Flip을 켜야 적용)")]
+    [SerializeField] private bool _bossMouthVfxFacesRight = false;
+    [SerializeField, Min(0f)] private float _bossSpitScale = 1f;
+    [SerializeField, Min(0f)] private float _bossHowlScale = 1f;
+
     private static EffectManager _instance = null;
     public static EffectManager Instance
     {
@@ -93,6 +99,18 @@ public class EffectManager : MonoBehaviour
             ? _talismanHitScale
             : hitData.IsHeavyImpact ? _heavyEnemyHitScale : _lightEnemyHitScale;
         Play(EffectType.EnemyHit, hitData.HitPoint, hitData.AttackDirection.x < 0f, scale);
+    }
+
+    /// <summary>보스 침뱉기 순간 입에서 터지는 이펙트</summary>
+    public void PlayBossSpit(Vector2 mouthPosition, bool bossFacingRight)
+    {
+        Play(EffectType.BossSpit, mouthPosition, bossFacingRight != _bossMouthVfxFacesRight, _bossSpitScale);
+    }
+
+    /// <summary>보스 하울링(페이즈 전환) 때 입에서 터지는 이펙트</summary>
+    public void PlayBossHowl(Vector2 mouthPosition, bool bossFacingRight)
+    {
+        Play(EffectType.BossHowl, mouthPosition, bossFacingRight != _bossMouthVfxFacesRight, _bossHowlScale);
     }
 
     /// <summary>
