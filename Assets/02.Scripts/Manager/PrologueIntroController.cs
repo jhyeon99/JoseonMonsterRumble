@@ -18,6 +18,14 @@ public class PrologueIntroController : MonoBehaviour
     [Tooltip("시작 위치에서 이 지점의 X좌표를 넘어가면 장소 2로 전환합니다.")]
     [SerializeField] private Transform _location2TransitionPoint;
 
+    [Header("Location 2 camera boundaries")]
+    [SerializeField] private bool _useLocation2Boundaries = true;
+    [Tooltip("화면 가장자리의 월드 좌표입니다. 카메라 중심 좌표가 아닙니다.")]
+    [SerializeField] private float _location2LeftBoundary = 185f;
+    [SerializeField] private float _location2RightBoundary = 230f;
+    [SerializeField] private float _location2TopBoundary = 15f;
+    [SerializeField] private float _location2BottomBoundary = -10f;
+
     [Header("Next scene exit")]
     [Tooltip("배경 2로 이동한 뒤 이 오브젝트에 가까워지면 다음 씬으로 넘어갑니다. 비워두면 전환하지 않습니다.")]
     [SerializeField] private Transform _nextSceneExitPoint;
@@ -66,13 +74,13 @@ public class PrologueIntroController : MonoBehaviour
     [SerializeField] private Sprite _wantedPosterSprite;
     [SerializeField, Min(0.1f)] private float _noticeBoardReadDistance = 2.5f;
     [SerializeField, Min(1f)] private float _noticeBoardZoom = 1.6f;
-    [SerializeField, Min(0.1f)] private float _noticeBoardFocusDuration = 1.5f;
     [SerializeField, TextArea] private string _noticeBoardText = "게시판에 무언가가 붙어있다. 확인해보자.";
     [SerializeField, TextArea] private string _afterPosterText = "잡으러 가자.";
     [SerializeField, TextArea] private string _jigeStoryText = "요괴들이 지게꾼을 괴롭혔나 보네.";
     private Transform _noticeBoardFocus;
     private GameObject _wantedPosterRoot;
     private Image _wantedPosterImage;
+    private GameObject _wantedPosterPrompt;
     private bool _posterRead;
     private bool _posterBusy;
     private RectTransform _boardKeyHint;
@@ -84,16 +92,17 @@ public class PrologueIntroController : MonoBehaviour
     [SerializeField, Min(0.1f)] private float _jigePanDuration = 0.8f;
 
     [Header("Dialogue")]
+    [SerializeField, TextArea] private string _openingSoundText = "[무언가 부서지는 소리와 남자의 비명]";
+    [SerializeField, TextArea] private string _openingReactionText = "뭐야?";
+    [SerializeField, TextArea] private string _exitChoiceText = "나가보자.";
     [SerializeField] private Font _subtitleFont;
-    [SerializeField, Min(0.1f)] private float _inspectionDuration = 2f;
-    [SerializeField, Min(0.1f)] private float _forwardDuration = 1.5f;
 
     [Header("Dialogue images (optional)")]
     [Tooltip("하단 대사창의 배경 그림입니다. 비워두면 기본 디자인을 사용합니다.")]
     [SerializeField] private Sprite _dialoguePanelSprite;
     [Tooltip("오른쪽 위 선택지의 배경 그림입니다. 선택지 글자는 별도로 표시합니다.")]
     [SerializeField] private Sprite _choicePanelSprite;
-    [Tooltip("대사를 넘기고 게시판을 여는 X 키 이미지입니다.")]
+    [Tooltip("대사를 넘기고 게시판을 여는 Enter 키 이미지입니다.")]
     [SerializeField] private Sprite _advanceKeySprite;
 
     [Header("Dialogue layout")]
@@ -278,7 +287,7 @@ public class PrologueIntroController : MonoBehaviour
 
         _camera.Reset(true, true, true);
         Phase = "Scream";
-        ShowSubtitle("[무언가 부서지는 소리와 남자의 비명]");
+        ShowSubtitle(_openingSoundText);
         PlaySound(_screamClip);
         PlaySound(_jigeBreakClip);
         // 비명을 끝까지 들은 뒤부터 새 Enter 입력을 받는다.
@@ -287,7 +296,7 @@ public class PrologueIntroController : MonoBehaviour
             yield return new WaitForSecondsRealtime(screamDuration);
         yield return WaitForAdvance();
         Phase = "What";
-        ShowSubtitle("뭐야?");
+        ShowSubtitle(_openingReactionText);
         yield return WaitForAdvance();
         // 선택지를 고르는 동안 하단에 기존 대사를 남겨 두고 Enter로 확정한다.
         Phase = "ExitChoice";
@@ -325,6 +334,7 @@ public class PrologueIntroController : MonoBehaviour
         }
 
         ShowSubtitle("");
+        LockPlayer();
         Phase = "Inspecting";
         _cinematicFinished = false;
         _jigeReached = false;
@@ -333,16 +343,18 @@ public class PrologueIntroController : MonoBehaviour
         if (jigeRenderer != null) _jigeFocus.position = jigeRenderer.bounds.center;
         _cinematics.CinematicTargets = new List<CinematicTarget> {
             new CinematicTarget { TargetTransform = _jigeFocus, EaseInDuration = _jigePanDuration,
-                HoldDuration = _inspectionDuration, Zoom = _jigeZoom, EaseType = EaseType.EaseInOut }
+                HoldDuration = -1f, Zoom = _jigeZoom, EaseType = EaseType.EaseInOut }
         };
         _cinematics.Play();
         while (!_jigeReached) yield return null;
         Phase = "JigeDialogue";
         ShowSubtitle(_jigeStoryText);
-        yield return new WaitForSecondsRealtime(_inspectionDuration);
+        yield return WaitForAdvance();
         ShowSubtitle("");
+        _cinematics.Stop();
         Phase = "ReturningToPlayer";
         while (!_cinematicFinished) yield return null;
+        UnlockPlayer();
         IsJigeInspected = true;
         _fade.blocksRaycasts = false;
         RestoreGameplayUi();
@@ -386,8 +398,11 @@ public class PrologueIntroController : MonoBehaviour
         _player.Movement.SetMovingPlatform(null);
         Physics2D.SyncTransforms();
 
-        // Reset both the visible camera and its internal smoothing state.
-        _camera.Reset(true, true, true);
+        ApplyLocation2Boundaries();
+
+        // Reset extensions first, then place the camera inside the destination limits.
+        _camera.Reset(false, true, true);
+        CenterLocation2Camera();
         foreach (KeyValuePair<Transform, Vector3> entry in _background2Layout)
             if (entry.Key != null) entry.Key.localPosition = entry.Value;
         SetActive(_background2, true);
@@ -396,6 +411,45 @@ public class PrologueIntroController : MonoBehaviour
         foreach (ParallaxManager parallax in _destinationParallax)
             parallax.RebaseAtCurrentPosition();
 
+    }
+
+    private void CenterLocation2Camera()
+    {
+        _camera.CenterOnTargets();
+        Vector3 position = _camera.transform.localPosition;
+        ProCamera2DNumericBoundaries boundaries = _camera.GetComponent<ProCamera2DNumericBoundaries>();
+        if (boundaries != null && boundaries.enabled && boundaries.UseNumericBoundaries)
+        {
+            Vector2 halfSize = _camera.ScreenSizeInWorldCoordinates * 0.5f;
+            if (boundaries.UseLeftBoundary) position.x = Mathf.Max(position.x, boundaries.LeftBoundary + halfSize.x);
+            if (boundaries.UseRightBoundary) position.x = Mathf.Min(position.x, boundaries.RightBoundary - halfSize.x);
+            if (boundaries.UseBottomBoundary) position.y = Mathf.Max(position.y, boundaries.BottomBoundary + halfSize.y);
+            if (boundaries.UseTopBoundary) position.y = Mathf.Min(position.y, boundaries.TopBoundary - halfSize.y);
+        }
+        _camera.MoveCameraInstantlyToPosition(new Vector2(position.x, position.y));
+    }
+
+    private void ApplyLocation2Boundaries()
+    {
+        if (!_useLocation2Boundaries) return;
+        ProCamera2DNumericBoundaries boundaries = _camera.GetComponent<ProCamera2DNumericBoundaries>();
+        if (boundaries == null) boundaries = _camera.gameObject.AddComponent<ProCamera2DNumericBoundaries>();
+        Vector3 parentPosition = _camera.transform.parent != null
+            ? _camera.transform.parent.position : Vector3.zero;
+        boundaries.enabled = true;
+        boundaries.UseNumericBoundaries = true;
+        boundaries.UseLeftBoundary = true;
+        boundaries.UseRightBoundary = true;
+        boundaries.UseTopBoundary = true;
+        boundaries.UseBottomBoundary = true;
+        boundaries.LeftBoundary = Mathf.Min(_location2LeftBoundary, _location2RightBoundary) - parentPosition.x;
+        boundaries.RightBoundary = Mathf.Max(_location2LeftBoundary, _location2RightBoundary) - parentPosition.x;
+        boundaries.BottomBoundary = Mathf.Min(_location2BottomBoundary, _location2TopBoundary) - parentPosition.y;
+        boundaries.TopBoundary = Mathf.Max(_location2BottomBoundary, _location2TopBoundary) - parentPosition.y;
+        boundaries.TargetLeftBoundary = boundaries.LeftBoundary;
+        boundaries.TargetRightBoundary = boundaries.RightBoundary;
+        boundaries.TargetBottomBoundary = boundaries.BottomBoundary;
+        boundaries.TargetTopBoundary = boundaries.TopBoundary;
     }
 
     private IEnumerator WaitForNextSceneExit()
@@ -417,15 +471,24 @@ public class PrologueIntroController : MonoBehaviour
         }
         if (_nextSceneExitPoint == null) yield break;
 
-        AsyncOperation loadOperation = SceneManager.LoadSceneAsync(_nextSceneName, LoadSceneMode.Single);
-        if (loadOperation == null) yield break;
-        loadOperation.allowSceneActivation = false;
         LockPlayer();
         Phase = "LeavingPrologue";
-        yield return FadeTo(1f, _fadeToBlack);
+        ShowSubtitle("");
+        // Render a fully black, persistent overlay before any scene loading work.
+        yield return SceneArrivalFade.FadeOut(_fadeToBlack);
         SceneArrivalFade.Prepare(_nextSceneRevealDuration);
+        yield return new WaitForEndOfFrame();
+        yield return null;
         Time.timeScale = 1f;
-        loadOperation.allowSceneActivation = true;
+        AsyncOperation loadOperation = SceneManager.LoadSceneAsync(_nextSceneName, LoadSceneMode.Single);
+        if (loadOperation == null)
+        {
+            SceneArrivalFade.Cancel();
+            UnlockPlayer();
+            RestoreGameplayUi();
+            Phase = "Complete";
+            yield break;
+        }
         yield return loadOperation;
     }
 
@@ -542,21 +605,24 @@ public class PrologueIntroController : MonoBehaviour
     private void ShowSubtitle(string text)
     {
         _subtitle.text = text;
-        _dialoguePanel.SetActive(!string.IsNullOrEmpty(text));
+        bool visible = !string.IsNullOrEmpty(text);
+        _dialoguePanel.SetActive(visible);
+        _continuePrompt.SetActive(visible);
     }
 
-    private IEnumerator WaitForAdvance()
+    private IEnumerator WaitForAdvance(GameObject prompt = null)
     {
         SetContinueKeyPress(0f);
-        _continuePrompt.SetActive(true);
-        // Require a fresh X press so opening a poster cannot also close it.
-        while (Input.GetKey(KeyCode.X))
+        GameObject activePrompt = prompt != null ? prompt : _continuePrompt;
+        activePrompt.SetActive(true);
+        // Require a fresh Enter press so opening a poster cannot also close it.
+        while ((Input.GetKey(KeyCode.Return) || Input.GetKey(KeyCode.KeypadEnter)))
             yield return null;
         yield return null;
-        while (!Input.GetKeyDown(KeyCode.X))
+        while (!(Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
             yield return null;
-        yield return AnimateContinueKeyPress();
-        _continuePrompt.SetActive(false);
+        if (prompt == null) yield return AnimateContinueKeyPress();
+        activePrompt.SetActive(false);
         yield return null;
     }
 
@@ -614,20 +680,21 @@ public class PrologueIntroController : MonoBehaviour
         while ((_player.transform.position.x - _noticeBoardTrigger.position.x) * direction < 0f)
             yield return null;
 
+        LockPlayer();
         Phase = "NoticeBoardFocus";
         _noticeBoardFocus.position = _noticeBoard.position;
         SpriteRenderer renderer = _noticeBoard.GetComponentInChildren<SpriteRenderer>();
         if (renderer != null) _noticeBoardFocus.position = renderer.bounds.center;
         _cinematicFinished = false;
         _jigeReached = false;
-        _cinematics.UseLetterbox = false;
+        _cinematics.UseLetterbox = true;
         _cinematics.CinematicTargets = new List<CinematicTarget>
         {
             new CinematicTarget
             {
                 TargetTransform = _noticeBoardFocus,
                 EaseInDuration = _jigePanDuration,
-                HoldDuration = _noticeBoardFocusDuration,
+                HoldDuration = -1f,
                 Zoom = _noticeBoardZoom,
                 EaseType = EaseType.EaseInOut
             }
@@ -635,9 +702,15 @@ public class PrologueIntroController : MonoBehaviour
         _cinematics.Play();
         while (!_jigeReached) yield return null;
         ShowSubtitle(_noticeBoardText);
+        yield return WaitForAdvance();
+        ShowSubtitle("");
+        _cinematics.Stop();
         while (!_cinematicFinished) yield return null;
+        UnlockPlayer();
+        _fade.blocksRaycasts = false;
+        RestoreGameplayUi();
         Phase = "ApproachingNoticeBoard";
-        while (!IsNearNoticeBoard() || !Input.GetKeyDown(KeyCode.X)) yield return null;
+        while (!IsNearNoticeBoard() || !(Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))) yield return null;
         yield return ReadWantedPoster(true);
         Phase = "Gameplay";
     }
@@ -656,16 +729,15 @@ public class PrologueIntroController : MonoBehaviour
         _wantedPosterImage.sprite = _wantedPosterSprite;
         _wantedPosterImage.enabled = _wantedPosterSprite != null;
         _wantedPosterRoot.SetActive(true);
-        ShowSubtitle(_wantedPosterSprite != null ? "" : "현상수배");
-        // Keep the dialogue X image visible even when the poster has no caption.
-        _dialoguePanel.SetActive(true);
-        yield return WaitForAdvance();
+        ShowSubtitle("");
+        if (_boardKeyHint != null) _boardKeyHint.gameObject.SetActive(false);
+        yield return WaitForAdvance(_wantedPosterPrompt);
         _wantedPosterRoot.SetActive(false);
         _posterRead = true;
         if (firstRead)
         {
             ShowSubtitle(_afterPosterText);
-            yield return new WaitForSecondsRealtime(_forwardDuration);
+            yield return WaitForAdvance();
         }
         ShowSubtitle("");
         UnlockPlayer();
@@ -695,8 +767,8 @@ public class PrologueIntroController : MonoBehaviour
         RectTransform canvasRect = _boardKeyHint.parent.GetComponent<RectTransform>();
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screen, null, out Vector2 position))
             _boardKeyHint.anchoredPosition = position + Vector2.up * 48f;
-        // The first read is owned by ReadNoticeBoard; subsequent reads use the same X prompt.
-        if (_posterRead && idle && Input.GetKeyDown(KeyCode.X))
+        // The first read is owned by ReadNoticeBoard; subsequent reads use the same Enter prompt.
+        if (_posterRead && idle && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
             StartCoroutine(ReadWantedPoster(false));
     }
 
@@ -711,7 +783,7 @@ public class PrologueIntroController : MonoBehaviour
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.matchWidthOrHeight = 0.5f;
-        var key = new GameObject("X", typeof(RectTransform), typeof(Image));
+        var key = new GameObject("Enter", typeof(RectTransform), typeof(Image));
         key.transform.SetParent(canvasObject.transform, false);
         _boardKeyHint = key.GetComponent<RectTransform>();
         _boardKeyHint.anchorMin = new Vector2(0.5f, 0.5f);
@@ -730,7 +802,7 @@ public class PrologueIntroController : MonoBehaviour
         RectTransform root = _wantedPosterRoot.GetComponent<RectTransform>();
         root.anchorMin = new Vector2(0.5f, 0.5f);
         root.anchorMax = root.anchorMin;
-        root.anchoredPosition = new Vector2(0f, 120f);
+        root.anchoredPosition = Vector2.zero;
         root.sizeDelta = new Vector2(1200f, 700f);
         var paper = new GameObject("PosterImage", typeof(RectTransform), typeof(Image));
         paper.transform.SetParent(root, false);
@@ -742,6 +814,18 @@ public class PrologueIntroController : MonoBehaviour
         _wantedPosterImage = paper.GetComponent<Image>();
         _wantedPosterImage.preserveAspect = true;
         _wantedPosterImage.raycastTarget = false;
+        _wantedPosterPrompt = new GameObject("Enter", typeof(RectTransform), typeof(Image));
+        _wantedPosterPrompt.transform.SetParent(root, false);
+        RectTransform promptRect = _wantedPosterPrompt.GetComponent<RectTransform>();
+        promptRect.anchorMin = new Vector2(1f, 0f);
+        promptRect.anchorMax = promptRect.anchorMin;
+        promptRect.pivot = new Vector2(1f, 0f);
+        promptRect.anchoredPosition = new Vector2(-24f, 24f);
+        promptRect.sizeDelta = new Vector2(120f, 72f);
+        Image promptImage = _wantedPosterPrompt.GetComponent<Image>();
+        promptImage.sprite = _advanceKeySprite;
+        promptImage.preserveAspect = true;
+        promptImage.raycastTarget = false;
         _wantedPosterRoot.SetActive(false);
     }
 
@@ -991,7 +1075,7 @@ public class PrologueIntroController : MonoBehaviour
         _continueHint.fontSize = 26;
         _continueHint.alignment = TextAnchor.MiddleCenter;
         _continueHint.color = new Color(0.94f, 0.94f, 0.94f, 1f);
-        _continueHint.text = "X";
+        _continueHint.text = "Enter";
         _continueHint.raycastTarget = false;
 
         // 화살표는 글꼴의 특수문자 지원 여부에 관계없이 같은 모양으로 표시한다.
@@ -1037,7 +1121,7 @@ public class PrologueIntroController : MonoBehaviour
         choiceLabel.fontSize = 32;
         choiceLabel.alignment = TextAnchor.MiddleCenter;
         choiceLabel.color = _choiceTextColor;
-        choiceLabel.text = "나가보자.";
+        choiceLabel.text = _exitChoiceText;
         choiceLabel.raycastTarget = false;
 
         var choiceMarkerObject = new GameObject("SelectionArrow", typeof(RectTransform), typeof(Text));
