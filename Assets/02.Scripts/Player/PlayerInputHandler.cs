@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerInputHandler : MonoBehaviour
 {
@@ -64,8 +64,8 @@ public class PlayerInputHandler : MonoBehaviour
     {
         _moveInputX = GetHorizontalInput();
 
-        _isJumpKeyDown = Input.GetKeyDown(KeyCode.C);
-        _isJumpKey = Input.GetKey(KeyCode.C);
+        _isJumpKeyDown = StageJumpInput.WasPressedThisFrame;
+        _isJumpKey = StageJumpInput.IsHeld;
         _isDodgeKeyDown = Input.GetKeyDown(KeyCode.Z);
         _isAttackKeyDown = Input.GetKeyDown(KeyCode.X);
         _isRangedAttackKeyDown = Input.GetKeyDown(KeyCode.V);
