@@ -20,7 +20,8 @@ public class PauseController : MonoBehaviour
 
     public static bool IsPaused { get; private set; }
     private static int _pauseTransitionFrame = -1;
-    public static bool IsGameplayInputBlocked => IsPaused || Time.frameCount == _pauseTransitionFrame;
+    public static bool IsGameplayInputBlocked => IsPaused || Time.frameCount == _pauseTransitionFrame ||
+                                                 (StageManager.Instance != null && StageManager.Instance.IsRespawning);
 
     [SerializeField, ReadOnly] private bool _isSettingsAvailable;
     private CanvasGroup _pauseMenuCanvasGroup;

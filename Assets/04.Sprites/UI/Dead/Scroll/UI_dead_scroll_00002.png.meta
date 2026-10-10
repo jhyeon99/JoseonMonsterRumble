@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 3191dec08bb2b644d8f176fcc9675b18
+guid: dc52b2ba0af89f840b4957c6b09b93ec
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 307158825773450447
-    second: Dead_Run1_0
+      213: 4843126764108488158
+    second: UI_dead_scroll_00002_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Dead_Run1_0
+      name: UI_dead_scroll_00002_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1672
-        height: 941
+        x: 569
+        y: 53
+        width: 144
+        height: 647
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fc44adb135f334400800000000000000
-      internalID: 307158825773450447
+      spriteID: edd9fd8c12e363340800000000000000
+      internalID: 4843126764108488158
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Dead_Run1_0: 307158825773450447
+      UI_dead_scroll_00002_0: 4843126764108488158
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
