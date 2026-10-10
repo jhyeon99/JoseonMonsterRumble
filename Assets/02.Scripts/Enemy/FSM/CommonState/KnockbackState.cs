@@ -4,6 +4,7 @@ public class KnockbackState : EnemyState
 {
     private const int FirstComboStep = 1;
     private const int SecondComboStep = 2;
+    private const int ThirdComboStep = 3;
 
     private readonly Enemy _enemy;
     private readonly HitData _hitData;
@@ -53,7 +54,9 @@ public class KnockbackState : EnemyState
         if (!_enemy.MoveType.IsKnockbackFinished(_isHorizontalOnly)) return;
 
         // 짧은 밀림이 끝나도 피격 모션을 새 공격으로 끊지 않는다.
-        if (_hitData.IsTalisman && _enemy.Animation.IsPlayingHit())
+        bool shouldStartSpacing = ShouldStartFlyingRangedSpacing();
+        bool shouldRecoverHit = _hitData.IsTalisman || shouldStartSpacing;
+        if (shouldRecoverHit && _enemy.Animation.IsPlayingHit())
         {
             return;
         }
@@ -65,7 +68,20 @@ public class KnockbackState : EnemyState
             return;
         }
 
-        _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
+        if (shouldStartSpacing)
+        {
+            _enemy.StateMachine.ChangeState(new FlyingRangedSpacingState(_enemy));
+        }
+        else
+        {
+            _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
+        }
+    }
+
+    private bool ShouldStartFlyingRangedSpacing()
+    {
+        return _hitData.ComboStep == ThirdComboStep && !_hitData.IsTalisman && !_hitData.IsReflectedProjectile &&
+            _enemy.Combat is EnemyRangedCombat && _enemy.MoveType is EnemyFlyingMove;
     }
 
     public override void Exit()

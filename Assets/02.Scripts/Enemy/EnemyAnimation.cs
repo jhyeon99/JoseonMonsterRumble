@@ -15,6 +15,7 @@ public class EnemyAnimation : MonoBehaviour
     private const int AnimationLayer = 0;
     private static readonly int HitTagHash = Animator.StringToHash("Hit");
     private static readonly int AttackTagHash = Animator.StringToHash("Attack");
+    private static readonly int FlightSpeedHash = Animator.StringToHash("flightSpeed");
     private static readonly int DieTagHash = Animator.StringToHash("Die");
     private static readonly int WalkStartTagHash = Animator.StringToHash("WalkStart");
     private static readonly int WalkLoopTagHash = Animator.StringToHash("WalkLoop");
@@ -32,6 +33,27 @@ public class EnemyAnimation : MonoBehaviour
 
     // 그로기 모션이 애니메이터에 추가되기 전에도 경고 없이 동작하도록 파라미터 유무를 한 번만 확인
     private bool? _hasGroggyParam;
+    private bool? _hasFlightSpeedParam;
+
+    public void SetFlightAnimationSpeed(float speed)
+    {
+        if (_animator == null)
+        {
+            return;
+        }
+        if (!_hasFlightSpeedParam.HasValue)
+        {
+            _hasFlightSpeedParam = HasParameter(FlightSpeedHash);
+            if (!_hasFlightSpeedParam.Value)
+            {
+                Debug.LogError("EnemyAnimation: 비행 재생 속도 파라미터 flightSpeed가 없습니다.", this);
+            }
+        }
+        if (_hasFlightSpeedParam.Value)
+        {
+            _animator.SetFloat(FlightSpeedHash, speed);
+        }
+    }
 
     public void SetRunning(bool isRunning)
     {
@@ -56,6 +78,26 @@ public class EnemyAnimation : MonoBehaviour
     }
 
     public void PlayAttack() => _animator.SetTrigger(_attack);
+
+    public bool TryGetAttackPlayback(out AnimatorStateInfo state, out float playbackSpeed)
+    {
+        state = default;
+        playbackSpeed = 0f;
+        if (_animator == null || _animator.IsInTransition(AnimationLayer))
+        {
+            return false;
+        }
+
+        state = _animator.GetCurrentAnimatorStateInfo(AnimationLayer);
+        playbackSpeed = _animator.speed * state.speed * state.speedMultiplier;
+        return state.tagHash == AttackTagHash;
+    }
+
+    public void ReplayAttackFrom(int stateHash, float normalizedTime)
+    {
+        _animator.Play(stateHash, AnimationLayer, normalizedTime);
+    }
+
     public void ResetAttackTrigger() => _animator.ResetTrigger(_attack);
     public void PlayProvoke() => _animator.SetTrigger(_provoke);
     public void ResetProvokeTrigger() => _animator.ResetTrigger(_provoke);

@@ -99,8 +99,10 @@ public class AttackState : EnemyState
         if (_attackTimer <= 0)
         {
             // 타이머만 끝났다고 무기 회수 동작 중에 회복을 시작하지 않는다.
-            if ((_enemy.MoveType is EnemyGroundMove && _animationPlayback == AnimationPlayback.Playing) ||
-                (!(_enemy.MoveType is EnemyGroundMove) && _enemy.Data.HasStationaryAttackCycle && _enemy.Animation.IsPlayingAttack()))
+            if ((_enemy.Combat is EnemyRangedCombat rangedAttack && rangedAttack.IsBurstPending) ||
+                (_enemy.MoveType is EnemyGroundMove && _animationPlayback == AnimationPlayback.Playing) ||
+                (!(_enemy.MoveType is EnemyGroundMove) &&
+                 (_enemy.Data.HasStationaryAttackCycle || _enemy.Combat is EnemyRangedCombat) && _enemy.Animation.IsPlayingAttack()))
             {
                 return;
             }
@@ -121,9 +123,9 @@ public class AttackState : EnemyState
             _enemy.DirectionLock.UnlockDirection();
         }
         _isSoftLocked = false;
+        _enemy.Combat.StopAttack();
         if (_enemy.Combat is EnemyMeleeCombat)
         {
-            _enemy.Combat.StopAttack();
             _enemy.MoveType.StopQuadraticCharge();
         }
         _enemy.Animation.ResetAttackTrigger();
