@@ -373,7 +373,28 @@ public abstract class BossPattern : MonoBehaviour
         }
     }
 
-    /// <summary>판정 구간 처리: 시작 전까지 예고 → 시작~끝 판정 → 끄기</summary>
+    /// <summary>
+    /// 패링 그로기 판정이면, 판정 시작(hitStartRatio)보다 반짝임 Lead Time만큼 앞선 지점인지 확인해 한 번 반짝임.
+    /// 루프 안에서 매 프레임 호출. 이미 반짝였으면 true 유지
+    /// </summary>
+    protected bool UpdateParryWarning(BossHitbox hitbox, float hitStartRatio, bool hasWarned)
+    {
+        if (hasWarned || hitbox == null || !hitbox.GroggyOnParry || Boss.ParryWarning == null)
+        {
+            return hasWarned;
+        }
+
+        float leadRatio = Duration > 0f ? Boss.ParryWarning.LeadTime / Duration : 0f;
+        if (Progress < hitStartRatio - leadRatio)
+        {
+            return false;
+        }
+
+        Boss.ParryWarning.Play();
+        return true;
+    }
+
+    /// <summary>판정 구간 처리: 시작 전까지 예고 → 시작~끝 판정 → 끄기 (패링 그로기 판정이면 직전에 반짝임)</summary>
     protected IEnumerator RunHitWindow(BossHitbox hitbox, bool showTelegraph = true)
     {
         if (showTelegraph)
@@ -381,7 +402,12 @@ public abstract class BossPattern : MonoBehaviour
             hitbox.SetTelegraph(true);
         }
 
-        yield return WaitUntilProgress(HitStartRatio);
+        bool hasWarned = false;
+        while (Progress < HitStartRatio)
+        {
+            hasWarned = UpdateParryWarning(hitbox, HitStartRatio, hasWarned);
+            yield return null;
+        }
 
         hitbox.SetTelegraph(false);
         hitbox.Activate();

@@ -4,6 +4,8 @@ public class AttackPrepareGroundState : EnemyState
 {
     protected Enemy _enemy;
     protected float _attackPrepareTimer = 0;
+    private ParryWarningFlash _parryWarning;
+    private bool _hasWarned;
 
     public AttackPrepareGroundState(Enemy enemy)
     {
@@ -21,7 +23,12 @@ public class AttackPrepareGroundState : EnemyState
             // (휴식 → 추적 → 공격 준비가 한 프레임에 이어지면 Flip이 돌기 전에 잠겨서 뒤를 보고 공격하던 문제)
             FacePlayer();
             _enemy.Animation.PlayAttack();
+
+            // 패링 그로기 공격 예고 (적에 ParryWarningFlash가 있을 때만)
+            _parryWarning = _enemy.GetComponentInChildren<ParryWarningFlash>();
         }
+
+        _hasWarned = false;
     }
 
     public override void FixedUpdate()
@@ -52,6 +59,14 @@ public class AttackPrepareGroundState : EnemyState
     public override void Update()
     {
         _attackPrepareTimer -= Time.deltaTime;
+
+        // 공격 판정이 켜지기 Lead Time초 전에 반짝임
+        if (_parryWarning != null && !_hasWarned && _attackPrepareTimer <= _parryWarning.LeadTime)
+        {
+            _parryWarning.Play();
+            _hasWarned = true;
+        }
+
         if (_attackPrepareTimer <= 0)
         {
             Debug.Log("지상 적 공격 준비");

@@ -125,11 +125,15 @@ public class BossStompPattern : BossPattern
         float landRatio = Mathf.Max(HitStartRatio, 0.01f);
         float apexRatio = Mathf.Min(_apexRatio, landRatio * 0.95f);
         float targetX = GetTargetX();
+        bool hasWarned = false;
 
         // 점프 → 착지 (판정 시작 지점에 착지)
         while (Progress < landRatio)
         {
             float progress = Progress;
+
+            // 패링 그로기 찍기면 착지 직전에 반짝임
+            hasWarned = UpdateParryWarning(_stompHitbox, landRatio, hasWarned);
 
             if (progress < _trackUntilRatio)
             {
