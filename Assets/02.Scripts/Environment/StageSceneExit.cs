@@ -5,13 +5,17 @@ using UnityEngine;
 public sealed class StageSceneExit : MonoBehaviour
 {
     [Tooltip("이 영역에 플레이어가 들어오면 불러올 씬 이름입니다.")]
-    [SerializeField] private string _nextSceneName = "Test_Boss";
+    [SerializeField] private string _nextSceneName = "Test_BossStage";
 
     [Tooltip("연결하면 입구를 맵 오른쪽 끝에 맞춥니다. 비워두면 오브젝트 위치를 사용합니다.")]
     [SerializeField] private StageCameraBounds _cameraBounds;
 
     [Tooltip("맵 오른쪽 끝에서 입구 중심까지의 거리입니다.")]
     [SerializeField, Min(0f)] private float _entryInset = 1f;
+
+    [Header("씬 전환 페이드")]
+    [SerializeField, Min(0f)] private float _fadeOutDuration = 0.5f;
+    [SerializeField, Min(0.01f)] private float _fadeInDuration = 0.75f;
 
     private bool _hasRequestedTransition;
     private bool _hasWarnedMissingManager;
@@ -79,7 +83,7 @@ public sealed class StageSceneExit : MonoBehaviour
             return;
         }
 
-        _hasRequestedTransition = stageManager.TryLoadStageScene(_nextSceneName);
+        _hasRequestedTransition = stageManager.TryLoadStageScene(_nextSceneName, _fadeOutDuration, _fadeInDuration);
     }
 
     private void OnDrawGizmosSelected()
