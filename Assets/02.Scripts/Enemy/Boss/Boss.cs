@@ -174,6 +174,9 @@ public class Boss : MonoBehaviour, IFinishable
     public string HowlTrigger => _howlTrigger;
     public string DefeatTrigger => _defeatTrigger;
 
+    /// <summary>몸통 접촉 데미지를 줄 수 있는지 (대기 / 패턴 중일 때만)</summary>
+    public bool CanDealContactDamage => CurrentState is BossIdleState || CurrentState is BossPatternState;
+
     /// <summary>지금 상태에서 데미지를 받는지</summary>
     public bool CanTakeDamage => CurrentState != null && CurrentState.CanTakeDamage;
 
