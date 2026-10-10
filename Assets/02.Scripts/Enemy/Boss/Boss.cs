@@ -69,6 +69,30 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField]
     private bool _disableOnDefeat = true;
 
+    [Tooltip("처치 소울을 한 번에 뿌리는 개수 (일반 적은 5개). 0이면 뿌리지 않음")]
+    [SerializeField, Min(0)]
+    private int _deathSoulsPerBurst = 8;
+
+    [Tooltip("처치 소울을 뿌리는 횟수. 전체 개수 = 한 번에 뿌리는 개수 x 횟수")]
+    [SerializeField, Min(1)]
+    private int _deathSoulBursts = 5;
+
+    [Tooltip("처치 소울을 뿌리는 간격 (초)")]
+    [SerializeField, Min(0f)]
+    private float _deathSoulBurstInterval = 0.12f;
+
+    [Tooltip("처치 소울 생성 위치가 흩어지는 반경. 회차마다 터지는 중심이 이 안에서 무작위 (0이면 한 점에서)")]
+    [SerializeField, Min(0f)]
+    private float _deathSoulSpawnRadius = 1.2f;
+
+    [Tooltip("처치 소울 전체 충전량 (1 = 소울 슬롯 1칸, 일반 적은 1)")]
+    [SerializeField, Min(0f)]
+    private float _deathSoulTotalAmount = 5f;
+
+    [Tooltip("소울이 퍼지는 속도 배율 (많이 뿌릴수록 크게 하면 넓게 퍼짐)")]
+    [SerializeField, Min(0.1f)]
+    private float _deathSoulSpeedMultiplier = 1.6f;
+
     [Header("애니메이션 파라미터 (애니메이터에 없으면 무시)")]
     [SerializeField]
     private string _introTrigger = "intro";
@@ -163,6 +187,12 @@ public class Boss : MonoBehaviour, IFinishable
     public CameraZoomSettings HowlZoom => _howlZoom;
     public float DefeatDuration => _defeatDuration;
     public bool DisableOnDefeat => _disableOnDefeat;
+    public int DeathSoulsPerBurst => _deathSoulsPerBurst;
+    public int DeathSoulBursts => _deathSoulBursts;
+    public float DeathSoulBurstInterval => _deathSoulBurstInterval;
+    public float DeathSoulSpawnRadius => _deathSoulSpawnRadius;
+    public float DeathSoulTotalAmount => _deathSoulTotalAmount;
+    public float DeathSoulSpeedMultiplier => _deathSoulSpeedMultiplier;
 
     public string IntroTrigger => _introTrigger;
     public string GroggyTrigger => _groggyTrigger;
