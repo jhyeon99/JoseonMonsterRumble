@@ -2345,6 +2345,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _needleWarningThickness
+      value: 1.2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
