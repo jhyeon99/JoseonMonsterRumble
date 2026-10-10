@@ -69,6 +69,30 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField]
     private bool _disableOnDefeat = true;
 
+    [Tooltip("처치 소울을 한 번에 뿌리는 개수 (일반 적은 5개). 0이면 뿌리지 않음")]
+    [SerializeField, Min(0)]
+    private int _deathSoulsPerBurst = 8;
+
+    [Tooltip("처치 소울을 뿌리는 횟수. 전체 개수 = 한 번에 뿌리는 개수 x 횟수")]
+    [SerializeField, Min(1)]
+    private int _deathSoulBursts = 5;
+
+    [Tooltip("처치 소울을 뿌리는 간격 (초)")]
+    [SerializeField, Min(0f)]
+    private float _deathSoulBurstInterval = 0.12f;
+
+    [Tooltip("처치 소울 생성 위치가 흩어지는 반경. 회차마다 터지는 중심이 이 안에서 무작위 (0이면 한 점에서)")]
+    [SerializeField, Min(0f)]
+    private float _deathSoulSpawnRadius = 1.2f;
+
+    [Tooltip("처치 소울 전체 충전량 (1 = 소울 슬롯 1칸, 일반 적은 1)")]
+    [SerializeField, Min(0f)]
+    private float _deathSoulTotalAmount = 5f;
+
+    [Tooltip("소울이 퍼지는 속도 배율 (많이 뿌릴수록 크게 하면 넓게 퍼짐)")]
+    [SerializeField, Min(0.1f)]
+    private float _deathSoulSpeedMultiplier = 1.6f;
+
     [Header("애니메이션 파라미터 (애니메이터에 없으면 무시)")]
     [SerializeField]
     private string _introTrigger = "intro";
@@ -122,6 +146,12 @@ public class Boss : MonoBehaviour, IFinishable
     /// <summary>페이즈 변경 (2 = 2페이즈 시작)</summary>
     public event Action<int> OnPhaseChanged;
 
+    /// <summary>처치 연출(날려 보내기 / 처치 애니메이션)이 끝남. 보스가 꺼지기 직전</summary>
+    public event Action OnDefeatFinished;
+
+    /// <summary>true인 동안 등장 상태에서 패턴으로 넘어가지 않음 (등장 연출이 끝날 때까지 대기)</summary>
+    public bool HoldIntro { get; set; }
+
     private readonly BossStateMachine _stateMachine = new BossStateMachine();
     private readonly List<BossPattern> _patterns = new List<BossPattern>();
     private readonly List<BossPattern> _candidates = new List<BossPattern>();
@@ -143,6 +173,9 @@ public class Boss : MonoBehaviour, IFinishable
     public string BossName => _bossName;
     public BossArena Arena => _arena;
     public BossHealth Health => _health;
+
+    /// <summary>패링 그로기 공격 직전 반짝임 (없으면 null)</summary>
+    public ParryWarningFlash ParryWarning { get; private set; }
     public Transform Player => _player;
     public int Phase => _phase;
     public BossState CurrentState => _stateMachine.CurrentState;
@@ -154,6 +187,12 @@ public class Boss : MonoBehaviour, IFinishable
     public CameraZoomSettings HowlZoom => _howlZoom;
     public float DefeatDuration => _defeatDuration;
     public bool DisableOnDefeat => _disableOnDefeat;
+    public int DeathSoulsPerBurst => _deathSoulsPerBurst;
+    public int DeathSoulBursts => _deathSoulBursts;
+    public float DeathSoulBurstInterval => _deathSoulBurstInterval;
+    public float DeathSoulSpawnRadius => _deathSoulSpawnRadius;
+    public float DeathSoulTotalAmount => _deathSoulTotalAmount;
+    public float DeathSoulSpeedMultiplier => _deathSoulSpeedMultiplier;
 
     public string IntroTrigger => _introTrigger;
     public string GroggyTrigger => _groggyTrigger;
@@ -164,6 +203,11 @@ public class Boss : MonoBehaviour, IFinishable
     public float GroggyEndDuration => _groggyEndClip != null ? _groggyEndClip.length : _groggyEndFallbackDuration;
     public string HowlTrigger => _howlTrigger;
     public string DefeatTrigger => _defeatTrigger;
+
+    /// <summary>몸통 접촉 데미지를 줄 수 있는지 (대기 / 패턴 중일 때만, 접촉 데미지를 끄는 패턴 중에는 제외)</summary>
+    public bool CanDealContactDamage =>
+        CurrentState is BossIdleState ||
+        (CurrentState is BossPatternState patternState && !patternState.Pattern.DisablesContactDamage);
 
     /// <summary>지금 상태에서 데미지를 받는지</summary>
     public bool CanTakeDamage => CurrentState != null && CurrentState.CanTakeDamage;
@@ -213,6 +257,7 @@ public class Boss : MonoBehaviour, IFinishable
     private void Awake()
     {
         _health = GetComponent<BossHealth>();
+        ParryWarning = GetComponentInChildren<ParryWarningFlash>(true);
         _animator = GetComponentInChildren<Animator>();
         _body = GetComponent<Rigidbody2D>();
         _bodyCollider = GetComponent<Collider2D>();
@@ -355,6 +400,11 @@ public class Boss : MonoBehaviour, IFinishable
     public void NotifyDefeated()
     {
         OnDefeated?.Invoke(this);
+    }
+
+    public void NotifyDefeatFinished()
+    {
+        OnDefeatFinished?.Invoke();
     }
 
     #endregion

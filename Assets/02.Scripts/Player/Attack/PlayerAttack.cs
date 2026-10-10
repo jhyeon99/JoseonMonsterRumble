@@ -109,7 +109,12 @@ public class PlayerAttack : MonoBehaviour
             if (!_hitTargets.Add(damageable)) continue;
 
             Vector3 edgePoint = hit.ClosestPoint(center);
-            var hitPoint = Vector3.Lerp(hit.bounds.center, edgePoint, _hitPointCenterRatio);
+
+            // 잡몹(Hurtbox)은 기존처럼 몸 중심 ~ 외곽 사이, 보스처럼 큰 대상은 공격 판정과 겹치는 부분의 중심
+            // (큰 콜라이더에 비율 보간을 쓰면 이펙트 / 소울이 몸 한가운데에서 나옴)
+            Vector3 hitPoint = hit.TryGetComponent(out EnemyHurtbox _)
+                ? Vector3.Lerp(hit.bounds.center, edgePoint, _hitPointCenterRatio)
+                : GetOverlapCenter(center, _activeStep.HitboxSize, hit.bounds, edgePoint);
             Vector3 attackDir = (hit.bounds.center - transform.position).normalized;
 
             var hitData = new HitData(
@@ -121,6 +126,25 @@ public class PlayerAttack : MonoBehaviour
             );
             damageable.TakeDamage(hitData);
         }
+    }
+
+    /// <summary>공격 판정 상자와 대상 콜라이더 영역이 겹치는 부분의 중심. 안 겹치면 fallback</summary>
+    private static Vector3 GetOverlapCenter(Vector3 boxCenter, Vector2 boxSize, Bounds target, Vector3 fallback)
+    {
+        Vector2 boxMin = (Vector2)boxCenter - (boxSize * 0.5f);
+        Vector2 boxMax = (Vector2)boxCenter + (boxSize * 0.5f);
+
+        float minX = Mathf.Max(boxMin.x, target.min.x);
+        float maxX = Mathf.Min(boxMax.x, target.max.x);
+        float minY = Mathf.Max(boxMin.y, target.min.y);
+        float maxY = Mathf.Min(boxMax.y, target.max.y);
+
+        if (minX > maxX || minY > maxY)
+        {
+            return fallback;
+        }
+
+        return new Vector3((minX + maxX) * 0.5f, (minY + maxY) * 0.5f, boxCenter.z);
     }
 
 #if UNITY_EDITOR

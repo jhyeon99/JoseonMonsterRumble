@@ -26,9 +26,9 @@ public class BossStompPattern : BossPattern
     private float _edgeMargin = 2f;
 
     [Header("찍기")]
-    [Tooltip("연속으로 찍는 횟수. 바늘은 마지막 찍기 후에만 발사")]
-    [SerializeField, Min(1)]
-    private int _stompCount = 3;
+    [Tooltip("찍는 횟수별 가중치. 원소 순서 = 1번, 2번, 3번... 찍을 확률 (예: 0.3, 0.3, 0.4면 30% 1번 / 30% 2번 / 40% 3번). 최대 횟수 = 배열 크기. 바늘은 마지막 찍기 후에만 발사")]
+    [SerializeField]
+    private float[] _stompCountWeights = { 0.3f, 0.3f, 0.4f };
 
     [Tooltip("마지막이 아닌 찍기에서 다음 점프를 시작하는 지점 (애니메이션 길이 대비 비율). 판정 끝보다 앞이면 판정 끝 사용")]
     [SerializeField, Range(0f, 1f)]
@@ -67,6 +67,12 @@ public class BossStompPattern : BossPattern
     [SerializeField, Min(0f)]
     private float _needleInterval = 0.2f;
 
+    // 떨어지면서 몸통이 먼저 닿아 찍기 판정 전에 맞지 않도록 기본으로 몸통 접촉 데미지 끔 (기존 컴포넌트에도 적용)
+    public BossStompPattern()
+    {
+        _disableContactDamage = true;
+    }
+
     private void Reset()
     {
         SetDefaults("연속 찍기 → 바늘", BossPhaseMask.Both, BossFloorMask.Floor1);
@@ -88,7 +94,8 @@ public class BossStompPattern : BossPattern
 
     protected override IEnumerator Execute()
     {
-        int count = Mathf.Max(1, _stompCount);
+        int count = PickStompCount();
+        Boss.Log($"{PatternName}: {count}번 찍기");
         float nextStompRatio = Mathf.Max(_nextStompRatio, HitEndRatio);
 
         for (int i = 0; i < count; i++)
@@ -117,6 +124,47 @@ public class BossStompPattern : BossPattern
         yield return FireNeedles();
     }
 
+    /// <summary>가중치 배열로 이번에 찍을 횟수 결정 (1 ~ 배열 크기). 배열이 비었거나 합이 0이면 1번</summary>
+    private int PickStompCount()
+    {
+        if (_stompCountWeights == null || _stompCountWeights.Length == 0)
+        {
+            return 1;
+        }
+
+        float total = 0f;
+        foreach (float weight in _stompCountWeights)
+        {
+            total += Mathf.Max(0f, weight);
+        }
+
+        if (total <= 0f)
+        {
+            return 1;
+        }
+
+        float pick = Random.value * total;
+        for (int i = 0; i < _stompCountWeights.Length; i++)
+        {
+            pick -= Mathf.Max(0f, _stompCountWeights[i]);
+            if (pick <= 0f && _stompCountWeights[i] > 0f)
+            {
+                return i + 1;
+            }
+        }
+
+        // 부동소수점 오차로 끝까지 온 경우: 가중치가 있는 마지막 횟수
+        for (int i = _stompCountWeights.Length - 1; i >= 0; i--)
+        {
+            if (_stompCountWeights[i] > 0f)
+            {
+                return i + 1;
+            }
+        }
+
+        return 1;
+    }
+
     /// <summary>점프 → 착지 → 찍기 판정 (판정 끝까지)</summary>
     private IEnumerator Stomp()
     {
@@ -125,11 +173,15 @@ public class BossStompPattern : BossPattern
         float landRatio = Mathf.Max(HitStartRatio, 0.01f);
         float apexRatio = Mathf.Min(_apexRatio, landRatio * 0.95f);
         float targetX = GetTargetX();
+        bool hasWarned = false;
 
         // 점프 → 착지 (판정 시작 지점에 착지)
         while (Progress < landRatio)
         {
             float progress = Progress;
+
+            // 패링 그로기 찍기면 착지 직전에 반짝임
+            hasWarned = UpdateParryWarning(_stompHitbox, landRatio, hasWarned);
 
             if (progress < _trackUntilRatio)
             {

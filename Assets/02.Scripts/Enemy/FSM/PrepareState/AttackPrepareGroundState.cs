@@ -6,6 +6,8 @@ public class AttackPrepareGroundState : EnemyState
     private PreparationPhase _phase;
     protected Enemy _enemy;
     protected float _attackPrepareTimer = 0;
+    private ParryWarningFlash _parryWarning;
+    private bool _hasWarned;
 
     public AttackPrepareGroundState(Enemy enemy)
     {
@@ -34,7 +36,12 @@ public class AttackPrepareGroundState : EnemyState
         if (_enemy.Combat is EnemyMeleeCombat)
         {
             _enemy.Animation.PlayAttack();
+
+            // 패링 그로기 공격 예고 (적에 ParryWarningFlash가 있을 때만)
+            _parryWarning = _enemy.GetComponentInChildren<ParryWarningFlash>();
         }
+
+        _hasWarned = false;
     }
 
     public override void Update()
@@ -49,6 +56,14 @@ public class AttackPrepareGroundState : EnemyState
             return;
         }
         _attackPrepareTimer -= Time.deltaTime;
+
+        // 공격 판정이 켜지기 Lead Time초 전에 반짝임
+        if (_parryWarning != null && !_hasWarned && _attackPrepareTimer <= _parryWarning.LeadTime)
+        {
+            _parryWarning.Play();
+            _hasWarned = true;
+        }
+
         if (_attackPrepareTimer <= 0)
         {
             _phase = PreparationPhase.Committed;
