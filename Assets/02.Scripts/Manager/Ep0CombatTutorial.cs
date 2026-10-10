@@ -135,6 +135,14 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
             if (point != null) _startPoint = point.transform;
         }
 
+        if (_enemy == null) ResolveTutorialEnemy();
+        if (_enemy == null)
+        {
+            Debug.LogError("EP0 Tutorial: 튜토리얼 몬스터가 삭제되었거나 Enemy 연결이 비어 있습니다. PF_Ep0CombatTutorial 안의 TutorialMonster를 복구하고 Enemy에 연결하세요. 일반 몬스터는 연습용 몬스터를 대신할 수 없습니다.", this);
+            enabled = false;
+            yield break;
+        }
+
         if (_player == null || _enemy == null || _camera == null || _panel == null ||
             _dialogue == null || _instruction == null || _keyPrompt == null || _keyLabel == null ||
             !_enemy.TryGetComponent(out _combat) || !(_enemy.Health is Ep0TutorialEnemyHealth))
@@ -167,6 +175,36 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         _enemy.EnemyRb.simulated = false;
         _enemy.StateMachine.ChangeState(new WaitingState(_enemy));
         _panel.SetActive(false);
+    }
+
+    private void ResolveTutorialEnemy()
+    {
+        // Recover an unassigned reference without selecting unrelated normal monsters.
+        Enemy[] children = GetComponentsInChildren<Enemy>(true);
+        foreach (Enemy candidate in children)
+        {
+            if (candidate.GetComponent<Ep0TutorialEnemyHealth>() == null ||
+                candidate.GetComponent<EnemyMeleeCombat>() == null)
+            {
+                continue;
+            }
+
+            _enemy = candidate;
+            return;
+        }
+
+        Enemy match = null;
+        Ep0TutorialEnemyHealth[] healths = FindObjectsByType<Ep0TutorialEnemyHealth>(
+            FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (Ep0TutorialEnemyHealth health in healths)
+        {
+            if (health.gameObject.scene != gameObject.scene) continue;
+            Enemy candidate = health.GetComponent<Enemy>();
+            if (candidate == null || candidate.GetComponent<EnemyMeleeCombat>() == null) continue;
+            if (match != null) return;
+            match = candidate;
+        }
+        _enemy = match;
     }
 
     private void Update()
@@ -399,8 +437,17 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     private IEnumerator ShowMonsterCinematic()
     {
         while (_cinematics.IsPlaying) yield return null;
+        SetPlayerControl(false);
+        _player.RangedAttack?.CancelCharge();
+        _player.StateMachine.ChangeState(_player.IdleState);
+        Rigidbody2D body = _player.GetComponent<Rigidbody2D>();
+        if (body != null) body.linearVelocity = Vector2.zero;
+        // Start from the grounded player instead of an in-flight follow position.
+        _camera.CenterOnTargets();
+        yield return new WaitForEndOfFrame();
+        yield return null;
         _monsterFocus.position = _enemy.GetEnemyCenterPosition();
-        _cinematics.UseLetterbox = false;
+        _cinematics.UseLetterbox = true;
         _cinematics.EndDuration = _zoomDuration;
         _cinematics.CinematicTargets = new List<CinematicTarget>
         {
@@ -415,6 +462,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         };
         _cinematics.Play();
         while (_cinematics.IsPlaying) yield return null;
+        SetPlayerControl(_normalInputWasEnabled);
     }
 
     private void FaceEachOther()
