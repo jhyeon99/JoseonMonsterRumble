@@ -20,7 +20,10 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     public bool IsDead => _isDead;
 
     private bool _isInvincible;
-    public bool IsInvincible => _isInvincible;
+
+    // 보스 등장 / 하울링 / 처치 등 연출 중 무적 (피격 후 무적과 별개로 유지)
+    private bool _isCinematicInvincible;
+    public bool IsInvincible => _isInvincible || _isCinematicInvincible;
 
     public HitData LastFatalHitData { get; private set; }
 
@@ -55,7 +58,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     public bool TakeDamage(HitData hitdata)
     {
-        if (IsDead || _isInvincible) return false;
+        if (IsDead || _isInvincible || _isCinematicInvincible) return false;
 
         // 가드 중이면 데미지 대신 가드 / 패링 처리
         if (_guard != null && _guard.TryHandleHit(hitdata) != GuardResult.None) return false;
@@ -164,6 +167,12 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         yield return new WaitForSeconds(_invincibleTime);
         SetInvincible(false);
         _invincibleRoutine = null;
+    }
+
+    /// <summary>연출용 무적 (반투명 표시 없음). 피격 후 무적 시간이 끝나도 풀리지 않음</summary>
+    public void SetCinematicInvincible(bool isInvincible)
+    {
+        _isCinematicInvincible = isInvincible;
     }
 
     /// <param name="showVisual">false면 반투명 표시 없이 무적만 적용 (해제할 때는 항상 원래대로)</param>
