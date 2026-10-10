@@ -158,13 +158,14 @@ public class ItemPool : MonoBehaviour
     public void SpawnHitSoul(Vector2 hitPosition, bool isHeavy)
     {
         float amount = isHeavy ? 0.35f : 0.15f;
-        float scale = isHeavy ? 1.35f : 1.0f;
+        float scale = isHeavy ? 1.85f : 0.95f;
         Color color = GetRandomSoulColor();
 
         Vector2 randomDir = (Vector2.up * 1.5f + Random.insideUnitCircle * 1.2f).normalized;
-        Vector2 velocity = randomDir * Random.Range(2.5f, 4.5f);
+        Vector2 velocity = randomDir * (isHeavy ? Random.Range(3.6f, 5.2f) : Random.Range(2.5f, 4.0f));
+        float waitTime = isHeavy ? Random.Range(0.12f, 0.18f) : Random.Range(0.08f, 0.14f);
 
-        SpawnCustomSoul(hitPosition, amount, color, scale, velocity, Random.Range(0.08f, 0.15f));
+        SpawnCustomSoul(hitPosition, amount, color, scale, velocity, waitTime);
     }
 
     public void SpawnDeathSouls(Vector2 centerPosition, int count = 5)
