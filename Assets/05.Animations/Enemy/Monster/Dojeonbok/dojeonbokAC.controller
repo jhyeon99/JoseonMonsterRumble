@@ -9,6 +9,12 @@ AnimatorController:
   m_Name: dojeonbokAC
   serializedVersion: 5
   m_AnimatorParameters:
+  - m_Name: flightSpeed
+    m_Type: 1
+    m_DefaultFloat: 1
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 9100000}
   - m_Name: isRunning
     m_Type: 4
     m_DefaultFloat: 0
@@ -181,13 +187,13 @@ AnimatorState:
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
   m_Mirror: 0
-  m_SpeedParameterActive: 0
+  m_SpeedParameterActive: 1
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
   m_Motion: {fileID: 7400000, guid: c9b40df194758ef4084ec72088a97055, type: 2}
   m_Tag: 
-  m_SpeedParameter: 
+  m_SpeedParameter: flightSpeed
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 

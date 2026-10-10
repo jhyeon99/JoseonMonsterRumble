@@ -1,8 +1,9 @@
-using System.Collections;
 using UnityEngine;
 
 public class EnemyRangedCombat : EnemyCombat
 {
+    private enum BurstPhase { None, WaitingForReplay, Replaying }
+
     [SerializeField] private Transform _muzzlePoint;
     [SerializeField] private ProjectileType _type;
 
@@ -10,8 +11,18 @@ public class EnemyRangedCombat : EnemyCombat
     [SerializeField, Range(0f, 1f)] private float _burstChance = 0.15f;
     [SerializeField, Range(0f, 1f)] private float _spreadChance = 0.15f;
     [SerializeField, Min(0f)] private float _burstMinDistance = 6.5f;
-    [SerializeField] private float _burstInterval = 0.28f;
+    [SerializeField] private float _burstInterval = 0.5f;
+    [SerializeField] private AnimationClip _burstAttackClip;
+    [SerializeField, Min(0)] private int _burstResumeFrame = 32;
     [SerializeField] private float _spreadAngle = 15f;
+
+    private BurstPhase _burstPhase;
+    private float _burstReplayDelay;
+    private float _burstResumeProgress;
+    private float _burstFireProgress;
+    private int _burstAttackStateHash;
+
+    public bool IsBurstPending => _burstPhase != BurstPhase.None;
 
     public event System.Action OnTelegraphAttack;
 
@@ -22,6 +33,7 @@ public class EnemyRangedCombat : EnemyCombat
 
     public override void Attack()
     {
+        StopAttack();
         if (Enemy == null || Enemy.Target == null || _muzzlePoint == null)
         {
             return;
@@ -32,13 +44,15 @@ public class EnemyRangedCombat : EnemyCombat
             float roll = Random.value;
             float distanceToPlayer = Enemy.GetDistanceToPlayer();
 
-            if (roll < _burstChance && distanceToPlayer >= _burstMinDistance)
+            if (roll < _burstChance)
             {
-                StartCoroutine(FireBurstRoutine());
-                return;
+                if (distanceToPlayer >= _burstMinDistance)
+                {
+                    StartBurst();
+                    return;
+                }
             }
-
-            if (roll < _burstChance + _spreadChance)
+            else if (_spreadChance > 0f && roll < _burstChance + _spreadChance)
             {
                 FireSpreadProjectiles();
                 return;
@@ -77,10 +91,77 @@ public class EnemyRangedCombat : EnemyCombat
         FireSingleProjectile(-_spreadAngle);
     }
 
-    private IEnumerator FireBurstRoutine()
+    private void StartBurst()
     {
         FireSingleProjectile(0f);
-        yield return new WaitForSeconds(_burstInterval);
-        FireSingleProjectile(0f);
+        if (_burstAttackClip == null ||
+            !Enemy.Animation.TryGetAttackPlayback(out AnimatorStateInfo state, out float playbackSpeed) ||
+            playbackSpeed <= 0f)
+        {
+            Debug.LogError("EnemyRangedCombat: 버스트 공격 클립과 Attack 재생 상태를 확인하세요.", this);
+            return;
+        }
+
+        _burstResumeProgress = _burstResumeFrame / (_burstAttackClip.frameRate * _burstAttackClip.length);
+        _burstFireProgress = state.normalizedTime;
+        if (_burstResumeProgress >= _burstFireProgress)
+        {
+            Debug.LogError("EnemyRangedCombat: 버스트 재시작 프레임은 발사 프레임보다 앞이어야 합니다.", this);
+            StopAttack();
+            return;
+        }
+
+        float replayDuration = (_burstFireProgress - _burstResumeProgress) * _burstAttackClip.length / playbackSpeed;
+        _burstReplayDelay = Mathf.Max(0f, _burstInterval - replayDuration);
+        _burstAttackStateHash = state.fullPathHash;
+        _burstPhase = BurstPhase.WaitingForReplay;
+    }
+
+    private void Update()
+    {
+        if (!IsBurstPending)
+        {
+            return;
+        }
+
+        if (Enemy.IsDefeated || !(Enemy.StateMachine.CurrentState is AttackState) ||
+            !Enemy.Animation.TryGetAttackPlayback(out AnimatorStateInfo state, out _) ||
+            state.fullPathHash != _burstAttackStateHash)
+        {
+            StopAttack();
+            return;
+        }
+
+        if (_burstPhase == BurstPhase.WaitingForReplay)
+        {
+            _burstReplayDelay -= Time.deltaTime;
+            if (_burstReplayDelay <= 0f)
+            {
+                Enemy.Animation.ReplayAttackFrom(_burstAttackStateHash, _burstResumeProgress);
+                _burstPhase = BurstPhase.Replaying;
+            }
+
+            return;
+        }
+
+        if (state.normalizedTime >= _burstFireProgress)
+        {
+            FireSingleProjectile(0f);
+            StopAttack();
+        }
+    }
+
+    public override void StopAttack()
+    {
+        _burstPhase = BurstPhase.None;
+        _burstReplayDelay = 0f;
+        _burstResumeProgress = 0f;
+        _burstFireProgress = 0f;
+        _burstAttackStateHash = 0;
+    }
+
+    private void OnDisable()
+    {
+        StopAttack();
     }
 }

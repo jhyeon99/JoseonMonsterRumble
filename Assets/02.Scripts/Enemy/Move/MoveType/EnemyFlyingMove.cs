@@ -12,6 +12,7 @@ public class EnemyFlyingMove : EnemyMoveType
     private const float ChaseDistanceMargin = 1f;
     private const float CollisionSkin = 0.02f;
     private const float MinimumFlightSpeed = 0.0001f;
+    private const float RetreatRiseRatio = 0.6f;
     private const int DeathLandingCastCapacity = 8;
     private const float LandingNormalThreshold = 0.7f;
     private enum MeleeFlightMode { Hovering, Approaching, Falling, Landed }
@@ -56,6 +57,11 @@ public class EnemyFlyingMove : EnemyMoveType
     [SerializeField, Range(0f, 1f)] private float _flyOverChance = 0.25f;
     private bool _isPerformingFlyOver = false;
     private float _flyOverTimer = 0f;
+
+    [Header("3타 피격 후 상승 후퇴")]
+    [SerializeField, Min(0.1f)] private float _ascendingRetreatSpeed = 5f;
+    [SerializeField, Min(0.1f)] private float _ascendingRetreatAcceleration = 16f;
+    [SerializeField, Min(1f)] private float _ascendingRetreatAnimationSpeed = 1.2f;
 
     [Header("패트롤 설정")]
 
@@ -452,6 +458,49 @@ public class EnemyFlyingMove : EnemyMoveType
         float hoverY = Mathf.Cos(Time.time * _hoverFrequency) * _hoverAmplitude;
         var disengageVelocity = new Vector2(dirSign * Enemy.Data.MoveSpeed * 1.15f, hoverY);
         Rigidbody.linearVelocity = GetAngleRestrictedVelocity(disengageVelocity, out _);
+    }
+
+    public bool MoveAscendingRetreat(float directionX)
+    {
+        Vector2 velocity = CalculateSafeRetreatVelocity(
+            new Vector2(directionX, RetreatRiseRatio).normalized * _ascendingRetreatSpeed);
+        if (velocity.sqrMagnitude <= MinimumFlightSpeed * MinimumFlightSpeed)
+        {
+            velocity = CalculateSafeRetreatVelocity(Vector2.up * _ascendingRetreatSpeed);
+        }
+        if (velocity.sqrMagnitude <= MinimumFlightSpeed * MinimumFlightSpeed)
+        {
+            velocity = CalculateSafeRetreatVelocity(new Vector2(directionX * _ascendingRetreatSpeed, 0f));
+        }
+        velocity = Vector2.MoveTowards(Rigidbody.linearVelocity, velocity, _ascendingRetreatAcceleration * Time.fixedDeltaTime);
+        Rigidbody.linearVelocity = CalculateSafeRetreatVelocity(velocity);
+        return Rigidbody.linearVelocity.sqrMagnitude > MinimumFlightSpeed * MinimumFlightSpeed;
+    }
+
+    public float GetAscendingRetreatAnimationSpeed()
+    {
+        float speedRatio = Mathf.Clamp01(Rigidbody.linearVelocity.magnitude / _ascendingRetreatSpeed);
+        return Mathf.Lerp(1f, _ascendingRetreatAnimationSpeed, speedRatio);
+    }
+
+    private Vector2 CalculateSafeRetreatVelocity(Vector2 velocity)
+    {
+        // 후퇴에는 순찰 높이나 사격 각도가 아닌 실제 이동 영역을 적용한다.
+        if (Enemy.MoveArea != null)
+        {
+            Vector2 nextPosition = Enemy.MoveArea.ClampPosition(Rigidbody.position + velocity * Time.fixedDeltaTime);
+            Vector2 allowedVelocity = (nextPosition - Rigidbody.position) / Time.fixedDeltaTime;
+            velocity.x = Mathf.Sign(velocity.x) * Mathf.Min(Mathf.Abs(velocity.x), Mathf.Max(0f, allowedVelocity.x * Mathf.Sign(velocity.x)));
+            velocity.y = Mathf.Sign(velocity.y) * Mathf.Min(Mathf.Abs(velocity.y), Mathf.Max(0f, allowedVelocity.y * Mathf.Sign(velocity.y)));
+        }
+
+        float distance = velocity.magnitude * Time.fixedDeltaTime;
+        if (distance > MinimumFlightSpeed && Enemy.AirSensor != null)
+        {
+            float allowedDistance = Enemy.AirSensor.CalculateAllowedTravelDistance(velocity.normalized, distance, CollisionSkin);
+            velocity *= allowedDistance / distance;
+        }
+        return velocity;
     }
 
     public override void StopMove()
