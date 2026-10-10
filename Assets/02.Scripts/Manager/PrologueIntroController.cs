@@ -33,6 +33,32 @@ public class PrologueIntroController : MonoBehaviour
     [SerializeField] private AudioClip _jigeBreakClip;
     [SerializeField] private AudioClip _doorClip;
 
+    [Header("Movement and jump tutorial")]
+    [Tooltip("동작 완료까지 표시된 시간의 배율입니다. 2면 완료 후 같은 시간만큼 더 표시합니다.")]
+    [SerializeField, Min(1f)] private float _controlHintDurationMultiplier = 2f;
+    [SerializeField] private Vector2 _controlHintOffset = new Vector2(0f, 64f);
+    [SerializeField] private Sprite _moveLeftKeySprite;
+    [SerializeField] private Sprite _moveRightKeySprite;
+    [SerializeField] private Sprite _jumpCKeySprite;
+    [SerializeField] private Sprite _jumpSpaceKeySprite;
+    [SerializeField] private Transform _jumpObstacle;
+    [SerializeField, Min(0.1f)] private float _jumpHintDistance = 4f;
+    [SerializeField, TextArea] private string _moveHintText = "이동하기";
+    [SerializeField, TextArea] private string _jumpHintText = "점프";
+    private RectTransform _controlHintRoot;
+    private GameObject _moveHintRow;
+    private GameObject _jumpHintRow;
+    private bool _movementStarted;
+    private bool _movementLearned;
+    private float _movementStartX;
+    private bool _jumpHintStarted;
+    private bool _jumpAttempted;
+    private bool _jumpLearned;
+    private float _movementHintElapsed;
+    private float _jumpHintElapsed;
+    private float _movementHideAt = -1f;
+    private float _jumpHideAt = -1f;
+
     [Header("Broken jige inspection")]
     [SerializeField] private Transform _jige;
     [SerializeField, Min(0.1f)] private float _jigeTriggerDistance = 3.5f;
@@ -539,6 +565,7 @@ public class PrologueIntroController : MonoBehaviour
 
     private void Update()
     {
+        UpdateControlHints();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (_ready && Phase != "Complete" &&
             (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0)))
@@ -553,6 +580,142 @@ public class PrologueIntroController : MonoBehaviour
             _exitChoiceBackground.color = hovered ? new Color(1f, 0.96f, 0.87f, 1f) : Color.white;
         else
             _exitChoiceBackground.color = hovered ? new Color(0.24f, 0.20f, 0.13f, 1f) : new Color(0.13f, 0.12f, 0.10f, 0.98f);
+    }
+
+    private void UpdateControlHints()
+    {
+        bool active = _ready && IsIntroComplete && !_locked &&
+            (Phase == "Gameplay" || Phase == "GameplayAfterJige") && !PauseController.IsPaused;
+        if (!active)
+        {
+            if (_controlHintRoot != null) _controlHintRoot.gameObject.SetActive(false);
+            return;
+        }
+
+        if (_controlHintRoot == null) CreateControlHints();
+        if (!_movementStarted)
+        {
+            _movementStarted = true;
+            _movementStartX = _player.transform.position.x;
+        }
+        if (!_movementLearned && (!_jumpHintStarted || _jumpLearned))
+            _movementHintElapsed += Time.deltaTime;
+        if (_movementHideAt < 0f && Mathf.Abs(_player.transform.position.x - _movementStartX) >= 3f)
+            _movementHideAt = _movementHintElapsed * _controlHintDurationMultiplier;
+        if (_movementHideAt >= 0f && _movementHintElapsed >= _movementHideAt) _movementLearned = true;
+        bool showJump = false;
+        if (_jumpObstacle != null && !_jumpLearned)
+        {
+            Collider2D obstacle = _jumpObstacle.GetComponent<Collider2D>();
+            float edge = obstacle != null ? obstacle.bounds.max.x : _jumpObstacle.position.x;
+            float distance = _jumpObstacle.position.x - _player.transform.position.x;
+            if (!_jumpHintStarted && distance >= -0.5f && distance <= _jumpHintDistance)
+                _jumpHintStarted = true;
+            if (_jumpHintStarted) _jumpHintElapsed += Time.deltaTime;
+            if (_jumpHintStarted && _player.StateMachine.CurrentState == _player.JumpState)
+                _jumpAttempted = true;
+            if (_jumpHideAt < 0f && _jumpAttempted && _player.IsGrounded &&
+                _player.transform.position.x > edge + 0.2f)
+            {
+                _jumpHideAt = _jumpHintElapsed * _controlHintDurationMultiplier;
+            }
+
+            if (_jumpHideAt >= 0f && _jumpHintElapsed >= _jumpHideAt) _jumpLearned = true;
+            showJump = _jumpHintStarted && !_jumpLearned;
+        }
+
+        _moveHintRow.SetActive(!showJump && !_movementLearned);
+        _jumpHintRow.SetActive(showJump);
+        _controlHintRoot.gameObject.SetActive(showJump || !_movementLearned);
+        Canvas canvas = _controlHintRoot.GetComponentInParent<Canvas>();
+        RectTransform canvasRect = canvas.GetComponent<RectTransform>();
+        Collider2D body = _player.GetComponent<Collider2D>();
+        Vector3 head = body != null
+            ? new Vector3(body.bounds.center.x, body.bounds.max.y, _player.transform.position.z)
+            : _player.transform.position + Vector3.up * 1.5f;
+        Vector3 screen = _camera.GetComponent<Camera>().WorldToScreenPoint(head);
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screen, null, out Vector2 position))
+            _controlHintRoot.anchoredPosition = position + _controlHintOffset;
+    }
+
+    private void CreateControlHints()
+    {
+        var canvasObject = new GameObject("OpeningControlHints", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
+        canvasObject.transform.SetParent(transform, false);
+        Canvas canvas = canvasObject.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 32765;
+        CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        scaler.matchWidthOrHeight = 0.5f;
+        var hint = new GameObject("PlayerControlHint", typeof(RectTransform));
+        hint.transform.SetParent(canvasObject.transform, false);
+        _controlHintRoot = hint.GetComponent<RectTransform>();
+        _controlHintRoot.anchorMin = new Vector2(0.5f, 0.5f);
+        _controlHintRoot.anchorMax = _controlHintRoot.anchorMin;
+        _controlHintRoot.sizeDelta = new Vector2(420f, 64f);
+        _moveHintRow = new GameObject("Movement", typeof(RectTransform));
+        _moveHintRow.transform.SetParent(hint.transform, false);
+        _jumpHintRow = new GameObject("Jump", typeof(RectTransform));
+        _jumpHintRow.transform.SetParent(hint.transform, false);
+        AddControlHintText(_moveHintRow.transform, _moveHintText, -150f, 130f);
+        AddControlHintKey(_moveHintRow.transform, _moveLeftKeySprite, -35f, 64f);
+        AddControlHintKey(_moveHintRow.transform, _moveRightKeySprite, 35f, 64f);
+        AddControlHintText(_jumpHintRow.transform, _jumpHintText, -150f, 130f);
+        AddControlHintKey(_jumpHintRow.transform, _jumpCKeySprite, -35f, 64f);
+        AddControlHintText(_jumpHintRow.transform, "또는", 30f, 60f);
+        AddControlHintKey(_jumpHintRow.transform, _jumpSpaceKeySprite, 120f, 110f);
+        CenterControlHintRow(_moveHintRow.transform);
+        CenterControlHintRow(_jumpHintRow.transform);
+    }
+
+    private void CenterControlHintRow(Transform row)
+    {
+        if (row.childCount == 0) return;
+        float left = float.PositiveInfinity;
+        float right = float.NegativeInfinity;
+        foreach (RectTransform child in row)
+        {
+            left = Mathf.Min(left, child.anchoredPosition.x - child.sizeDelta.x * child.pivot.x);
+            right = Mathf.Max(right, child.anchoredPosition.x + child.sizeDelta.x * (1f - child.pivot.x));
+        }
+        float center = (left + right) * 0.5f;
+        foreach (RectTransform child in row)
+            child.anchoredPosition -= new Vector2(center, 0f);
+    }
+
+    private void AddControlHintText(Transform parent, string value, float x, float width)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return;
+        var label = new GameObject("Label", typeof(RectTransform), typeof(Text), typeof(Outline));
+        label.transform.SetParent(parent, false);
+        RectTransform rect = label.GetComponent<RectTransform>();
+        rect.anchoredPosition = new Vector2(x, 0f);
+        rect.sizeDelta = new Vector2(width, 64f);
+        Text text = label.GetComponent<Text>();
+        text.text = value;
+        text.font = _subtitle.font;
+        text.fontSize = 24;
+        text.alignment = TextAnchor.MiddleCenter;
+        text.color = Color.black;
+        text.raycastTarget = false;
+        Outline outline = label.GetComponent<Outline>();
+        outline.effectColor = Color.white;
+        outline.effectDistance = new Vector2(1f, -1f);
+    }
+
+    private void AddControlHintKey(Transform parent, Sprite sprite, float x, float width)
+    {
+        var key = new GameObject("Key", typeof(RectTransform), typeof(Image));
+        key.transform.SetParent(parent, false);
+        RectTransform rect = key.GetComponent<RectTransform>();
+        rect.anchoredPosition = new Vector2(x, 0f);
+        rect.sizeDelta = new Vector2(width, 44f);
+        Image image = key.GetComponent<Image>();
+        image.sprite = sprite;
+        image.preserveAspect = true;
+        image.raycastTarget = false;
     }
 
     private void CreateFadeOverlay()

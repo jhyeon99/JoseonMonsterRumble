@@ -142,9 +142,9 @@ public sealed class StageManager : MonoBehaviour
     }
 
     /// <summary>지정한 스테이지 씬으로 전환한다. 중복 전환과 리스폰 중 전환은 막는다.</summary>
-    public bool TryLoadStageScene(string sceneName)
+    public bool TryLoadStageScene(string sceneName, float fadeOutDuration = 0.5f, float fadeInDuration = 0.75f)
     {
-        if (_isRespawning || _isChangingScene || string.IsNullOrWhiteSpace(sceneName))
+        if (_isRespawning || _isChangingScene || SceneArrivalFade.IsTransitioning || string.IsNullOrWhiteSpace(sceneName))
             return false;
 
         if (SceneManager.GetActiveScene().name == sceneName)
@@ -156,27 +156,35 @@ public sealed class StageManager : MonoBehaviour
             return false;
         }
 
-        StartCoroutine(ChangeStageSceneRoutine(sceneName));
+        StartCoroutine(ChangeStageSceneRoutine(sceneName, fadeOutDuration, fadeInDuration));
         return true;
     }
 
-    private IEnumerator ChangeStageSceneRoutine(string sceneName)
+    private IEnumerator ChangeStageSceneRoutine(string sceneName, float fadeOutDuration, float fadeInDuration)
     {
         _isChangingScene = true;
         CameraShake.Stop();
         Time.timeScale = 1f;
+        yield return SceneArrivalFade.FadeOut(Mathf.Max(0f, fadeOutDuration));
+        SceneArrivalFade.Prepare(fadeInDuration);
         UnbindPlayerHealth();
 
         AsyncOperation loadOperation = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
         if (loadOperation == null)
         {
             Debug.LogWarning($"{sceneName}: 씬 전환을 시작하지 못했습니다.", this);
+            SceneArrivalFade.Cancel();
             BindPlayerHealth(SceneManager.GetActiveScene());
             _isChangingScene = false;
             yield break;
         }
 
+        loadOperation.allowSceneActivation = false;
+        while (loadOperation.progress < 0.9f) yield return null;
+        Time.timeScale = 1f;
+        loadOperation.allowSceneActivation = true;
         yield return loadOperation;
+        while (SceneArrivalFade.IsTransitioning) yield return null;
         _isChangingScene = false;
     }
 

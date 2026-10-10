@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -135,6 +136,7 @@ public class Boss : MonoBehaviour, IFinishable
     private Collider2D _bodyCollider;
     private Transform _player;
     private BossPattern _lastPattern;
+    private Coroutine _fightStartRoutine;
     private bool _isAnimatorPaused;
     private float _animatorSpeedBeforePause = 1f;
 
@@ -288,6 +290,11 @@ public class Boss : MonoBehaviour, IFinishable
 
     private void OnDisable()
     {
+        if (_fightStartRoutine != null)
+        {
+            StopCoroutine(_fightStartRoutine);
+            _fightStartRoutine = null;
+        }
         ClearMinions();
     }
 
@@ -303,10 +310,26 @@ public class Boss : MonoBehaviour, IFinishable
             return;
         }
 
+        if (SceneArrivalFade.IsTransitioning)
+        {
+            if (_fightStartRoutine == null)
+            {
+                _fightStartRoutine = StartCoroutine(StartFightAfterFade());
+            }
+            return;
+        }
+
         _phase = 1;
         _health.BeginFight();
         OnFightStarted?.Invoke(this);
         ChangeState(new BossIntroState(this));
+    }
+
+    private IEnumerator StartFightAfterFade()
+    {
+        while (SceneArrivalFade.IsTransitioning) yield return null;
+        _fightStartRoutine = null;
+        if (isActiveAndEnabled) StartFight();
     }
 
     public void ChangeState(BossState nextState)
