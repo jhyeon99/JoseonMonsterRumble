@@ -2042,6 +2042,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BuffEnemy
   _enemyType: 1
   _data: {fileID: 11400000, guid: 2fad875db8129d84e982006d0afedb46, type: 2}
+  _assignedBuffData: {fileID: 0}
+  _availableBuffs:
+  - {fileID: 11400000, guid: e6b8ea1e57434df9baad953be53938df, type: 2}
+  - {fileID: 11400000, guid: 48081a73c37a4c88940d756be670133a, type: 2}
+  - {fileID: 11400000, guid: 6d3a0de14298400c9cdaf0dca6cde43a, type: 2}
+  - {fileID: 11400000, guid: c1f95b47455e44a6bd044c42488e8c0f, type: 2}
 --- !u!61 &1249033454841099493
 BoxCollider2D:
   m_ObjectHideFlags: 0

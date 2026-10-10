@@ -1,5 +1,6 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
+using System;
 
 public class EnemyMeleeCombat : EnemyCombat, IParryable
 {
@@ -15,12 +16,25 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
     private float _groggyDuration = 2f;
     private Coroutine _attackCoroutine;
     private float _currentDamage;
+    private Transform _heightTarget;
+    private Collider2D _heightTargetCollider;
+    private BoxCollider2D _groundAttackBox;
+    private FlyingMeleeAttackController _flyingAttack;
     public float CurrentDamage => _currentDamage;
+    public FlyingMeleeAttackController FlyingAttack => _flyingAttack;
+    public event Action OnAttackHit;
 
     protected override void Awake()
     {
         base.Awake();
+        _flyingAttack = GetComponent<FlyingMeleeAttackController>();
+        _groundAttackBox = _attackCollider as BoxCollider2D;
+        if (TryGetComponent<EnemyGroundMove>(out _) && _groundAttackBox == null)
+        {
+            Debug.LogError("EnemyMeleeCombat: 지상 공격 높이 확인에는 BoxCollider2D가 필요합니다.", this);
+        }
         _attackCollider.enabled = false;
+        _currentDamage = Enemy != null && Enemy.Data != null ? Enemy.Data.MeleeAttackDamage : 0f;
     }
 
     public override void Attack()
@@ -29,6 +43,32 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
         CalculateDamage(DamageIncreaseValue);
 
         _attackCoroutine = StartCoroutine(AttackRoutine());
+    }
+
+    // 공중 돌진은 공격 상태가 판정 수명을 관리한다. 지상의 시간 기반 Attack은 유지한다.
+    public void StartControlledAttack()
+    {
+        StopAttack();
+        CalculateDamage(DamageIncreaseValue);
+        _attackCollider.enabled = true;
+    }
+
+    public bool IsTargetInAttackHeight(Transform target)
+    {
+        if (target != _heightTarget)
+        {
+            _heightTarget = target;
+            _heightTargetCollider = target != null ? target.GetComponent<Collider2D>() : null;
+        }
+        if (_heightTargetCollider == null || _groundAttackBox == null)
+        {
+            return false;
+        }
+        // 비활성 공격 콜라이더의 bounds는 비어 있으므로 로컬 모양으로 높이를 계산한다.
+        float centerY = _groundAttackBox.transform.TransformPoint(_groundAttackBox.offset).y;
+        float halfHeight = _groundAttackBox.size.y * Mathf.Abs(_groundAttackBox.transform.lossyScale.y) * 0.5f;
+        Bounds targetBounds = _heightTargetCollider.bounds;
+        return targetBounds.max.y >= centerY - halfHeight && targetBounds.min.y <= centerY + halfHeight;
     }
 
     private IEnumerator AttackRoutine()
@@ -54,7 +94,7 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
             Enemy.Data.KnockbackForce,
             hitPoint,
             Enemy.GetDirectionToPlayer(),
-            _defense,
+            GetEffectiveDefense(_defense),
             this,
             0,
             _attackName
@@ -64,12 +104,12 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
         if (damageable.TakeDamage(hitData))
         {
             _attackCollider.enabled = false;
-            if (Enemy.MoveType is EnemyFlyingMove flyingMove)
+            if (_flyingAttack == null && Enemy.MoveType is EnemyFlyingMove flyingMove)
             {
                 flyingMove.ApplyHitSlowdown();
             }
 
-            Debug.Log($"플레이어에게 근접공격으로 {_currentDamage}만큼 피해를 입힘.");
+            OnAttackHit?.Invoke();
         }
     }
 
@@ -79,7 +119,6 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
         StopAttack();
         Enemy.Animation.PlayParriedHit();
         Enemy.EnterGroggy(_groggyDuration);
-        Debug.Log($"{name}: 근접 공격이 패링당함 → 그로기 {_groggyDuration}초");
     }
 
     public override void StopAttack()
@@ -98,8 +137,8 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
         StopAttack();
     }
 
-    public void CalculateDamage(float percentage)
+    public void CalculateDamage(float additionalDamage)
     {
-        _currentDamage = Enemy.Data.MeleeAttackDamage * (1 + (percentage / 100f));
+        _currentDamage = Enemy.Data.MeleeAttackDamage + additionalDamage;
     }
 }

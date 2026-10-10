@@ -35,8 +35,11 @@ public class UI_EnemyDamageText : MonoBehaviour
         GameEvents.OnEnemyHit -= ShowDamage;
         StopAllCoroutines();
         foreach (TextMeshProUGUI text in _activeTexts)
+        {
             if (text != null)
                 Destroy(text.gameObject);
+        }
+
         _activeTexts.Clear();
     }
 
@@ -50,10 +53,12 @@ public class UI_EnemyDamageText : MonoBehaviour
 
         TextMeshProUGUI text;
         if (_textPrefab != null)
+        {
             text = Instantiate(_textPrefab, _container, false);
+        }
         else
         {
-            GameObject textObject = new GameObject("Enemy Damage", typeof(RectTransform));
+            var textObject = new GameObject("Enemy Damage", typeof(RectTransform));
             textObject.transform.SetParent(_container, false);
             text = textObject.AddComponent<TextMeshProUGUI>();
             text.fontSize = _fontSize;
@@ -83,7 +88,10 @@ public class UI_EnemyDamageText : MonoBehaviour
             if (screenPosition.z <= 0f) break;
             if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
                     _container, screenPosition, uiCamera, out Vector2 localPosition))
+            {
                 text.rectTransform.localPosition = localPosition + _offset + Vector2.up * (_riseDistance * progress);
+            }
+
             text.color = new Color(color.r, color.g, color.b, color.a * (1f - progress));
             elapsed += Time.unscaledDeltaTime;
             yield return null;
