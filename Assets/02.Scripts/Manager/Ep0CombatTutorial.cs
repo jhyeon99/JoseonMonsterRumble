@@ -14,12 +14,17 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     [SerializeField] private ProCamera2D _camera;
 
     [Header("Encounter")]
+    [SerializeField] private bool _beginAtLocation2Spawn = true;
     [SerializeField, Min(0.5f)] private float _encounterDistance = 2.8f;
     [SerializeField] private bool _snapEnemyToGround = true;
     [SerializeField, Min(0.1f)] private float _noticeDuration = 1.2f;
     [SerializeField, Min(0.1f)] private float _dialogueDuration = 1.2f;
 
-    [Header("Parry camera and timing")]
+    [Header("Monster camera presentation")]
+    [SerializeField, Range(0.2f, 1f)] private float _monsterZoomRatio = 0.7f;
+    [SerializeField, Min(0f)] private float _monsterFocusDuration = 0.6f;
+
+    [Header("Camera and timing")]
     [SerializeField, Min(0.01f)] private float _zoomDuration = 0.35f;
     [SerializeField, Min(0.05f)] private float _parrySuccessDuration = 0.25f;
 
@@ -27,7 +32,8 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     [SerializeField] private Vector2 _hintOffset = new Vector2(-220f, 80f);
     [SerializeField] private Vector2 _hintSize = new Vector2(340f, 100f);
     [SerializeField, Min(12)] private int _hintFontSize = 24;
-    [SerializeField] private Color _hintTextColor = Color.white;
+    [SerializeField] private Color _hintTextColor = Color.black;
+    [SerializeField] private Color _hintOutlineColor = Color.white;
 
     [Header("Editable UI in the prefab")]
     [SerializeField] private GameObject _panel;
@@ -40,7 +46,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     [SerializeField] private Sprite _parryKeySprite;
 
     [Header("Dialogue")]
-    [SerializeField, TextArea] private string _encounterText = "헉스, 얜 뭐야?";
+    [SerializeField, TextArea] private string _encounterText = "요괴?";
     [SerializeField, TextArea] private string _comboText = "일단 공격해보자.";
     [SerializeField, TextArea] private string _parryText = "공격을 막아볼까?";
     [SerializeField, TextArea] private string _parryTimingText = "공격이 닿기 직전에 막아보자.";
@@ -50,7 +56,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     [Header("Editable instructions")]
     [Tooltip("{count}는 현재 타격 수, {total}은 목표 타격 수로 표시됩니다.")]
-    [SerializeField, TextArea] private string _comboInstruction = "일반 공격  {count} / {total}";
+    [SerializeField, TextArea] private string _comboInstruction = "";
     [SerializeField, TextArea] private string _parryInstruction = "공격이 닿기 직전에 막기";
     [SerializeField, TextArea] private string _parryTimingInstruction = "↓ 가드 / 패링";
     [SerializeField, TextArea] private string _retryInstruction = "닿기 직전에 ↓";
@@ -59,17 +65,12 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     private PlayerInputHandler _input;
     private EnemyMeleeCombat _combat;
-    private HitStop _hitStop;
     private bool _initialized;
     private bool _enemyReady;
     private bool _enemyBodyWasSimulated;
-    private bool _frozen;
-    private bool _playerWasEnabled;
-    private bool _inputWasEnabled;
     private bool _normalInputWasEnabled;
     private bool _cameraWasEnabled;
-    private bool _hitStopWasEnabled;
-    private float _savedTimeScale;
+    private bool _cameraPresentationActive;
     private float _normalCameraSize;
     private bool _hasCameraSize;
     private int _comboStep;
@@ -149,7 +150,6 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         _instruction.alignment = TextAnchor.MiddleCenter;
         _keyLabel.alignment = TextAnchor.MiddleCenter;
         ConfigurePlayerHint();
-        _hitStop = FindFirstObjectByType<HitStop>();
         foreach (EnemyContactDamage contact in _enemy.GetComponentsInChildren<EnemyContactDamage>())
             contact.enabled = false;
         _enemy.Health.OnHit += HandleEnemyHit;
@@ -178,8 +178,9 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         }
         Vector2 playerPosition = _player.transform.position;
         Vector2 enemyPosition = _enemy.transform.position;
-        if (Mathf.Abs(playerPosition.x - enemyPosition.x) > _encounterDistance ||
-            Mathf.Abs(playerPosition.y - enemyPosition.y) > 4f)
+        if (!_beginAtLocation2Spawn &&
+            (Mathf.Abs(playerPosition.x - enemyPosition.x) > _encounterDistance ||
+             Mathf.Abs(playerPosition.y - enemyPosition.y) > 4f))
         {
             return;
         }
@@ -190,7 +191,6 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (_frozen) Time.timeScale = 0f;
         UpdateHintPosition();
         if (_running && _player != null && _player.Health.IsDead)
         {
@@ -208,16 +208,35 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         _hasCameraSize = true;
         _parried = false;
         _normalInputWasEnabled = _input.enabled;
-        _player.RangedAttack.CancelCharge();
-        _player.StateMachine.ChangeState(_player.IdleState);
-        SetPlayerControl(false);
-        FaceEachOther();
+        Phase = "FirstMonsterFocus";
+        BeginCameraPresentation();
+        _panel.SetActive(false);
+        float monsterCameraSize = _normalCameraSize * _monsterZoomRatio;
+        yield return ZoomTo(monsterCameraSize, _enemy.GetEnemyCenterPosition());
+        yield return WaitRealtime(_monsterFocusDuration);
+        yield return ZoomTo(_normalCameraSize, GetPlayerCameraPosition());
+        EndCameraPresentation();
 
         Phase = "Encounter";
-        Freeze();
         Show(_encounterText, "", "");
         yield return WaitRealtime(_noticeDuration);
-        Unfreeze();
+        _panel.SetActive(false);
+        SetPlayerControl(true);
+
+        Phase = "ApproachingMonster";
+        while (Mathf.Abs(_player.transform.position.x - _enemy.transform.position.x) > _encounterDistance ||
+               Mathf.Abs(_player.transform.position.y - _enemy.transform.position.y) > 4f)
+        {
+            yield return null;
+        }
+
+        Phase = "SecondMonsterFocus";
+        BeginCameraPresentation();
+        yield return ZoomTo(monsterCameraSize, _enemy.GetEnemyCenterPosition());
+        yield return WaitRealtime(_monsterFocusDuration);
+        // Resume following the player at the closer size for combat.
+        yield return ZoomTo(monsterCameraSize, GetPlayerCameraPosition());
+        EndCameraPresentation();
 
         Phase = "Combo";
         _comboStep = 0;
@@ -283,7 +302,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         _complete = true;
         Show(_completeText, "", "");
         yield return new WaitForSeconds(0.8f);
-        Freeze();
+        BeginCameraPresentation();
         yield return ZoomTo(_normalCameraSize, GetPlayerCameraPosition());
         ReleaseControl();
         _running = false;
@@ -315,8 +334,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     private void SetPlayerControl(bool allowed)
     {
         ClearPlayerInput();
-        if (_frozen) _inputWasEnabled = allowed;
-        else _input.enabled = allowed;
+        _input.enabled = allowed;
     }
 
     private void ClearPlayerInput()
@@ -358,20 +376,20 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         RectTransform textRect = _dialogue.rectTransform;
         textRect.anchorMin = Vector2.zero;
         textRect.anchorMax = Vector2.one;
-        textRect.offsetMin = new Vector2(84f, 4f);
-        textRect.offsetMax = new Vector2(-4f, -4f);
+        textRect.offsetMin = new Vector2(4f, 4f);
+        textRect.offsetMax = new Vector2(-84f, -4f);
         _dialogue.fontSize = _hintFontSize;
         _dialogue.color = _hintTextColor;
         _dialogue.raycastTarget = false;
         Outline textOutline = _dialogue.GetComponent<Outline>();
         if (textOutline == null) textOutline = _dialogue.gameObject.AddComponent<Outline>();
-        textOutline.effectColor = new Color(0f, 0f, 0f, 0.85f);
+        textOutline.effectColor = _hintOutlineColor;
         textOutline.effectDistance = new Vector2(1f, -1f);
         RectTransform keyRect = _keyPrompt.GetComponent<RectTransform>();
-        keyRect.anchorMin = new Vector2(0f, 0.5f);
+        keyRect.anchorMin = new Vector2(1f, 0.5f);
         keyRect.anchorMax = keyRect.anchorMin;
         keyRect.pivot = new Vector2(0.5f, 0.5f);
-        keyRect.anchoredPosition = new Vector2(40f, 0f);
+        keyRect.anchoredPosition = new Vector2(-40f, 0f);
         keyRect.sizeDelta = new Vector2(64f, 44f);
         _keyLabel.fontSize = _hintFontSize;
     }
@@ -396,34 +414,21 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         }
     }
 
-    private void Freeze()
+    private void BeginCameraPresentation()
     {
-        if (_frozen) return;
-        _savedTimeScale = HitStop.IsActive ? 1f : Time.timeScale;
-        HitStop.Stop();
-        _playerWasEnabled = _player.enabled;
-        _inputWasEnabled = _input.enabled;
+        if (_cameraPresentationActive) return;
         _cameraWasEnabled = _camera.enabled;
-        _hitStopWasEnabled = _hitStop != null && _hitStop.enabled;
-        if (_hitStop != null) _hitStop.enabled = false;
-        ClearPlayerInput();
-        _input.enabled = false;
-        _player.enabled = false;
+        _cameraPresentationActive = true;
+        // Avoid automatic follow overriding the manual ProCamera2D pan.
+        // Player input, physics and game time stay active throughout.
         _camera.enabled = false;
-        _frozen = true;
-        Time.timeScale = 0f;
     }
 
-    private void Unfreeze()
+    private void EndCameraPresentation()
     {
-        if (!_frozen) return;
-        _frozen = false;
-        ClearPlayerInput();
-        _input.enabled = _inputWasEnabled;
-        _player.enabled = _playerWasEnabled;
-        _camera.enabled = _cameraWasEnabled;
-        if (_hitStop != null) _hitStop.enabled = _hitStopWasEnabled;
-        Time.timeScale = PauseController.IsPaused ? 0f : Mathf.Max(0.01f, _savedTimeScale);
+        if (!_cameraPresentationActive) return;
+        _cameraPresentationActive = false;
+        if (_camera != null) _camera.enabled = _cameraWasEnabled;
     }
 
     private IEnumerator ZoomTo(float size, Vector2 position)
@@ -518,7 +523,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     private void ReleaseControl()
     {
-        Unfreeze();
+        EndCameraPresentation();
         if (_combat != null)
         {
             _combat.StopAttack();
