@@ -8494,6 +8494,20 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 467fac5d9b3640c5bd7b0c08d4a96f27, type: 3}
+--- !u!114 &1900009901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7561039035588078903}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 056b1e97a5ab4ae43b3db8ec7565e1ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyGroundSensor
+  _edgeMargin: 0.1
+  _groundProbeDepth: 0.3
 --- !u!4 &1901743881 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3559325001615895474, guid: 3231d6d0194cd944396cd2e8d9186173,
@@ -8845,6 +8859,11 @@ PrefabInstance:
     - target: {fileID: 264897234835927485, guid: 4d47b5d7fe17c144ea67c4205a119ed7,
         type: 3}
       propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 420562276022660253, guid: 4d47b5d7fe17c144ea67c4205a119ed7,
+        type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1455836220450431103, guid: 4d47b5d7fe17c144ea67c4205a119ed7,
@@ -11973,6 +11992,7 @@ MonoBehaviour:
     Unblockable: 0
     ParryWindowOverride: 0
     GuardGaugeCost: 0
+    BlockInvincibleTime: 0
   _groggyDuration: 2
 --- !u!50 &550537114968232841
 Rigidbody2D:
@@ -13279,6 +13299,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMoveArea
   CenterOffset: {x: 0, y: 2.5}
   AreaSize: {x: 10, y: 6}
+  _useCustomDetectionArea: 0
+  _detectionAreaSize: {x: 3, y: 3}
+  _chaseReleaseMargin: 0
   AreaColor: {r: 0, g: 1, b: 0, a: 0.3}
 --- !u!4 &1107423767148191911
 Transform:
@@ -13394,6 +13417,7 @@ MonoBehaviour:
     Unblockable: 0
     ParryWindowOverride: 0
     GuardGaugeCost: 0
+    BlockInvincibleTime: 0
 --- !u!50 &1185889823730598629
 Rigidbody2D:
   serializedVersion: 5
@@ -19371,20 +19395,6 @@ MonoBehaviour:
   _lightHitKnockbackMultiplier: 0
   _groundSensor: {fileID: 1900009901}
   _walkEndClip: {fileID: 7400000, guid: 11a6eeb020a67b3448abc63f9b37e018, type: 2}
---- !u!114 &1900009901
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7561039035588078903}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 056b1e97a5ab4ae43b3db8ec7565e1ea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyGroundSensor
-  _edgeMargin: 0.1
-  _groundProbeDepth: 0.3
 --- !u!50 &4164086741711457401
 Rigidbody2D:
   serializedVersion: 5
