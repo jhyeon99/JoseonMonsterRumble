@@ -1,5 +1,88 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1800000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1800000002}
+  - component: {fileID: 1800000003}
+  - component: {fileID: 1800000004}
+  m_Layer: 7
+  m_Name: Hurtbox
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1800000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1800000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5461545414730076664}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!70 &1800000003
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1800000001}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: -0.011054277, y: -0.50437516}
+  m_Size: {x: 1.1, y: 1.1}
+  m_Direction: 0
+--- !u!114 &1800000004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1800000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e71f9c66c7242c888bc5b1cbf2c92e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHurtbox
+  _health: {fileID: 6900135879620250934}
 --- !u!1 &242172676066010467
 GameObject:
   m_ObjectHideFlags: 0
@@ -91,6 +174,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d45d33509ea22984cb53ed07eb97d773, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExplosionAttack
+  _attackName: "\uD3ED\uBC1C \uACF5\uACA9"
+  _attackDefense:
+    Parryable: 0
+    Unblockable: 1
+    ParryWindowOverride: 0
+    GuardGaugeCost: 0
 --- !u!1 &2057356393512570043
 GameObject:
   m_ObjectHideFlags: 0
@@ -172,7 +261,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 701cbabab077439eb6eea967b09f5d98, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -192,8 +281,8 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -1927546311
-  m_SortingLayer: 4
-  m_SortingOrder: 1
+  m_SortingLayer: 5
+  m_SortingOrder: 25
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: aaadb808e8afcb04daa4c9e46cf26d5d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -219,7 +308,6 @@ GameObject:
   - component: {fileID: 623762422257324959}
   - component: {fileID: 3743613202740329121}
   - component: {fileID: 6900135879620250934}
-  - component: {fileID: 8776698276065337361}
   - component: {fileID: 8846624967543919300}
   - component: {fileID: -3787385288428544344}
   - component: {fileID: 1842194761569257879}
@@ -336,6 +424,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BuffEnemy
   _enemyType: 1
   _data: {fileID: 11400000, guid: 2fad875db8129d84e982006d0afedb46, type: 2}
+  _assignedBuffData: {fileID: 0}
+  _availableBuffs:
+  - {fileID: 11400000, guid: e6b8ea1e57434df9baad953be53938df, type: 2}
+  - {fileID: 11400000, guid: 48081a73c37a4c88940d756be670133a, type: 2}
+  - {fileID: 11400000, guid: 6d3a0de14298400c9cdaf0dca6cde43a, type: 2}
+  - {fileID: 11400000, guid: c1f95b47455e44a6bd044c42488e8c0f, type: 2}
+  _selfDestructDelay: 2
 --- !u!114 &3743613202740329121
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -349,8 +444,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBuffMove
   IsBackMove: 0
-  _lerpValue: 1.1
-  MaxAngle: 90
+  _knockbackDeceleration: 20
+  _lightHitKnockbackMultiplier: 0
+  _orbitMarginX: 0.85
+  _orbitMarginY: 0.55
+  _minOrbitRadiusX: 1.8
+  _minOrbitRadiusY: 1.2
+  _maxOrbitRadiusX: 2.2
+  _maxOrbitRadiusY: 1.6
+  _orbitSpeed: 100
+  _floatAmplitude: 0.25
+  _floatFrequency: 2.5
+  _followLerpSpeed: 8.5
+  _decelerateDistance: 5
+  _arrivalDistance: 0.45
 --- !u!114 &6900135879620250934
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -363,20 +470,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 728a422b81f2dc84abbffee7b8ef4ec0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
---- !u!114 &8776698276065337361
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9002607081654718196}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e950c96884d53654e965e9f8e0aed5dc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HitFlash
-  _flashColor: {r: 1, g: 0, b: 0, a: 1}
-  _flashDuration: 0.1
 --- !u!114 &8846624967543919300
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -403,6 +496,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAnimation
   _animator: {fileID: 3742089821849712071}
+  _hitAnimationMode: 0
 --- !u!114 &1842194761569257879
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -428,86 +522,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GroundDirectionLock
   _flip: {fileID: 1842194761569257879}
---- !u!1 &1800000001
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1800000002}
-  - component: {fileID: 1800000003}
-  - component: {fileID: 1800000004}
-  m_Layer: 7
-  m_Name: Hurtbox
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1800000002
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1800000001}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 5461545414730076664}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!70 &1800000003
-CapsuleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1800000001}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: -0.011054277, y: -0.22937524}
-  m_Size: {x: 1.1, y: 1.65}
-  m_Direction: 0
---- !u!114 &1800000004
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1800000001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e71f9c66c7242c888bc5b1cbf2c92e6, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyHurtbox
-  _health: {fileID: 6900135879620250934}

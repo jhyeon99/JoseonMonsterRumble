@@ -19369,6 +19369,22 @@ MonoBehaviour:
   IsBackMove: 0
   _knockbackDeceleration: 20
   _lightHitKnockbackMultiplier: 0
+  _groundSensor: {fileID: 1900009901}
+  _walkEndClip: {fileID: 7400000, guid: 11a6eeb020a67b3448abc63f9b37e018, type: 2}
+--- !u!114 &1900009901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7561039035588078903}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 056b1e97a5ab4ae43b3db8ec7565e1ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyGroundSensor
+  _edgeMargin: 0.1
+  _groundProbeDepth: 0.3
 --- !u!50 &4164086741711457401
 Rigidbody2D:
   serializedVersion: 5
@@ -26933,6 +26949,7 @@ GameObject:
   - component: {fileID: 454341219011787183}
   - component: {fileID: 1240641369692963762}
   - component: {fileID: 4159931056790052877}
+  - component: {fileID: 1900009901}
   - component: {fileID: 543007295355023254}
   - component: {fileID: 8537434690237667580}
   - component: {fileID: 9091590563733308488}

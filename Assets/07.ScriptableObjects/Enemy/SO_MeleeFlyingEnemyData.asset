@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0acbf576c0c037642807f92438aa2cd4, type: 3}
   m_Name: SO_MeleeFlyingEnemyData
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
-  _maxHp: 100
+  _maxHp: 120
   _moveSpeed: 3
   _dieTime: 0
-  _meleeAttackDamage: 10
+  _meleeAttackDamage: 15
   _chargeSpeed: 7
   _knockbackForce: 3
   _attackDetectRange: 7

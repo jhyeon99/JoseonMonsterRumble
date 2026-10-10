@@ -7,8 +7,9 @@ using UnityEngine;
 /// - 방울은 천천히 계속 올라가다 끝 높이에서 사라짐. 터트리면 올챙이가 나옴 (3타로 날려 보스에게 기믹 데미지)
 /// - 패턴 중 보스는 제자리에 있고, 직접 공격은 받지 않음 (올챙이 기믹 데미지만 들어감)
 /// - 최대 시간이 지나거나, 패턴 중 깎인 체력이 최대 체력의 일정 비율 이상이면 종료. 종료 시 방울 / 올챙이 모두 제거
-/// - 애니메이션 길이는 패턴 공통의 Duration Override로 조절. 그 시간이 지나면 대기(Idle) 애니메이션으로 돌아감
-///   (패턴 자체는 종료 조건까지 계속, 판정 시작 / 끝 비율은 사용하지 않음)
+/// - 반복 클립(angry_loop)이 있으면 패턴이 끝날 때까지 반복 재생하고, 끝나면 종료 트리거(angryEnd)로 마무리 애니메이션 후 종료
+///   반복 클립이 없으면 패턴 길이(Duration Override)가 지나면 대기(Idle) 상태로 돌아감
+///   (판정 시작 / 끝 비율은 사용하지 않음)
 /// </summary>
 public class BossSummonPattern : BossPattern
 {
@@ -25,7 +26,7 @@ public class BossSummonPattern : BossPattern
     [SerializeField]
     private BossPoisonBubble _bubblePrefab;
 
-    [Tooltip("첫 방울이 올라오는 지점 (애니메이션 길이 대비 비율)")]
+    [Tooltip("반복 클립이 없을 때: 첫 방울이 올라오는 지점 (애니메이션 길이 대비 비율). 반복 클립이 있으면 반복 시작 + Spawn Delay After Loop")]
     [SerializeField, Range(0f, 1f)]
     private float _spawnRatio = 0.6f;
 
@@ -66,8 +67,21 @@ public class BossSummonPattern : BossPattern
     [SerializeField, Range(0f, 1f)]
     private float _endDamageRatio = 0.15f;
 
+    [Header("애니메이션 반복 (angry 유지)")]
+    [Tooltip("패턴이 끝날 때까지 반복할 클립 (angry_loop). 비우면 이어지는 클립 중 반복(Loop Time) 클립을 자동으로 사용")]
+    [SerializeField]
+    private AnimationClip _loopClip;
+
+    [Tooltip("패턴이 끝날 때 반복을 끝내는 애니메이터 트리거 (angry_loop → angry_end)")]
+    [SerializeField]
+    private string _loopEndTrigger = "angryEnd";
+
+    [Tooltip("반복 클립이 재생되기 시작한 뒤 첫 방울이 올라오기까지 (초)")]
+    [SerializeField, Min(0f)]
+    private float _spawnDelayAfterLoop = 0f;
+
     [Header("보스")]
-    [Tooltip("angry 애니메이션(패턴 길이)이 끝나면 재생할 애니메이터 상태 이름")]
+    [Tooltip("반복 클립이 없을 때: 패턴 길이가 지나면 재생할 애니메이터 상태 이름")]
     [SerializeField]
     private string _idleState = "Idle";
 
@@ -172,7 +186,70 @@ public class BossSummonPattern : BossPattern
         _startHp = Boss.Health.CurrentHp;
     }
 
+    private AnimationClip LoopClip => _loopClip != null ? _loopClip : FindLoopingFollowingClip();
+
+    /// <summary>반복 클립으로 유지하면 패턴 길이를 기다리지 않음 (종료 조건으로 끝을 판단)</summary>
+    protected override bool WaitForDurationAfterExecute => LoopClip == null;
+
     protected override IEnumerator Execute()
+    {
+        AnimationClip loopClip = LoopClip;
+        if (loopClip != null && Boss.HasAnimator)
+        {
+            yield return ExecuteWithLoop(loopClip);
+            yield break;
+        }
+
+        yield return ExecuteWithoutLoop();
+    }
+
+    /// <summary>angry_start → angry_loop(종료 조건까지 유지) → angryEnd → angry_end → 종료</summary>
+    private IEnumerator ExecuteWithLoop(AnimationClip loopClip)
+    {
+        float startTime = Time.time;
+
+        // 반복 구간에 들어갈 때까지 대기 (안 들어가면 시작 클립 길이 정도 뒤 그대로 진행)
+        float waitUntil = Time.time + Mathf.Max(1f, Duration);
+        while (!Boss.IsPlayingClip(loopClip) && Time.time < waitUntil)
+        {
+            yield return null;
+        }
+
+        if (_spawnDelayAfterLoop > 0f)
+        {
+            yield return new WaitForSeconds(_spawnDelayAfterLoop);
+        }
+
+        float nextWave = Time.time;
+        while (!ShouldEnd(startTime))
+        {
+            if (Time.time >= nextWave)
+            {
+                SpawnWave();
+                nextWave = Time.time + _waveInterval;
+            }
+
+            yield return null;
+        }
+
+        // 반복 끝 → 마무리 애니메이션이 끝날 때까지 대기 (이후 애니메이터 전이로 Idle)
+        Boss.SetTrigger(_loopEndTrigger);
+
+        float endTimeout = Time.time + 3f;
+        while (Boss.IsPlayingClip(loopClip) && Time.time < endTimeout)
+        {
+            yield return null;
+        }
+
+        while (IsPlayingPatternClip() && Time.time < endTimeout)
+        {
+            yield return null;
+        }
+
+        Boss.ResetTrigger(_loopEndTrigger);
+    }
+
+    private IEnumerator ExecuteWithoutLoop()
     {
         float startTime = Time.time;
 

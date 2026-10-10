@@ -1,9 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class KnockbackState : EnemyState
 {
     private const int FirstComboStep = 1;
     private const int SecondComboStep = 2;
+    private const int ThirdComboStep = 3;
 
     private readonly Enemy _enemy;
     private readonly HitData _hitData;
@@ -16,15 +17,18 @@ public class KnockbackState : EnemyState
     {
         _enemy = enemy;
         _hitData = hitData;
-        _isHorizontalOnly = hitData.IsTalisman || hitData.ComboStep == FirstComboStep || hitData.ComboStep == SecondComboStep;
+        _isHorizontalOnly = hitData.IsTalisman || hitData.ComboStep == FirstComboStep ||
+            hitData.ComboStep == SecondComboStep || hitData.IsReflectedProjectile;
     }
 
     public override void Enter()
     {
-        Debug.Log("적 넉백!");
         _enemy.MoveType.ResetLightKnockback();
         _enemy.Combat.StopAttack();
         _enemy.MoveType.StopMove();
+        _enemy.Animation.SetRunning(false);
+        _enemy.Animation.ResetAttackTrigger();
+        _enemy.Animation.SetKnockback(!_isHorizontalOnly && _enemy.MoveType is EnemyGroundMove);
         // AddForce(Impulse)는 질량에 따라 튀는 높이가 달라지고 연타 시 속도가 누적되므로 직접 대입
         float verticalVelocity = _hitData.IsTalisman
             ? _enemy.EnemyRb.linearVelocity.y
@@ -32,7 +36,7 @@ public class KnockbackState : EnemyState
         Vector2 knockbackVelocity = Vector2.up * verticalVelocity;
         knockbackVelocity.x = Mathf.Sign(_hitData.AttackDirection.x) * _hitData.KnockbackForce;
 
-        _enemy.EnemyRb.linearVelocity = knockbackVelocity;
+        _enemy.EnemyRb.linearVelocity = _enemy.MoveType.CalculateSafeKnockbackVelocity(knockbackVelocity);
         _minKnockbackTimer = _hitData.IsTalisman ? 0f : MinKnockbackDuration;
     }
 
@@ -53,7 +57,9 @@ public class KnockbackState : EnemyState
         if (!_enemy.MoveType.IsKnockbackFinished(_isHorizontalOnly)) return;
 
         // 짧은 밀림이 끝나도 피격 모션을 새 공격으로 끊지 않는다.
-        if (_hitData.IsTalisman && _enemy.Animation.IsPlayingHit())
+        bool shouldStartSpacing = ShouldStartFlyingRangedSpacing();
+        bool shouldRecoverHit = _hitData.IsTalisman || shouldStartSpacing;
+        if (shouldRecoverHit && _enemy.Animation.IsPlayingHit())
         {
             return;
         }
@@ -65,11 +71,24 @@ public class KnockbackState : EnemyState
             return;
         }
 
-        _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
+        if (shouldStartSpacing)
+        {
+            _enemy.StateMachine.ChangeState(new FlyingRangedSpacingState(_enemy));
+        }
+        else
+        {
+            _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
+        }
+    }
+
+    private bool ShouldStartFlyingRangedSpacing()
+    {
+        return _hitData.ComboStep == ThirdComboStep && !_hitData.IsTalisman && !_hitData.IsReflectedProjectile &&
+            _enemy.Combat is EnemyRangedCombat && _enemy.MoveType is EnemyFlyingMove;
     }
 
     public override void Exit()
     {
-        Debug.Log("적 넉백 종료!");
+        _enemy.Animation.SetKnockback(false);
     }
 }
