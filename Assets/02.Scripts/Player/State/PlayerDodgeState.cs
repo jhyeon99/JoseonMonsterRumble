@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class PlayerDodgeState : PlayerBaseState
 {
+    private PlayerDodgeAfterimage _afterimage;
     private float _elapsedTime;
     private float _dodgeDirection;
     private Vector2 _startPosition;
@@ -42,6 +43,17 @@ public class PlayerDodgeState : PlayerBaseState
         float facingDirection = _player.transform.localScale.x > 0 ? 1f : -1f;
         _dodgeDirection = -facingDirection;
 
+        if (_afterimage == null)
+        {
+            _afterimage = _player.GetComponent<PlayerDodgeAfterimage>();
+            if (_afterimage == null)
+            {
+                _afterimage = _player.gameObject.AddComponent<PlayerDodgeAfterimage>();
+            }
+        }
+
+        _afterimage.Begin();
+
         _startPosition = _rigidbody2D.position;
         _rigidbody2D.linearVelocity = new Vector2(0f, _rigidbody2D.linearVelocity.y);
     }
@@ -51,6 +63,10 @@ public class PlayerDodgeState : PlayerBaseState
         base.Execute();
 
         _elapsedTime += Time.deltaTime;
+        if (_elapsedTime >= _player.Movement.DodgeDuration)
+        {
+            _afterimage.Stop();
+        }
 
         if (!_isInvincibleEnded && _elapsedTime >= _player.Movement.DodgeInvincibleDuration)
         {
@@ -130,6 +146,11 @@ public class PlayerDodgeState : PlayerBaseState
     public override void Exit()
     {
         base.Exit();
+
+        if (_afterimage != null)
+        {
+            _afterimage.Stop();
+        }
 
         _rigidbody2D.constraints = _originalConstraints;
         _player.Health.SetInvincible(false);

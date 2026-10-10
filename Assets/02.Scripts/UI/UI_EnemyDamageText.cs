@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -13,6 +13,15 @@ public class UI_EnemyDamageText : MonoBehaviour
     [SerializeField] private Vector2 _offset = new Vector2(10f, 30f);
     [SerializeField] private Color _textColor = Color.white;
     [SerializeField, Min(1f)] private float _fontSize = 56f;
+    [Header("데미지에 따른 크기")]
+    [Tooltip("이 데미지 이하에서는 기본 크기로 표시합니다.")]
+    [SerializeField, Min(0f)]
+    private float _baseSizeDamage = 10f;
+    [Tooltip("이 데미지 이상에서는 최대 배율로 표시합니다.")]
+    [SerializeField, Min(0.01f)]
+    private float _maxSizeDamage = 50f;
+    [SerializeField, Min(1f)] private float _maxSizeMultiplier = 2f;
+
     private Canvas _canvas;
     private RectTransform _container;
     private readonly List<TextMeshProUGUI> _activeTexts = new List<TextMeshProUGUI>();
@@ -67,6 +76,12 @@ public class UI_EnemyDamageText : MonoBehaviour
             text.rectTransform.sizeDelta = new Vector2(160f, 60f);
         }
 
+        float baseDamage = Mathf.Max(0f, _baseSizeDamage);
+        float maxDamage = Mathf.Max(baseDamage + 0.01f, _maxSizeDamage);
+        float sizeProgress = Mathf.InverseLerp(baseDamage, maxDamage, hitData.Damage);
+        float sizeMultiplier = Mathf.Lerp(1f, Mathf.Max(1f, _maxSizeMultiplier), sizeProgress);
+        // 영역도 함께 확대해 프리팹의 자동 크기 설정이나 잘림에 영향을 주지 않는다.
+        text.rectTransform.localScale *= sizeMultiplier;
         text.text = hitData.Damage.ToString("0.#");
         text.raycastTarget = false;
         text.gameObject.SetActive(true);

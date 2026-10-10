@@ -5,6 +5,9 @@ public class EnemyHealth : MonoBehaviour, IDamageable, IKillable
 {
     private const int FirstComboStep = 1;
     private const int SecondComboStep = 2;
+    [Header("받는 데미지 랜덤 편차")]
+    [Tooltip("기본값 2: 타격마다 -2, -1, 0, +1, +2 중 하나를 적용합니다. 0이면 비활성화합니다.")]
+    [SerializeField, Min(0)] private int _damageVariance = 2;
     private Enemy _enemy;
     private float _currentHp;
     public event Action OnDeath;
@@ -49,6 +52,14 @@ public class EnemyHealth : MonoBehaviour, IDamageable, IKillable
     public bool TakeDamage(HitData hitData)
     {
         if (_enemy.IsDefeated) return false;
+
+        if (hitData.Damage > 0f && _damageVariance > 0)
+        {
+            int variance = UnityEngine.Random.Range(-_damageVariance, _damageVariance + 1);
+            // 양수 타격은 최소 1을 유지하되, 원래 1 미만인 데미지는 증가시키지 않는다.
+            float minimumDamage = Mathf.Min(1f, hitData.Damage);
+            hitData.Damage = Mathf.Max(minimumDamage, hitData.Damage + variance);
+        }
 
         if (_shieldHp > 0f)
         {
