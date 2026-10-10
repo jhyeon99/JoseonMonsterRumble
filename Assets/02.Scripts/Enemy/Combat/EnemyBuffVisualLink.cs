@@ -26,6 +26,7 @@ public class EnemyBuffVisualLink : MonoBehaviour
     private Color _originalTargetColor = Color.white;
     private bool _hasTargetColor;
     private float _waveTimer;
+    private Material _runtimeLineMaterial;
 
     private void Awake()
     {
@@ -58,8 +59,8 @@ public class EnemyBuffVisualLink : MonoBehaviour
 
         if (_lineRenderer.sharedMaterial == null)
         {
-            var defaultSpriteMat = new Material(Shader.Find("Sprites/Default"));
-            _lineRenderer.material = defaultSpriteMat;
+            _runtimeLineMaterial = new Material(Shader.Find("Sprites/Default"));
+            _lineRenderer.sharedMaterial = _runtimeLineMaterial;
         }
 
         _lineRenderer.enabled = false;
@@ -218,5 +219,10 @@ public class EnemyBuffVisualLink : MonoBehaviour
     private void OnDestroy()
     {
         StopLink();
+        if (_runtimeLineMaterial != null)
+        {
+            Destroy(_runtimeLineMaterial);
+            _runtimeLineMaterial = null;
+        }
     }
 }
