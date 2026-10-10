@@ -237,7 +237,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75ce8593a8cb43cda55721514a842891, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::FinisherScreenImpact
-  _duration: 0.65
+  _duration: 0.25
   _shockwaveMaterial: {fileID: 2100000, guid: 472773933134478c830881baab2ff2ef, type: 2}
   _shockwaveSize: 1
 --- !u!114 &7028000000000000102
@@ -271,5 +271,5 @@ MonoBehaviour:
     Duration: 0.12
     TimeScale: 0.02
   _finisher:
-    Duration: 0.2
+    Duration: 0.32
     TimeScale: 0.02
