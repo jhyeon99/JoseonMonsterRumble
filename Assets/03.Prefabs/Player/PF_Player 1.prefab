@@ -506,8 +506,8 @@ MonoBehaviour:
   _blockOnlyFront: 0
   _blockKnockbackSpeed: 5
   _blockKnockbackDeceleration: 50
-  _parryWindow: 0.2
-  _parryCooldown: 0.2
+  _parryWindow: 0.1
+  _parryCooldown: 0.1
   _reflectSpeed: 15
   _reflectDamageMultiplier: 2
   _logResult: 1
@@ -531,9 +531,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   _useAttackHitTiming: 1
-  _impactFrameIndex: 3
   _impactDelay: 0.55
   _duration: 1.2
+  _impactFrameIndex: 3
   _launch:
     Duration: 1.5
     Height: 5
