@@ -26,9 +26,9 @@ public class BossStompPattern : BossPattern
     private float _edgeMargin = 2f;
 
     [Header("찍기")]
-    [Tooltip("연속으로 찍는 횟수. 바늘은 마지막 찍기 후에만 발사")]
-    [SerializeField, Min(1)]
-    private int _stompCount = 3;
+    [Tooltip("찍는 횟수별 가중치. 원소 순서 = 1번, 2번, 3번... 찍을 확률 (예: 0.3, 0.3, 0.4면 30% 1번 / 30% 2번 / 40% 3번). 최대 횟수 = 배열 크기. 바늘은 마지막 찍기 후에만 발사")]
+    [SerializeField]
+    private float[] _stompCountWeights = { 0.3f, 0.3f, 0.4f };
 
     [Tooltip("마지막이 아닌 찍기에서 다음 점프를 시작하는 지점 (애니메이션 길이 대비 비율). 판정 끝보다 앞이면 판정 끝 사용")]
     [SerializeField, Range(0f, 1f)]
@@ -88,7 +88,8 @@ public class BossStompPattern : BossPattern
 
     protected override IEnumerator Execute()
     {
-        int count = Mathf.Max(1, _stompCount);
+        int count = PickStompCount();
+        Boss.Log($"{PatternName}: {count}번 찍기");
         float nextStompRatio = Mathf.Max(_nextStompRatio, HitEndRatio);
 
         for (int i = 0; i < count; i++)
@@ -115,6 +116,47 @@ public class BossStompPattern : BossPattern
 
         // 마지막 찍기 후에만 좌우 바늘 (패링당했으면 그로기로 넘어가 여기까지 오지 않음)
         yield return FireNeedles();
+    }
+
+    /// <summary>가중치 배열로 이번에 찍을 횟수 결정 (1 ~ 배열 크기). 배열이 비었거나 합이 0이면 1번</summary>
+    private int PickStompCount()
+    {
+        if (_stompCountWeights == null || _stompCountWeights.Length == 0)
+        {
+            return 1;
+        }
+
+        float total = 0f;
+        foreach (float weight in _stompCountWeights)
+        {
+            total += Mathf.Max(0f, weight);
+        }
+
+        if (total <= 0f)
+        {
+            return 1;
+        }
+
+        float pick = Random.value * total;
+        for (int i = 0; i < _stompCountWeights.Length; i++)
+        {
+            pick -= Mathf.Max(0f, _stompCountWeights[i]);
+            if (pick <= 0f && _stompCountWeights[i] > 0f)
+            {
+                return i + 1;
+            }
+        }
+
+        // 부동소수점 오차로 끝까지 온 경우: 가중치가 있는 마지막 횟수
+        for (int i = _stompCountWeights.Length - 1; i >= 0; i--)
+        {
+            if (_stompCountWeights[i] > 0f)
+            {
+                return i + 1;
+            }
+        }
+
+        return 1;
     }
 
     /// <summary>점프 → 착지 → 찍기 판정 (판정 끝까지)</summary>
