@@ -2396,11 +2396,51 @@ PrefabInstance:
       propertyPath: _arena
       value: 
       objectReference: {fileID: 729448826}
+    - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _deathSoulBursts
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _deathSoulsPerBurst
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _deathSoulSpawnRadius
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _deathSoulTotalAmount
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _deathSoulBurstInterval
+      value: 0.16
+      objectReference: {fileID: 0}
+    - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _deathSoulSpeedMultiplier
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1330438052931922566, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _healthBar
       value: 
       objectReference: {fileID: 973774570}
+    - target: {fileID: 1330438052931922566, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _phase1MaxHp
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1330438052931922566, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _phase2MaxHp
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3711774888999376504, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: m_LocalPosition.x
