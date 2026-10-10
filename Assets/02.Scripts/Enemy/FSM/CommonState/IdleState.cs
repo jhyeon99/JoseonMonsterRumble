@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class IdleState : EnemyState
 {
@@ -11,7 +11,6 @@ public class IdleState : EnemyState
 
     public override void Enter()
     {
-        Debug.Log("Idle 시작");
         _enemy.DirectionLock.LockDirection();
         if (_enemy.Combat is EnemyMeleeCombat melee && melee.FlyingAttack != null)
         {
@@ -49,6 +48,5 @@ public class IdleState : EnemyState
 
     public override void Exit()
     {
-        Debug.Log("Idle 종료");
     }
 }

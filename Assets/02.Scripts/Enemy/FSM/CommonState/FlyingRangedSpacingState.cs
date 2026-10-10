@@ -56,7 +56,7 @@ public class FlyingRangedSpacingState : EnemyState
 
     private void ResumeCombat()
     {
-        if (_enemy.AirSensor == null || _enemy.AirSensor.HasLineOfSight(_enemy.Target.position))
+        if (_enemy.Target != null && (_enemy.AirSensor == null || _enemy.AirSensor.HasLineOfSight(_enemy.Target.position)))
         {
             _enemy.StateMachine.ChangeState(new AttackPrepareFlyingState(_enemy));
         }

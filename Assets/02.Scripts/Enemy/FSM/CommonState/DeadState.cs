@@ -18,7 +18,6 @@ public class DeadState : EnemyState
     public override void Enter()
     {
         _enemy.DirectionLock.LockDirection();
-        Debug.Log("적 사망!");
         _enemy.Animation.PlayDie();
         if (_fallingMove != null)
         {

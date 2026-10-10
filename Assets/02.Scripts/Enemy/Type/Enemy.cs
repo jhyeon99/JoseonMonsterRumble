@@ -1,5 +1,4 @@
 using System;
-using TMPro;
 using UnityEngine;
 
 public enum EnemyType
@@ -102,7 +101,10 @@ public abstract class Enemy : MonoBehaviour, IFinishable
 
     protected virtual void OnDisable()
     {
-        EnemyManager.Instance.RemoveEnemy(this);
+        if (EnemyManager.Instance != null)
+        {
+            EnemyManager.Instance.RemoveEnemy(this);
+        }
     }
 
     protected virtual void Awake()
@@ -124,8 +126,16 @@ public abstract class Enemy : MonoBehaviour, IFinishable
     protected virtual void Start()
     {
         _radius = _enemyCollider.bounds.extents.y;
-        EnemyManager.Instance.AddEnemy(this);
-        _target = GameObject.FindWithTag(Constants.Tags.Player).transform;
+        if (EnemyManager.Instance != null)
+        {
+            EnemyManager.Instance.AddEnemy(this);
+        }
+
+        var playerObj = GameObject.FindWithTag(Constants.Tags.Player);
+        if (playerObj != null)
+        {
+            _target = playerObj.transform;
+        }
     }
 
     public virtual void FindNewTarget()

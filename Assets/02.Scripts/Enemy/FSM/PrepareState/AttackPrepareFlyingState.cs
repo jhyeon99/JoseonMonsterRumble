@@ -12,7 +12,6 @@ public class AttackPrepareFlyingState : EnemyState
 
     public override void Enter()
     {
-        Debug.Log("적 공격 준비 시작");
         _attackPrepareTimer = _enemy.Data.AttackPrepareTime;
         _enemy.MoveType.StopMove();
         if (_enemy.Combat is EnemyMeleeCombat)
@@ -66,7 +65,6 @@ public class AttackPrepareFlyingState : EnemyState
         _attackPrepareTimer -= Time.deltaTime;
         if (_attackPrepareTimer <= 0)
         {
-            Debug.Log("공중 적 공격 준비");
             if (_enemy.Combat is EnemyMeleeCombat && _enemy.Target != null)
             {
                 _enemy.MoveType.StartQuadraticCharge(_enemy.Target.position);
@@ -83,7 +81,5 @@ public class AttackPrepareFlyingState : EnemyState
         {
             _enemy.MoveType.StopMove();
         }
-
-        Debug.Log("적 공격 준비 완료");
     }
 }

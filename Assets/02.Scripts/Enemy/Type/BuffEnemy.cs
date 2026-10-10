@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 
 public class BuffEnemy : Enemy
 {
@@ -59,21 +58,27 @@ public class BuffEnemy : Enemy
     protected override void Start()
     {
         base.Start();
-        EnemyManager.Instance.OnAllAttackersKilled += HandleAllAttackersKilled;
+        if (EnemyManager.Instance != null)
+        {
+            EnemyManager.Instance.OnAllAttackersKilled += HandleAllAttackersKilled;
+        }
         StateMachine.ChangeState(new FindEnemyState(this));
     }
 
     protected override void OnDisable()
     {
         base.OnDisable();
-        EnemyManager.Instance.OnAllAttackersKilled -= HandleAllAttackersKilled;
+        if (EnemyManager.Instance != null)
+        {
+            EnemyManager.Instance.OnAllAttackersKilled -= HandleAllAttackersKilled;
+        }
         UnsubscribeTarget();
     }
 
     [ContextMenu("Test FindNewTarget")]
     public override void FindNewTarget()
     {
-        if (!EnemyManager.Instance.HasAnyAttacker())
+        if (EnemyManager.Instance == null || !EnemyManager.Instance.HasAnyAttacker())
         {
             StartSelfDestruct();
             return;

@@ -18,7 +18,8 @@ public class GroundRangedSpacingState : EnemyState
 
     public override void Enter()
     {
-        _direction = _enemy.Target.position.x >= _enemy.transform.position.x ? -1f : 1f;
+        float targetX = _enemy.Target != null ? _enemy.Target.position.x : _enemy.transform.position.x;
+        _direction = targetX >= _enemy.transform.position.x ? -1f : 1f;
         _phase = MotionPhase.Fleeing;
         _enemy.DirectionLock.LockDirection();
     }

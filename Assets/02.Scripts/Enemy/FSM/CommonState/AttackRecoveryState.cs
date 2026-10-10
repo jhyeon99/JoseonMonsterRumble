@@ -21,7 +21,6 @@ public class AttackRecoveryState : EnemyState
 
     public override void Enter()
     {
-        Debug.Log("휴식 시작");
         _recoveryTimer = _enemy.Data.AttackRecoveryTime;
         if (_enemy.MoveType is EnemyGroundMove || _enemy.Data.HasStationaryAttackCycle)
         {
@@ -133,7 +132,6 @@ public class AttackRecoveryState : EnemyState
 
     public override void Exit()
     {
-        Debug.Log("휴식 종료");
         _enemy.MoveType.IsBackMove = false;
         _recoveryTimer = 0f;
         if (_enemy.MoveType is EnemyGroundMove)

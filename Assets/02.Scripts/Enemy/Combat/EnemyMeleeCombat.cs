@@ -34,6 +34,7 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
             Debug.LogError("EnemyMeleeCombat: 지상 공격 높이 확인에는 BoxCollider2D가 필요합니다.", this);
         }
         _attackCollider.enabled = false;
+        _currentDamage = Enemy != null && Enemy.Data != null ? Enemy.Data.MeleeAttackDamage : 0f;
     }
 
     public override void Attack()
@@ -109,8 +110,6 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
             }
 
             OnAttackHit?.Invoke();
-
-            Debug.Log($"플레이어에게 근접공격으로 {_currentDamage}만큼 피해를 입힘.");
         }
     }
 
@@ -120,7 +119,6 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
         StopAttack();
         Enemy.Animation.PlayParriedHit();
         Enemy.EnterGroggy(_groggyDuration);
-        Debug.Log($"{name}: 근접 공격이 패링당함 → 그로기 {_groggyDuration}초");
     }
 
     public override void StopAttack()
@@ -139,8 +137,8 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
         StopAttack();
     }
 
-    public void CalculateDamage(float percentage)
+    public void CalculateDamage(float additionalDamage)
     {
-        _currentDamage = Enemy.Data.MeleeAttackDamage * (1 + (percentage / 100f));
+        _currentDamage = Enemy.Data.MeleeAttackDamage + additionalDamage;
     }
 }

@@ -14,7 +14,6 @@ public class EnemyProvokeState : EnemyState
 
     public override void Enter()
     {
-        Debug.Log("적 도발 상태 진입");
         _timer = ProvokeDuration;
 
         _enemy.MoveType.StopMove();
@@ -41,7 +40,6 @@ public class EnemyProvokeState : EnemyState
         _timer -= Time.deltaTime;
         if (_timer <= 0f)
         {
-            Debug.Log("도발 완료, 공격 상태로 즉시 전이");
             _enemy.StateMachine.ChangeState(AttackPrepareGroundState.CreateAttackEntryState(_enemy));
         }
     }
@@ -50,6 +48,5 @@ public class EnemyProvokeState : EnemyState
     {
         _enemy.Animation.ResetProvokeTrigger();
         _timer = 0f;
-        Debug.Log("적 도발 상태 종료");
     }
 }

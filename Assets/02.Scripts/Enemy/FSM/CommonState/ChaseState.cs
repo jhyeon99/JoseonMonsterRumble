@@ -16,7 +16,6 @@ public class ChaseState : EnemyState
 
     public override void Enter()
     {
-        Debug.Log("추적 시작");
         _exitMotion = ExitMotion.Stop;
         _enemy.DirectionLock.UnlockDirection();
         if (_enemy.Combat is EnemyMeleeCombat melee && melee.FlyingAttack != null)
@@ -141,7 +140,6 @@ public class ChaseState : EnemyState
     public override void Exit()
     {
         _lastSeenPosition = Vector2.zero;
-        Debug.Log("추적 종료");
         if (_exitMotion == ExitMotion.Stop)
         {
             _enemy.Animation.SetRunning(false);

@@ -487,12 +487,12 @@ MonoBehaviour:
   _muzzlePoint: {fileID: 3292567938427824021}
   _type: 1
   _burstChance: 1
-  _spreadChance: 0.2
-  _burstMinDistance: 8
+  _spreadChance: 0
+  _burstMinDistance: 7
   _burstInterval: 0.5
   _burstAttackClip: {fileID: 7400000, guid: e732d348f438ff64fac544cb12eb20e1, type: 2}
   _burstResumeFrame: 32
-  _spreadAngle: 15
+  _spreadAngle: 10
 --- !u!114 &4524897786918831374
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -557,9 +557,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMoveArea
   CenterOffset: {x: 0, y: 0}
-  AreaSize: {x: 12, y: 8}
+  AreaSize: {x: 13.6, y: 6.11}
   _useCustomDetectionArea: 1
-  _detectionAreaSize: {x: 18, y: 12}
+  _detectionAreaSize: {x: 21.8, y: 6.2}
   _chaseReleaseMargin: 2
   AreaColor: {r: 0, g: 1, b: 0, a: 0.3}
 --- !u!114 &-8952448662296909365
