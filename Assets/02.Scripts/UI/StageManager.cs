@@ -20,7 +20,7 @@ public sealed class StageManager : MonoBehaviour
 
     [Tooltip("사망 후 화면이 어두워지기 시작할 때까지 대기 (사망 모션을 보여주는 시간)")]
     [SerializeField, Min(0f)]
-    private float _deathDelay = 0.8f;
+    private float _deathDelay = 1.0f;
 
     [Tooltip("화면이 완전히 어두워진 뒤 씬을 다시 로드하기 전까지 유지하는 시간")]
     [SerializeField, Min(0f)]
@@ -235,16 +235,31 @@ public sealed class StageManager : MonoBehaviour
 
         if (_deathScreen != null)
         {
-            _deathScreen.SetCauseOfDeath($"{causeOfDeath}에 의해 사망");
-            yield return _deathScreen.FadeIn();
+            if (waitForDeath)
+            {
+                _deathScreen.SetCauseOfDeath(causeOfDeath);
+                yield return _deathScreen.FadeIn();
+                yield return _deathScreen.WaitForRestartInput();
+            }
         }
-
-        yield return new WaitForSecondsRealtime(_displayDuration);
+        else if (waitForDeath)
+        {
+            yield return new WaitForSecondsRealtime(_displayDuration);
+        }
 
         UnbindPlayerHealth();
 
         // 일시정지 / 히트스톱 중에 재시작해도 정상 속도로 시작
         Time.timeScale = 1f;
+
+        Coroutine loadingAnimCoroutine = null;
+        if (_deathScreen != null)
+        {
+            loadingAnimCoroutine = StartCoroutine(_deathScreen.PlayLoadingRoutine());
+        }
+
+        float minLoadingTime = _deathScreen != null ? _deathScreen.MinLoadingDuration : 3f;
+        float loadingStartTime = Time.realtimeSinceStartup;
 
         AsyncOperation loadOperation = SceneManager.LoadSceneAsync(
             sceneName,
@@ -264,9 +279,19 @@ public sealed class StageManager : MonoBehaviour
 
         yield return loadOperation;
 
+        while (Time.realtimeSinceStartup - loadingStartTime < minLoadingTime)
+        {
+            yield return null;
+        }
+
         if (_deathScreen != null)
         {
-            yield return _deathScreen.FadeOut();
+            if (loadingAnimCoroutine != null)
+            {
+                StopCoroutine(loadingAnimCoroutine);
+            }
+
+            yield return _deathScreen.FadeOutLoading();
         }
 
         _isRespawning = false;
