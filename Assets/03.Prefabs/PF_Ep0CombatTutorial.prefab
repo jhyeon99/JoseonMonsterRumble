@@ -51,6 +51,7 @@ MonoBehaviour:
   _startPoint: {fileID: 0}
   _prologue: {fileID: 0}
   _camera: {fileID: 0}
+  _beginAtLocation2Spawn: 1
   _encounterDistance: 2.8
   _snapEnemyToGround: 1
   _noticeDuration: 1.2
@@ -59,6 +60,8 @@ MonoBehaviour:
   _zoomDuration: 0.35
   _parrySuccessDuration: 0.25
   _hintOffset: {x: -220, y: 80}
+  _hintTextColor: {r: 0, g: 0, b: 0, a: 1}
+  _hintOutlineColor: {r: 1, g: 1, b: 1, a: 1}
   _panel: {fileID: 1201}
   _dialogue: {fileID: 1304}
   _instruction: {fileID: 1404}
@@ -67,7 +70,8 @@ MonoBehaviour:
   _keyImage: {fileID: 1504}
   _attackKeySprite: {fileID: 21300012, guid: 8ce7e7c466d746ed81978a9de9c5f59d, type: 3}
   _parryKeySprite: {fileID: 21300004, guid: 8ce7e7c466d746ed81978a9de9c5f59d, type: 3}
-  _encounterText: "헉스, 얜 뭐야?"
+  _encounterText: "요괴?"
+  _comboInstruction: ""
   _comboText: "일단 공격해보자."
   _parryText: "공격을 막아볼까?"
   _parryTimingText: "공격이 닿기 직전에 막아보자."
