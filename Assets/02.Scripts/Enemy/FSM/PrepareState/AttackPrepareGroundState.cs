@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class AttackPrepareGroundState : EnemyState
 {
@@ -24,7 +24,6 @@ public class AttackPrepareGroundState : EnemyState
 
     public override void Enter()
     {
-        Debug.Log("적 공격 준비 시작");
         bool isRanged = _enemy.Combat is EnemyRangedCombat;
         _phase = isRanged ? PreparationPhase.WaitingForIdle : PreparationPhase.Preparing;
         _attackPrepareTimer = isRanged ? _enemy.Data.RangedAttackIdleDuration : _enemy.Data.AttackPrepareTime;
@@ -53,7 +52,6 @@ public class AttackPrepareGroundState : EnemyState
         if (_attackPrepareTimer <= 0)
         {
             _phase = PreparationPhase.Committed;
-            Debug.Log("지상 적 공격 준비");
             _enemy.StateMachine.ChangeState(new AttackState(_enemy));
         }
     }
@@ -68,6 +66,5 @@ public class AttackPrepareGroundState : EnemyState
         }
         _attackPrepareTimer = 0f;
         _phase = PreparationPhase.Preparing;
-        Debug.Log("적 공격 준비 완료");
     }
 }

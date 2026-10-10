@@ -18,7 +18,6 @@ public class AttackState : EnemyState
 
     public override void Enter()
     {
-        Debug.Log("공격 시작");
         _enemy.MoveType.StopMove();
         _enemy.Animation.SetRunning(false);
         if (_enemy.MoveType is EnemyGroundMove groundMove && _enemy.Combat is EnemyRangedCombat)
@@ -117,7 +116,6 @@ public class AttackState : EnemyState
 
     public override void Exit()
     {
-        Debug.Log("공격 종료");
         if (_enemy.Combat is EnemyRangedCombat || (!(_enemy.MoveType is EnemyGroundMove) && !_enemy.Data.HasStationaryAttackCycle))
         {
             _enemy.DirectionLock.UnlockDirection();

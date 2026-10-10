@@ -41,7 +41,10 @@ public class BuffState : EnemyState
         switch (_buffData.BuffType)
         {
             case DokkebibulBuffType.Red_Attack:
-                float attackIncrease = _targetEnemy.Data.MeleeAttackDamage * (_buffData.AttackDamageMultiplier - 1f);
+                float baseDamage = _targetEnemy.Data.MeleeAttackDamage > 0f
+                    ? _targetEnemy.Data.MeleeAttackDamage
+                    : _enemy.Data.AttackBuffAmount;
+                float attackIncrease = baseDamage * (_buffData.AttackDamageMultiplier - 1f);
                 _targetEnemy.Combat.IncreaseDamage(Mathf.Max(attackIncrease, _enemy.Data.AttackBuffAmount));
                 break;
 
@@ -50,8 +53,11 @@ public class BuffState : EnemyState
                 break;
 
             case DokkebibulBuffType.Blue_GuardBreak:
+                float guardBaseDamage = _targetEnemy.Data.MeleeAttackDamage > 0f
+                    ? _targetEnemy.Data.MeleeAttackDamage
+                    : _enemy.Data.AttackBuffAmount;
                 _targetEnemy.Combat.SetExtraGuardGaugeCost(_buffData.ExtraGuardGaugeCost);
-                _targetEnemy.Combat.IncreaseDamage(_targetEnemy.Data.MeleeAttackDamage * 0.2f);
+                _targetEnemy.Combat.IncreaseDamage(guardBaseDamage * 0.2f);
                 break;
 
             case DokkebibulBuffType.Yellow_Shield:

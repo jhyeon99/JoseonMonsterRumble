@@ -66,7 +66,6 @@ public class EnemyHealth : MonoBehaviour, IDamageable, IKillable
 
         bool shouldKnockback = hitData.KnockbackForce > 0f && !_enemy.IsGroggy;
         _currentHp -= hitData.Damage;
-        Debug.Log($"현재 체력 {_currentHp}");
         GameEvents.TriggerEnemyHit(hitData);
 
         if (_currentHp <= 0f)

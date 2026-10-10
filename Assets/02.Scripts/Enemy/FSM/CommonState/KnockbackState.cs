@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class KnockbackState : EnemyState
 {
@@ -22,7 +22,6 @@ public class KnockbackState : EnemyState
 
     public override void Enter()
     {
-        Debug.Log("적 넉백!");
         _enemy.MoveType.ResetLightKnockback();
         _enemy.Combat.StopAttack();
         _enemy.MoveType.StopMove();
@@ -86,6 +85,5 @@ public class KnockbackState : EnemyState
 
     public override void Exit()
     {
-        Debug.Log("적 넉백 종료!");
     }
 }
