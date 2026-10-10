@@ -25,12 +25,24 @@ public class UI_HealthBar : MonoBehaviour
     [SerializeField] private float _currentRatio = 1f;
     [SerializeField] private float _ghostRatio = 1f;
 
+    [Header("피격 펀치 및 셰이크 설정")]
+    [SerializeField] private RectTransform _punchTarget;
+    [SerializeField, Range(1f, 1.3f)] private float _punchScale = 1.08f;
+    [SerializeField, Range(0f, 15f)] private float _punchShakeAmount = 5f;
+    [SerializeField, Min(0.05f)] private float _punchDuration = 0.15f;
+
+    private Coroutine _punchCoroutine;
+    private Vector3 _originalScale = Vector3.one;
+    private Vector2 _originalAnchoredPosition;
+    private bool _hasOriginalPunchState;
+
     private Coroutine _trailCoroutine;
     private float _maskFullWidth;
 
     private void Awake()
     {
         InitializeComponents();
+        InitializePunchTarget();
     }
 
     private void Start()
@@ -57,6 +69,7 @@ public class UI_HealthBar : MonoBehaviour
         UnsubscribeFromHealthChanged();
 
         StopTrailCoroutine();
+        StopPunch();
     }
 
     private void SubscribeToHealthChanged()
@@ -133,6 +146,7 @@ public class UI_HealthBar : MonoBehaviour
             // 데미지 피격
             UpdateMainMask(targetRatio);
             StartTrailCoroutine(ApplyDamageTrail(targetRatio));
+            PlayPunch();
         }
         else
         {
@@ -262,5 +276,79 @@ public class UI_HealthBar : MonoBehaviour
 
         float targetWidth = _maskFullWidth * ratio;
         mask.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, targetWidth);
+    }
+
+    private void InitializePunchTarget()
+    {
+        if (_punchTarget == null)
+        {
+            _punchTarget = GetComponent<RectTransform>();
+        }
+
+        if (_punchTarget != null)
+        {
+            _originalScale = _punchTarget.localScale;
+            _originalAnchoredPosition = _punchTarget.anchoredPosition;
+            _hasOriginalPunchState = true;
+        }
+    }
+
+    public void PlayPunch()
+    {
+        if (_punchTarget == null)
+        {
+            return;
+        }
+
+        if (_punchCoroutine != null)
+        {
+            StopCoroutine(_punchCoroutine);
+            RestorePunchState();
+        }
+
+        _punchCoroutine = StartCoroutine(AnimatePunch());
+    }
+
+    public void StopPunch()
+    {
+        if (_punchCoroutine != null)
+        {
+            StopCoroutine(_punchCoroutine);
+            _punchCoroutine = null;
+        }
+
+        RestorePunchState();
+    }
+
+    private void RestorePunchState()
+    {
+        if (_punchTarget != null && _hasOriginalPunchState)
+        {
+            _punchTarget.localScale = _originalScale;
+            _punchTarget.anchoredPosition = _originalAnchoredPosition;
+        }
+    }
+
+    private IEnumerator AnimatePunch()
+    {
+        float elapsed = 0f;
+
+        while (elapsed < _punchDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / _punchDuration);
+            float decay = 1f - t;
+
+            float currentScale = Mathf.Lerp(_punchScale, 1f, t);
+            _punchTarget.localScale = _originalScale * currentScale;
+
+            Vector2 shakeOffset = Random.insideUnitCircle * (_punchShakeAmount * decay);
+            _punchTarget.anchoredPosition = _originalAnchoredPosition + shakeOffset;
+
+            yield return null;
+        }
+
+        RestorePunchState();
+        _punchCoroutine = null;
     }
 }

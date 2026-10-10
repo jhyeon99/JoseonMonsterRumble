@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 3058435715441207292}
   - component: {fileID: 2559861560151184640}
   - component: {fileID: 1248506260812186181}
+  - component: {fileID: 7028000000000000101}
+  - component: {fileID: 7028000000000000102}
   m_Layer: 0
   m_Name: PF_Camera
   m_TagString: MainCamera
@@ -171,9 +173,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 045cc958ea9249bf9a349862e8ae82e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraShake
-  _duration: 0.1
+  _playerHitShake:
+    Duration: 0.1
+    Magnitude: 0.3
   _damageMultiplier: 0.02
-  _maxMagnitude: 0.3
   _enemyLightHitShake:
     Duration: 0.092
     Magnitude: 0.046
@@ -183,6 +186,31 @@ MonoBehaviour:
   _talismanHitShake:
     Duration: 0.05
     Magnitude: 0.015
+  _parryShake:
+    Duration: 0.12
+    Magnitude: 0.12
+  _parryZoom:
+    Amount: 0.06
+    InTime: 0.03
+    HoldTime: 0.1
+    OutTime: 0.25
+    FocusStrength: 0.15
+    MaxFocusDistance: 1.5
+  _finisherZoom:
+    Amount: 0.15
+    InTime: 0.035
+    HoldTime: 0.14
+    OutTime: 0.32
+    FocusStrength: 0.35
+    MaxFocusDistance: 2.5
+  _finisherKick:
+    Distance: 0.35
+    Duration: 0.32
+    PushRatio: 0.18
+  _finisherShake:
+    Duration: 0.12
+    Magnitude: 0.09
+  _verticalShakeRatio: 0.3
 --- !u!114 &1248506260812186181
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,3 +225,51 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxManager
   _targetCamera: {fileID: 2666010563660507785}
   _layers: []
+--- !u!114 &7028000000000000101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5113649265694187133}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75ce8593a8cb43cda55721514a842891, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::FinisherScreenImpact
+  _duration: 0.65
+  _shockwaveMaterial: {fileID: 2100000, guid: 472773933134478c830881baab2ff2ef, type: 2}
+  _shockwaveSize: 1
+--- !u!114 &7028000000000000102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5113649265694187133}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbab2cf8e56a4786a55961f9f78d24d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HitStop
+  _playerHit:
+    Duration: 0.08
+    TimeScale: 0.02
+  _playerHitDamageBonus: 0.005
+  _playerHitMaxDuration: 0.2
+  _enemyLightHit:
+    Duration: 0.035
+    TimeScale: 0.08
+  _enemyHeavyHit:
+    Duration: 0.075
+    TimeScale: 0.02
+  _talismanHit:
+    Duration: 0.025
+    TimeScale: 0.15
+  _talismanHitInterval: 0.15
+  _parry:
+    Duration: 0.12
+    TimeScale: 0.02
+  _finisher:
+    Duration: 0.2
+    TimeScale: 0.02
