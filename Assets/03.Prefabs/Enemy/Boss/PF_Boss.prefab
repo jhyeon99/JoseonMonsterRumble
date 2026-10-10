@@ -356,8 +356,6 @@ Transform:
   - {fileID: 2598448836683763758}
   - {fileID: 2286373942653099037}
   - {fileID: 4284407722315779401}
-  - {fileID: 1252533167004806700}
-  - {fileID: 2780830855148515869}
   - {fileID: 5341789162555310532}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -508,6 +506,7 @@ MonoBehaviour:
   _groggyEndClip: {fileID: 7400000, guid: 71d9b6b42d4147e43a819cabf376f361, type: 2}
   _groggyEndFallbackDuration: 0.5
   _howlTrigger: howling
+  _idleStateName: Boss_Idle
   _defeatTrigger: die
   _logState: 1
   _currentStateName: 
@@ -963,19 +962,28 @@ MonoBehaviour:
   _phase2HpRatios:
   - 0.7
   - 0.4
+  _summonPoint: {fileID: 0}
+  _jumpTrigger: jump
+  _jumpDuration: 0.8
+  _jumpHeight: 3
+  _delayAfterLanding: 0.2
+  _landingShake:
+    Duration: 0.2
+    Magnitude: 0.2
+  _returnPattern: {fileID: 4884170672072706667}
   _bubblePrefab: {fileID: 6839276842027270784, guid: 8b80df437139a2e47b3d265a00cb7a45,
     type: 3}
   _spawnRatio: 0.6
   _bubblesPerWave: 2
   _waveInterval: 3
-  _spawnLine: {fileID: 1252533167004806700}
+  _spawnLine: {fileID: 0}
   _spawnBelowFloor: 2
-  _despawnLine: {fileID: 2780830855148515869}
+  _despawnLine: {fileID: 0}
   _spawnXMargin: 1
   _minSpacing: 2
   _maxDuration: 60
   _endDamageRatio: 0.15
-  _loopClip: {fileID: 0}
+  _loopClip: {fileID: 7400000, guid: fa579bddf70022d4d847483975a86125, type: 2}
   _loopEndTrigger: angryEnd
   _spawnDelayAfterLoop: 0
   _idleState: Boss_Idle
@@ -1027,37 +1035,6 @@ MonoBehaviour:
     FlashDuration: 0.1
     PeakOpacity: 0.35
   _flashColor: {r: 1, g: 1, b: 1, a: 1}
---- !u!1 &1506781305571567215
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2780830855148515869}
-  m_Layer: 7
-  m_Name: DespawnBubbleLine
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2780830855148515869
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1506781305571567215}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 15, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3711774888999376504}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2615288417524523987
 GameObject:
   m_ObjectHideFlags: 0
@@ -1383,37 +1360,6 @@ MonoBehaviour:
     ParryWindowOverride: 0
     GuardGaugeCost: 0
     BlockInvincibleTime: 0
---- !u!1 &5234470148980255405
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1252533167004806700}
-  m_Layer: 7
-  m_Name: SpawnBubbleLine
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1252533167004806700
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5234470148980255405}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -1, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3711774888999376504}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5416191411500762054
 GameObject:
   m_ObjectHideFlags: 0
