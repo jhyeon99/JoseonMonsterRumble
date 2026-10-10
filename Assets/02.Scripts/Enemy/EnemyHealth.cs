@@ -80,7 +80,9 @@ public class EnemyHealth : MonoBehaviour, IDamageable, IKillable
         // 그로기 중에는 넉백으로 그로기가 풀리지 않게 데미지만 받음
         if (shouldKnockback)
         {
-            bool isLightComboHit = hitData.ComboStep == FirstComboStep || hitData.ComboStep == SecondComboStep;
+            bool isLightComboHit = hitData.ComboStep == FirstComboStep ||
+                hitData.ComboStep == SecondComboStep ||
+                hitData.IsReflectedProjectile;
             if (!isLightComboHit || !_enemy.MoveType.TryStartLightKnockback(hitData))
             {
                 _enemy.StateMachine.ChangeState(new KnockbackState(_enemy, hitData));

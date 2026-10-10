@@ -12,7 +12,7 @@ public abstract class EnemyMoveType : MonoBehaviour
 
     [Tooltip("넉백 속도를 초당 얼마나 줄일지. 속도가 거의 0이 되면 넉백 종료")]
     [SerializeField, Min(0.01f)]
-    private float _knockbackDeceleration = 20f;
+    private float _knockbackDeceleration = 12f;
 
     [Tooltip("1·2타의 실제 밀림 배율. 0이면 기존 넉백 처리를 사용")]
     [SerializeField, Min(0f)] private float _lightHitKnockbackMultiplier;

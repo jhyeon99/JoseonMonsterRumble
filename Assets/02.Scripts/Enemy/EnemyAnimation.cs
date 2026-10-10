@@ -16,6 +16,7 @@ public class EnemyAnimation : MonoBehaviour
     private static readonly int HitTagHash = Animator.StringToHash("Hit");
     private static readonly int AttackTagHash = Animator.StringToHash("Attack");
     private static readonly int FlightSpeedHash = Animator.StringToHash("flightSpeed");
+    private static readonly int KnockbackHash = Animator.StringToHash("isKnockedBack");
     private static readonly int DieTagHash = Animator.StringToHash("Die");
     private static readonly int WalkStartTagHash = Animator.StringToHash("WalkStart");
     private static readonly int WalkLoopTagHash = Animator.StringToHash("WalkLoop");
@@ -34,6 +35,22 @@ public class EnemyAnimation : MonoBehaviour
     // 그로기 모션이 애니메이터에 추가되기 전에도 경고 없이 동작하도록 파라미터 유무를 한 번만 확인
     private bool? _hasGroggyParam;
     private bool? _hasFlightSpeedParam;
+    private bool? _hasKnockbackParam;
+
+    public void SetKnockback(bool isKnockedBack)
+    {
+        if (_animator == null)
+        {
+            return;
+        }
+
+        // 공중 피격 자세를 유지하는 컨트롤러만 이 파라미터를 사용한다.
+        _hasKnockbackParam ??= HasParameter(KnockbackHash);
+        if (_hasKnockbackParam.Value)
+        {
+            _animator.SetBool(KnockbackHash, isKnockedBack);
+        }
+    }
 
     public void SetFlightAnimationSpeed(float speed)
     {

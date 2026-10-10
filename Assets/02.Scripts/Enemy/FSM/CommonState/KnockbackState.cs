@@ -17,7 +17,8 @@ public class KnockbackState : EnemyState
     {
         _enemy = enemy;
         _hitData = hitData;
-        _isHorizontalOnly = hitData.IsTalisman || hitData.ComboStep == FirstComboStep || hitData.ComboStep == SecondComboStep;
+        _isHorizontalOnly = hitData.IsTalisman || hitData.ComboStep == FirstComboStep ||
+            hitData.ComboStep == SecondComboStep || hitData.IsReflectedProjectile;
     }
 
     public override void Enter()
@@ -25,6 +26,9 @@ public class KnockbackState : EnemyState
         _enemy.MoveType.ResetLightKnockback();
         _enemy.Combat.StopAttack();
         _enemy.MoveType.StopMove();
+        _enemy.Animation.SetRunning(false);
+        _enemy.Animation.ResetAttackTrigger();
+        _enemy.Animation.SetKnockback(!_isHorizontalOnly && _enemy.MoveType is EnemyGroundMove);
         // AddForce(Impulse)는 질량에 따라 튀는 높이가 달라지고 연타 시 속도가 누적되므로 직접 대입
         float verticalVelocity = _hitData.IsTalisman
             ? _enemy.EnemyRb.linearVelocity.y
@@ -85,5 +89,6 @@ public class KnockbackState : EnemyState
 
     public override void Exit()
     {
+        _enemy.Animation.SetKnockback(false);
     }
 }
