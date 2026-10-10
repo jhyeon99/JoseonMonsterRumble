@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -311,6 +311,21 @@ public class PrologueIntroController : MonoBehaviour
 
         // Swap only while completely covered. Keep the player's authored Z depth.
         Phase = "Switching";
+        TransferToLocation2();
+
+        // Allow new renderers and camera extensions to update beneath the black screen.
+        yield return null;
+        Phase = "Revealing";
+        yield return FadeTo(0f, _revealLocation2);
+        UnlockPlayer();
+        _fade.blocksRaycasts = false;
+        RestoreGameplayUi();
+        Phase = "Complete";
+        yield return WaitForNextSceneExit();
+    }
+
+    private void TransferToLocation2()
+    {
         SetActive(_background1, false);
         SetActive(_environment1, false);
         Vector3 position = _location2Spawn.position;
@@ -333,15 +348,6 @@ public class PrologueIntroController : MonoBehaviour
         foreach (ParallaxManager parallax in _destinationParallax)
             parallax.RebaseAtCurrentPosition();
 
-        // Allow new renderers and camera extensions to update beneath the black screen.
-        yield return null;
-        Phase = "Revealing";
-        yield return FadeTo(0f, _revealLocation2);
-        UnlockPlayer();
-        _fade.blocksRaycasts = false;
-        RestoreGameplayUi();
-        Phase = "Complete";
-        yield return WaitForNextSceneExit();
     }
 
     private IEnumerator WaitForNextSceneExit()
@@ -451,7 +457,7 @@ public class PrologueIntroController : MonoBehaviour
     }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-    private void SkipOpeningForTesting()
+    private void SkipToLocation2ForTesting()
     {
         StopAllCoroutines();
         if (Phase == "Preparing")
@@ -472,9 +478,14 @@ public class PrologueIntroController : MonoBehaviour
         _input.ClearInputState();
         UnlockPlayer();
         RestoreGameplayUi();
-        _camera.Reset(true, true, true);
+        _cinematics.Stop();
+        _player.RangedAttack?.CancelCharge();
+        _player.StateMachine.ChangeState(_player.IdleState);
+        TransferToLocation2();
         IsIntroComplete = true;
-        StartCoroutine(ContinueAfterOpening());
+        IsJigeInspected = true;
+        Phase = "Complete";
+        StartCoroutine(WaitForNextSceneExit());
     }
 #endif
 
@@ -529,11 +540,10 @@ public class PrologueIntroController : MonoBehaviour
     private void Update()
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        bool isOpening = Phase == "Preparing" || Phase == "Scream" || Phase == "What" ||
-            Phase == "ExitChoice" || Phase == "DoorOpening";
-        if (_ready && isOpening && (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0)))
+        if (_ready && Phase != "Complete" &&
+            (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0)))
         {
-            SkipOpeningForTesting();
+            SkipToLocation2ForTesting();
             return;
         }
 #endif

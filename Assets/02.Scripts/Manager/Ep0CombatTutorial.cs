@@ -104,6 +104,14 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     private void Awake()
     {
+        // Direct scene play bypasses the bootstrap scene. Enemy.Start needs this manager
+        // before it can register itself and bind the player used by native attack hit data.
+        if (EnemyManager.Instance == null && FindFirstObjectByType<EnemyManager>() == null)
+        {
+            var managerObject = new GameObject("EnemyManager");
+            managerObject.AddComponent<EnemyManager>();
+        }
+
         // Hide the authored legacy panel even if a missing reference prevents initialization.
         if (_panel != null) _panel.SetActive(false);
     }
