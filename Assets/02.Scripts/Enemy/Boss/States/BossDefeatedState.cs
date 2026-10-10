@@ -185,9 +185,34 @@ public class BossDefeatedState : BossState
 
     #endregion
 
+    /// <summary>
+    /// 날아간 끝 지점(날리지 않으면 몸 중심)에서 일반 적보다 훨씬 많은 소울을 여러 번에 나눠 뿌림.
+    /// 보스는 바로 꺼지므로 ItemPool이 이어서 진행
+    /// </summary>
+    private void SpawnDeathSouls()
+    {
+        if (_boss.DeathSoulsPerBurst <= 0 || ItemPool.Instance == null)
+        {
+            return;
+        }
+
+        Vector2 position = _launch ? (Vector2)_currentCenter : _boss.CenterPosition;
+        ItemPool.Instance.SpawnDeathSoulBursts(
+            position,
+            _boss.DeathSoulsPerBurst,
+            _boss.DeathSoulBursts,
+            _boss.DeathSoulBurstInterval,
+            _boss.DeathSoulTotalAmount,
+            _boss.DeathSoulSpeedMultiplier,
+            _boss.DeathSoulSpawnRadius
+        );
+    }
+
     private void Finish()
     {
         _isFinished = true;
+        SpawnDeathSouls();
+        _boss.NotifyDefeatFinished();
 
         if (_boss.DisableOnDefeat)
         {

@@ -9,7 +9,17 @@ public abstract class Projectile : MonoBehaviour, IParryable
     private string _attackName;
 
     [SerializeField] private ProjectileType _type;
+    [Tooltip("이 시간이 지나면 풀로 돌아감 (화면 밖 판정이 안 될 때를 위한 최대 수명)")]
     [SerializeField] private float _returnPoolTimer = 5f;
+
+    [Header("화면 밖 정리")]
+    [Tooltip("카메라 화면 좌 / 우 / 아래로 이 거리(월드)만큼 벗어나면 풀로 돌아감. 0 이하면 사용 안 함")]
+    [SerializeField]
+    private float _offscreenMargin = 2f;
+
+    [Tooltip("위쪽은 이만큼 더 여유 (곡사 투사체가 화면 위로 솟았다 떨어지는 높이)")]
+    [SerializeField, Min(0f)]
+    private float _offscreenTopExtra = 5f;
 
     [Header("가드 / 패링")]
 
@@ -26,6 +36,8 @@ public abstract class Projectile : MonoBehaviour, IParryable
     private bool _ignoreGroundWhenReturning = true;
 
     private float _returnPoolTime = 0f;
+    private static Camera _camera;
+    private Vector3 _lastPosition;
     public ProjectileType Type => _type;
     protected float Speed { get; private set; }
     protected Vector2 MuzzlePosition { get; private set; }
@@ -69,6 +81,54 @@ public abstract class Projectile : MonoBehaviour, IParryable
         }
 
         ReturnProjectile();
+        ReturnIfOffscreen();
+    }
+
+    /// <summary>빗나가서 화면 밖으로 충분히 벗어나면 풀로 돌아감</summary>
+    private void ReturnIfOffscreen()
+    {
+        if (_offscreenMargin <= 0f || !gameObject.activeSelf)
+        {
+            return;
+        }
+
+        // 쏜 적에게 되돌아가는 반사 투사체는 쏜 적이 화면 밖에 있을 수 있으므로 제외
+        if (_isReflected && IsReturningToShooter())
+        {
+            return;
+        }
+
+        if (_camera == null || !_camera.isActiveAndEnabled)
+        {
+            _camera = Camera.main;
+            if (_camera == null || !_camera.orthographic)
+            {
+                return;
+            }
+        }
+
+        Vector3 cameraPosition = _camera.transform.position;
+        float halfHeight = _camera.orthographicSize;
+        float halfWidth = halfHeight * _camera.aspect;
+        Vector3 position = transform.position;
+
+        bool outside =
+            position.x < cameraPosition.x - halfWidth - _offscreenMargin ||
+            position.x > cameraPosition.x + halfWidth + _offscreenMargin ||
+            position.y < cameraPosition.y - halfHeight - _offscreenMargin ||
+            position.y > cameraPosition.y + halfHeight + _offscreenMargin + _offscreenTopExtra;
+
+        // 화면 밖에서 쏴서 화면 안으로 들어오는 중이면 유지 (멀어지는 중일 때만 정리)
+        Vector3 moved = position - _lastPosition;
+        Vector3 fromCamera = position - cameraPosition;
+        bool movingAway = (moved.x * fromCamera.x) + (moved.y * fromCamera.y) > 0f;
+        _lastPosition = position;
+
+        if (outside && movingAway)
+        {
+            gameObject.SetActive(false);
+            _returnPoolTime = _returnPoolTimer;
+        }
     }
 
     protected void ReturnProjectile()
@@ -95,6 +155,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
         _t = 0f;
         _isLaunching = true;
         _returnPoolTime = _returnPoolTimer;
+        _lastPosition = transform.position;
         IncreaseDamage(damageIncreaseValue);
         ResetReflect();
     }

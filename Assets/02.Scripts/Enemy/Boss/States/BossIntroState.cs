@@ -20,7 +20,8 @@ public class BossIntroState : BossState
     public override void Update()
     {
         _timer -= Time.deltaTime;
-        if (_timer <= 0f)
+        // 등장 연출(BossCinematicDirector)이 끝날 때까지 대기
+        if (_timer <= 0f && !_boss.HoldIntro)
         {
             _boss.GoIdle();
         }

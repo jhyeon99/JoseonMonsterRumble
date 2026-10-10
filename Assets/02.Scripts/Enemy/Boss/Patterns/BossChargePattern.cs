@@ -46,6 +46,12 @@ public class BossChargePattern : BossPattern
     // 반복 클립을 쓰면 길이가 정해지지 않으므로 애니메이션 종료로 패턴 끝을 판단
     protected override bool WaitForDurationAfterExecute => _loopClip == null;
 
+    // 돌진 판정이 몸통과 겹치므로 기본으로 몸통 접촉 데미지 끔 (기존 컴포넌트에도 적용)
+    public BossChargePattern()
+    {
+        _disableContactDamage = true;
+    }
+
     private void Reset()
     {
         SetDefaults("돌진", BossPhaseMask.Phase2, BossFloorMask.Floor1 | BossFloorMask.Floor2);
