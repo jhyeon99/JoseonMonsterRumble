@@ -301,6 +301,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
             _data.KnockbackForce,
             hitPoint,
             _reflectDirection,
+            comboStep: 2,
             attackName: "반사된 투사체",
             isReflectedProjectile: true
         );

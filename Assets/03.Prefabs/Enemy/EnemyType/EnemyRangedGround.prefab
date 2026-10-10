@@ -567,7 +567,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyGroundMove
   IsBackMove: 0
-  _knockbackDeceleration: 20
+  _knockbackDeceleration: 12
   _lightHitKnockbackMultiplier: 1
   _groundSensor: {fileID: 3213173035042365351}
   _walkEndClip: {fileID: 7400000, guid: a5be27647b8bc43419fa193a0672513e, type: 2}
