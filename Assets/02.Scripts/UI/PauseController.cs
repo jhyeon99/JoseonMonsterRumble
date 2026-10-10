@@ -3,6 +3,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+[DefaultExecutionOrder(-200)]
 public class PauseController : MonoBehaviour
 {
     [SerializeField] private GameObject _pauseOverlay;
@@ -18,6 +19,8 @@ public class PauseController : MonoBehaviour
     [SerializeField, ReadOnly] private bool _isPaused;
 
     public static bool IsPaused { get; private set; }
+    private static int _pauseTransitionFrame = -1;
+    public static bool IsGameplayInputBlocked => IsPaused || Time.frameCount == _pauseTransitionFrame;
 
     [SerializeField, ReadOnly] private bool _isSettingsAvailable;
     private CanvasGroup _pauseMenuCanvasGroup;
@@ -32,6 +35,7 @@ public class PauseController : MonoBehaviour
 
         _isPaused = false;
         IsPaused = false;
+        _pauseTransitionFrame = -1;
         if (_pauseMenuPanel != null)
         {
             _pauseMenuCanvasGroup = _pauseMenuPanel.GetComponent<CanvasGroup>();
@@ -198,6 +202,7 @@ public class PauseController : MonoBehaviour
 
         _isPaused = isPaused;
         IsPaused = isPaused;
+        _pauseTransitionFrame = Time.frameCount;
         GameCursorController.SetPauseVisible(isPaused);
 
         if (isPaused)
