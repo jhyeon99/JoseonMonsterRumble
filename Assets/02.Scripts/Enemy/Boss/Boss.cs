@@ -143,6 +143,9 @@ public class Boss : MonoBehaviour, IFinishable
     public string BossName => _bossName;
     public BossArena Arena => _arena;
     public BossHealth Health => _health;
+
+    /// <summary>패링 그로기 공격 직전 반짝임 (없으면 null)</summary>
+    public ParryWarningFlash ParryWarning { get; private set; }
     public Transform Player => _player;
     public int Phase => _phase;
     public BossState CurrentState => _stateMachine.CurrentState;
@@ -213,6 +216,7 @@ public class Boss : MonoBehaviour, IFinishable
     private void Awake()
     {
         _health = GetComponent<BossHealth>();
+        ParryWarning = GetComponentInChildren<ParryWarningFlash>(true);
         _animator = GetComponentInChildren<Animator>();
         _body = GetComponent<Rigidbody2D>();
         _bodyCollider = GetComponent<Collider2D>();
