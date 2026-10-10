@@ -27,6 +27,9 @@ public sealed class EnemyHitFeedback : MonoBehaviour
 
     [Tooltip("보스에 쓸 때는 Health 대신 여기에 BossHealth 연결 (둘 중 하나만 있으면 됨)")]
     [SerializeField] private BossHealth _bossHealth;
+
+    // Health / Boss Health가 둘 다 비어 있으면 부모에서 찾는 피격 신호 (올챙이, 독 방울 등)
+    private IHitFeedbackSource _feedbackSource;
     [SerializeField] private SpriteRenderer _sourceRenderer;
     [SerializeField] private SpriteRenderer _flashRenderer;
 
@@ -45,7 +48,12 @@ public sealed class EnemyHitFeedback : MonoBehaviour
 
     private void Awake()
     {
-        if ((_health == null && _bossHealth == null) || _sourceRenderer == null || _flashRenderer == null ||
+        if (_health == null && _bossHealth == null)
+        {
+            _feedbackSource = GetComponentInParent<IHitFeedbackSource>();
+        }
+
+        if ((_health == null && _bossHealth == null && _feedbackSource == null) || _sourceRenderer == null || _flashRenderer == null ||
             _sourceRenderer.sprite == null || _flashRenderer.sharedMaterial == null)
         {
             Debug.LogError($"{name}: EnemyHitFeedback의 Health, Renderer, Sprite 또는 Material 참조가 없습니다.", this);
@@ -68,6 +76,11 @@ public sealed class EnemyHitFeedback : MonoBehaviour
         {
             _bossHealth.OnDamaged += HandleHit;
         }
+
+        if (_feedbackSource != null)
+        {
+            _feedbackSource.OnHitFeedback += HandleHit;
+        }
     }
 
     private void OnDisable()
@@ -81,6 +94,11 @@ public sealed class EnemyHitFeedback : MonoBehaviour
         if (_bossHealth != null)
         {
             _bossHealth.OnDamaged -= HandleHit;
+        }
+
+        if (_feedbackSource != null)
+        {
+            _feedbackSource.OnHitFeedback -= HandleHit;
         }
 
         ResetFeedback();

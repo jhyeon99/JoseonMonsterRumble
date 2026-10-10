@@ -8,7 +8,7 @@ using UnityEngine;
 /// 레이어는 Enemy (플레이어 근접 공격에 맞도록), Rigidbody2D(Dynamic) + 콜라이더 필요.
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
-public class BossBaby : MonoBehaviour, IDamageable
+public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
 {
     [Header("체력")]
     [SerializeField, Min(1f)]
@@ -102,6 +102,9 @@ public class BossBaby : MonoBehaviour, IDamageable
     private bool _isLaunched;
     private bool _isDead;
     private float _invincibleUntil;
+
+    /// <summary>맞았을 때 (EnemyHitFeedback 피격 연출용)</summary>
+    public event System.Action<HitData> OnHitFeedback;
 
     public void Initialize(Boss boss)
     {
@@ -282,6 +285,7 @@ public class BossBaby : MonoBehaviour, IDamageable
         }
 
         _currentHp = Mathf.Max(0f, _currentHp - hitData.Damage);
+        OnHitFeedback?.Invoke(hitData);
 
         // 3타는 죽든 말든 보스에게 날아감
         if (hitData.ComboStep == _launchComboStep)
