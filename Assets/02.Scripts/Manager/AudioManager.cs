@@ -160,19 +160,25 @@ public class AudioManager : MonoBehaviour
 
     public void PlaySfx(AudioClip clip, float volumeScale = 1f, float gain = 1f)
     {
+        PlaySfxTracked(clip, volumeScale, gain);
+    }
+
+    public AudioSource PlaySfxTracked(AudioClip clip, float volumeScale = 1f, float gain = 1f)
+    {
         if (clip == null || _isSfxMuted)
         {
-            return;
+            return null;
         }
 
         AudioSource source = GetNextSfxSource();
         if (source == null)
         {
-            return;
+            return null;
         }
 
         float finalVolume = Mathf.Clamp01(volumeScale) * _sfxVolume * Mathf.Clamp(gain, 0f, 3f);
         source.PlayOneShot(clip, finalVolume);
+        return source;
     }
 
     public void PlayButtonHover()

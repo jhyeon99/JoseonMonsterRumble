@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -33,6 +33,32 @@ public class PrologueIntroController : MonoBehaviour
     [SerializeField] private AudioClip _jigeBreakClip;
     [SerializeField] private AudioClip _doorClip;
 
+    [Header("Movement and jump tutorial")]
+    [Tooltip("동작 완료까지 표시된 시간의 배율입니다. 2면 완료 후 같은 시간만큼 더 표시합니다.")]
+    [SerializeField, Min(1f)] private float _controlHintDurationMultiplier = 2f;
+    [SerializeField] private Vector2 _controlHintOffset = new Vector2(0f, 64f);
+    [SerializeField] private Sprite _moveLeftKeySprite;
+    [SerializeField] private Sprite _moveRightKeySprite;
+    [SerializeField] private Sprite _jumpCKeySprite;
+    [SerializeField] private Sprite _jumpSpaceKeySprite;
+    [SerializeField] private Transform _jumpObstacle;
+    [SerializeField, Min(0.1f)] private float _jumpHintDistance = 4f;
+    [SerializeField, TextArea] private string _moveHintText = "이동하기";
+    [SerializeField, TextArea] private string _jumpHintText = "점프";
+    private RectTransform _controlHintRoot;
+    private GameObject _moveHintRow;
+    private GameObject _jumpHintRow;
+    private bool _movementStarted;
+    private bool _movementLearned;
+    private float _movementStartX;
+    private bool _jumpHintStarted;
+    private bool _jumpAttempted;
+    private bool _jumpLearned;
+    private float _movementHintElapsed;
+    private float _jumpHintElapsed;
+    private float _movementHideAt = -1f;
+    private float _jumpHideAt = -1f;
+
     [Header("Broken jige inspection")]
     [SerializeField] private Transform _jige;
     [SerializeField, Min(0.1f)] private float _jigeTriggerDistance = 3.5f;
@@ -53,10 +79,10 @@ public class PrologueIntroController : MonoBehaviour
     [SerializeField] private Sprite _enterKeySprite;
 
     [Header("Dialogue layout")]
-    [SerializeField, Min(180f)] private float _dialogueHeight = 230f;
+    [SerializeField, Min(180f)] private float _dialogueHeight = 280f;
     [SerializeField, Min(0f)] private float _dialogueBottomMargin = 48f;
     [SerializeField, Min(0f)] private float _dialogueSideMargin = 64f;
-    [SerializeField, Min(18)] private int _dialogueFontSize = 36;
+    [SerializeField, Min(18)] private int _dialogueFontSize = 48;
     [SerializeField] private Color _dialogueTextColor = new Color(0.94f, 0.93f, 0.88f, 1f);
     [SerializeField] private Color _choiceTextColor = new Color(1f, 0.88f, 0.65f, 1f);
     [SerializeField] private Color _dialoguePanelColor = new Color(0.055f, 0.065f, 0.075f, 0.94f);
@@ -86,6 +112,7 @@ public class PrologueIntroController : MonoBehaviour
     [SerializeField, Min(0.01f)] private float _fadeToBlack = 0.5f;
     [SerializeField, Min(0.01f)] private float _revealLocation2 = 0.75f;
 
+    private readonly List<AudioSource> _openingSoundSources = new List<AudioSource>();
     private PlayerInputHandler _input;
     private Rigidbody2D _body;
     private CanvasGroup _fade;
@@ -105,6 +132,10 @@ public class PrologueIntroController : MonoBehaviour
     private Text _continueHint;
     private GameObject _dialoguePanel;
     private GameObject _continuePrompt;
+    private RectTransform _continuePromptRect;
+    private Image _continuePromptImage;
+    private Vector2 _continuePromptRestPosition;
+    private Color _continuePromptRestColor;
     private GameObject _exitChoice;
     private RectTransform _exitChoiceRect;
     private Image _exitChoiceBackground;
@@ -258,6 +289,12 @@ public class PrologueIntroController : MonoBehaviour
         RestoreGameplayUi();
         IsIntroComplete = true;
         yield return FadeTo(0f, _openingFade);
+        yield return ContinueAfterOpening();
+    }
+
+    private IEnumerator ContinueAfterOpening()
+    {
+        _openingSoundSources.Clear();
         Phase = "Gameplay";
         float approachDirection = _jige.position.x >= _player.transform.position.x ? 1f : -1f;
         while ((_player.transform.position.x - (_jige.position.x - _jigeTriggerDistance * approachDirection)) * approachDirection < 0f)
@@ -300,6 +337,21 @@ public class PrologueIntroController : MonoBehaviour
 
         // Swap only while completely covered. Keep the player's authored Z depth.
         Phase = "Switching";
+        TransferToLocation2();
+
+        // Allow new renderers and camera extensions to update beneath the black screen.
+        yield return null;
+        Phase = "Revealing";
+        yield return FadeTo(0f, _revealLocation2);
+        UnlockPlayer();
+        _fade.blocksRaycasts = false;
+        RestoreGameplayUi();
+        Phase = "Complete";
+        yield return WaitForNextSceneExit();
+    }
+
+    private void TransferToLocation2()
+    {
         SetActive(_background1, false);
         SetActive(_environment1, false);
         Vector3 position = _location2Spawn.position;
@@ -322,15 +374,6 @@ public class PrologueIntroController : MonoBehaviour
         foreach (ParallaxManager parallax in _destinationParallax)
             parallax.RebaseAtCurrentPosition();
 
-        // Allow new renderers and camera extensions to update beneath the black screen.
-        yield return null;
-        Phase = "Revealing";
-        yield return FadeTo(0f, _revealLocation2);
-        UnlockPlayer();
-        _fade.blocksRaycasts = false;
-        RestoreGameplayUi();
-        Phase = "Complete";
-        yield return WaitForNextSceneExit();
     }
 
     private IEnumerator WaitForNextSceneExit()
@@ -425,10 +468,52 @@ public class PrologueIntroController : MonoBehaviour
 
     private void HandleJigeReached(int targetIndex) => _jigeReached = true;
 
-    private static void PlaySound(AudioClip clip, float gain = 1f)
+    private void PlaySound(AudioClip clip, float gain = 1f)
     {
-        if (clip != null) AudioManager.Instance.PlaySfx(clip, gain: gain);
+        if (clip == null) return;
+        AudioSource source = AudioManager.Instance.PlaySfxTracked(clip, gain: gain);
+        if (source != null) _openingSoundSources.Add(source);
     }
+
+    private void StopOpeningSounds()
+    {
+        foreach (AudioSource source in _openingSoundSources)
+            if (source != null) source.Stop();
+        _openingSoundSources.Clear();
+    }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    private void SkipToLocation2ForTesting()
+    {
+        StopAllCoroutines();
+        if (Phase == "Preparing")
+        {
+            _transitionDirection = _location2TransitionPoint.position.x >= _player.transform.position.x ? 1f : -1f;
+            _player.RangedAttack?.CancelCharge();
+            _player.StateMachine.ChangeState(_player.IdleState);
+            _body.linearVelocity = Vector2.zero;
+            _body.angularVelocity = 0f;
+        }
+        StopOpeningSounds();
+        ShowSubtitle("");
+        _exitChoice.SetActive(false);
+        _continuePrompt.SetActive(false);
+        SetContinueKeyPress(0f);
+        _fade.alpha = 0f;
+        _fade.blocksRaycasts = false;
+        _input.ClearInputState();
+        UnlockPlayer();
+        RestoreGameplayUi();
+        _cinematics.Stop();
+        _player.RangedAttack?.CancelCharge();
+        _player.StateMachine.ChangeState(_player.IdleState);
+        TransferToLocation2();
+        IsIntroComplete = true;
+        IsJigeInspected = true;
+        Phase = "Complete";
+        StartCoroutine(WaitForNextSceneExit());
+    }
+#endif
 
     private void ShowSubtitle(string text)
     {
@@ -438,6 +523,7 @@ public class PrologueIntroController : MonoBehaviour
 
     private IEnumerator WaitForEnter()
     {
+        SetContinueKeyPress(0f);
         _continuePrompt.SetActive(true);
         // Require a fresh press so a held Enter cannot skip several steps.
         while (Input.GetKey(KeyCode.Return) || Input.GetKey(KeyCode.KeypadEnter))
@@ -445,18 +531,191 @@ public class PrologueIntroController : MonoBehaviour
         yield return null;
         while (!Input.GetKeyDown(KeyCode.Return) && !Input.GetKeyDown(KeyCode.KeypadEnter))
             yield return null;
+        yield return AnimateContinueKeyPress();
         _continuePrompt.SetActive(false);
         yield return null;
     }
 
+    private IEnumerator AnimateContinueKeyPress()
+    {
+        SetContinueKeyPress(1f);
+        yield return new WaitForSecondsRealtime(0.05f);
+
+        float elapsed = 0f;
+        const float releaseDuration = 0.09f;
+        while (elapsed < releaseDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float amount = 1f - Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / releaseDuration));
+            SetContinueKeyPress(amount);
+            yield return null;
+        }
+        SetContinueKeyPress(0f);
+    }
+
+    private void SetContinueKeyPress(float amount)
+    {
+        if (_continuePromptRect == null || _continuePromptImage == null) return;
+        _continuePromptRect.localScale = Vector3.one * Mathf.Lerp(1f, 0.88f, amount);
+        _continuePromptRect.anchoredPosition = _continuePromptRestPosition + Vector2.down * (4f * amount);
+        var pressedColor = new Color(_continuePromptRestColor.r * 0.78f,
+            _continuePromptRestColor.g * 0.78f, _continuePromptRestColor.b * 0.78f, _continuePromptRestColor.a);
+        _continuePromptImage.color = Color.Lerp(_continuePromptRestColor, pressedColor, amount);
+    }
+
     private void Update()
     {
+        UpdateControlHints();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (_ready && Phase != "Complete" &&
+            (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0)))
+        {
+            SkipToLocation2ForTesting();
+            return;
+        }
+#endif
         if (_exitChoice == null || !_exitChoice.activeSelf) return;
         bool hovered = RectTransformUtility.RectangleContainsScreenPoint(_exitChoiceRect, Input.mousePosition);
         if (_choicePanelSprite != null)
             _exitChoiceBackground.color = hovered ? new Color(1f, 0.96f, 0.87f, 1f) : Color.white;
         else
             _exitChoiceBackground.color = hovered ? new Color(0.24f, 0.20f, 0.13f, 1f) : new Color(0.13f, 0.12f, 0.10f, 0.98f);
+    }
+
+    private void UpdateControlHints()
+    {
+        bool active = _ready && IsIntroComplete && !_locked &&
+            (Phase == "Gameplay" || Phase == "GameplayAfterJige") && !PauseController.IsPaused;
+        if (!active)
+        {
+            if (_controlHintRoot != null) _controlHintRoot.gameObject.SetActive(false);
+            return;
+        }
+
+        if (_controlHintRoot == null) CreateControlHints();
+        if (!_movementStarted)
+        {
+            _movementStarted = true;
+            _movementStartX = _player.transform.position.x;
+        }
+        if (!_movementLearned && (!_jumpHintStarted || _jumpLearned))
+            _movementHintElapsed += Time.deltaTime;
+        if (_movementHideAt < 0f && Mathf.Abs(_player.transform.position.x - _movementStartX) >= 3f)
+            _movementHideAt = _movementHintElapsed * _controlHintDurationMultiplier;
+        if (_movementHideAt >= 0f && _movementHintElapsed >= _movementHideAt) _movementLearned = true;
+        bool showJump = false;
+        if (_jumpObstacle != null && !_jumpLearned)
+        {
+            Collider2D obstacle = _jumpObstacle.GetComponent<Collider2D>();
+            float edge = obstacle != null ? obstacle.bounds.max.x : _jumpObstacle.position.x;
+            float distance = _jumpObstacle.position.x - _player.transform.position.x;
+            if (!_jumpHintStarted && distance >= -0.5f && distance <= _jumpHintDistance)
+                _jumpHintStarted = true;
+            if (_jumpHintStarted) _jumpHintElapsed += Time.deltaTime;
+            if (_jumpHintStarted && _player.StateMachine.CurrentState == _player.JumpState)
+                _jumpAttempted = true;
+            if (_jumpHideAt < 0f && _jumpAttempted && _player.IsGrounded &&
+                _player.transform.position.x > edge + 0.2f)
+            {
+                _jumpHideAt = _jumpHintElapsed * _controlHintDurationMultiplier;
+            }
+
+            if (_jumpHideAt >= 0f && _jumpHintElapsed >= _jumpHideAt) _jumpLearned = true;
+            showJump = _jumpHintStarted && !_jumpLearned;
+        }
+
+        _moveHintRow.SetActive(!showJump && !_movementLearned);
+        _jumpHintRow.SetActive(showJump);
+        _controlHintRoot.gameObject.SetActive(showJump || !_movementLearned);
+        Canvas canvas = _controlHintRoot.GetComponentInParent<Canvas>();
+        RectTransform canvasRect = canvas.GetComponent<RectTransform>();
+        Collider2D body = _player.GetComponent<Collider2D>();
+        Vector3 head = body != null
+            ? new Vector3(body.bounds.center.x, body.bounds.max.y, _player.transform.position.z)
+            : _player.transform.position + Vector3.up * 1.5f;
+        Vector3 screen = _camera.GetComponent<Camera>().WorldToScreenPoint(head);
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screen, null, out Vector2 position))
+            _controlHintRoot.anchoredPosition = position + _controlHintOffset;
+    }
+
+    private void CreateControlHints()
+    {
+        var canvasObject = new GameObject("OpeningControlHints", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
+        canvasObject.transform.SetParent(transform, false);
+        Canvas canvas = canvasObject.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 32765;
+        CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        scaler.matchWidthOrHeight = 0.5f;
+        var hint = new GameObject("PlayerControlHint", typeof(RectTransform));
+        hint.transform.SetParent(canvasObject.transform, false);
+        _controlHintRoot = hint.GetComponent<RectTransform>();
+        _controlHintRoot.anchorMin = new Vector2(0.5f, 0.5f);
+        _controlHintRoot.anchorMax = _controlHintRoot.anchorMin;
+        _controlHintRoot.sizeDelta = new Vector2(420f, 64f);
+        _moveHintRow = new GameObject("Movement", typeof(RectTransform));
+        _moveHintRow.transform.SetParent(hint.transform, false);
+        _jumpHintRow = new GameObject("Jump", typeof(RectTransform));
+        _jumpHintRow.transform.SetParent(hint.transform, false);
+        AddControlHintText(_moveHintRow.transform, _moveHintText, -150f, 130f);
+        AddControlHintKey(_moveHintRow.transform, _moveLeftKeySprite, -35f, 64f);
+        AddControlHintKey(_moveHintRow.transform, _moveRightKeySprite, 35f, 64f);
+        AddControlHintText(_jumpHintRow.transform, _jumpHintText, -150f, 130f);
+        AddControlHintKey(_jumpHintRow.transform, _jumpCKeySprite, -35f, 64f);
+        AddControlHintText(_jumpHintRow.transform, "또는", 30f, 60f);
+        AddControlHintKey(_jumpHintRow.transform, _jumpSpaceKeySprite, 120f, 110f);
+        CenterControlHintRow(_moveHintRow.transform);
+        CenterControlHintRow(_jumpHintRow.transform);
+    }
+
+    private void CenterControlHintRow(Transform row)
+    {
+        if (row.childCount == 0) return;
+        float left = float.PositiveInfinity;
+        float right = float.NegativeInfinity;
+        foreach (RectTransform child in row)
+        {
+            left = Mathf.Min(left, child.anchoredPosition.x - child.sizeDelta.x * child.pivot.x);
+            right = Mathf.Max(right, child.anchoredPosition.x + child.sizeDelta.x * (1f - child.pivot.x));
+        }
+        float center = (left + right) * 0.5f;
+        foreach (RectTransform child in row)
+            child.anchoredPosition -= new Vector2(center, 0f);
+    }
+
+    private void AddControlHintText(Transform parent, string value, float x, float width)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return;
+        var label = new GameObject("Label", typeof(RectTransform), typeof(Text), typeof(Outline));
+        label.transform.SetParent(parent, false);
+        RectTransform rect = label.GetComponent<RectTransform>();
+        rect.anchoredPosition = new Vector2(x, 0f);
+        rect.sizeDelta = new Vector2(width, 64f);
+        Text text = label.GetComponent<Text>();
+        text.text = value;
+        text.font = _subtitle.font;
+        text.fontSize = 24;
+        text.alignment = TextAnchor.MiddleCenter;
+        text.color = Color.black;
+        text.raycastTarget = false;
+        Outline outline = label.GetComponent<Outline>();
+        outline.effectColor = Color.white;
+        outline.effectDistance = new Vector2(1f, -1f);
+    }
+
+    private void AddControlHintKey(Transform parent, Sprite sprite, float x, float width)
+    {
+        var key = new GameObject("Key", typeof(RectTransform), typeof(Image));
+        key.transform.SetParent(parent, false);
+        RectTransform rect = key.GetComponent<RectTransform>();
+        rect.anchoredPosition = new Vector2(x, 0f);
+        rect.sizeDelta = new Vector2(width, 44f);
+        Image image = key.GetComponent<Image>();
+        image.sprite = sprite;
+        image.preserveAspect = true;
+        image.raycastTarget = false;
     }
 
     private void CreateFadeOverlay()
@@ -515,13 +774,13 @@ public class PrologueIntroController : MonoBehaviour
         RectTransform subtitleRect = subtitleObject.GetComponent<RectTransform>();
         subtitleRect.anchorMin = Vector2.zero;
         subtitleRect.anchorMax = Vector2.one;
-        subtitleRect.offsetMin = new Vector2(40f, 82f);
+        subtitleRect.offsetMin = new Vector2(40f, 28f);
         subtitleRect.offsetMax = new Vector2(-40f, -28f);
         _subtitle = subtitleObject.GetComponent<Text>();
         _subtitle.font = _subtitleFont != null ? _subtitleFont :
             Font.CreateDynamicFontFromOSFont(new[] { "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans CJK KR", "Arial" }, _dialogueFontSize);
         _subtitle.fontSize = _dialogueFontSize;
-        _subtitle.alignment = TextAnchor.MiddleLeft;
+        _subtitle.alignment = TextAnchor.MiddleCenter;
         _subtitle.color = _dialogueTextColor;
         _subtitle.raycastTarget = false;
 
@@ -531,12 +790,16 @@ public class PrologueIntroController : MonoBehaviour
         promptRect.anchorMin = new Vector2(1f, 0f);
         promptRect.anchorMax = new Vector2(1f, 0f);
         promptRect.pivot = new Vector2(1f, 0f);
-        promptRect.anchoredPosition = new Vector2(-28f, 20f);
-        promptRect.sizeDelta = new Vector2(184f, 56f);
+        promptRect.anchoredPosition = new Vector2(-32f, 16f);
+        promptRect.sizeDelta = _enterKeySprite != null ? new Vector2(80f, 80f) : new Vector2(184f, 56f);
         Image keyBackground = _continuePrompt.GetComponent<Image>();
         ConfigureDialogueImage(keyBackground, _enterKeySprite, new Color(0.22f, 0.23f, 0.25f, 1f));
         keyBackground.type = Image.Type.Simple;
         keyBackground.preserveAspect = _enterKeySprite != null;
+        _continuePromptRect = promptRect;
+        _continuePromptImage = keyBackground;
+        _continuePromptRestPosition = promptRect.anchoredPosition;
+        _continuePromptRestColor = keyBackground.color;
         Outline keyOutline = _continuePrompt.GetComponent<Outline>();
         keyOutline.effectColor = new Color(0.50f, 0.51f, 0.53f, 1f);
         keyOutline.effectDistance = new Vector2(1f, -1f);
@@ -591,9 +854,10 @@ public class PrologueIntroController : MonoBehaviour
         _exitChoiceRect.anchorMax = Vector2.one;
         _exitChoiceRect.pivot = new Vector2(1f, 0f);
         _exitChoiceRect.anchoredPosition = new Vector2(0f, 18f);
-        _exitChoiceRect.sizeDelta = new Vector2(360f, 76f);
+        _exitChoiceRect.sizeDelta = new Vector2(360f, 112f);
         _exitChoiceBackground = _exitChoice.GetComponent<Image>();
         ConfigureDialogueImage(_exitChoiceBackground, _choicePanelSprite, new Color(0.13f, 0.12f, 0.10f, 0.98f));
+        _exitChoiceBackground.pixelsPerUnitMultiplier = 2f;
         Outline choiceOutline = _exitChoice.GetComponent<Outline>();
         choiceOutline.effectColor = _dialogueBorderColor;
         choiceOutline.effectDistance = new Vector2(1f, -1f);
@@ -603,12 +867,12 @@ public class PrologueIntroController : MonoBehaviour
         RectTransform choiceLabelRect = choiceLabelObject.GetComponent<RectTransform>();
         choiceLabelRect.anchorMin = Vector2.zero;
         choiceLabelRect.anchorMax = Vector2.one;
-        choiceLabelRect.offsetMin = new Vector2(24f, 0f);
-        choiceLabelRect.offsetMax = new Vector2(-72f, 0f);
+        choiceLabelRect.offsetMin = new Vector2(40f, 16f);
+        choiceLabelRect.offsetMax = new Vector2(-40f, -16f);
         Text choiceLabel = choiceLabelObject.GetComponent<Text>();
         choiceLabel.font = _subtitle.font;
         choiceLabel.fontSize = 32;
-        choiceLabel.alignment = TextAnchor.MiddleLeft;
+        choiceLabel.alignment = TextAnchor.MiddleCenter;
         choiceLabel.color = _choiceTextColor;
         choiceLabel.text = "나가보자.";
         choiceLabel.raycastTarget = false;
@@ -686,6 +950,7 @@ public class PrologueIntroController : MonoBehaviour
     private void OnDisable()
     {
         StopAllCoroutines();
+        StopOpeningSounds();
         if (_cinematics != null)
         {
             _cinematics.OnCinematicFinished.RemoveListener(HandleCinematicFinished);
@@ -695,6 +960,7 @@ public class PrologueIntroController : MonoBehaviour
         UnlockPlayer();
         RestoreGameplayUi();
         if (_subtitle != null) ShowSubtitle("");
+        SetContinueKeyPress(0f);
         if (_continuePrompt != null) _continuePrompt.SetActive(false);
         if (_exitChoice != null) _exitChoice.SetActive(false);
         if (_fade != null)
