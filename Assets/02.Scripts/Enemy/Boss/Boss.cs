@@ -31,6 +31,10 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField, Min(0f)]
     private float _introDuration = 1.5f;
 
+    [Tooltip("등장 연출(하울링)에서도 입 이펙트(BossHowl) 재생. 타이밍은 Howl Vfx Delay를 같이 사용")]
+    [SerializeField]
+    private bool _playIntroHowlVfx = true;
+
     [Header("패턴 사이 대기 (초, 최소 ~ 최대)")]
     [SerializeField]
     private Vector2 _phase1IdleRange = new Vector2(0.8f, 1.4f);
@@ -43,11 +47,20 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField, Min(0f)]
     private float _howlDuration = 2.5f;
 
+    [Tooltip("하울링 시작 후 입 이펙트(BossHowl)가 터지기까지 (초). 등장 / 페이즈 전환 하울링 공용. 애니메이션에서 입을 벌리는 타이밍에 맞춤")]
+    [SerializeField, Min(0f)]
+    private float _howlVfxDelay = 0f;
+
     [SerializeField]
     private CameraShakeSettings _howlShake = new CameraShakeSettings(1.2f, 0.25f);
 
     [SerializeField]
     private CameraZoomSettings _howlZoom = new CameraZoomSettings(0.08f, 0.3f, 1.4f, 0.6f, 0.2f, 2f);
+
+    [Header("입")]
+    [Tooltip("입 위치 (하울링 이펙트 등). 비어 있으면 자식 중 이름이 \"Mouth\"인 오브젝트를 찾고, 없으면 몸 중심 사용")]
+    [SerializeField]
+    private Transform _mouth;
 
     [Header("처치")]
     [Tooltip("마무리 공격을 맞은 뒤 사라질 때까지 (초)")]
@@ -68,6 +81,30 @@ public class Boss : MonoBehaviour, IFinishable
     [Tooltip("처치 연출 뒤 보스 오브젝트를 끔")]
     [SerializeField]
     private bool _disableOnDefeat = true;
+
+    [Tooltip("처치 소울을 한 번에 뿌리는 개수 (일반 적은 5개). 0이면 뿌리지 않음")]
+    [SerializeField, Min(0)]
+    private int _deathSoulsPerBurst = 8;
+
+    [Tooltip("처치 소울을 뿌리는 횟수. 전체 개수 = 한 번에 뿌리는 개수 x 횟수")]
+    [SerializeField, Min(1)]
+    private int _deathSoulBursts = 5;
+
+    [Tooltip("처치 소울을 뿌리는 간격 (초)")]
+    [SerializeField, Min(0f)]
+    private float _deathSoulBurstInterval = 0.12f;
+
+    [Tooltip("처치 소울 생성 위치가 흩어지는 반경. 회차마다 터지는 중심이 이 안에서 무작위 (0이면 한 점에서)")]
+    [SerializeField, Min(0f)]
+    private float _deathSoulSpawnRadius = 1.2f;
+
+    [Tooltip("처치 소울 전체 충전량 (1 = 소울 슬롯 1칸, 일반 적은 1)")]
+    [SerializeField, Min(0f)]
+    private float _deathSoulTotalAmount = 5f;
+
+    [Tooltip("소울이 퍼지는 속도 배율 (많이 뿌릴수록 크게 하면 넓게 퍼짐)")]
+    [SerializeField, Min(0.1f)]
+    private float _deathSoulSpeedMultiplier = 1.6f;
 
     [Header("애니메이션 파라미터 (애니메이터에 없으면 무시)")]
     [SerializeField]
@@ -122,6 +159,12 @@ public class Boss : MonoBehaviour, IFinishable
     /// <summary>페이즈 변경 (2 = 2페이즈 시작)</summary>
     public event Action<int> OnPhaseChanged;
 
+    /// <summary>처치 연출(날려 보내기 / 처치 애니메이션)이 끝남. 보스가 꺼지기 직전</summary>
+    public event Action OnDefeatFinished;
+
+    /// <summary>true인 동안 등장 상태에서 패턴으로 넘어가지 않음 (등장 연출이 끝날 때까지 대기)</summary>
+    public bool HoldIntro { get; set; }
+
     private readonly BossStateMachine _stateMachine = new BossStateMachine();
     private readonly List<BossPattern> _patterns = new List<BossPattern>();
     private readonly List<BossPattern> _candidates = new List<BossPattern>();
@@ -143,17 +186,28 @@ public class Boss : MonoBehaviour, IFinishable
     public string BossName => _bossName;
     public BossArena Arena => _arena;
     public BossHealth Health => _health;
+
+    /// <summary>패링 그로기 공격 직전 반짝임 (없으면 null)</summary>
+    public ParryWarningFlash ParryWarning { get; private set; }
     public Transform Player => _player;
     public int Phase => _phase;
     public BossState CurrentState => _stateMachine.CurrentState;
     public float GroundY { get; private set; }
 
     public float IntroDuration => _introDuration;
+    public bool PlayIntroHowlVfx => _playIntroHowlVfx;
     public float HowlDuration => _howlDuration;
+    public float HowlVfxDelay => _howlVfxDelay;
     public CameraShakeSettings HowlShake => _howlShake;
     public CameraZoomSettings HowlZoom => _howlZoom;
     public float DefeatDuration => _defeatDuration;
     public bool DisableOnDefeat => _disableOnDefeat;
+    public int DeathSoulsPerBurst => _deathSoulsPerBurst;
+    public int DeathSoulBursts => _deathSoulBursts;
+    public float DeathSoulBurstInterval => _deathSoulBurstInterval;
+    public float DeathSoulSpawnRadius => _deathSoulSpawnRadius;
+    public float DeathSoulTotalAmount => _deathSoulTotalAmount;
+    public float DeathSoulSpeedMultiplier => _deathSoulSpeedMultiplier;
 
     public string IntroTrigger => _introTrigger;
     public string GroggyTrigger => _groggyTrigger;
@@ -164,6 +218,11 @@ public class Boss : MonoBehaviour, IFinishable
     public float GroggyEndDuration => _groggyEndClip != null ? _groggyEndClip.length : _groggyEndFallbackDuration;
     public string HowlTrigger => _howlTrigger;
     public string DefeatTrigger => _defeatTrigger;
+
+    /// <summary>몸통 접촉 데미지를 줄 수 있는지 (대기 / 패턴 중일 때만, 접촉 데미지를 끄는 패턴 중에는 제외)</summary>
+    public bool CanDealContactDamage =>
+        CurrentState is BossIdleState ||
+        (CurrentState is BossPatternState patternState && !patternState.Pattern.DisablesContactDamage);
 
     /// <summary>지금 상태에서 데미지를 받는지</summary>
     public bool CanTakeDamage => CurrentState != null && CurrentState.CanTakeDamage;
@@ -196,6 +255,12 @@ public class Boss : MonoBehaviour, IFinishable
     public Vector2 CenterPosition =>
         _bodyCollider != null ? (Vector2)_bodyCollider.bounds.center : (Vector2)transform.position;
 
+    /// <summary>입 위치 (입이 지정되지 않았으면 몸 중심)</summary>
+    public Vector2 MouthPosition => _mouth != null ? (Vector2)_mouth.position : CenterPosition;
+
+    /// <summary>오른쪽을 보고 있는지</summary>
+    public bool IsFacingRight => FacingX > 0f;
+
     /// <summary>살아 있는 소환물 수 (독 방울 + 올챙이)</summary>
     public int MinionCount
     {
@@ -213,10 +278,16 @@ public class Boss : MonoBehaviour, IFinishable
     private void Awake()
     {
         _health = GetComponent<BossHealth>();
+        ParryWarning = GetComponentInChildren<ParryWarningFlash>(true);
         _animator = GetComponentInChildren<Animator>();
         _body = GetComponent<Rigidbody2D>();
         _bodyCollider = GetComponent<Collider2D>();
         GroundY = transform.position.y;
+
+        if (_mouth == null)
+        {
+            _mouth = FindChildRecursive(transform, "Mouth");
+        }
 
         // 보스는 스크립트로만 움직임. Dynamic이면 중력 / 플레이어와의 충돌로 튀어 오를 수 있음
         if (_body != null && _body.bodyType != RigidbodyType2D.Kinematic)
@@ -355,6 +426,11 @@ public class Boss : MonoBehaviour, IFinishable
     public void NotifyDefeated()
     {
         OnDefeated?.Invoke(this);
+    }
+
+    public void NotifyDefeatFinished()
+    {
+        OnDefeatFinished?.Invoke();
     }
 
     #endregion
@@ -753,6 +829,38 @@ public class Boss : MonoBehaviour, IFinishable
     }
 
     #endregion
+
+    private static Transform FindChildRecursive(Transform parent, string childName)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.name == childName)
+            {
+                return child;
+            }
+
+            Transform found = FindChildRecursive(child, childName);
+            if (found != null)
+            {
+                return found;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>입 위치에서 하울링 이펙트 재생 (등장 / 페이즈 전환 공용)</summary>
+    public void PlayHowlVfx()
+    {
+        if (EffectManager.Instance == null)
+        {
+            Debug.LogWarning($"{name}: EffectManager가 없어 하울링 이펙트를 재생하지 못했습니다.", this);
+            return;
+        }
+
+        Log("하울링 이펙트 재생");
+        EffectManager.Instance.PlayBossHowl(MouthPosition, IsFacingRight);
+    }
 
     public void Log(string message)
     {

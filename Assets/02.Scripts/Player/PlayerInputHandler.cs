@@ -47,6 +47,9 @@ public class PlayerInputHandler : MonoBehaviour
         _isRangedAttackKeyDown = false;
         _isRangedAttackKeyUp = false;
         _isPotionKeyDown = false;
+        _isGuardKeyDown = false;
+        _isGuardKey = false;
+        _guardBuffer.Clear();
         _jumpBuffer.Clear();
         _dodgeBuffer.Clear();
         _attackBuffer.Clear();

@@ -64,6 +64,10 @@ public abstract class BossPattern : MonoBehaviour
     [SerializeField, Min(0f)]
     private float _afterDelay = 0f;
 
+    [Tooltip("이 패턴 중에는 보스 몸통 접촉 데미지(EnemyContactDamage)를 끔. 찍기 / 돌진처럼 자체 공격 판정이 있어 몸통과 겹쳐 두 번 맞는 패턴용")]
+    [SerializeField]
+    protected bool _disableContactDamage = false;
+
     [Header("판정 구간 (애니메이션 길이 대비 비율)")]
     [Tooltip("판정 시작 지점 (0 ~ 1)")]
     [SerializeField, Range(0f, 1f)]
@@ -89,6 +93,9 @@ public abstract class BossPattern : MonoBehaviour
 
     /// <summary>true면 이 패턴 중 보스가 플레이어의 직접 공격을 받지 않음 (기믹 데미지는 받음)</summary>
     public virtual bool BlocksDirectDamage => false;
+
+    /// <summary>이 패턴 중 몸통 접촉 데미지를 끄는지</summary>
+    public bool DisablesContactDamage => _disableContactDamage;
 
     /// <summary>패턴 전체 길이 (초) = 클립 길이 / 재생 속도</summary>
     public float Duration
@@ -306,6 +313,25 @@ public abstract class BossPattern : MonoBehaviour
         return false;
     }
 
+    /// <summary>이어지는 클립 중 반복(Loop Time) 클립 (없으면 null). 반복 구간이 있는 패턴의 자동 설정용</summary>
+    protected AnimationClip FindLoopingFollowingClip()
+    {
+        if (_followingClips == null)
+        {
+            return null;
+        }
+
+        foreach (AnimationClip clip in _followingClips)
+        {
+            if (clip != null && clip.isLooping)
+            {
+                return clip;
+            }
+        }
+
+        return null;
+    }
+
     /// <summary>지금 재생 중인 이 패턴의 클립 (없으면 null)</summary>
     protected AnimationClip GetPlayingPatternClip()
     {
@@ -373,7 +399,28 @@ public abstract class BossPattern : MonoBehaviour
         }
     }
 
-    /// <summary>판정 구간 처리: 시작 전까지 예고 → 시작~끝 판정 → 끄기</summary>
+    /// <summary>
+    /// 패링 그로기 판정이면, 판정 시작(hitStartRatio)보다 반짝임 Lead Time만큼 앞선 지점인지 확인해 한 번 반짝임.
+    /// 루프 안에서 매 프레임 호출. 이미 반짝였으면 true 유지
+    /// </summary>
+    protected bool UpdateParryWarning(BossHitbox hitbox, float hitStartRatio, bool hasWarned)
+    {
+        if (hasWarned || hitbox == null || !hitbox.GroggyOnParry || Boss.ParryWarning == null)
+        {
+            return hasWarned;
+        }
+
+        float leadRatio = Duration > 0f ? Boss.ParryWarning.LeadTime / Duration : 0f;
+        if (Progress < hitStartRatio - leadRatio)
+        {
+            return false;
+        }
+
+        Boss.ParryWarning.Play();
+        return true;
+    }
+
+    /// <summary>판정 구간 처리: 시작 전까지 예고 → 시작~끝 판정 → 끄기 (패링 그로기 판정이면 직전에 반짝임)</summary>
     protected IEnumerator RunHitWindow(BossHitbox hitbox, bool showTelegraph = true)
     {
         if (showTelegraph)
@@ -381,7 +428,12 @@ public abstract class BossPattern : MonoBehaviour
             hitbox.SetTelegraph(true);
         }
 
-        yield return WaitUntilProgress(HitStartRatio);
+        bool hasWarned = false;
+        while (Progress < HitStartRatio)
+        {
+            hasWarned = UpdateParryWarning(hitbox, HitStartRatio, hasWarned);
+            yield return null;
+        }
 
         hitbox.SetTelegraph(false);
         hitbox.Activate();
