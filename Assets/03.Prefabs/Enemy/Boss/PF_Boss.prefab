@@ -791,6 +791,12 @@ MonoBehaviour:
   _needleRatio: 0.8
   _needleCountPerSide: 3
   _needleInterval: 0.2
+  _needleWarningLead: 0.5
+  _needleWarningColor: {r: 1, g: 0.1, b: 0.1, a: 0.55}
+  _needleWarningThickness: 1.2
+  _needleWarningLength: 0
+  _needleWarningBlinkSpeed: 18
+  _needleWarningSortingOffset: 5
 --- !u!114 &732215281463642168
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -961,6 +967,9 @@ MonoBehaviour:
   _minSpacing: 2
   _maxDuration: 60
   _endDamageRatio: 0.15
+  _loopClip: {fileID: 0}
+  _loopEndTrigger: angryEnd
+  _spawnDelayAfterLoop: 0
   _idleState: Boss_Idle
   _blockDirectDamage: 1
 --- !u!114 &9029155996032855552
