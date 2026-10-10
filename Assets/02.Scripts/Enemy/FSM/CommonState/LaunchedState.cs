@@ -38,7 +38,6 @@ public class LaunchedState : EnemyState
 
     public override void Enter()
     {
-        Debug.Log("적 날아감!");
         _elapsed = 0f;
         _isFinished = false;
 

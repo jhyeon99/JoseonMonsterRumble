@@ -524,7 +524,7 @@ MonoBehaviour:
     Parryable: 0
     Unblockable: 0
     ParryWindowOverride: 0
-    GuardGaugeCost: 0
+    GuardGaugeCost: 10
 --- !u!1 &4754600020612061745
 GameObject:
   m_ObjectHideFlags: 0
@@ -616,6 +616,7 @@ GameObject:
   - component: {fileID: 1388460662712899234}
   - component: {fileID: 305485781356309695}
   - component: {fileID: 3220603913955626752}
+  - component: {fileID: 1292940093020702429}
   - component: {fileID: 1334137726836670619}
   - component: {fileID: 7165762390576756721}
   - component: {fileID: 7719512815199251269}
@@ -751,8 +752,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyGroundMove
   IsBackMove: 0
-  _knockbackDeceleration: 20
+  _knockbackDeceleration: 30
   _lightHitKnockbackMultiplier: 0.65
+  _groundSensor: {fileID: 1292940093020702429}
+  _walkEndClip: {fileID: 7400000, guid: 11a6eeb020a67b3448abc63f9b37e018, type: 2}
+--- !u!114 &1292940093020702429
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9071619103714574906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 056b1e97a5ab4ae43b3db8ec7565e1ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyGroundSensor
+  _edgeMargin: 0.1
+  _groundProbeDepth: 0.3
 --- !u!114 &1334137726836670619
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -771,7 +788,7 @@ MonoBehaviour:
     Parryable: 1
     Unblockable: 0
     ParryWindowOverride: 0
-    GuardGaugeCost: 0
+    GuardGaugeCost: 35
   _groggyDuration: 2
 --- !u!114 &7165762390576756721
 MonoBehaviour:
@@ -822,8 +839,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e34f270a66f14f9449d441ce020b0af0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMoveArea
-  CenterOffset: {x: 0, y: 2.5}
-  AreaSize: {x: 10, y: 6}
+  CenterOffset: {x: -0.66, y: 2.5}
+  AreaSize: {x: 16.8, y: 6}
+  _useCustomDetectionArea: 1
+  _detectionAreaSize: {x: 28.1, y: 6.1}
+  _chaseReleaseMargin: 1
   AreaColor: {r: 0, g: 1, b: 0, a: 0.3}
 --- !u!114 &721203627900600272
 MonoBehaviour:

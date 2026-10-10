@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public abstract class Projectile : MonoBehaviour, IParryable
@@ -10,20 +9,23 @@ public abstract class Projectile : MonoBehaviour, IParryable
     private string _attackName;
 
     [SerializeField] private ProjectileType _type;
-    [SerializeField] private float _curveHeight = 5f;
     [Tooltip("이 시간이 지나면 풀로 돌아감 (화면 밖 판정이 안 될 때를 위한 최대 수명)")]
     [SerializeField] private float _returnPoolTimer = 5f;
 
     [Header("화면 밖 정리")]
-    [Tooltip("카메라 화면 좌 / 우 / 아래로 이 거리(월드)만큼 벗어나면 풀로 돌아감. 0 이하면 사용 안 함 (위쪽은 곡사 궤적을 위해 곡선 높이만큼 더 여유)")]
+    [Tooltip("카메라 화면 좌 / 우 / 아래로 이 거리(월드)만큼 벗어나면 풀로 돌아감. 0 이하면 사용 안 함")]
     [SerializeField]
     private float _offscreenMargin = 2f;
+
+    [Tooltip("위쪽은 이만큼 더 여유 (곡사 투사체가 화면 위로 솟았다 떨어지는 높이)")]
+    [SerializeField, Min(0f)]
+    private float _offscreenTopExtra = 5f;
 
     [Header("가드 / 패링")]
 
     [SerializeField] private AttackDefense _defense = new AttackDefense { Parryable = true, GuardGaugeCost = 25f };
 
-    [Header("패링 반사 (속도 / 데미지 배율은 PlayerGuard에서 설정)")]
+    [Header("패링 반사 (피해는 ProjectileData, 속도는 PlayerGuard에서 설정)")]
 
     [Tooltip("켜면 쏜 적의 몸(콜라이더 중심)을 따라가며 되돌아감. 끄거나 쏜 적이 없으면 맞은 방향의 반대로 직진")]
     [SerializeField]
@@ -38,7 +40,6 @@ public abstract class Projectile : MonoBehaviour, IParryable
     private Vector3 _lastPosition;
     public ProjectileType Type => _type;
     protected float Speed { get; private set; }
-    protected Vector2 ControlPoint { get; private set; }
     protected Vector2 MuzzlePosition { get; private set; }
     protected Vector2 PlayerPosition { get; private set; }
     protected float _t;
@@ -52,14 +53,15 @@ public abstract class Projectile : MonoBehaviour, IParryable
 
     // 반사 상태
     private int _originalLayer;
-    private Transform _muzzleTransform;
     private Collider2D _shooterCollider;
     private bool _isReflected;
     private Vector2 _reflectDirection;
     private float _reflectSpeed;
     public bool IsReflected => _isReflected;
+    protected Vector2 ReflectDirection => _reflectDirection;
+    protected bool ShouldIgnoreReturnGround => _ignoreGroundWhenReturning && IsReturningToShooter();
 
-    private void Awake()
+    protected virtual void Awake()
     {
         Speed = _data.ProjectileSpeed;
         _projectileDamage = _data.ProjectileDamage;
@@ -67,11 +69,11 @@ public abstract class Projectile : MonoBehaviour, IParryable
         _originalLayer = gameObject.layer;
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         if (_isReflected)
         {
-            MoveReflected();
+            MoveReflected(Time.deltaTime);
         }
         else
         {
@@ -114,7 +116,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
             position.x < cameraPosition.x - halfWidth - _offscreenMargin ||
             position.x > cameraPosition.x + halfWidth + _offscreenMargin ||
             position.y < cameraPosition.y - halfHeight - _offscreenMargin ||
-            position.y > cameraPosition.y + halfHeight + _offscreenMargin + Mathf.Max(0f, _curveHeight);
+            position.y > cameraPosition.y + halfHeight + _offscreenMargin + _offscreenTopExtra;
 
         // 화면 밖에서 쏴서 화면 안으로 들어오는 중이면 유지 (멀어지는 중일 때만 정리)
         Vector3 moved = position - _lastPosition;
@@ -129,7 +131,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
         }
     }
 
-    private void ReturnProjectile()
+    protected void ReturnProjectile()
     {
         _returnPoolTime -= Time.deltaTime;
         if (_returnPoolTime <= 0f)
@@ -142,7 +144,6 @@ public abstract class Projectile : MonoBehaviour, IParryable
     public virtual void OnSpawn(Transform muzzlePoint, Transform playerPoint, float damageIncreaseValue)
     {
         MuzzlePosition = muzzlePoint.position;
-        _muzzleTransform = muzzlePoint;
         _shooterCollider = FindShooterCollider(muzzlePoint);
         Transform player = playerPoint;
 
@@ -151,7 +152,6 @@ public abstract class Projectile : MonoBehaviour, IParryable
             PlayerPosition = player.position;
         }
 
-        ControlPoint = (MuzzlePosition + PlayerPosition) / 2f + new Vector2(0f, _curveHeight);
         _t = 0f;
         _isLaunching = true;
         _returnPoolTime = _returnPoolTimer;
@@ -185,27 +185,23 @@ public abstract class Projectile : MonoBehaviour, IParryable
 
         if (other.TryGetComponent<IDamageable>(out IDamageable damageable))
         {
-            var hitData = new HitData(
-                _projectileDamage,
-                _data.KnockbackForce,
-                hitPoint,
-                HitDirection,
-                _defense,
-                this,
-                0,
-                AttackName
-            );
-
-            damageable.TakeDamage(hitData);
-
-            // 패링당해 반사됐으면 사라지지 않고 되돌아감
-            if (_isReflected)
-            {
-                return;
-            }
+            ApplyHit(damageable, hitPoint);
+            return;
         }
 
         gameObject.SetActive(false);
+    }
+
+    protected void ApplyHit(IDamageable damageable, Vector2 hitPoint)
+    {
+        var hitData = new HitData(_projectileDamage, _data.KnockbackForce, hitPoint,
+            HitDirection, _defense, this, 0, AttackName);
+        damageable.TakeDamage(hitData);
+        // 무적과 가드에는 소멸하고, 피해 처리 중 패링됐을 때만 반사를 유지한다.
+        if (!_isReflected)
+        {
+            gameObject.SetActive(false);
+        }
     }
 
     public void IncreaseDamage(float percentage)
@@ -225,10 +221,12 @@ public abstract class Projectile : MonoBehaviour, IParryable
         _isLaunching = false;
         _returnPoolTime = _returnPoolTimer;
 
-        // 반사 속도 / 데미지는 패링한 쪽(PlayerGuard) 설정을 따름. 없으면 원래 속도, 원래 데미지
+        // 별도 반사 피해가 없으면 기존 PlayerGuard 배율을 유지한다.
         PlayerGuard guard = parrier != null ? parrier.GetComponent<PlayerGuard>() : null;
         _reflectSpeed = guard != null ? guard.ReflectSpeed : Speed;
-        _projectileDamage *= guard != null ? guard.ReflectDamageMultiplier : 1f;
+        _projectileDamage = _data.ReflectedDamage > 0f
+            ? _data.ReflectedDamage
+            : _projectileDamage * (guard != null ? guard.ReflectDamageMultiplier : 1f);
         _reflectDirection = CalculateReflectDirection(hitData);
 
         // 적에게 맞도록 플레이어 투사체 레이어로 변경
@@ -272,12 +270,18 @@ public abstract class Projectile : MonoBehaviour, IParryable
         return _reflectToShooter && _shooterCollider != null && _shooterCollider.isActiveAndEnabled;
     }
 
-    /// <summary>총구에서 위로 올라가며 쏜 적 본체(IDamageable)의 콜라이더를 찾음</summary>
+    /// <summary>총구에서 위로 올라가며 쏜 적 본체의 피격 콜라이더를 찾음</summary>
     private static Collider2D FindShooterCollider(Transform muzzlePoint)
     {
         if (muzzlePoint == null)
         {
             return null;
+        }
+
+        EnemyHurtbox hurtbox = muzzlePoint.GetComponentInParent<Enemy>()?.GetComponentInChildren<EnemyHurtbox>();
+        if (hurtbox != null)
+        {
+            return hurtbox.GetComponent<Collider2D>();
         }
 
         IDamageable shooter = muzzlePoint.GetComponentInParent<IDamageable>();
@@ -293,7 +297,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
         return bounds.Contains(position);
     }
 
-    private void MoveReflected()
+    protected void MoveReflected(float deltaTime)
     {
         // 쏜 적 몸에 도착했는데도 남아 있으면 (이미 쓰러진 적 등) 더 따라가지 않고 직진
         if (IsReturningToShooter() && IsInsideShooter())
@@ -308,7 +312,12 @@ public abstract class Projectile : MonoBehaviour, IParryable
             UpdateReflectRotation();
         }
 
-        transform.position += (Vector3)(_reflectDirection * _reflectSpeed * Time.deltaTime);
+        MoveProjectile(_reflectDirection * _reflectSpeed * deltaTime);
+    }
+
+    protected virtual void MoveProjectile(Vector2 displacement)
+    {
+        transform.position += (Vector3)displacement;
     }
 
     private void UpdateReflectRotation()
@@ -318,7 +327,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
         transform.rotation = Quaternion.Euler(0f, 0f, angle);
     }
 
-    private void HandleReflectedHit(Collider2D other)
+    protected void HandleReflectedHit(Collider2D other)
     {
         // 벽 / 바닥에 닿으면 사라짐 (쏜 적에게 되돌아가는 중이면 통과)
         if ((Constants.Layers.GroundAllMask & (1 << other.gameObject.layer)) != 0)
@@ -343,11 +352,17 @@ public abstract class Projectile : MonoBehaviour, IParryable
             return;
         }
 
+        ApplyReflectedHit(damageable, other.ClosestPoint(transform.position));
+    }
+
+    protected void ApplyReflectedHit(IDamageable damageable, Vector2 hitPoint)
+    {
         var hitData = new HitData(
             _projectileDamage,
             _data.KnockbackForce,
-            other.ClosestPoint(transform.position),
+            hitPoint,
             _reflectDirection,
+            comboStep: 2,
             attackName: "반사된 투사체",
             isReflectedProjectile: true
         );
