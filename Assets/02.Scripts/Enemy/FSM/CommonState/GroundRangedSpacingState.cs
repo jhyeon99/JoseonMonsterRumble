@@ -5,10 +5,14 @@ public class GroundRangedSpacingState : EnemyState
 {
     private enum MotionPhase { Fleeing, StoppingToReverse, StoppingToAttack }
 
+    private const float BreakoutSpeedMultiplier = 1.6f;
+
     private readonly Enemy _enemy;
     private readonly EnemyGroundMove _move;
     private MotionPhase _phase;
     private float _direction;
+    private bool _hasReversed;
+    private float _breakoutPlayerStartX;
 
     public GroundRangedSpacingState(Enemy enemy)
     {
@@ -21,6 +25,8 @@ public class GroundRangedSpacingState : EnemyState
         float targetX = _enemy.Target != null ? _enemy.Target.position.x : _enemy.transform.position.x;
         _direction = targetX >= _enemy.transform.position.x ? -1f : 1f;
         _phase = MotionPhase.Fleeing;
+        _hasReversed = false;
+        _breakoutPlayerStartX = 0f;
         _enemy.DirectionLock.LockDirection();
     }
 
@@ -32,25 +38,43 @@ public class GroundRangedSpacingState : EnemyState
             _enemy.StateMachine.ChangeState(new AlertState(_enemy));
             return;
         }
-        if (_phase == MotionPhase.Fleeing &&
-            _enemy.GetDistanceXToPlayer() >= _enemy.Data.RangedFleeEndDistance)
+        if (_phase == MotionPhase.Fleeing)
         {
-            StartStopping(MotionPhase.StoppingToAttack);
+            bool shouldStop = _hasReversed
+                ? (_enemy.transform.position.x - _breakoutPlayerStartX) * _direction >= _enemy.Data.RangedFleeEndDistance
+                : _enemy.GetDistanceXToPlayer() >= _enemy.Data.RangedFleeEndDistance;
+
+            if (shouldStop)
+            {
+                StartStopping(MotionPhase.StoppingToAttack);
+            }
         }
         if (_phase == MotionPhase.Fleeing || !_move.IsWalkStopped)
         {
             return;
         }
-        if (_phase == MotionPhase.StoppingToReverse && _move.CanMoveInDirection(-_direction))
+        if (_phase == MotionPhase.StoppingToReverse)
         {
-            _direction = -_direction;
-            _phase = MotionPhase.Fleeing;
+            if (!_hasReversed && _move.CanMoveInDirection(-_direction))
+            {
+                _direction = -_direction;
+                _hasReversed = true;
+                _breakoutPlayerStartX = _enemy.Target != null ? _enemy.Target.position.x : _enemy.transform.position.x;
+                _phase = MotionPhase.Fleeing;
+                _enemy.Animation.SetAnimationSpeed(BreakoutSpeedMultiplier);
+                return;
+            }
+
+            StartStopping(MotionPhase.StoppingToAttack);
             return;
         }
-        // 양쪽 모두 막힌 경우에도 방향 반전을 반복하지 않고 제자리 공격을 선택한다.
+
+        _move.FaceTarget();
+
         if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
         {
-            if (Random.value < _enemy.Data.ProvokeChance)
+            if (_enemy.GetDistanceToPlayer() >= _enemy.Data.RangedFleeEndDistance &&
+                Random.value < _enemy.Data.ProvokeChance)
             {
                 _enemy.StateMachine.ChangeState(new EnemyProvokeState(_enemy));
                 return;
@@ -77,15 +101,24 @@ public class GroundRangedSpacingState : EnemyState
         }
         if (!_move.CanMoveInDirection(_direction))
         {
+            if (_hasReversed)
+            {
+                StartStopping(MotionPhase.StoppingToAttack);
+                return;
+            }
+
             StartStopping(MotionPhase.StoppingToReverse);
             return;
         }
-        _move.Move(new Vector2(_direction, 0f));
+
+        float speedMultiplier = _hasReversed ? BreakoutSpeedMultiplier : 1f;
+        _move.Move(new Vector2(_direction * speedMultiplier, 0f));
     }
 
     private void StartStopping(MotionPhase phase)
     {
         _phase = phase;
+        _enemy.Animation.ResetAnimationSpeed();
         _move.RequestStopMove();
     }
 
@@ -93,5 +126,9 @@ public class GroundRangedSpacingState : EnemyState
     {
         _direction = 0f;
         _phase = MotionPhase.Fleeing;
+        _hasReversed = false;
+        _breakoutPlayerStartX = 0f;
+        _enemy.Animation.ResetAnimationSpeed();
+        _enemy.DirectionLock.UnlockDirection();
     }
 }

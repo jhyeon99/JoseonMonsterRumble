@@ -67,15 +67,15 @@ MonoBehaviour:
   _meleeAttackDamage: 0
   _chargeSpeed: 0
   _knockbackForce: 0
-  _attackDetectRange: 7
+  _attackDetectRange: 10
   _attackCycleMode: 0
   _attackRecoverRange: 0
   _attackPrepareTime: 1.5
   _attackDurationTime: 0.8333
   _attackDelayTime: 0.8333
   _attackRecoveryTime: 1
-  _rangedFleeStartDistance: 3
-  _rangedFleeEndDistance: 5
+  _rangedFleeStartDistance: 3.5
+  _rangedFleeEndDistance: 7
   _rangedAttackIdleChance: 0.08
   _rangedAttackIdleDuration: 0.35
   _provokeChance: 0.15
