@@ -95,7 +95,7 @@ public abstract class BossPattern : MonoBehaviour
     public virtual bool BlocksDirectDamage => false;
 
     /// <summary>이 패턴 중 몸통 접촉 데미지를 끄는지</summary>
-    public bool DisablesContactDamage => _disableContactDamage;
+    public virtual bool DisablesContactDamage => _disableContactDamage;
 
     /// <summary>패턴 전체 길이 (초) = 클립 길이 / 재생 속도</summary>
     public float Duration
