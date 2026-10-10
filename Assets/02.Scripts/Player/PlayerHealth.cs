@@ -23,6 +23,9 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     // 보스 등장 / 하울링 / 처치 등 연출 중 무적 (피격 후 무적과 별개로 유지)
     private bool _isCinematicInvincible;
+
+    // 가드 / 패링으로 막은 직후 잠깐 무적 (공격의 AttackDefense.BlockInvincibleTime)
+    private float _blockInvincibleUntil = float.NegativeInfinity;
     public bool IsInvincible => _isInvincible || _isCinematicInvincible;
 
     public HitData LastFatalHitData { get; private set; }
@@ -60,8 +63,24 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     {
         if (IsDead || _isInvincible || _isCinematicInvincible) return false;
 
+        // 가드 / 패링으로 막은 직후 잠깐은 후속 공격에 맞지 않음 (가드 게이지도 깎이지 않음)
+        if (Time.time < _blockInvincibleUntil) return false;
+
         // 가드 중이면 데미지 대신 가드 / 패링 처리
-        if (_guard != null && _guard.TryHandleHit(hitdata) != GuardResult.None) return false;
+        if (_guard != null)
+        {
+            GuardResult guardResult = _guard.TryHandleHit(hitdata);
+            if (guardResult != GuardResult.None)
+            {
+                // 가드(Blocked) / 패링(Parried) 모두 적용
+                if (hitdata.Defense.BlockInvincibleTime > 0f)
+                {
+                    _blockInvincibleUntil = Mathf.Max(_blockInvincibleUntil, Time.time + hitdata.Defense.BlockInvincibleTime);
+                }
+
+                return false;
+            }
+        }
 
         GameEvents.TriggerPlayerHit(hitdata);
         _currentHealth = Mathf.Max(_currentHealth - hitdata.Damage, 0f);

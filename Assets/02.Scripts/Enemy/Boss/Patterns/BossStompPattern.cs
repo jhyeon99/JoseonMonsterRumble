@@ -67,6 +67,12 @@ public class BossStompPattern : BossPattern
     [SerializeField, Min(0f)]
     private float _needleInterval = 0.2f;
 
+    // 떨어지면서 몸통이 먼저 닿아 찍기 판정 전에 맞지 않도록 기본으로 몸통 접촉 데미지 끔 (기존 컴포넌트에도 적용)
+    public BossStompPattern()
+    {
+        _disableContactDamage = true;
+    }
+
     private void Reset()
     {
         SetDefaults("연속 찍기 → 바늘", BossPhaseMask.Both, BossFloorMask.Floor1);
