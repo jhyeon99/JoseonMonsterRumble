@@ -3,8 +3,8 @@ guid: c024078824191c14fae557e995dcf916
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7027494407496439997
-    second: mokgaek_Idle_00014_0
+      213: -4165320788750772951
+    second: Mokgaek_Idle_00014_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 7
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 125
+  spritePixelsToUnits: 250
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -88,7 +88,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 2
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: mokgaek_Idle_00014_0
+      name: Mokgaek_Idle_00014_0
       rect:
         serializedVersion: 2
-        x: 500
+        x: 362
         y: 0
-        width: 281
-        height: 263
+        width: 599
+        height: 495
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: db89edb2eeca68160800000000000000
-      internalID: 7027494407496439997
+      spriteID: 925d5fabfcec136c0800000000000000
+      internalID: -4165320788750772951
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      mokgaek_Idle_00014_0: 7027494407496439997
+      Mokgaek_Idle_00014_0: -4165320788750772951
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

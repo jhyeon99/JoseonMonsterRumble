@@ -1,0 +1,663 @@
+fileFormatVersion: 2
+guid: 38657e0c2cccf0e43a6b22323f8c0540
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6841327134152572746
+    second: Howling_VFX_00037_0
+  - first:
+      213: -8640277253811285840
+    second: Howling_VFX_00037_1
+  - first:
+      213: 2554239455808137823
+    second: Howling_VFX_00037_2
+  - first:
+      213: -4441023966335078300
+    second: Howling_VFX_00037_3
+  - first:
+      213: -798164433321681110
+    second: Howling_VFX_00037_4
+  - first:
+      213: 4636331447611547073
+    second: Howling_VFX_00037_5
+  - first:
+      213: -329754714298940277
+    second: Howling_VFX_00037_6
+  - first:
+      213: 8382828221301613417
+    second: Howling_VFX_00037_7
+  - first:
+      213: -7688263361314885067
+    second: Howling_VFX_00037_8
+  - first:
+      213: -1395112716247750134
+    second: Howling_VFX_00037_9
+  - first:
+      213: 3401991181671675455
+    second: Howling_VFX_00037_10
+  - first:
+      213: -8700746465525103745
+    second: Howling_VFX_00037_11
+  - first:
+      213: 7765508512908347515
+    second: Howling_VFX_00037_12
+  - first:
+      213: 8228673330238531082
+    second: Howling_VFX_00037_13
+  - first:
+      213: -4238172853026298562
+    second: Howling_VFX_00037_14
+  - first:
+      213: 8956175074651913174
+    second: Howling_VFX_00037_15
+  - first:
+      213: 5501036513014247035
+    second: Howling_VFX_00037_16
+  - first:
+      213: -8726927047581299598
+    second: Howling_VFX_00037_17
+  - first:
+      213: 5860036803569091890
+    second: Howling_VFX_00037_18
+  - first:
+      213: 2368977351001891786
+    second: Howling_VFX_00037_19
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Howling_VFX_00037_0
+      rect:
+        serializedVersion: 2
+        x: 736
+        y: 836
+        width: 441
+        height: 145
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b04898e739be01a0800000000000000
+      internalID: -6841327134152572746
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_1
+      rect:
+        serializedVersion: 2
+        x: 1428
+        y: 856
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b0d0b5ad91971880800000000000000
+      internalID: -8640277253811285840
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_2
+      rect:
+        serializedVersion: 2
+        x: 1446
+        y: 848
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5a2bba804b727320800000000000000
+      internalID: 2554239455808137823
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_3
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 754
+        width: 53
+        height: 97
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 460f99f6b305e52c0800000000000000
+      internalID: -4441023966335078300
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_4
+      rect:
+        serializedVersion: 2
+        x: 708
+        y: 763
+        width: 65
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2f928f3da95ce4f0800000000000000
+      internalID: -798164433321681110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_5
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 814
+        width: 12
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1cddbd323ee875040800000000000000
+      internalID: 4636331447611547073
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_6
+      rect:
+        serializedVersion: 2
+        x: 1500
+        y: 771
+        width: 9
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b84833f95d97c6bf0800000000000000
+      internalID: -329754714298940277
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_7
+      rect:
+        serializedVersion: 2
+        x: 1507
+        y: 733
+        width: 19
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9636dc76ad9c55470800000000000000
+      internalID: 8382828221301613417
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_8
+      rect:
+        serializedVersion: 2
+        x: 387
+        y: 729
+        width: 9
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 532fc21053dcd4590800000000000000
+      internalID: -7688263361314885067
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_9
+      rect:
+        serializedVersion: 2
+        x: 1521
+        y: 679
+        width: 10
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0a2c6e406093ace0800000000000000
+      internalID: -1395112716247750134
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_10
+      rect:
+        serializedVersion: 2
+        x: 1276
+        y: 587
+        width: 27
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f363d8884fc463f20800000000000000
+      internalID: 3401991181671675455
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_11
+      rect:
+        serializedVersion: 2
+        x: 1291
+        y: 573
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7304a9203db04780800000000000000
+      internalID: -8700746465525103745
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_12
+      rect:
+        serializedVersion: 2
+        x: 629
+        y: 416
+        width: 22
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b788c2c59d0a4cb60800000000000000
+      internalID: 7765508512908347515
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_13
+      rect:
+        serializedVersion: 2
+        x: 377
+        y: 355
+        width: 9
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a062995ebce123270800000000000000
+      internalID: 8228673330238531082
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_14
+      rect:
+        serializedVersion: 2
+        x: 379
+        y: 182
+        width: 104
+        height: 141
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e35e9a6be3cfe25c0800000000000000
+      internalID: -4238172853026298562
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_15
+      rect:
+        serializedVersion: 2
+        x: 1507
+        y: 317
+        width: 10
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6dbb5de47c9ba4c70800000000000000
+      internalID: 8956175074651913174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_16
+      rect:
+        serializedVersion: 2
+        x: 789
+        y: 276
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7eeaa6109b975c40800000000000000
+      internalID: 5501036513014247035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_17
+      rect:
+        serializedVersion: 2
+        x: 1117
+        y: 264
+        width: 65
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 27c0b24661ab3e680800000000000000
+      internalID: -8726927047581299598
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_18
+      rect:
+        serializedVersion: 2
+        x: 1438
+        y: 183
+        width: 79
+        height: 127
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 235837fcc68035150800000000000000
+      internalID: 5860036803569091890
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Howling_VFX_00037_19
+      rect:
+        serializedVersion: 2
+        x: 713
+        y: 99
+        width: 492
+        height: 171
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac3e96f695c40e020800000000000000
+      internalID: 2368977351001891786
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Howling_VFX_00037_0: -6841327134152572746
+      Howling_VFX_00037_1: -8640277253811285840
+      Howling_VFX_00037_10: 3401991181671675455
+      Howling_VFX_00037_11: -8700746465525103745
+      Howling_VFX_00037_12: 7765508512908347515
+      Howling_VFX_00037_13: 8228673330238531082
+      Howling_VFX_00037_14: -4238172853026298562
+      Howling_VFX_00037_15: 8956175074651913174
+      Howling_VFX_00037_16: 5501036513014247035
+      Howling_VFX_00037_17: -8726927047581299598
+      Howling_VFX_00037_18: 5860036803569091890
+      Howling_VFX_00037_19: 2368977351001891786
+      Howling_VFX_00037_2: 2554239455808137823
+      Howling_VFX_00037_3: -4441023966335078300
+      Howling_VFX_00037_4: -798164433321681110
+      Howling_VFX_00037_5: 4636331447611547073
+      Howling_VFX_00037_6: -329754714298940277
+      Howling_VFX_00037_7: 8382828221301613417
+      Howling_VFX_00037_8: -7688263361314885067
+      Howling_VFX_00037_9: -1395112716247750134
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
