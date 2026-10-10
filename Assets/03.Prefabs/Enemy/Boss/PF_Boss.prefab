@@ -963,6 +963,15 @@ MonoBehaviour:
   _phase2HpRatios:
   - 0.7
   - 0.4
+  _summonPoint: {fileID: 0}
+  _jumpTrigger: jump
+  _jumpDuration: 0.8
+  _jumpHeight: 3
+  _delayAfterLanding: 0.2
+  _landingShake:
+    Duration: 0.2
+    Magnitude: 0.2
+  _returnPattern: {fileID: 4884170672072706667}
   _bubblePrefab: {fileID: 6839276842027270784, guid: 8b80df437139a2e47b3d265a00cb7a45,
     type: 3}
   _spawnRatio: 0.6
@@ -975,7 +984,7 @@ MonoBehaviour:
   _minSpacing: 2
   _maxDuration: 60
   _endDamageRatio: 0.15
-  _loopClip: {fileID: 0}
+  _loopClip: {fileID: 7400000, guid: fa579bddf70022d4d847483975a86125, type: 2}
   _loopEndTrigger: angryEnd
   _spawnDelayAfterLoop: 0
   _idleState: Boss_Idle
