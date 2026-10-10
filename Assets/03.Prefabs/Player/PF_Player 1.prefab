@@ -853,6 +853,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 68.8
       objectReference: {fileID: 0}
+    - target: {fileID: 7410000000000000003, guid: b7a4e92d801d4e60a41e49ab643425c1,
+        type: 3}
+      propertyPath: _phaseOffset
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7410000000000000003, guid: b7a4e92d801d4e60a41e49ab643425c1,
+        type: 3}
+      propertyPath: _floatAmplitude
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7410000000000000003, guid: b7a4e92d801d4e60a41e49ab643425c1,
+        type: 3}
+      propertyPath: _floatFrequency
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7410000000000000003, guid: b7a4e92d801d4e60a41e49ab643425c1,
+        type: 3}
+      propertyPath: _rotationAmplitude
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 7410000000000000201, guid: b7a4e92d801d4e60a41e49ab643425c1,
         type: 3}
       propertyPath: m_LocalPosition.x
