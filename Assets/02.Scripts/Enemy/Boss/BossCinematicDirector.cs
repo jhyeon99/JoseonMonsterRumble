@@ -2,13 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 /// <summary>
 /// 보스전 연출 감독. 씬에 빈 오브젝트로 하나 두면 보스 이벤트에 맞춰 자동 재생 (보스 자식에 두지 않기: 처치 후 보스가 꺼짐).
 /// - 등장: 플레이어 조작 잠금 + 무적, 레터박스, 카메라가 보스 쪽으로 이동 + 줌, 보스 이름 타이틀 → 원래대로
 /// - 2페이즈(하울링): 조작 잠금 + 무적, 화면 플래시, 보스 분노 색조 + 화면 색조, 음악 전환
-/// - 처치(마무리 공격 적중 후): 조작 잠금 + 무적, 레터박스, 음악 페이드 아웃 → 처치 연출이 끝나면 해제
+/// - 처치(마무리 공격 적중 후): 조작 잠금 + 무적, 흰 화면 플래시 + 슬로모션, 레터박스, 음악 페이드 아웃
+///   → 처치 연출이 끝나면 클리어 문구 표시 후 해제 (On Defeat Sequence Finished 이벤트로 스테이지 클리어 연결)
 /// 레터박스 / 타이틀 / 플래시 / 화면 색조 UI는 실행 시 자동으로 만듦 (따로 만들 필요 없음).
 /// </summary>
 public class BossCinematicDirector : MonoBehaviour
@@ -147,6 +149,68 @@ public class BossCinematicDirector : MonoBehaviour
     [SerializeField, Min(0.1f)]
     private float _defeatLockTimeout = 6f;
 
+    [Tooltip("마무리 공격이 맞는 순간 화면 플래시")]
+    [SerializeField]
+    private Color _defeatFlashColor = Color.white;
+
+    [SerializeField, Range(0f, 1f)]
+    private float _defeatFlashPeakAlpha = 1f;
+
+    [SerializeField, Min(0.01f)]
+    private float _defeatFlashDuration = 0.6f;
+
+    [Tooltip("슬로모션 시간 배율 (1이면 사용 안 함). 마무리 공격 히트스톱이 끝난 뒤 시작")]
+    [SerializeField, Range(0.05f, 1f)]
+    private float _slowMotionScale = 0.25f;
+
+    [Tooltip("슬로모션 유지 시간 (실제 초)")]
+    [SerializeField, Min(0f)]
+    private float _slowMotionHold = 0.6f;
+
+    [Tooltip("평소 속도로 돌아오는 시간 (실제 초)")]
+    [SerializeField, Min(0.01f)]
+    private float _slowMotionRecover = 0.5f;
+
+    [Tooltip("처치 순간 효과음 (선택)")]
+    [SerializeField]
+    private AudioClip _defeatSfx;
+
+    [Header("클리어 문구")]
+    [Tooltip("처치 연출이 끝난 뒤 표시 (비우면 표시 안 함)")]
+    [SerializeField]
+    private string _clearText = "격파";
+
+    [Tooltip("클리어 문구 아래 작게 표시 (비우면 표시 안 함)")]
+    [SerializeField]
+    private string _clearSubtext = "";
+
+    [SerializeField, Min(1f)]
+    private float _clearFontSize = 110f;
+
+    [SerializeField]
+    private Color _clearColor = new Color(1f, 0.86f, 0.45f, 1f);
+
+    [Tooltip("클리어 문구 세로 위치 (화면 아래 0 ~ 위 1)")]
+    [SerializeField, Range(0f, 1f)]
+    private float _clearHeight = 0.55f;
+
+    [SerializeField, Min(0.01f)]
+    private float _clearFadeIn = 0.5f;
+
+    [SerializeField, Min(0f)]
+    private float _clearHold = 2f;
+
+    [SerializeField, Min(0.01f)]
+    private float _clearFadeOut = 0.6f;
+
+    [Tooltip("클리어 문구가 나타날 때 효과음 (선택)")]
+    [SerializeField]
+    private AudioClip _clearSfx;
+
+    [Tooltip("처치 연출이 모두 끝나고 조작이 풀릴 때 (스테이지 클리어 / 다음 씬 연결용)")]
+    [SerializeField]
+    private UnityEvent _onDefeatSequenceFinished;
+
     [Header("UI")]
     [SerializeField]
     private int _canvasSortingOrder = 50;
@@ -166,6 +230,8 @@ public class BossCinematicDirector : MonoBehaviour
     private Coroutine _letterboxRoutine;
     private Coroutine _defeatRoutine;
     private bool _isDefeatFinished;
+    private CanvasGroup _clearGroup;
+    private bool _isSlowMotion;
 
     private void Awake()
     {
@@ -224,6 +290,13 @@ public class BossCinematicDirector : MonoBehaviour
         // 연출 도중 꺼져도 플레이어가 잠긴 채 남지 않도록
         _lockCount = 1;
         UnlockPlayer();
+
+        // 슬로모션 도중 꺼지면 시간이 느린 채로 남지 않도록
+        if (_isSlowMotion)
+        {
+            _isSlowMotion = false;
+            Time.timeScale = 1f;
+        }
 
         if (_cameraFollow != null)
         {
@@ -326,7 +399,7 @@ public class BossCinematicDirector : MonoBehaviour
         }
 
         PlayBgm(_phase2Bgm);
-        StartCoroutine(FlashRoutine());
+        StartCoroutine(FlashRoutine(_flashColor, _flashPeakAlpha, _flashDuration));
         StartCoroutine(TintRoutine(true));
 
         yield return Wait(_boss.HowlDuration);
@@ -343,6 +416,11 @@ public class BossCinematicDirector : MonoBehaviour
     {
         _isDefeatFinished = false;
         LockPlayer();
+
+        // 마무리 공격이 맞는 순간: 흰 화면 플래시 + 슬로모션
+        StartCoroutine(FlashRoutine(_defeatFlashColor, _defeatFlashPeakAlpha, _defeatFlashDuration));
+        StartCoroutine(SlowMotionRoutine());
+        PlaySfx(_defeatSfx);
 
         if (_letterboxOnDefeat)
         {
@@ -363,6 +441,15 @@ public class BossCinematicDirector : MonoBehaviour
             yield return null;
         }
 
+        // 클리어 문구
+        if (_clearGroup != null)
+        {
+            PlaySfx(_clearSfx);
+            yield return FadeCanvasGroup(_clearGroup, 0f, 1f, _clearFadeIn);
+            yield return Wait(_clearHold);
+            yield return FadeCanvasGroup(_clearGroup, 1f, 0f, _clearFadeOut);
+        }
+
         if (_letterboxOnDefeat)
         {
             SetLetterbox(false);
@@ -370,9 +457,10 @@ public class BossCinematicDirector : MonoBehaviour
 
         UnlockPlayer();
         _defeatRoutine = null;
+        _onDefeatSequenceFinished?.Invoke();
     }
 
-    private IEnumerator FlashRoutine()
+    private IEnumerator FlashRoutine(Color color, float peakAlpha, float duration)
     {
         if (_flashImage == null)
         {
@@ -380,18 +468,56 @@ public class BossCinematicDirector : MonoBehaviour
         }
 
         float elapsed = 0f;
-        while (elapsed < _flashDuration)
+        while (elapsed < duration)
         {
             elapsed += DeltaTime();
-            float t = Mathf.Clamp01(elapsed / _flashDuration);
+            float t = Mathf.Clamp01(elapsed / duration);
 
             // 순간 번쩍 → 서서히 사라짐
             float alpha = t < 0.1f ? Mathf.Lerp(0f, 1f, t / 0.1f) : 1f - Mathf.SmoothStep(0f, 1f, (t - 0.1f) / 0.9f);
-            SetImageAlpha(_flashImage, _flashColor, _flashPeakAlpha * alpha);
+            SetImageAlpha(_flashImage, color, peakAlpha * alpha);
             yield return null;
         }
 
-        SetImageAlpha(_flashImage, _flashColor, 0f);
+        SetImageAlpha(_flashImage, color, 0f);
+    }
+
+    /// <summary>마무리 공격 히트스톱이 끝나면 느려졌다가 서서히 평소 속도로</summary>
+    private IEnumerator SlowMotionRoutine()
+    {
+        if (_slowMotionScale >= 1f)
+        {
+            yield break;
+        }
+
+        // 히트스톱과 겹치면 서로 timeScale을 덮어쓰므로 끝날 때까지 대기
+        while (HitStop.IsActive)
+        {
+            yield return null;
+        }
+
+        _isSlowMotion = true;
+        float elapsed = 0f;
+        float total = _slowMotionHold + _slowMotionRecover;
+
+        while (elapsed < total)
+        {
+            if (!PauseController.IsPaused)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float recover = Mathf.Clamp01((elapsed - _slowMotionHold) / _slowMotionRecover);
+                Time.timeScale = Mathf.Lerp(_slowMotionScale, 1f, Mathf.SmoothStep(0f, 1f, recover));
+            }
+
+            yield return null;
+        }
+
+        if (!PauseController.IsPaused)
+        {
+            Time.timeScale = 1f;
+        }
+
+        _isSlowMotion = false;
     }
 
     /// <summary>분노 색조 켜기 / 끄기 (보스 스프라이트 + 화면)</summary>
@@ -529,6 +655,14 @@ public class BossCinematicDirector : MonoBehaviour
         }
     }
 
+    private static void PlaySfx(AudioClip clip)
+    {
+        if (clip != null && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySfx(clip);
+        }
+    }
+
     private void PlayBgm(AudioClip clip)
     {
         if (clip != null && AudioManager.Instance != null)
@@ -587,6 +721,28 @@ public class BossCinematicDirector : MonoBehaviour
         {
             CreateText("Subtitle", titleRect, _subtitle, _subtitleFontSize, new Vector2(0f, 50f));
         }
+
+        // 클리어 문구
+        if (!string.IsNullOrEmpty(_clearText))
+        {
+            var clearObject = new GameObject("ClearTitle", typeof(RectTransform), typeof(CanvasGroup));
+            clearObject.transform.SetParent(canvasObject.transform, false);
+            var clearRect = (RectTransform)clearObject.transform;
+            clearRect.anchorMin = new Vector2(0f, _clearHeight);
+            clearRect.anchorMax = new Vector2(1f, _clearHeight);
+            clearRect.sizeDelta = new Vector2(0f, 240f);
+            _clearGroup = clearObject.GetComponent<CanvasGroup>();
+            _clearGroup.alpha = 0f;
+            _clearGroup.blocksRaycasts = false;
+            _clearGroup.interactable = false;
+
+            CreateText("Clear", clearRect, _clearText, _clearFontSize, new Vector2(0f, 20f)).color = _clearColor;
+
+            if (!string.IsNullOrEmpty(_clearSubtext))
+            {
+                CreateText("ClearSub", clearRect, _clearSubtext, _subtitleFontSize, new Vector2(0f, -70f));
+            }
+        }
     }
 
     private static Image CreateImage(string objectName, Transform parent, Color color)
@@ -599,7 +755,7 @@ public class BossCinematicDirector : MonoBehaviour
         return image;
     }
 
-    private void CreateText(string objectName, RectTransform parent, string text, float size, Vector2 offset)
+    private TextMeshProUGUI CreateText(string objectName, RectTransform parent, string text, float size, Vector2 offset)
     {
         var textObject = new GameObject(objectName, typeof(RectTransform), typeof(TextMeshProUGUI));
         textObject.transform.SetParent(parent, false);
@@ -621,6 +777,7 @@ public class BossCinematicDirector : MonoBehaviour
         tmp.color = _titleColor;
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.raycastTarget = false;
+        return tmp;
     }
 
     private static void Stretch(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax)
