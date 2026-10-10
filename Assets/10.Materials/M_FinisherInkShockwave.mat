@@ -26,6 +26,9 @@ Material:
     m_Ints: []
     m_Floats:
     - _ScreenFade: 0
+    - _MonochromeThreshold: 0.45
+    - _MonochromeSoftness: 0.025
+    - _RestorationProgress: 0
     m_Colors:
     - _CenterAspect: {r: 0.5, g: 0.5, b: 1, a: 0}
     - _Burst: {r: 0, g: 0, b: 0, a: 0}
