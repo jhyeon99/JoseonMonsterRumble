@@ -122,6 +122,12 @@ public class Boss : MonoBehaviour, IFinishable
     /// <summary>페이즈 변경 (2 = 2페이즈 시작)</summary>
     public event Action<int> OnPhaseChanged;
 
+    /// <summary>처치 연출(날려 보내기 / 처치 애니메이션)이 끝남. 보스가 꺼지기 직전</summary>
+    public event Action OnDefeatFinished;
+
+    /// <summary>true인 동안 등장 상태에서 패턴으로 넘어가지 않음 (등장 연출이 끝날 때까지 대기)</summary>
+    public bool HoldIntro { get; set; }
+
     private readonly BossStateMachine _stateMachine = new BossStateMachine();
     private readonly List<BossPattern> _patterns = new List<BossPattern>();
     private readonly List<BossPattern> _candidates = new List<BossPattern>();
@@ -359,6 +365,11 @@ public class Boss : MonoBehaviour, IFinishable
     public void NotifyDefeated()
     {
         OnDefeated?.Invoke(this);
+    }
+
+    public void NotifyDefeatFinished()
+    {
+        OnDefeatFinished?.Invoke();
     }
 
     #endregion

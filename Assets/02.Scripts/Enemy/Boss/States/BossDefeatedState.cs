@@ -188,6 +188,7 @@ public class BossDefeatedState : BossState
     private void Finish()
     {
         _isFinished = true;
+        _boss.NotifyDefeatFinished();
 
         if (_boss.DisableOnDefeat)
         {
