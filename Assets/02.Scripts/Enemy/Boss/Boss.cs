@@ -31,6 +31,10 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField, Min(0f)]
     private float _introDuration = 1.5f;
 
+    [Tooltip("등장 연출(하울링)에서도 입 이펙트(BossHowl) 재생. 타이밍은 Howl Vfx Delay를 같이 사용")]
+    [SerializeField]
+    private bool _playIntroHowlVfx = true;
+
     [Header("패턴 사이 대기 (초, 최소 ~ 최대)")]
     [SerializeField]
     private Vector2 _phase1IdleRange = new Vector2(0.8f, 1.4f);
@@ -43,11 +47,20 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField, Min(0f)]
     private float _howlDuration = 2.5f;
 
+    [Tooltip("하울링 시작 후 입 이펙트(BossHowl)가 터지기까지 (초). 등장 / 페이즈 전환 하울링 공용. 애니메이션에서 입을 벌리는 타이밍에 맞춤")]
+    [SerializeField, Min(0f)]
+    private float _howlVfxDelay = 0f;
+
     [SerializeField]
     private CameraShakeSettings _howlShake = new CameraShakeSettings(1.2f, 0.25f);
 
     [SerializeField]
     private CameraZoomSettings _howlZoom = new CameraZoomSettings(0.08f, 0.3f, 1.4f, 0.6f, 0.2f, 2f);
+
+    [Header("입")]
+    [Tooltip("입 위치 (하울링 이펙트 등). 비어 있으면 자식 중 이름이 \"Mouth\"인 오브젝트를 찾고, 없으면 몸 중심 사용")]
+    [SerializeField]
+    private Transform _mouth;
 
     [Header("처치")]
     [Tooltip("마무리 공격을 맞은 뒤 사라질 때까지 (초)")]
@@ -182,7 +195,9 @@ public class Boss : MonoBehaviour, IFinishable
     public float GroundY { get; private set; }
 
     public float IntroDuration => _introDuration;
+    public bool PlayIntroHowlVfx => _playIntroHowlVfx;
     public float HowlDuration => _howlDuration;
+    public float HowlVfxDelay => _howlVfxDelay;
     public CameraShakeSettings HowlShake => _howlShake;
     public CameraZoomSettings HowlZoom => _howlZoom;
     public float DefeatDuration => _defeatDuration;
@@ -240,6 +255,12 @@ public class Boss : MonoBehaviour, IFinishable
     public Vector2 CenterPosition =>
         _bodyCollider != null ? (Vector2)_bodyCollider.bounds.center : (Vector2)transform.position;
 
+    /// <summary>입 위치 (입이 지정되지 않았으면 몸 중심)</summary>
+    public Vector2 MouthPosition => _mouth != null ? (Vector2)_mouth.position : CenterPosition;
+
+    /// <summary>오른쪽을 보고 있는지</summary>
+    public bool IsFacingRight => FacingX > 0f;
+
     /// <summary>살아 있는 소환물 수 (독 방울 + 올챙이)</summary>
     public int MinionCount
     {
@@ -262,6 +283,11 @@ public class Boss : MonoBehaviour, IFinishable
         _body = GetComponent<Rigidbody2D>();
         _bodyCollider = GetComponent<Collider2D>();
         GroundY = transform.position.y;
+
+        if (_mouth == null)
+        {
+            _mouth = FindChildRecursive(transform, "Mouth");
+        }
 
         // 보스는 스크립트로만 움직임. Dynamic이면 중력 / 플레이어와의 충돌로 튀어 오를 수 있음
         if (_body != null && _body.bodyType != RigidbodyType2D.Kinematic)
@@ -803,6 +829,38 @@ public class Boss : MonoBehaviour, IFinishable
     }
 
     #endregion
+
+    private static Transform FindChildRecursive(Transform parent, string childName)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.name == childName)
+            {
+                return child;
+            }
+
+            Transform found = FindChildRecursive(child, childName);
+            if (found != null)
+            {
+                return found;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>입 위치에서 하울링 이펙트 재생 (등장 / 페이즈 전환 공용)</summary>
+    public void PlayHowlVfx()
+    {
+        if (EffectManager.Instance == null)
+        {
+            Debug.LogWarning($"{name}: EffectManager가 없어 하울링 이펙트를 재생하지 못했습니다.", this);
+            return;
+        }
+
+        Log("하울링 이펙트 재생");
+        EffectManager.Instance.PlayBossHowl(MouthPosition, IsFacingRight);
+    }
 
     public void Log(string message)
     {
