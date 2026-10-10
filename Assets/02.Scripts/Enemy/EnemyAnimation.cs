@@ -88,6 +88,13 @@ public class EnemyAnimation : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        // AI 상태와 Animator 상태를 재활성화 후에도 함께 유지한다.
+        if (_animator != null)
+            _animator.keepAnimatorStateOnDisable = true;
+    }
+
     public void SetRunning(bool isRunning)
     {
         _animator.SetBool(_isRunning, isRunning);
