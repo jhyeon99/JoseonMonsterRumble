@@ -7,7 +7,7 @@ using UnityEngine;
 /// 레이어는 Enemy (플레이어 공격에 맞도록), Rigidbody2D + 콜라이더 필요 (Rigidbody2D는 자동으로 Kinematic).
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
-public class BossPoisonBubble : MonoBehaviour, IDamageable
+public class BossPoisonBubble : MonoBehaviour, IDamageable, IHitFeedbackSource
 {
     [Header("체력")]
     [SerializeField, Min(1f)]
@@ -50,6 +50,9 @@ public class BossPoisonBubble : MonoBehaviour, IDamageable
     private float _topY = float.PositiveInfinity;
     private float _lifeTimer;
     private bool _isPopped;
+
+    /// <summary>맞았을 때 (EnemyHitFeedback 피격 연출용)</summary>
+    public event System.Action<HitData> OnHitFeedback;
 
     /// <summary>생성 직후 호출. topY에 닿으면 사라짐 (무한대면 수명 기준)</summary>
     public void Initialize(Boss boss, float topY)
@@ -99,6 +102,8 @@ public class BossPoisonBubble : MonoBehaviour, IDamageable
         }
 
         _currentHp = Mathf.Max(0f, _currentHp - hitData.Damage);
+        OnHitFeedback?.Invoke(hitData);
+
         if (_hitFlash != null)
         {
             _hitFlash.Flash();

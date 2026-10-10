@@ -27,6 +27,8 @@ public class SoulItem : Item
     private float _scatterTimer;
     private float _currentWaitTime;
     private Vector3 _baseScale = Vector3.one;
+    private float _baseTrailTime;
+    private float _baseParticleSize = 1f;
 
     private void Awake()
     {
@@ -39,11 +41,27 @@ public class SoulItem : Item
         if (_trailRenderer == null)
         {
             _trailRenderer = GetComponentInChildren<TrailRenderer>(true);
+            if (_trailRenderer != null)
+            {
+                _baseTrailTime = _trailRenderer.time;
+            }
+        }
+        else if (_baseTrailTime <= 0f)
+        {
+            _baseTrailTime = _trailRenderer.time;
         }
 
         if (_headParticle == null)
         {
             _headParticle = GetComponentInChildren<ParticleSystem>(true);
+            if (_headParticle != null)
+            {
+                _baseParticleSize = _headParticle.main.startSizeMultiplier;
+            }
+        }
+        else if (_baseParticleSize <= 0f)
+        {
+            _baseParticleSize = _headParticle.main.startSizeMultiplier;
         }
     }
 
@@ -109,6 +127,16 @@ public class SoulItem : Item
         if (_trailRenderer != null)
         {
             _trailRenderer.widthMultiplier = 1f;
+            if (_baseTrailTime > 0f)
+            {
+                _trailRenderer.time = _baseTrailTime;
+            }
+        }
+
+        if (_headParticle != null)
+        {
+            ParticleSystem.MainModule main = _headParticle.main;
+            main.startSizeMultiplier = _baseParticleSize;
         }
 
         ResetTrail();
@@ -131,6 +159,17 @@ public class SoulItem : Item
         if (_trailRenderer != null)
         {
             _trailRenderer.widthMultiplier = scaleMultiplier;
+            if (_baseTrailTime > 0f)
+            {
+                float durationFactor = Mathf.Lerp(1f, 1.45f, Mathf.InverseLerp(1f, 2f, scaleMultiplier));
+                _trailRenderer.time = _baseTrailTime * durationFactor;
+            }
+        }
+
+        if (_headParticle != null)
+        {
+            ParticleSystem.MainModule main = _headParticle.main;
+            main.startSizeMultiplier = _baseParticleSize * scaleMultiplier;
         }
 
         ApplyColor(color);

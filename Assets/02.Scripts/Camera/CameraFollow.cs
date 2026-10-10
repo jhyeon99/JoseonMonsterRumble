@@ -31,7 +31,27 @@ public class CameraFollow : MonoBehaviour
     // 따라가기 기준 위치. 흔들림 등 연출 오프셋(CameraShake)은 매 프레임 이 위에 얹혀서 누적되지 않음
     private Vector3 _basePosition;
 
+    // 연출용 초점 (보스 등장 등). 켜져 있으면 대상 대신 이 위치를 따라감
+    private bool _hasFocus;
+    private Vector3 _focusPoint;
+    private float _smoothTimeOverride = -1f;
+
     public Transform Target => _target;
+
+    /// <summary>연출 중 대상 대신 이 위치를 비춤. smoothTime이 0 이상이면 그 부드러움으로 이동</summary>
+    public void SetFocus(Vector3 worldPoint, float smoothTime = -1f)
+    {
+        _hasFocus = true;
+        _focusPoint = worldPoint;
+        _smoothTimeOverride = smoothTime;
+    }
+
+    /// <summary>연출 초점 해제 후 원래 대상으로 복귀. smoothTime이 0 이상이면 도착할 때까지 그 부드러움 사용</summary>
+    public void ClearFocus(float smoothTime = -1f)
+    {
+        _hasFocus = false;
+        _smoothTimeOverride = smoothTime;
+    }
 
     private void Awake()
     {
@@ -54,9 +74,17 @@ public class CameraFollow : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (_target != null)
+        if (_target != null || _hasFocus)
         {
-            _basePosition = Vector3.SmoothDamp(_basePosition, GetTargetPosition(), ref _velocity, _smoothTime);
+            Vector3 goal = GetTargetPosition();
+            float smoothTime = _smoothTimeOverride >= 0f ? _smoothTimeOverride : _smoothTime;
+            _basePosition = Vector3.SmoothDamp(_basePosition, goal, ref _velocity, smoothTime);
+
+            // 초점 해제 후 원래 대상에 거의 도착하면 기본 부드러움으로
+            if (!_hasFocus && _smoothTimeOverride >= 0f && (goal - _basePosition).sqrMagnitude < 0.0025f)
+            {
+                _smoothTimeOverride = -1f;
+            }
         }
 
         transform.position = _basePosition;
@@ -74,6 +102,14 @@ public class CameraFollow : MonoBehaviour
 
     private Vector3 GetTargetPosition()
     {
+        if (_hasFocus)
+        {
+            var focus = new Vector3(_focusPoint.x, _focusPoint.y, _offset.z);
+            focus.x = Mathf.Clamp(focus.x, _minX, _maxX);
+            focus.y = Mathf.Clamp(focus.y, _minY, _maxY);
+            return focus;
+        }
+
         int signX = _target.localScale.x > 0 ? 1 : -1;
 
         var realOffset = new Vector3(signX * _offset.x, _offset.y, _offset.z);

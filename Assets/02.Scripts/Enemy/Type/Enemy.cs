@@ -1,5 +1,4 @@
 using System;
-using TMPro;
 using UnityEngine;
 
 public enum EnemyType
@@ -23,8 +22,8 @@ public abstract class Enemy : MonoBehaviour, IFinishable
     private EnemyHealth _health;
     private IAttackDirectionLock _directionLock;
     private Rigidbody2D _enemyRb;
-    private HitFlash _hitFlash;
     private EnemyMoveArea _moveArea;
+    private EnemyAirSensor _airSensor;
     private Collider2D _enemyCollider;
     private float _radius;
     private float _rightAngle;
@@ -38,8 +37,8 @@ public abstract class Enemy : MonoBehaviour, IFinishable
     public EnemyHealth Health => _health;
     public IAttackDirectionLock DirectionLock => _directionLock;
     public Rigidbody2D EnemyRb => _enemyRb;
-    public HitFlash HitFlash => _hitFlash;
     public EnemyMoveArea MoveArea => _moveArea;
+    public EnemyAirSensor AirSensor => _airSensor;
     public float Radius => _radius;
     public bool IsTargetedForBuff { get; set; } = false;
     public float RightAngle => _rightAngle;
@@ -49,7 +48,7 @@ public abstract class Enemy : MonoBehaviour, IFinishable
     public bool IsGroggy => _stateMachine.CurrentState is GroggyState;
 
     /// <summary>죽는 중이거나 날아가는 중 (더 이상 행동 / 피격 / 공격하지 않음)</summary>
-    public bool IsDefeated => _stateMachine.CurrentState is DeadState || _stateMachine.CurrentState is LaunchedState;
+    public bool IsDefeated => _stateMachine?.CurrentState is DeadState || _stateMachine?.CurrentState is LaunchedState;
 
     /// <summary>그로기 시작 (패링당했을 때 공격 컴포넌트가 호출)</summary>
     public void EnterGroggy(float duration)
@@ -100,9 +99,29 @@ public abstract class Enemy : MonoBehaviour, IFinishable
 
     #endregion
 
+    protected virtual void OnEnable()
+    {
+        // 최초 등록은 Start에서 초기화가 끝난 뒤 수행한다.
+        if (_stateMachine?.CurrentState != null && EnemyManager.Instance != null)
+        {
+            EnemyManager.Instance.AddEnemy(this);
+        }
+    }
+
     protected virtual void OnDisable()
     {
-        EnemyManager.Instance.RemoveEnemy(this);
+        if (EnemyManager.Instance != null)
+        {
+            EnemyManager.Instance.RemoveEnemy(this);
+        }
+    }
+
+    protected virtual void OnDestroy()
+    {
+        if (EnemyManager.Instance != null)
+        {
+            EnemyManager.Instance.UnregisterEnemy(this);
+        }
     }
 
     protected virtual void Awake()
@@ -114,18 +133,30 @@ public abstract class Enemy : MonoBehaviour, IFinishable
         _health = GetComponent<EnemyHealth>();
         _directionLock = GetComponent<IAttackDirectionLock>();
         _enemyRb = GetComponent<Rigidbody2D>();
-        _hitFlash = GetComponent<HitFlash>();
         _moveArea = GetComponent<EnemyMoveArea>();
+        _airSensor = GetComponent<EnemyAirSensor>();
         _enemyCollider = GetComponent<Collider2D>();
         _rightAngle = Data.AttackAngle;
         _leftAngle = 180f - Data.AttackAngle;
+        if (EnemyManager.Instance != null)
+        {
+            EnemyManager.Instance.RegisterEnemy(this);
+        }
     }
 
     protected virtual void Start()
     {
         _radius = _enemyCollider.bounds.extents.y;
-        EnemyManager.Instance.AddEnemy(this);
-        _target = GameObject.FindWithTag(Constants.Tags.Player).transform;
+        if (EnemyManager.Instance != null)
+        {
+            EnemyManager.Instance.AddEnemy(this);
+        }
+
+        var playerObj = GameObject.FindWithTag(Constants.Tags.Player);
+        if (playerObj != null)
+        {
+            _target = playerObj.transform;
+        }
     }
 
     public virtual void FindNewTarget()
@@ -150,6 +181,7 @@ public abstract class Enemy : MonoBehaviour, IFinishable
         }
 
         _stateMachine.FixedUpdate();
+        _moveType.UpdateWalkPhysics();
     }
 
     public float GetDistanceToPlayer()

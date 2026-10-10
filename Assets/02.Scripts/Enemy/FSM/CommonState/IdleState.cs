@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class IdleState : EnemyState
 {
@@ -11,9 +11,15 @@ public class IdleState : EnemyState
 
     public override void Enter()
     {
-        Debug.Log("Idle 시작");
         _enemy.DirectionLock.LockDirection();
-        _enemy.MoveType.StopMove();
+        if (_enemy.Combat is EnemyMeleeCombat melee && melee.FlyingAttack != null)
+        {
+            melee.FlyingAttack.PlayFlightAnimation();
+        }
+        else
+        {
+            _enemy.MoveType.StopMove();
+        }
         _enemy.Animation.SetRunning(true);
     }
 
@@ -33,7 +39,7 @@ public class IdleState : EnemyState
     {
         if (_enemy.MoveArea != null && _enemy.Target != null)
         {
-            if (_enemy.MoveArea.IsPositionInArea(_enemy.Target.position))
+            if (_enemy.MoveArea.IsPositionDetected(_enemy.Target.position))
             {
                 _enemy.StateMachine.ChangeState(new ChaseState(_enemy));
             }
@@ -42,6 +48,5 @@ public class IdleState : EnemyState
 
     public override void Exit()
     {
-        Debug.Log("Idle 종료");
     }
 }

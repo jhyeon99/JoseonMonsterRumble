@@ -24,6 +24,11 @@ public class GroggyState : EnemyState
     {
         _enemy = enemy;
         _duration = duration;
+        _renderer = enemy.GetComponentInChildren<SpriteRenderer>();
+        if (_renderer != null)
+        {
+            _originalColor = _renderer.color;
+        }
     }
 
     /// <summary>마무리 공격 준비 중에는 시간이 지나도 그로기가 풀리지 않게 고정</summary>
@@ -33,7 +38,6 @@ public class GroggyState : EnemyState
 
     public override void Enter()
     {
-        Debug.Log("적 그로기!");
         _timer = _duration;
         _isHeld = false;
 
@@ -41,12 +45,6 @@ public class GroggyState : EnemyState
         _enemy.DirectionLock?.LockDirection();
         _enemy.Animation.SetRunning(false);
         _enemy.Animation.SetGroggy(true);
-
-        _renderer = _enemy.GetComponentInChildren<SpriteRenderer>();
-        if (_renderer != null)
-        {
-            _originalColor = _renderer.color;
-        }
 
         _blinkTimer = 0f;
         _isBlinkOn = false;
@@ -83,7 +81,6 @@ public class GroggyState : EnemyState
 
     public override void Exit()
     {
-        Debug.Log("적 그로기 종료");
         RestoreColor();
         _enemy.Animation.SetGroggy(false);
     }

@@ -12,9 +12,9 @@ using UnityEngine;
 public class BossSpitPattern : BossPattern
 {
     [Header("침뱉기")]
-    [Tooltip("ProjectilePool에 등록된 투사체 타입 (Flying = 직선, Ground = 곡사)")]
+    [Tooltip("ProjectilePool에 등록된 투사체 타입 (BossSpit = 보스 침 전용 직선, Flying = 직선, Ground = 곡사)")]
     [SerializeField]
-    private ProjectileType _projectileType = ProjectileType.Flying;
+    private ProjectileType _projectileType = ProjectileType.BossSpit;
 
     [Tooltip("발사 위치 (입). 반사된 투사체도 이쪽으로 돌아옴")]
     [SerializeField]
@@ -24,7 +24,7 @@ public class BossSpitPattern : BossPattern
     [SerializeField]
     private int[] _shotCounts = { 3, 5, 3 };
 
-    [Tooltip("한 번 뱉는 애니메이션에서 실제로 발사하는 지점 (애니메이션 길이 대비 비율)")]
+    [Tooltip("한 번 뱉는 애니메이션에서 뱉기를 시작하는 지점 (애니메이션 길이 대비 비율). 입 이펙트가 여기서 나오고, Spit Delay 뒤에 침이 나감")]
     [SerializeField, Range(0f, 1f)]
     private float _fireRatio = 0.5f;
 
@@ -36,13 +36,26 @@ public class BossSpitPattern : BossPattern
     [SerializeField, Min(0f)]
     private float _delayBetweenShots = 0f;
 
-    [Tooltip("한 번에 여러 개를 뱉을 때 퍼지는 전체 각도 (도). 직선(Flying) 투사체만 적용, 곡사는 모두 플레이어 위치로 떨어짐")]
+    [Tooltip("한 번에 여러 개를 뱉을 때 퍼지는 전체 각도 (도). 직선(BossSpit / Flying) 투사체만 적용, 곡사(Ground)는 모두 플레이어 위치로 떨어짐")]
     [SerializeField, Range(0f, 180f)]
     private float _spreadAngle = 30f;
 
     [Tooltip("한 번에 여러 개를 뱉을 때 하나씩 나가는 간격 (초). 0이면 동시에")]
     [SerializeField, Min(0f)]
     private float _projectileInterval = 0f;
+
+    [Header("입 이펙트")]
+    [Tooltip("켜면 뱉을 때마다 BossSpit 이펙트 재생 (EffectPool에 BossSpit 등록 필요)")]
+    [SerializeField]
+    private bool _playMouthVfx = true;
+
+    [Tooltip("입 이펙트가 나오는 위치. 비어 있으면 발사 위치(Muzzle) 사용")]
+    [SerializeField]
+    private Transform _vfxPoint;
+
+    [Tooltip("입 이펙트가 나온 뒤 침이 실제로 나가기까지 (초). 입 이펙트를 끄면 사용 안 함")]
+    [SerializeField, Min(0f)]
+    private float _spitDelay = 0.1f;
 
     [Tooltip("투사체 데미지 증가율 (%)")]
     [SerializeField]
@@ -83,6 +96,17 @@ public class BossSpitPattern : BossPattern
 
             yield return WaitUntilProgress(_fireRatio);
 
+            // 입 이펙트 먼저 → Spit Delay 뒤에 침 발사
+            if (_playMouthVfx)
+            {
+                PlayMouthVfx();
+
+                if (_spitDelay > 0f)
+                {
+                    yield return new WaitForSeconds(_spitDelay);
+                }
+            }
+
             int count = _shotCounts != null && shot < _shotCounts.Length ? Mathf.Max(1, _shotCounts[shot]) : 1;
             for (int i = 0; i < count; i++)
             {
@@ -101,10 +125,20 @@ public class BossSpitPattern : BossPattern
         }
     }
 
+    private void PlayMouthVfx()
+    {
+        if (EffectManager.Instance != null)
+        {
+            Transform point = _vfxPoint != null ? _vfxPoint : _muzzle;
+            EffectManager.Instance.PlayBossSpit(point.position, Boss.IsFacingRight);
+        }
+    }
+
     /// <summary>부채꼴에서 index번째 투사체의 각도 (가운데가 플레이어 방향)</summary>
     private float GetSpreadOffset(int index, int count)
     {
-        if (count <= 1 || _projectileType != ProjectileType.Flying)
+        // 곡사(Ground)는 모두 플레이어 위치로 떨어지므로 퍼뜨리지 않음 (직선 / 보스 침은 퍼짐)
+        if (count <= 1 || _projectileType == ProjectileType.Ground)
         {
             return 0f;
         }
