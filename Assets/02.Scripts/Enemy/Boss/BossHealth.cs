@@ -98,6 +98,9 @@ public class BossHealth : MonoBehaviour, IDamageable
 
         // 보스는 넉백 없음
         ApplyDamage(hitData.Damage);
+
+        // 일반 적과 같은 피격 공통 반응 (타격 소울, 히트스톱, 카메라 흔들림)
+        GameEvents.TriggerEnemyHit(hitData);
         OnDamaged?.Invoke(hitData);
         return true;
     }
