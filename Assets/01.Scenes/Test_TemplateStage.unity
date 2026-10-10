@@ -396,6 +396,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1900000006, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
+      propertyPath: _flashColor.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1900000006, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
+      propertyPath: _flashColor.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1900000006, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
+      propertyPath: _flashColor.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5470014724525197126, guid: 90d19ac7f34305341affdaed62c6b681,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -986,6 +998,11 @@ PrefabInstance:
     - target: {fileID: 264897234835927485, guid: 4d47b5d7fe17c144ea67c4205a119ed7,
         type: 3}
       propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 420562276022660253, guid: 4d47b5d7fe17c144ea67c4205a119ed7,
+        type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1455836220450431103, guid: 4d47b5d7fe17c144ea67c4205a119ed7,
