@@ -175,6 +175,11 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        if (PauseController.IsGameplayInputBlocked)
+        {
+            return;
+        }
+
         _stateMachine.Update();
         HandleRangedAttack();
         SetGrounded(IsGrounded);
@@ -187,6 +192,11 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (PauseController.IsGameplayInputBlocked)
+        {
+            return;
+        }
+
         _stateMachine.FixedUpdate();
         Movement.ApplyGravity(_inputHandler.IsJumpKey);
         Movement.IntegrateMovement(_stateMachine.CurrentState.PlatformMode);

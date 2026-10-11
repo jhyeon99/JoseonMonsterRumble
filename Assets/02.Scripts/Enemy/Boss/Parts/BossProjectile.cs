@@ -92,6 +92,11 @@ public class BossProjectile : MonoBehaviour, IParryable
                 continue;
             }
 
+            if (damageable is PlayerHealth playerHealth && playerHealth.IsInvincible)
+            {
+                continue;
+            }
+
             var hitData = new HitData(
                 _damage,
                 _knockbackForce,

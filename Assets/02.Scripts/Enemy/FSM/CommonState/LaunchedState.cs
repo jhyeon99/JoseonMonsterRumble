@@ -55,9 +55,12 @@ public class LaunchedState : EnemyState
         _currentCenter = _startCenter;
         _spinAngle = 0f;
 
-        if (ItemPool.Instance != null)
+        ItemPool itemPool = ItemPool.Instance;
+        if (itemPool != null)
         {
-            ItemPool.Instance.SpawnDeathSouls(_startCenter, 5);
+            // A finisher bypasses TakeDamage, so its heavy-hit soul must be spawned here.
+            itemPool.SpawnHitSoul(_startCenter, true);
+            itemPool.SpawnDeathSouls(_startCenter, 5);
         }
 
         // 물리와 충돌을 끄고 직접 움직임
