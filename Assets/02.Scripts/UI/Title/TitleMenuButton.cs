@@ -92,7 +92,10 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
             return;
         }
 
-        if (!_isSelected && Input.anyKeyDown) PlayHoverSound();
+        if (!_isSelected && Input.anyKeyDown)
+        {
+            PlayHoverSound();
+        }
         ApplyHighlight(true);
     }
 
@@ -108,7 +111,10 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
             return;
         }
 
-        if (!_isSelected) PlayHoverSound();
+        if (!_isSelected)
+        {
+            PlayHoverSound();
+        }
         ApplyHighlight(true);
 
         if (EventSystem.current != null)
@@ -209,7 +215,8 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
 
     private void HandleClick()
     {
-        if (!_isInteractable || _isAnyButtonClicked)
+        // Button.onClick may have closed the panel before this handler runs.
+        if (!isActiveAndEnabled || !_isInteractable || _isAnyButtonClicked)
         {
             return;
         }
@@ -231,10 +238,11 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
         yield return new WaitForSecondsRealtime(_actionDelay);
 
         ApplyPress(false);
-        _onClickAction?.Invoke();
         _isInteractable = true;
         _isAnyButtonClicked = false;
         _clickActionCoroutine = null;
+        // The callback can disable or destroy this button. Finish cleanup first.
+        _onClickAction?.Invoke();
     }
 
     private void PlayClickSound()
