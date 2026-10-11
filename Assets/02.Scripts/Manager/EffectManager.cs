@@ -18,6 +18,16 @@ public class EffectManager : MonoBehaviour
     [SerializeField] private bool _bossMouthVfxFacesRight = false;
     [SerializeField, Min(0f)] private float _bossSpitScale = 1f;
     [SerializeField, Min(0f)] private float _bossHowlScale = 1f;
+    [Header("데미지에 따른 추가 크기 배율")]
+    [Tooltip("X: 적에게 준 데미지, Y: 기존 적 피격 이펙트 크기에 곱할 배율. 양 끝 범위 밖은 끝값으로 고정됩니다.")]
+    [SerializeField]
+    private AnimationCurve _enemyHitDamageScaleCurve = new AnimationCurve(
+        new Keyframe(0f, 0.75f), new Keyframe(15f, 1f), new Keyframe(50f, 1.35f));
+
+    [Tooltip("X: 플레이어가 받은 데미지, Y: 플레이어 피격 이펙트 크기에 곱할 배율. 양 끝 범위 밖은 끝값으로 고정됩니다.")]
+    [SerializeField]
+    private AnimationCurve _playerHitDamageScaleCurve = new AnimationCurve(
+        new Keyframe(0f, 0.75f), new Keyframe(20f, 1f), new Keyframe(30f, 1.2f));
 
     private static EffectManager _instance = null;
     public static EffectManager Instance
@@ -90,7 +100,8 @@ public class EffectManager : MonoBehaviour
     public void PlayPlayerHit(HitData hitData)
     {
         // AttackDirection.x < 0 → 왼쪽으로 밀리는 공격 = 오른쪽에서 맞음 → 좌우 반전
-        Play(EffectType.PlayerHit, hitData.HitPoint, hitData.AttackDirection.x < 0f);
+        float scale = CalculateDamageScale(_playerHitDamageScaleCurve, hitData.Damage);
+        Play(EffectType.PlayerHit, hitData.HitPoint, hitData.AttackDirection.x < 0f, scale);
     }
 
     public void PlayEnemyHit(HitData hitData)
@@ -98,6 +109,7 @@ public class EffectManager : MonoBehaviour
         float scale = hitData.IsTalisman
             ? _talismanHitScale
             : hitData.IsHeavyImpact ? _heavyEnemyHitScale : _lightEnemyHitScale;
+        scale *= CalculateDamageScale(_enemyHitDamageScaleCurve, hitData.Damage);
         Play(EffectType.EnemyHit, hitData.HitPoint, hitData.AttackDirection.x < 0f, scale);
     }
 
@@ -111,6 +123,27 @@ public class EffectManager : MonoBehaviour
     public void PlayBossHowl(Vector2 mouthPosition, bool bossFacingRight)
     {
         Play(EffectType.BossHowl, mouthPosition, bossFacingRight != _bossMouthVfxFacesRight, _bossHowlScale);
+    }
+
+    private static float CalculateDamageScale(AnimationCurve curve, float damage)
+    {
+        if (curve == null || curve.length == 0)
+        {
+            return 1f;
+        }
+
+        float clampedDamage = Mathf.Clamp(damage, curve[0].time, curve[curve.length - 1].time);
+        return Mathf.Max(0f, curve.Evaluate(clampedDamage));
+    }
+
+    public void PlayWalkDust(Vector2 position, bool flipX)
+    {
+        Play(EffectType.WalkDust, position, flipX);
+    }
+
+    public void PlayLandingDust(Vector2 position)
+    {
+        Play(EffectType.LandingDust, position);
     }
 
     /// <summary>

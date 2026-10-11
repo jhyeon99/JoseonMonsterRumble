@@ -9,6 +9,7 @@ public static class GameCursorController
 
     private static Texture2D _cursorTexture;
     private static bool _pauseVisible;
+    private static bool _deathScreenVisible;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Initialize()
@@ -19,6 +20,7 @@ public static class GameCursorController
         Application.quitting += RestoreDefault;
 
         _pauseVisible = false;
+        _deathScreenVisible = false;
         _cursorTexture = Resources.Load<Texture2D>(CursorResourcePath);
         if (_cursorTexture == null)
         {
@@ -32,6 +34,12 @@ public static class GameCursorController
         Apply(SceneManager.GetActiveScene().name);
     }
 
+    public static void SetDeathScreenVisible(bool visible)
+    {
+        _deathScreenVisible = visible;
+        Apply(SceneManager.GetActiveScene().name);
+    }
+
     private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         _pauseVisible = false;
@@ -40,7 +48,7 @@ public static class GameCursorController
 
     private static void Apply(string sceneName)
     {
-        bool show = sceneName == TitleSceneName || _pauseVisible;
+        bool show = sceneName == TitleSceneName || _pauseVisible || _deathScreenVisible;
         Cursor.SetCursor(show ? _cursorTexture : null, show ? Hotspot : Vector2.zero, CursorMode.Auto);
         Cursor.visible = show;
     }

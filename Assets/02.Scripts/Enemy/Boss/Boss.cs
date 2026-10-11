@@ -133,6 +133,10 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField]
     private string _howlTrigger = "howl";
 
+    [Tooltip("대기 애니메이터 상태 이름. 하울링(페이즈 전환) 시 진행 중인 애니메이션을 끊고 이 상태로 돌린 뒤 하울링 트리거를 보냄")]
+    [SerializeField]
+    private string _idleStateName = "Boss_Idle";
+
     [SerializeField]
     private string _defeatTrigger = "defeat";
 
@@ -176,8 +180,11 @@ public class Boss : MonoBehaviour, IFinishable
     private Animator _animator;
     private Rigidbody2D _body;
     private Collider2D _bodyCollider;
+    private bool _isBodyCollisionOff;
+    private bool _bodyWasTrigger;
     private Transform _player;
     private BossPattern _lastPattern;
+    private BossPattern _queuedPattern;
     private bool _isAnimatorPaused;
     private float _animatorSpeedBeforePause = 1f;
 
@@ -236,6 +243,11 @@ public class Boss : MonoBehaviour, IFinishable
     {
         get
         {
+            if (_queuedPattern != null)
+            {
+                return true;
+            }
+
             foreach (BossPattern pattern in _patterns)
             {
                 if (pattern != null && pattern.IsForced && pattern.CanUse())
@@ -426,6 +438,7 @@ public class Boss : MonoBehaviour, IFinishable
     {
         _phase = phase;
         _lastPattern = null;
+        _queuedPattern = null;
         OnPhaseChanged?.Invoke(phase);
     }
 
@@ -448,6 +461,20 @@ public class Boss : MonoBehaviour, IFinishable
     {
         selected = null;
         _candidates.Clear();
+
+        // 예약된 패턴(소환 후 찍기로 복귀 등)이 가장 먼저. 조건(층 / 쿨타임 등) 무시
+        if (_queuedPattern != null)
+        {
+            BossPattern queued = _queuedPattern;
+            _queuedPattern = null;
+
+            if (queued.isActiveAndEnabled)
+            {
+                selected = queued;
+                _lastPattern = selected;
+                return true;
+            }
+        }
 
         // 체력 비율 발동 등 무조건 써야 하는 패턴이 먼저
         foreach (BossPattern pattern in _patterns)
@@ -502,6 +529,12 @@ public class Boss : MonoBehaviour, IFinishable
 
         _lastPattern = selected;
         return true;
+    }
+
+    /// <summary>다음 패턴을 지정 (대기 시간 없이 바로, 사용 조건 무시). 페이즈가 바뀌면 취소</summary>
+    public void QueuePattern(BossPattern pattern)
+    {
+        _queuedPattern = pattern;
     }
 
     /// <summary>플레이어가 있는 층 (1 ~ 3)</summary>
@@ -759,6 +792,74 @@ public class Boss : MonoBehaviour, IFinishable
     }
 
     /// <summary>예약된 트리거 취소 (패턴이 끊겼을 때 공격 애니메이션이 뒤늦게 재생되지 않도록)</summary>
+    /// <summary>
+    /// 몸통 콜라이더의 물리 충돌을 켜고 끔 (점프 중 플레이어를 밀어내지 않도록 등).
+    /// 끌 때는 트리거로 바꿔서 위치 / 크기(CenterPosition 등)는 그대로 유지
+    /// </summary>
+    public void SetBodyCollision(bool enabled)
+    {
+        if (_bodyCollider == null)
+        {
+            return;
+        }
+
+        if (!enabled)
+        {
+            if (_isBodyCollisionOff)
+            {
+                return;
+            }
+
+            _isBodyCollisionOff = true;
+            _bodyWasTrigger = _bodyCollider.isTrigger;
+            _bodyCollider.isTrigger = true;
+            return;
+        }
+
+        if (!_isBodyCollisionOff)
+        {
+            return;
+        }
+
+        _isBodyCollisionOff = false;
+        _bodyCollider.isTrigger = _bodyWasTrigger;
+    }
+
+    /// <summary>
+    /// 진행 중인 애니메이션을 모두 끊고 대기 상태로 즉시 전환.
+    /// 남은 트리거 / Bool을 초기화하고, 멈춰 둔 애니메이터는 다시 재생. 바로 이어서 보낸 트리거가 대기 상태에서 평가됨
+    /// </summary>
+    public void ForceIdleAnimation()
+    {
+        if (_animator == null || !_animator.isActiveAndEnabled)
+        {
+            return;
+        }
+
+        ResumeAnimator();
+
+        foreach (AnimatorControllerParameter parameter in _animator.parameters)
+        {
+            if (parameter.type == AnimatorControllerParameterType.Trigger)
+            {
+                _animator.ResetTrigger(parameter.nameHash);
+            }
+            else if (parameter.type == AnimatorControllerParameterType.Bool)
+            {
+                _animator.SetBool(parameter.nameHash, false);
+            }
+        }
+
+        if (!PlayState(_idleStateName))
+        {
+            Debug.LogWarning($"{name}: 대기 상태({_idleStateName})가 애니메이터에 없습니다. Idle State Name을 확인하세요.", this);
+            return;
+        }
+
+        // Play는 다음 애니메이터 업데이트에 적용되므로 바로 적용 (이어서 보낸 트리거가 이전 상태에서 평가되지 않도록)
+        _animator.Update(0f);
+    }
+
     public void ResetTrigger(string parameter)
     {
         if (TryGetParameter(parameter, out int hash))
