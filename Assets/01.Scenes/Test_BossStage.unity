@@ -3305,17 +3305,17 @@ PrefabInstance:
     - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _spikeHoldTime
-      value: 0.3
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _spikeRiseTime
-      value: 0.3
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _spikeSinkTime
-      value: 0.2
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
@@ -3338,6 +3338,16 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 159123632947961680, guid: e77274ac9c54c834f9fbd20a49cbc6a1,
         type: 3}
+    - target: {fileID: 5040009013939251897, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _flightTimeRange.x
+      value: 1.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5040009013939251897, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _flightTimeRange.y
+      value: 2.4
+      objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _spawnLine
