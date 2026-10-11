@@ -24,6 +24,11 @@ public class PlayerMoveState : PlayerBaseState
             return;
         }
 
+        if (_inputHandler.TryUsePotionInput() && _player.TryEnterPotion())
+        {
+            return;
+        }
+
         if (_inputHandler.TryUseAttackInput() && _player.IsGrounded)
         {
             // 앞에 그로기 적이 있으면 일반 공격 대신 마무리 공격

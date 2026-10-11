@@ -170,6 +170,10 @@ public sealed class StageManager : MonoBehaviour
         }
 
         _activeCheckpointId = point.CheckpointId;
+        if (_playerHealth != null)
+        {
+            _playerHealth.RefillPotions();
+        }
         RefreshCheckpointVisuals(point.gameObject.scene);
         return true;
     }
@@ -575,6 +579,7 @@ public sealed class StageManager : MonoBehaviour
         }
 
         _playerHealth.OnDied += HandlePlayerDied;
+        _playerHealth.RefillPotions();
         if (IsRespawning)
         {
             _playerHealth.SetRespawnProtected(true);

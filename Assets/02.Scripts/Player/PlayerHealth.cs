@@ -11,8 +11,15 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     public float CurrentHealth => _currentHealth;
     [SerializeField, ReadOnly] private int _potionCount;
     public int PotionCount => _potionCount;
-    [SerializeField] private int _maxPotionCount = 10;
-    [SerializeField] private float _potionHealAmount = 10f;
+    [SerializeField] private int _maxPotionCount = 3;
+    [SerializeField, Range(0.1f, 1.0f)] private float _potionHealRatio = 0.7f;
+    [SerializeField, Min(0.1f)] private float _potionCooldown = 0.48f;
+
+    private float _potionCooldownTimer;
+    public float PotionCooldown => _potionCooldown;
+    public float PotionCooldownTimer => _potionCooldownTimer;
+    public float PotionCooldownRatio => _potionCooldown > 0f ? Mathf.Clamp01(_potionCooldownTimer / _potionCooldown) : 0f;
+    public bool CanUsePotion => !_isDead && _potionCount > 0 && _potionCooldownTimer <= 0f && !Mathf.Approximately(_currentHealth, _maxHealth);
 
     [SerializeField] private float _invincibleTime = 1.0f;
 
@@ -42,12 +49,14 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     public event Action OnDied;
     public event Action<HitData> OnHit;
     public event Action<int> OnPotionChanged;
+    public event Action OnPotionUsed;
     public event Action<HitData> OnDodgeSuccess;
 
 
     private void Awake()
     {
         _currentHealth = _maxHealth;
+        _potionCount = _maxPotionCount;
         _isDead = false;
         _isRespawnProtected = false;
         LastFatalHitData = default;
@@ -146,14 +155,37 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         OnPotionChanged?.Invoke(_potionCount);
     }
 
+    private void Update()
+    {
+        if (_potionCooldownTimer > 0f)
+        {
+            _potionCooldownTimer -= Time.deltaTime;
+            if (_potionCooldownTimer < 0f)
+            {
+                _potionCooldownTimer = 0f;
+            }
+        }
+    }
+
+    public void RefillPotions()
+    {
+        _potionCount = _maxPotionCount;
+        _potionCooldownTimer = 0f;
+        OnPotionChanged?.Invoke(_potionCount);
+    }
+
     public bool TryUsePotion()
     {
         if (_isDead || _potionCount <= 0) return false;
+        if (_potionCooldownTimer > 0f) return false;
         if (Mathf.Approximately(_currentHealth, _maxHealth)) return false;
 
-        Heal(_potionHealAmount);
+        float healAmount = _maxHealth * _potionHealRatio;
+        Heal(healAmount);
         _potionCount--;
+        _potionCooldownTimer = _potionCooldown;
         OnPotionChanged?.Invoke(_potionCount);
+        OnPotionUsed?.Invoke();
         return true;
     }
 
