@@ -165,6 +165,7 @@ public class Boss : MonoBehaviour, IFinishable
 
     /// <summary>처치 연출(날려 보내기 / 처치 애니메이션)이 끝남. 보스가 꺼지기 직전</summary>
     public event Action OnDefeatFinished;
+    public event Action<BossState, BossState> OnAudioStateChanged;
 
     /// <summary>true인 동안 등장 상태에서 패턴으로 넘어가지 않음 (등장 연출이 끝날 때까지 대기)</summary>
     public bool HoldIntro { get; set; }
@@ -332,6 +333,7 @@ public class Boss : MonoBehaviour, IFinishable
         }
 
         _stateMachine.ChangeState(new BossWaitState(this));
+        if (!TryGetComponent<BossAudio>(out _)) gameObject.AddComponent<BossAudio>();
     }
 
     private void Start()
@@ -413,7 +415,9 @@ public class Boss : MonoBehaviour, IFinishable
 
     public void ChangeState(BossState nextState)
     {
+        BossState previous = CurrentState;
         _stateMachine.ChangeState(nextState);
+        OnAudioStateChanged?.Invoke(previous, nextState);
     }
 
     /// <summary>패턴 사이 대기로 (페이즈별 대기 시간)</summary>

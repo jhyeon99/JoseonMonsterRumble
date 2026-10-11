@@ -157,9 +157,9 @@ public sealed class DeathScreenView : MonoBehaviour
 
     private void PlayRunButtonClickSound()
     {
-        if (!_restartTriggered && _canvasGroup != null && _canvasGroup.interactable && _runButtonClickClip != null)
+        if (!_restartTriggered && _canvasGroup != null && _canvasGroup.interactable)
         {
-            AudioManager.Instance.PlaySfx(_runButtonClickClip, _runButtonClickVolume);
+            AudioManager.Instance.PlayUiEvent("UI.Click", _runButtonClickClip, _runButtonClickVolume);
         }
     }
 
@@ -208,6 +208,7 @@ public sealed class DeathScreenView : MonoBehaviour
 
     public IEnumerator FadeIn()
     {
+        AudioManager.Instance.PlayMusicEvent("Music.Death", gameObject.scene);
         InitializeDeathEventSystem();
         GameCursorController.SetDeathScreenVisible(true);
         _restartTriggered = false;

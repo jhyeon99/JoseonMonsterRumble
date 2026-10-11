@@ -151,12 +151,14 @@ public class PauseAudioSettingsView : MonoBehaviour
     {
         _bgmVolume = Mathf.Clamp01(value);
         _bgmVolumeChanged.Invoke(_bgmVolume);
+        if (_isReady) AudioManager.Instance.PlaySlider();
     }
 
     private void HandleSfxVolumeChanged(float value)
     {
         _sfxVolume = Mathf.Clamp01(value);
         _sfxVolumeChanged.Invoke(_sfxVolume);
+        if (_isReady) AudioManager.Instance.PlaySlider();
     }
 
     private void RefreshView()
