@@ -240,11 +240,15 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
     private void PlayClickSound()
     {
         AudioManager manager = AudioManager.Instance;
+        if (manager == null)
+            return;
         manager.PlayUiEvent("UI.Click", _clickSound != null ? _clickSound : manager.ButtonClickClip, _clickVolume);
     }
     private void PlayHoverSound()
     {
         AudioManager manager = AudioManager.Instance;
+        if (manager == null)
+            return;
         manager.PlayUiEvent("UI.Hover", _hoverSound != null ? _hoverSound : manager.ButtonHoverClip, _hoverVolume);
     }
 }

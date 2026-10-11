@@ -15,6 +15,14 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
     private const float DefaultVolume = 1f;
 
     private static AudioManager _instance;
+    private static bool _isShuttingDown;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetLifecycle()
+    {
+        _instance = null;
+        _isShuttingDown = false;
+    }
 
     [Header("BGM 채널")]
     [SerializeField] private AudioSource _bgmSource;
@@ -35,6 +43,8 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
     {
         get
         {
+            if (_isShuttingDown || !Application.isPlaying)
+                return null;
             if (_instance == null)
             {
                 AudioManager existing = FindFirstObjectByType<AudioManager>();
@@ -1004,11 +1014,20 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         _musicSequence++;
     }
 
+    private void OnApplicationQuit()
+    {
+        if (_instance == this)
+        {
+            _isShuttingDown = true;
+        }
+    }
+
     private void OnDestroy()
     {
         UnsubscribeSceneEvents();
         if (_instance == this)
         {
+            _isShuttingDown = true;
             _instance = null;
         }
     }
