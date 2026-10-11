@@ -340,6 +340,13 @@ public class BossSpitProjectile : Projectile
             _animator.SetBool(_endBool, true);
         }
 
+        // 꺼지는 중인 같은 프레임에 충돌이 들어오면 코루틴을 못 돌리므로 바로 정리
+        if (!gameObject.activeInHierarchy)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
         _endRoutine = StartCoroutine(DisableAfter(GetEndDuration()));
     }
 

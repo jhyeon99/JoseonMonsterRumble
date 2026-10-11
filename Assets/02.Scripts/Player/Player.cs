@@ -177,6 +177,8 @@ public class Player : MonoBehaviour
     {
         if (PauseController.IsGameplayInputBlocked)
         {
+            // 리스폰 로딩 화면이 걷히는 동안에도 착지 애니메이션은 갱신 (공중 포즈로 멈춰 보이지 않게)
+            SetGrounded(IsGrounded);
             return;
         }
 
