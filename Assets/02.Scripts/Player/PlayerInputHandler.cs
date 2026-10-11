@@ -1,7 +1,17 @@
 ﻿using UnityEngine;
 
+using System.Collections.Generic;
+
+[DefaultExecutionOrder(-100)]
 public class PlayerInputHandler : MonoBehaviour
 {
+    private static readonly KeyCode[] GameplayKeys =
+    {
+        KeyCode.LeftArrow, KeyCode.RightArrow, KeyCode.DownArrow,
+        KeyCode.C, KeyCode.Space, KeyCode.Z, KeyCode.X, KeyCode.V, KeyCode.B
+    };
+    private readonly HashSet<KeyCode> _suppressedKeys = new HashSet<KeyCode>(GameplayKeys.Length);
+    private bool _wasRangedAttackHeld;
     private float _moveInputX;
     public float MoveInputX => _moveInputX;
 
@@ -57,22 +67,59 @@ public class PlayerInputHandler : MonoBehaviour
     }
     private void Update()
     {
+        if (PauseController.IsGameplayInputBlocked)
+        {
+            ClearInputState();
+            foreach (KeyCode key in GameplayKeys)
+            {
+                if (Input.GetKey(key))
+                {
+                    _suppressedKeys.Add(key);
+                }
+                else
+                {
+                    _suppressedKeys.Remove(key);
+                }
+            }
+            return;
+        }
+
+        foreach (KeyCode key in GameplayKeys)
+        {
+            if (!Input.GetKey(key))
+            {
+                _suppressedKeys.Remove(key);
+            }
+        }
         GetKeyInput();
+    }
+
+    private bool IsKeyHeld(KeyCode key)
+    {
+        return !_suppressedKeys.Contains(key) && Input.GetKey(key);
+    }
+
+    private bool IsKeyPressed(KeyCode key)
+    {
+        return !_suppressedKeys.Contains(key) && Input.GetKeyDown(key);
     }
 
     private void GetKeyInput()
     {
         _moveInputX = GetHorizontalInput();
 
-        _isJumpKeyDown = StageJumpInput.WasPressedThisFrame;
-        _isJumpKey = StageJumpInput.IsHeld;
-        _isDodgeKeyDown = Input.GetKeyDown(KeyCode.Z);
-        _isAttackKeyDown = Input.GetKeyDown(KeyCode.X);
-        _isRangedAttackKeyDown = Input.GetKeyDown(KeyCode.V);
-        _isRangedAttackKeyUp = Input.GetKeyUp(KeyCode.V);
-        _isPotionKeyDown = Input.GetKeyDown(KeyCode.B);
-        _isGuardKeyDown = Input.GetKeyDown(KeyCode.DownArrow);
-        _isGuardKey = Input.GetKey(KeyCode.DownArrow);
+        _isJumpKeyDown = IsKeyPressed(KeyCode.C) || IsKeyPressed(KeyCode.Space);
+        _isJumpKey = IsKeyHeld(KeyCode.C) || IsKeyHeld(KeyCode.Space);
+        _isDodgeKeyDown = IsKeyPressed(KeyCode.Z);
+        _isAttackKeyDown = IsKeyPressed(KeyCode.X);
+        _isRangedAttackKeyDown = IsKeyPressed(KeyCode.V);
+        // Preserve a release that happened while paused without recording menu presses.
+        bool isRangedAttackHeld = Input.GetKey(KeyCode.V);
+        _isRangedAttackKeyUp = Input.GetKeyUp(KeyCode.V) || (_wasRangedAttackHeld && !isRangedAttackHeld);
+        _wasRangedAttackHeld = isRangedAttackHeld;
+        _isPotionKeyDown = IsKeyPressed(KeyCode.B);
+        _isGuardKeyDown = IsKeyPressed(KeyCode.DownArrow);
+        _isGuardKey = IsKeyHeld(KeyCode.DownArrow);
 
 
         if (_isJumpKeyDown)
@@ -102,16 +149,16 @@ public class PlayerInputHandler : MonoBehaviour
     }
 
     // 좌우 이동은 방향키만 사용 (Input Manager의 Horizontal에 포함된 A/D 제외)
-    private static float GetHorizontalInput()
+    private float GetHorizontalInput()
     {
         float x = 0f;
 
-        if (Input.GetKey(KeyCode.LeftArrow))
+        if (IsKeyHeld(KeyCode.LeftArrow))
         {
             x -= 1f;
         }
 
-        if (Input.GetKey(KeyCode.RightArrow))
+        if (IsKeyHeld(KeyCode.RightArrow))
         {
             x += 1f;
         }

@@ -183,8 +183,15 @@ public abstract class Projectile : MonoBehaviour, IParryable
 
         Vector2 hitPoint = other.ClosestPoint(transform.position);
 
-        if (other.TryGetComponent<IDamageable>(out IDamageable damageable))
+        IDamageable damageable = other.GetComponentInParent<IDamageable>();
+        if (damageable != null)
         {
+            // 플레이어가 닷지(회피) 등 무적 상태일 때는 투사체를 소멸시키지 않고 관통하여 지나감
+            if (damageable is PlayerHealth playerHealth && playerHealth.IsInvincible)
+            {
+                return;
+            }
+
             ApplyHit(damageable, hitPoint);
             return;
         }

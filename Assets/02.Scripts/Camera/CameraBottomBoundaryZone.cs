@@ -18,6 +18,7 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
 
     private static readonly Dictionary<ProCamera2D, CameraBoundaryState> States =
         new Dictionary<ProCamera2D, CameraBoundaryState>();
+
     private CameraBoundaryState _state;
 
     private void OnEnable()
@@ -158,8 +159,7 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
         Gizmos.DrawCube(center, size);
         Gizmos.color = new Color(0.2f, 1f, 0.45f, 1f);
         Gizmos.DrawWireCube(center, size);
-        UnityEditor.Handles.Label(center + Vector3.up * (size.y * 0.5f),
-            "이 X 구간에서 화면 하단 제한 적용");
+        UnityEditor.Handles.Label(center + Vector3.up * (size.y * 0.5f), "이 X 구간에서 화면 하단 제한 적용");
 
         if (_bottomEdge != null)
         {

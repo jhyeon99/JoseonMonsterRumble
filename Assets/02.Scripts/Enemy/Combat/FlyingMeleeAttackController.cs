@@ -25,6 +25,7 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
     [SerializeField] private Animator _animator;
     [SerializeField] private Collider2D _bodyCollider;
     [SerializeField] private EnemyContactDamage _contactDamage;
+    [SerializeField] private ParryWarningFlash _parryWarning;
     [SerializeField, Range(0f, 30f)] private float _maxVisualTilt = 15f;
     [SerializeField, Range(0f, 15f)] private float _maxFlightVisualTilt = 7f;
 
@@ -54,6 +55,7 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
     private bool _isConfigured;
     private bool _wasContactDamageEnabled;
     private bool _isContactDamageSuppressed;
+    private bool _hasWarned;
 
     public FlyingMeleeAttackData Data => _data;
 
@@ -279,6 +281,7 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
 
     public void StopAttackPresentation()
     {
+        StopParryWarning();
         _visualPhase = FlyingMeleeAttackPhase.Completed;
         _smoothedFlightVelocity = Vector2.zero;
         _flightTiltVelocity = 0f;
@@ -299,6 +302,10 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
 
     public void PlayPhase(FlyingMeleeAttackPhase phase)
     {
+        if (phase != FlyingMeleeAttackPhase.Preparing && phase != FlyingMeleeAttackPhase.Striking)
+        {
+            StopParryWarning();
+        }
         _visualPhase = phase;
         // 표현 연결이 잘못되어도 공격 타이밍은 바뀌지 않는다.
         int hash = phase switch
@@ -331,6 +338,25 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
             }
         }
         _animator.Play(hash, AnimationLayer, 0f);
+    }
+
+    public void UpdateParryWarning(float prepareTimeRemaining)
+    {
+        if (_visualPhase == FlyingMeleeAttackPhase.Preparing && _parryWarning != null &&
+            !_hasWarned && prepareTimeRemaining <= _parryWarning.LeadTime)
+        {
+            _parryWarning.Play();
+            _hasWarned = true;
+        }
+    }
+
+    private void StopParryWarning()
+    {
+        if (_parryWarning != null)
+        {
+            _parryWarning.Stop();
+        }
+        _hasWarned = false;
     }
 
     public void PlayFlightAnimation()

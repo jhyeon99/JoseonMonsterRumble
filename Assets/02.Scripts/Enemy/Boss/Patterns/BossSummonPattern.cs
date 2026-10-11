@@ -3,6 +3,8 @@ using UnityEngine;
 
 /// <summary>
 /// 소환 (체력 비율 발동). 현재 페이즈 체력이 지정한 비율 이하가 되면 다른 패턴보다 먼저 무조건 사용.
+/// - 소환 위치(Summon Point)를 지정하면 먼저 그 위치로 점프한 뒤 angry 시작
+/// - 끝나면(끊겨도) 복귀 패턴(찍기)을 대기 없이 바로 사용해서 찍으면서 내려옴
 /// - 시작하면 패턴 트리거(angry 등)를 보내고, 애니메이션의 소환 비율 지점부터 일정 간격으로 맵 아래에서 독 방울이 n개씩 올라옴
 /// - 방울은 천천히 계속 올라가다 끝 높이에서 사라짐. 터트리면 올챙이가 나옴 (3타로 날려 보스에게 기믹 데미지)
 /// - 패턴 중 보스는 제자리에 있고, 직접 공격은 받지 않음 (올챙이 기믹 데미지만 들어감)
@@ -21,6 +23,39 @@ public class BossSummonPattern : BossPattern
     [Tooltip("2페이즈 체력이 이 비율 이하가 되면 사용 (예: 0.7, 0.4)")]
     [SerializeField]
     private float[] _phase2HpRatios = { 0.7f, 0.4f };
+
+    [Header("소환 위치로 점프 (비우면 제자리에서 소환)")]
+    [Tooltip("소환할 때 보스가 점프해서 올라갈 고정 위치 (보스 발밑 기준)")]
+    [SerializeField]
+    private Transform _summonPoint;
+
+    [Tooltip("점프할 때 재생할 애니메이터 트리거 (비우면 애니메이션 변경 없음). 착지하면 대기 상태(Idle State)로 바로 돌려서 angry가 곧바로 시작되게 함")]
+    [SerializeField]
+    private string _jumpTrigger = "";
+
+    [Tooltip("소환 위치까지 점프하는 시간 (초)")]
+    [SerializeField, Min(0.05f)]
+    private float _jumpDuration = 0.8f;
+
+    [Tooltip("출발 / 도착 중 높은 쪽 기준으로 더 올라가는 높이")]
+    [SerializeField, Min(0f)]
+    private float _jumpHeight = 3f;
+
+    [Tooltip("점프하는 동안 몸통 충돌(플레이어 밀어내기)과 접촉 데미지를 끔")]
+    [SerializeField]
+    private bool _disableCollisionWhileJumping = true;
+
+    [Tooltip("착지 후 angry 시작까지 대기 (초)")]
+    [SerializeField, Min(0f)]
+    private float _delayAfterLanding = 0.2f;
+
+    [SerializeField]
+    private CameraShakeSettings _landingShake = new CameraShakeSettings(0.2f, 0.2f);
+
+    [Header("복귀")]
+    [Tooltip("소환이 끝나면(끊겨도) 바로 사용할 패턴. 찍기 패턴을 넣으면 소환 위치에서 플레이어 쪽으로 찍으면서 내려옴")]
+    [SerializeField]
+    private BossPattern _returnPattern;
 
     [Header("독 방울")]
     [SerializeField]
@@ -93,10 +128,15 @@ public class BossSummonPattern : BossPattern
     private bool[] _usedPhase2;
     private bool _pending;
     private bool _isRunning;
+    private bool _isJumping;
     private float _startHp;
 
     public override bool IsForced => true;
     public override bool BlocksDirectDamage => _blockDirectDamage && _isRunning;
+
+    /// <summary>점프 중에는 접촉 데미지 끔</summary>
+    public override bool DisablesContactDamage =>
+        base.DisablesContactDamage || (_isJumping && _disableCollisionWhileJumping);
 
     private void Reset()
     {
@@ -184,6 +224,86 @@ public class BossSummonPattern : BossPattern
         _pending = false;
         _isRunning = true;
         _startHp = Boss.Health.CurrentHp;
+    }
+
+    /// <summary>angry 전에 소환 위치로 점프</summary>
+    protected override IEnumerator BeforeAnimation()
+    {
+        if (_summonPoint == null)
+        {
+            yield break;
+        }
+
+        Vector2 start = Boss.Position;
+        Vector2 target = _summonPoint.position;
+
+        Boss.FaceDirection(target.x - start.x);
+        if (!string.IsNullOrEmpty(_jumpTrigger))
+        {
+            Boss.SetTrigger(_jumpTrigger);
+        }
+
+        SetJumping(true);
+
+        float apexY = Mathf.Max(start.y, target.y) + _jumpHeight;
+        float elapsed = 0f;
+        while (elapsed < _jumpDuration)
+        {
+            elapsed += Time.fixedDeltaTime;
+            float t = Mathf.Clamp01(elapsed / _jumpDuration);
+
+            float x = Mathf.Lerp(start.x, target.x, Mathf.SmoothStep(0f, 1f, t));
+            Boss.MoveTo(new Vector2(x, GetJumpY(t, start.y, apexY, target.y)));
+            yield return new WaitForFixedUpdate();
+        }
+
+        Boss.MoveTo(target);
+        yield return new WaitForFixedUpdate();
+
+        SetJumping(false);
+
+        if (!string.IsNullOrEmpty(_jumpTrigger))
+        {
+            Boss.ResetTrigger(_jumpTrigger);
+
+            // angry 전이는 대기 상태에서만 있으므로, 점프 애니메이션이 끝나기를 기다리지 않고 바로 대기로 돌림
+            // (안 돌리면 점프 클립이 끝날 때까지 angry가 시작되지 않아 클립 대기 시간을 넘김)
+            if (!Boss.PlayState(_idleState))
+            {
+                Debug.LogWarning($"{name}: {PatternName} 착지 후 재생할 상태({_idleState})가 애니메이터에 없습니다. Idle State 이름을 확인하세요.", this);
+            }
+        }
+
+        CameraShake.Shake(_landingShake);
+        Boss.FacePlayer();
+
+        if (_delayAfterLanding > 0f)
+        {
+            yield return new WaitForSeconds(_delayAfterLanding);
+        }
+    }
+
+    private void SetJumping(bool jumping)
+    {
+        _isJumping = jumping;
+
+        if (_disableCollisionWhileJumping && Boss != null)
+        {
+            Boss.SetBodyCollision(!jumping);
+        }
+    }
+
+    /// <summary>출발 → 최고점(t = 0.5) → 도착 높이</summary>
+    private static float GetJumpY(float t, float startY, float apexY, float endY)
+    {
+        if (t < 0.5f)
+        {
+            float up = t / 0.5f;
+            return Mathf.Lerp(startY, apexY, 1f - ((1f - up) * (1f - up)));
+        }
+
+        float down = (t - 0.5f) / 0.5f;
+        return Mathf.Lerp(apexY, endY, down * down);
     }
 
     private AnimationClip LoopClip => _loopClip != null ? _loopClip : FindLoopingFollowingClip();
@@ -366,10 +486,21 @@ public class BossSummonPattern : BossPattern
 
     protected override void Cleanup()
     {
-        // 끝났거나 끊겼으면 남은 방울 / 올챙이 모두 제거
+        // 점프 중에 끊겼으면 충돌 원래대로
+        if (_isJumping)
+        {
+            SetJumping(false);
+        }
+
+        // 끝났거나 끊겼으면 남은 방울 / 올챙이 모두 제거하고, 복귀 패턴(찍기)을 바로 이어서 사용
         if (_isRunning && Boss != null)
         {
             Boss.ClearMinions();
+
+            if (_returnPattern != null)
+            {
+                Boss.QueuePattern(_returnPattern);
+            }
         }
 
         _isRunning = false;
@@ -377,6 +508,12 @@ public class BossSummonPattern : BossPattern
 
     private void OnDrawGizmosSelected()
     {
+        if (_summonPoint != null)
+        {
+            Gizmos.color = new Color(1f, 0.4f, 0.1f, 0.9f);
+            Gizmos.DrawWireSphere(_summonPoint.position, 0.5f);
+        }
+
         Gizmos.color = new Color(0.5f, 1f, 0.3f, 0.8f);
         if (_spawnLine != null)
         {
