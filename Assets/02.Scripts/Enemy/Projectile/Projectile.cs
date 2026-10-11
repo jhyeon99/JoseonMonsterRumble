@@ -35,6 +35,10 @@ public abstract class Projectile : MonoBehaviour, IParryable
     [SerializeField]
     private bool _ignoreGroundWhenReturning = true;
 
+    // 발사마다 가드 / 패링 규칙을 바꿀 때 (보스 침의 패링 가능 / 불가 등)
+    private bool _hasDefenseOverride;
+    private AttackDefense _defenseOverride;
+
     private float _returnPoolTime = 0f;
     private static Camera _camera;
     private Vector3 _lastPosition;
@@ -61,6 +65,24 @@ public abstract class Projectile : MonoBehaviour, IParryable
     public bool IsReflected => _isReflected;
     protected Vector2 ReflectDirection => _reflectDirection;
     protected bool ShouldIgnoreReturnGround => _ignoreGroundWhenReturning && IsReturningToShooter();
+
+    /// <summary>프리팹에 설정된 가드 / 패링 규칙</summary>
+    public AttackDefense BaseDefense => _defense;
+
+    /// <summary>이번 발사에 적용되는 가드 / 패링 규칙</summary>
+    public AttackDefense CurrentDefense => _hasDefenseOverride ? _defenseOverride : _defense;
+
+    /// <summary>이번 발사에만 가드 / 패링 규칙을 바꿈 (다음 발사 때 원래대로)</summary>
+    public void SetDefenseOverride(AttackDefense defense)
+    {
+        _defenseOverride = defense;
+        _hasDefenseOverride = true;
+    }
+
+    /// <summary>
+    /// 반사된 뒤 쏜 적을 계속 따라가며 날아갈지 (유도). 기본 false: 패링한 순간 쏜 적이 있던 방향으로 직진
+    /// </summary>
+    protected virtual bool TrackShooterWhileReflected => false;
 
     protected virtual void Awake()
     {
@@ -154,6 +176,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
             PlayerPosition = player.position;
         }
 
+        _hasDefenseOverride = false;
         _t = 0f;
         _isLaunching = true;
         _returnPoolTime = _returnPoolTimer;
@@ -212,7 +235,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
     protected void ApplyHit(IDamageable damageable, Vector2 hitPoint)
     {
         var hitData = new HitData(_projectileDamage, _data.KnockbackForce, hitPoint,
-            HitDirection, _defense, this, 0, AttackName);
+            HitDirection, CurrentDefense, this, 0, AttackName);
         hitData.Attacker = _shooter;
         damageable.TakeDamage(hitData);
         // 무적과 가드에는 소멸하고, 피해 처리 중 패링됐을 때만 반사를 유지한다.
@@ -341,8 +364,9 @@ public abstract class Projectile : MonoBehaviour, IParryable
             _shooterCollider = null;
         }
 
-        // 쏜 적이 움직여도 몸에 맞도록 매 프레임 방향을 다시 계산 (쏜 적이 사라지면 마지막 방향으로 직진)
-        if (TryGetShooterDirection(out Vector2 toShooter))
+        // 기본은 패링한 순간 쏜 적이 있던 방향으로 직진 (유도 X).
+        // 유도하도록 바꾼 투사체만 매 프레임 쏜 적 방향을 다시 계산
+        if (TrackShooterWhileReflected && TryGetShooterDirection(out Vector2 toShooter))
         {
             _reflectDirection = toShooter;
             UpdateReflectRotation();

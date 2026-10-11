@@ -60,6 +60,23 @@ public sealed class StageManager : MonoBehaviour
     private float _enemyClearOffsetX = 0f;
 
     private PlayerHealth _playerHealth;
+
+    [Header("리스폰 위치 보정")]
+    [Tooltip("리스폰 시 지점 아래 땅을 찾아 발을 붙임. 지점보다 이만큼 위에서부터 찾음 (발판에 살짝 묻힌 경우용)")]
+    [SerializeField, Min(0f)]
+    private float _spawnGroundProbeUp = 0.5f;
+
+    [Tooltip("지점 아래로 땅을 찾는 최대 거리. 이 안에 땅이 없으면 지점 위치 그대로 생성")]
+    [SerializeField, Min(0f)]
+    private float _spawnGroundProbeDown = 3f;
+
+    [Header("보스전 리스폰")]
+    [Tooltip("켜면 등장 연출을 이미 본 보스 씬에서 리스폰할 때 최소 로딩 시간 없이 씬이 준비되는 대로 바로 시작")]
+    [SerializeField]
+    private bool _skipLoadingWaitAfterBossIntro = true;
+
+    // 표면에 딱 붙이면 콜라이더가 겹쳐 일방 발판을 통과할 수 있어 아주 살짝 띄움
+    private const float SpawnSkin = 0.02f;
     private string _activeSceneName;
     private string _activeCheckpointId;
     [SerializeField, ReadOnly] private RespawnPhase _respawnPhase;
@@ -337,6 +354,10 @@ public sealed class StageManager : MonoBehaviour
             }
             float minLoadingTime = _deathScreen != null
                 ? _deathScreen.MinLoadingDuration : DefaultMinLoadingDuration;
+            if (_skipLoadingWaitAfterBossIntro && BossCinematicDirector.HasSeenIntroInScene(sceneName))
+            {
+                minLoadingTime = 0f;
+            }
             float loadingStartTime = Time.realtimeSinceStartup;
             AsyncOperation loadOperation = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
             if (loadOperation == null)
@@ -655,6 +676,65 @@ public sealed class StageManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 리스폰 지점 바로 아래 땅(일방 발판 포함)에 발이 닿는 위치.
+    /// 지점이 공중에 떠 있거나 발판에 살짝 묻혀 있어도 발바닥을 표면에 맞춤. 땅을 못 찾으면 지점 그대로
+    /// </summary>
+    private Vector2 GetGroundedSpawnPosition(Vector2 point)
+    {
+        Collider2D playerCollider = FindPlayerBodyCollider();
+        if (playerCollider == null)
+        {
+            return point;
+        }
+
+        // 지점 기준 발바닥 높이 (콜라이더 아래 끝 - 피벗)
+        float footOffset = playerCollider.bounds.min.y - _playerHealth.transform.position.y;
+
+        // 발판에 살짝 묻혀 있어도 윗면을 찾도록 조금 위에서 아래로 쏨
+        Vector2 origin = point + Vector2.up * _spawnGroundProbeUp;
+        RaycastHit2D[] hits = Physics2D.RaycastAll(
+            origin,
+            Vector2.down,
+            _spawnGroundProbeUp + _spawnGroundProbeDown,
+            Constants.Layers.GroundAllMask
+        );
+
+        for (int i = 0; i < hits.Length; i++)
+        {
+            RaycastHit2D hit = hits[i];
+            // 트리거 / 플레이어 자신 / 시작점이 콜라이더 안이라 위를 향하지 않는 결과는 제외
+            if (hit.collider == null || hit.collider.isTrigger || hit.normal.y < 0.7f || hit.distance <= 0f)
+            {
+                continue;
+            }
+
+            if (hit.collider.attachedRigidbody != null
+                && hit.collider.attachedRigidbody.gameObject == _playerHealth.gameObject)
+            {
+                continue;
+            }
+
+            return new Vector2(point.x, hit.point.y - footOffset + SpawnSkin);
+        }
+
+        return point;
+    }
+
+    private Collider2D FindPlayerBodyCollider()
+    {
+        Collider2D[] colliders = _playerHealth.GetComponents<Collider2D>();
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            if (colliders[i] != null && colliders[i].enabled && !colliders[i].isTrigger)
+            {
+                return colliders[i];
+            }
+        }
+
+        return null;
+    }
+
     private void MovePlayerTo(RespawnPoint point)
     {
         if (_playerHealth == null || point == null)
@@ -662,15 +742,17 @@ public sealed class StageManager : MonoBehaviour
             return;
         }
 
+        Vector2 spawnPosition = GetGroundedSpawnPosition(point.Position);
+
         // Rigidbody 위치는 다음 물리 스텝에 Transform에 반영되므로 Transform도 같이 옮김 (카메라 스냅용)
-        _playerHealth.transform.position = point.Position;
+        _playerHealth.transform.position = spawnPosition;
 
         Rigidbody2D playerBody = _playerHealth.GetComponent<Rigidbody2D>();
         if (playerBody != null)
         {
             playerBody.linearVelocity = Vector2.zero;
             playerBody.angularVelocity = 0f;
-            playerBody.position = point.Position;
+            playerBody.position = spawnPosition;
         }
 
         // 카메라가 시작 위치에서 미끄러져 오지 않도록 바로 붙임
