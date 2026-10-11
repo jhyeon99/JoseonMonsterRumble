@@ -2,11 +2,11 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 플레이어 연속 찍기 → 마지막 찍기 후 좌우 바늘. (1층 공격) 애니메이션 하나에 점프 / 찍기 / 바늘이 모두 들어 있는 기준.
+/// 플레이어 연속 찍기 → 마지막 찍기 후 바닥 전체에서 가시가 솟음. (1층 공격) 애니메이션 하나에 점프 / 찍기 / 가시가 모두 들어 있는 기준.
 /// - 0 ~ 판정 시작: 점프해서 플레이어 위로 이동 (최고점 비율까지 올라가고, 판정 시작에 착지)
 /// - 판정 시작 ~ 끝: 찍기 판정 (패링 시 그로기를 켜 두면 타이밍 가드로 보스 그로기)
 /// - 마지막이 아닌 찍기: 다음 찍기 비율에서 애니메이션을 처음부터 다시 재생해 다시 점프
-/// - 마지막 찍기: 바늘 비율에서 좌우로 바늘 발사
+/// - 마지막 찍기: 바닥 전체에 빨간 경고 → 가시 비율에서 바닥 전체의 가시가 아래에서 위로 솟았다가 다시 내려감
 /// </summary>
 public class BossStompPattern : BossPattern
 {
@@ -26,7 +26,7 @@ public class BossStompPattern : BossPattern
     private float _edgeMargin = 2f;
 
     [Header("찍기")]
-    [Tooltip("찍는 횟수별 가중치. 원소 순서 = 1번, 2번, 3번... 찍을 확률 (예: 0.3, 0.3, 0.4면 30% 1번 / 30% 2번 / 40% 3번). 최대 횟수 = 배열 크기. 바늘은 마지막 찍기 후에만 발사")]
+    [Tooltip("찍는 횟수별 가중치. 원소 순서 = 1번, 2번, 3번... 찍을 확률 (예: 0.3, 0.3, 0.4면 30% 1번 / 30% 2번 / 40% 3번). 최대 횟수 = 배열 크기. 가시는 마지막 찍기 후에만 솟음")]
     [SerializeField]
     private float[] _stompCountWeights = { 0.3f, 0.3f, 0.4f };
 
@@ -48,27 +48,49 @@ public class BossStompPattern : BossPattern
 
     [SerializeField] private CameraShakeSettings _landingShake = new CameraShakeSettings(0.25f, 0.25f);
 
-    [Header("좌우 바늘")]
-    [SerializeField] private BossProjectile _needlePrefab;
-
-    [Tooltip("바늘 발사 위치 (비우면 보스 발밑)")]
+    [Header("바닥 가시 (마지막 찍기 후 바닥 전체에서 솟음)")]
+    [Tooltip("솟아오를 가시 프리팹 (BossFloorSpike). 비우면 가시 없이 찍기만")]
     [SerializeField]
-    private Transform _needleSpawnPoint;
+    private BossFloorSpike _floorSpikePrefab;
 
-    [Tooltip("바늘 발사 지점 (애니메이션 길이 대비 비율)")]
+    [Tooltip("가시가 솟는 지점 (애니메이션 길이 대비 비율)")]
     [SerializeField, Range(0f, 1f)]
     private float _needleRatio = 0.75f;
 
-    [Tooltip("한쪽에 쏘는 바늘 수")]
-    [SerializeField, Min(0)]
-    private int _needleCountPerSide = 1;
+    [Tooltip("가시가 솟는 바닥 높이 기준. 비우면 보스 바닥 높이(1층)")]
+    [SerializeField]
+    private Transform _spikeFloor;
 
-    [Tooltip("바늘이 여러 개일 때 간격 (초)")]
+    [Tooltip("가시 사이 간격 (월드)")]
+    [SerializeField, Min(0.1f)]
+    private float _spikeSpacing = 0.5f;
+
+    [Tooltip("맵 양 끝에서 이만큼 안쪽부터 가시를 깔기")]
     [SerializeField, Min(0f)]
-    private float _needleInterval = 0.2f;
+    private float _spikeEdgeMargin = 0f;
 
-    [Header("가시 예고 (마지막 찍기, 가시가 지나갈 가로줄이 빨갛게 빛남)")]
-    [Tooltip("가시 발사 몇 초 전에 예고할지 (0이면 예고 없음)")]
+    [Tooltip("다 솟았을 때 가시 위치가 바닥보다 얼마나 위인지 (가시 프리팹의 기준점 기준)")]
+    [SerializeField]
+    private float _spikeUpOffset = 0.5f;
+
+    [Tooltip("바닥 아래에서 솟아오르는 거리")]
+    [SerializeField, Min(0f)]
+    private float _spikeRiseHeight = 1.5f;
+
+    [Tooltip("솟아오르는 시간 (초)")]
+    [SerializeField, Min(0.01f)]
+    private float _spikeRiseTime = 0.12f;
+
+    [Tooltip("솟은 채로 유지하는 시간 (초)")]
+    [SerializeField, Min(0f)]
+    private float _spikeHoldTime = 0.5f;
+
+    [Tooltip("다시 내려가는 시간 (초)")]
+    [SerializeField, Min(0.01f)]
+    private float _spikeSinkTime = 0.3f;
+
+    [Header("가시 예고 (마지막 찍기, 바닥 전체가 빨갛게 빛남)")]
+    [Tooltip("가시가 솟기 몇 초 전에 예고할지 (0이면 예고 없음)")]
     [SerializeField, Min(0f)]
     private float _needleWarningLead = 0.5f;
 
@@ -76,11 +98,11 @@ public class BossStompPattern : BossPattern
     [SerializeField]
     private Color _needleWarningColor = new Color(1f, 0.1f, 0.1f, 0.55f);
 
-    [Tooltip("예고 줄 두께 (월드). 가시 높이 정도로")]
+    [Tooltip("예고 띠 높이 (월드). 바닥에서 위로 이만큼. 가시가 솟는 높이 정도로")]
     [SerializeField, Min(0.01f)]
     private float _needleWarningThickness = 0.4f;
 
-    [Tooltip("예고 줄 길이 (발사 위치에서 좌 / 우 각각, 월드). 0이면 맵 끝까지 (BossArena 기준)")]
+    [Tooltip("예고 / 가시 범위 (보스 위치에서 좌 / 우 각각, 월드). 0이면 맵 끝까지 (BossArena 기준)")]
     [SerializeField, Min(0f)]
     private float _needleWarningLength = 0f;
 
@@ -150,8 +172,8 @@ public class BossStompPattern : BossPattern
             }
         }
 
-        // 마지막 찍기 후에만 좌우 바늘 (패링당했으면 그로기로 넘어가 여기까지 오지 않음)
-        yield return FireNeedles();
+        // 마지막 찍기 후에만 바닥 가시 (패링당했으면 그로기로 넘어가 여기까지 오지 않음)
+        yield return EruptFloorSpikes();
     }
 
     /// <summary>가중치 배열로 이번에 찍을 횟수 결정 (1 ~ 배열 크기). 배열이 비었거나 합이 0이면 1번</summary>
@@ -238,14 +260,14 @@ public class BossStompPattern : BossPattern
         _stompHitbox.Deactivate();
     }
 
-    private IEnumerator FireNeedles()
+    private IEnumerator EruptFloorSpikes()
     {
-        if (_needlePrefab == null || _needleCountPerSide <= 0)
+        if (_floorSpikePrefab == null)
         {
             yield break;
         }
 
-        // 가시 예고: 발사 Lead초 전부터 가시가 지나갈 가로줄이 빨갛게 깜빡임
+        // 가시 예고: 솟기 Lead초 전부터 바닥 전체가 빨갛게 깜빡임
         if (_needleWarningLead > 0f)
         {
             float leadRatio = Duration > 0f ? _needleWarningLead / Duration : 0f;
@@ -265,15 +287,54 @@ public class BossStompPattern : BossPattern
 
         yield return WaitUntilProgress(_needleRatio);
 
-        for (int i = 0; i < _needleCountPerSide; i++)
-        {
-            FireNeedle(Vector2.left);
-            FireNeedle(Vector2.right);
+        SpawnFloorSpikes();
+    }
 
-            if (i < _needleCountPerSide - 1)
-            {
-                yield return new WaitForSeconds(_needleInterval);
-            }
+    /// <summary>바닥 범위 전체에 간격대로 가시를 깔고 동시에 솟게 함</summary>
+    private void SpawnFloorSpikes()
+    {
+        GetSpikeRange(out float left, out float right);
+        float upY = GetSpikeFloorY() + _spikeUpOffset;
+
+        int count = Mathf.Max(1, Mathf.FloorToInt((right - left) / _spikeSpacing) + 1);
+        float step = count > 1 ? (right - left) / (count - 1) : 0f;
+
+        for (int i = 0; i < count; i++)
+        {
+            var upPosition = new Vector2(count > 1 ? left + (step * i) : (left + right) * 0.5f, upY);
+            BossFloorSpike spike = Instantiate(_floorSpikePrefab, upPosition, Quaternion.identity);
+            spike.Begin(Boss, upPosition, _spikeRiseHeight, _spikeRiseTime, _spikeHoldTime, _spikeSinkTime);
+        }
+    }
+
+    private float GetSpikeFloorY()
+    {
+        return _spikeFloor != null ? _spikeFloor.position.y : Boss.GroundY;
+    }
+
+    /// <summary>가시 / 예고 범위. Length가 0이면 맵 끝까지 (양 끝 여백 제외)</summary>
+    private void GetSpikeRange(out float left, out float right)
+    {
+        float centerX = Boss.Position.x;
+
+        if (_needleWarningLength > 0f)
+        {
+            left = centerX - _needleWarningLength;
+            right = centerX + _needleWarningLength;
+        }
+        else
+        {
+            BossArena arena = Boss.Arena;
+            bool hasBounds = arena != null && !float.IsInfinity(arena.LeftX) && !float.IsInfinity(arena.RightX);
+            left = hasBounds ? arena.LeftX : centerX - 20f;
+            right = hasBounds ? arena.RightX : centerX + 20f;
+        }
+
+        left += _spikeEdgeMargin;
+        right -= _spikeEdgeMargin;
+        if (left > right)
+        {
+            left = right = (left + right) * 0.5f;
         }
     }
 
@@ -344,25 +405,16 @@ public class BossStompPattern : BossPattern
             CreateNeedleWarningLine();
         }
 
-        Vector3 origin = _needleSpawnPoint != null ? _needleSpawnPoint.position : (Vector3)Boss.Position;
-        float left;
-        float right;
+        GetSpikeRange(out float left, out float right);
 
-        if (_needleWarningLength > 0f)
-        {
-            left = origin.x - _needleWarningLength;
-            right = origin.x + _needleWarningLength;
-        }
-        else
-        {
-            BossArena arena = Boss.Arena;
-            bool hasBounds = arena != null && !float.IsInfinity(arena.LeftX) && !float.IsInfinity(arena.RightX);
-            left = hasBounds ? arena.LeftX : origin.x - 20f;
-            right = hasBounds ? arena.RightX : origin.x + 20f;
-        }
+        // 바닥에서 위로 Thickness만큼 덮는 띠 (가시 간격 반만큼 양옆을 더 덮음)
+        float halfSpacing = _spikeSpacing * 0.5f;
+        left -= halfSpacing;
+        right += halfSpacing;
+        float floorY = GetSpikeFloorY();
 
         Transform line = _needleWarningLine.transform;
-        line.position = new Vector3((left + right) * 0.5f, origin.y, origin.z);
+        line.position = new Vector3((left + right) * 0.5f, floorY + (_needleWarningThickness * 0.5f), 0f);
         line.localScale = new Vector3(Mathf.Max(0.01f, right - left), _needleWarningThickness, 1f);
 
         // 보스 스프라이트와 같은 정렬 레이어에서 조금 앞에
@@ -377,7 +429,7 @@ public class BossStompPattern : BossPattern
         UpdateNeedleWarning(0f);
     }
 
-    /// <summary>깜빡이면서 점점 굵어짐 (발사가 가까울수록 진하게)</summary>
+    /// <summary>깜빡이면서 점점 진해지고 높아짐 (솟을 때가 가까울수록)</summary>
     private void UpdateNeedleWarning(float elapsed)
     {
         if (_needleWarningLine == null)
@@ -392,9 +444,16 @@ public class BossStompPattern : BossPattern
         color.a = _needleWarningColor.a * Mathf.Lerp(0.5f, 1f, progress) * blink;
         _needleWarningLine.color = color;
 
-        Vector3 scale = _needleWarningLine.transform.localScale;
-        scale.y = _needleWarningThickness * Mathf.Lerp(0.4f, 1f, progress);
-        _needleWarningLine.transform.localScale = scale;
+        // 바닥에 붙은 채로 높이만 커지도록 위치도 같이 맞춤
+        float height = _needleWarningThickness * Mathf.Lerp(0.4f, 1f, progress);
+        Transform line = _needleWarningLine.transform;
+        Vector3 scale = line.localScale;
+        scale.y = height;
+        line.localScale = scale;
+
+        Vector3 position = line.position;
+        position.y = GetSpikeFloorY() + (height * 0.5f);
+        line.position = position;
     }
 
     private void HideNeedleWarning()
@@ -432,10 +491,4 @@ public class BossStompPattern : BossPattern
 
     #endregion
 
-    private void FireNeedle(Vector2 direction)
-    {
-        Vector3 position = _needleSpawnPoint != null ? _needleSpawnPoint.position : (Vector3)Boss.Position;
-        BossProjectile needle = Instantiate(_needlePrefab, position, Quaternion.identity);
-        needle.Launch(direction);
-    }
 }
