@@ -81,6 +81,13 @@ public abstract class BossPattern : MonoBehaviour
     private float _startTime;
     private Coroutine _routine;
     private Action _onFinished;
+    private bool _executionActive;
+    public event Action<BossPattern> OnExecutionStarted;
+    public event Action<BossPattern, bool> OnExecutionEnded;
+    public event Action<BossPattern, string, Vector3, bool> OnAudioCue;
+
+    protected void AudioAction(string eventId) => OnAudioCue?.Invoke(this, eventId, transform.position, false);
+    protected void AudioResult(string eventId, Vector3 position) => OnAudioCue?.Invoke(this, eventId, position, true);
     private int _patternStateHash;
 
     protected Boss Boss { get; private set; }
@@ -179,12 +186,19 @@ public abstract class BossPattern : MonoBehaviour
 
         _lastUsedTime = Time.time;
         _onFinished = onFinished;
+        _executionActive = true;
+        OnExecutionStarted?.Invoke(this);
         _routine = Boss.StartCoroutine(Run());
     }
 
     /// <summary>패턴 중단 (끝났거나 끊겼을 때). 판정 / 예고 정리</summary>
     public void Stop()
     {
+        if (_executionActive)
+        {
+            _executionActive = false;
+            OnExecutionEnded?.Invoke(this, false);
+        }
         if (_routine != null)
         {
             Boss.StopCoroutine(_routine);
@@ -270,6 +284,8 @@ public abstract class BossPattern : MonoBehaviour
 
         Action onFinished = _onFinished;
         _onFinished = null;
+        _executionActive = false;
+        OnExecutionEnded?.Invoke(this, true);
         onFinished?.Invoke();
     }
 

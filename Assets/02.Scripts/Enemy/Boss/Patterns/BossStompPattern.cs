@@ -255,6 +255,7 @@ public class BossStompPattern : BossPattern
         ShowLandingMarker(false, targetX, groundY);
         CameraShake.Shake(_landingShake);
 
+        AudioResult("Boss.Stomp", Boss.transform.position);
         _stompHitbox.Activate();
         yield return WaitUntilProgress(HitEndRatio);
         _stompHitbox.Deactivate();
@@ -286,9 +287,9 @@ public class BossStompPattern : BossPattern
         }
 
         yield return WaitUntilProgress(_needleRatio);
-
         SpawnFloorSpikes();
     }
+
 
     /// <summary>바닥 범위 전체에 간격대로 가시를 깔고 동시에 솟게 함</summary>
     private void SpawnFloorSpikes()
