@@ -124,7 +124,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5163122068110826278}
   - component: {fileID: 2097699926969838497}
-  m_Layer: 0
+  m_Layer: 17
   m_Name: Trail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -192,7 +192,7 @@ TrailRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -1826688615
-  m_SortingLayer: 6
+  m_SortingLayer: 7
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Time: 0.24
@@ -276,7 +276,7 @@ GameObject:
   - component: {fileID: 8727715461838301053}
   - component: {fileID: 2685656145178184546}
   - component: {fileID: 7726360629692644251}
-  m_Layer: 0
+  m_Layer: 17
   m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5067,7 +5067,7 @@ ParticleSystemRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -1826688615
-  m_SortingLayer: 6
+  m_SortingLayer: 7
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_RenderMode: 0
@@ -5113,7 +5113,7 @@ GameObject:
   - component: {fileID: 8935737677707294436}
   - component: {fileID: 8769034579815852107}
   - component: {fileID: 2095320613361971631}
-  m_Layer: 0
+  m_Layer: 17
   m_Name: Soul
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5156,6 +5156,9 @@ MonoBehaviour:
   _absorbDuration: 1
   _arcHeight: 1
   _randomRange: 0.3
+  _targetOffset: {x: 0, y: 0.7, z: 0}
+  _trailRenderer: {fileID: 0}
+  _headParticle: {fileID: 0}
 --- !u!58 &8769034579815852107
 CircleCollider2D:
   m_ObjectHideFlags: 0
