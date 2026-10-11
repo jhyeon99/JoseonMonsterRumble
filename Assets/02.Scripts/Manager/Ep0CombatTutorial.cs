@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using Com.LuisPedroFonseca.ProCamera2D;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,7 +27,6 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     [Header("Camera and timing")]
     [SerializeField, Min(0.01f)] private float _zoomDuration = 0.35f;
-    [SerializeField, Min(0.05f)] private float _parrySuccessDuration = 0.25f;
 
     [Header("Player-side hint")]
     [SerializeField] private Vector2 _hintOffset = new Vector2(-220f, 80f);
@@ -60,7 +60,6 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     [SerializeField, TextArea] private string _parryInstruction = "공격이 닿기 직전에 막기";
     [SerializeField, TextArea] private string _parryTimingInstruction = "↓ 가드 / 패링";
     [SerializeField, TextArea] private string _retryInstruction = "닿기 직전에 ↓";
-    [SerializeField, TextArea] private string _parrySuccessText = "막았다!";
     [SerializeField, TextArea] private string _finisherInstruction = "가까이 가서 X로 마무리 공격";
 
     private PlayerInputHandler _input;
@@ -69,8 +68,8 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     private bool _enemyReady;
     private bool _enemyBodyWasSimulated;
     private bool _normalInputWasEnabled;
-    private bool _cameraWasEnabled;
-    private bool _cameraPresentationActive;
+    private ProCamera2DCinematics _cinematics;
+    private Transform _monsterFocus;
     private float _normalCameraSize;
     private bool _hasCameraSize;
     private int _comboStep;
@@ -136,6 +135,14 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
             if (point != null) _startPoint = point.transform;
         }
 
+        if (_enemy == null) ResolveTutorialEnemy();
+        if (_enemy == null)
+        {
+            Debug.LogError("EP0 Tutorial: 튜토리얼 몬스터가 삭제되었거나 Enemy 연결이 비어 있습니다. PF_Ep0CombatTutorial 안의 TutorialMonster를 복구하고 Enemy에 연결하세요. 일반 몬스터는 연습용 몬스터를 대신할 수 없습니다.", this);
+            enabled = false;
+            yield break;
+        }
+
         if (_player == null || _enemy == null || _camera == null || _panel == null ||
             _dialogue == null || _instruction == null || _keyPrompt == null || _keyLabel == null ||
             !_enemy.TryGetComponent(out _combat) || !(_enemy.Health is Ep0TutorialEnemyHealth))
@@ -145,6 +152,15 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
             yield break;
         }
 
+        _cinematics = _camera.GetComponent<ProCamera2DCinematics>();
+        if (_cinematics == null || !_cinematics.enabled)
+        {
+            Debug.LogError("EP0 Tutorial: Main Camera의 ProCamera2D Cinematics를 활성화하세요.", this);
+            enabled = false;
+            yield break;
+        }
+        _monsterFocus = new GameObject("TutorialMonsterFocus").transform;
+        _monsterFocus.SetParent(transform, false);
         _input = _player.GetComponent<PlayerInputHandler>();
         _dialogue.alignment = TextAnchor.MiddleCenter;
         _instruction.alignment = TextAnchor.MiddleCenter;
@@ -159,6 +175,36 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         _enemy.EnemyRb.simulated = false;
         _enemy.StateMachine.ChangeState(new WaitingState(_enemy));
         _panel.SetActive(false);
+    }
+
+    private void ResolveTutorialEnemy()
+    {
+        // Recover an unassigned reference without selecting unrelated normal monsters.
+        Enemy[] children = GetComponentsInChildren<Enemy>(true);
+        foreach (Enemy candidate in children)
+        {
+            if (candidate.GetComponent<Ep0TutorialEnemyHealth>() == null ||
+                candidate.GetComponent<EnemyMeleeCombat>() == null)
+            {
+                continue;
+            }
+
+            _enemy = candidate;
+            return;
+        }
+
+        Enemy match = null;
+        Ep0TutorialEnemyHealth[] healths = FindObjectsByType<Ep0TutorialEnemyHealth>(
+            FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (Ep0TutorialEnemyHealth health in healths)
+        {
+            if (health.gameObject.scene != gameObject.scene) continue;
+            Enemy candidate = health.GetComponent<Enemy>();
+            if (candidate == null || candidate.GetComponent<EnemyMeleeCombat>() == null) continue;
+            if (match != null) return;
+            match = candidate;
+        }
+        _enemy = match;
     }
 
     private void Update()
@@ -209,34 +255,14 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         _parried = false;
         _normalInputWasEnabled = _input.enabled;
         Phase = "FirstMonsterFocus";
-        BeginCameraPresentation();
         _panel.SetActive(false);
-        float monsterCameraSize = _normalCameraSize * _monsterZoomRatio;
-        yield return ZoomTo(monsterCameraSize, _enemy.GetEnemyCenterPosition());
-        yield return WaitRealtime(_monsterFocusDuration);
-        yield return ZoomTo(_normalCameraSize, GetPlayerCameraPosition());
-        EndCameraPresentation();
+        yield return ShowMonsterCinematic();
 
         Phase = "Encounter";
         Show(_encounterText, "", "");
         yield return WaitRealtime(_noticeDuration);
         _panel.SetActive(false);
         SetPlayerControl(true);
-
-        Phase = "ApproachingMonster";
-        while (Mathf.Abs(_player.transform.position.x - _enemy.transform.position.x) > _encounterDistance ||
-               Mathf.Abs(_player.transform.position.y - _enemy.transform.position.y) > 4f)
-        {
-            yield return null;
-        }
-
-        Phase = "SecondMonsterFocus";
-        BeginCameraPresentation();
-        yield return ZoomTo(monsterCameraSize, _enemy.GetEnemyCenterPosition());
-        yield return WaitRealtime(_monsterFocusDuration);
-        // Resume following the player at the closer size for combat.
-        yield return ZoomTo(monsterCameraSize, GetPlayerCameraPosition());
-        EndCameraPresentation();
 
         Phase = "Combo";
         _comboStep = 0;
@@ -287,11 +313,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
             }
         }
 
-        Phase = "ParrySuccess";
         _enemy.TryHoldGroggy();
-        SetPlayerControl(false);
-        Show(_parrySuccessText, "", "");
-        yield return new WaitForSeconds(_parrySuccessDuration);
 
         Phase = "Finisher";
         SetPlayerControl(true);
@@ -302,8 +324,6 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         _complete = true;
         Show(_completeText, "", "");
         yield return new WaitForSeconds(0.8f);
-        BeginCameraPresentation();
-        yield return ZoomTo(_normalCameraSize, GetPlayerCameraPosition());
         ReleaseControl();
         _running = false;
         Phase = "Complete";
@@ -414,45 +434,35 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         }
     }
 
-    private void BeginCameraPresentation()
+    private IEnumerator ShowMonsterCinematic()
     {
-        if (_cameraPresentationActive) return;
-        _cameraWasEnabled = _camera.enabled;
-        _cameraPresentationActive = true;
-        // Avoid automatic follow overriding the manual ProCamera2D pan.
-        // Player input, physics and game time stay active throughout.
-        _camera.enabled = false;
-    }
-
-    private void EndCameraPresentation()
-    {
-        if (!_cameraPresentationActive) return;
-        _cameraPresentationActive = false;
-        if (_camera != null) _camera.enabled = _cameraWasEnabled;
-    }
-
-    private IEnumerator ZoomTo(float size, Vector2 position)
-    {
-        float initialSize = _camera.ScreenSizeInWorldCoordinates.y * 0.5f;
-        Vector2 initialPosition = _camera.transform.position;
-        float elapsed = 0f;
-        while (elapsed < _zoomDuration)
+        while (_cinematics.IsPlaying) yield return null;
+        SetPlayerControl(false);
+        _player.RangedAttack?.CancelCharge();
+        _player.StateMachine.ChangeState(_player.IdleState);
+        Rigidbody2D body = _player.GetComponent<Rigidbody2D>();
+        if (body != null) body.linearVelocity = Vector2.zero;
+        // Start from the grounded player instead of an in-flight follow position.
+        _camera.CenterOnTargets();
+        yield return new WaitForEndOfFrame();
+        yield return null;
+        _monsterFocus.position = _enemy.GetEnemyCenterPosition();
+        _cinematics.UseLetterbox = true;
+        _cinematics.EndDuration = _zoomDuration;
+        _cinematics.CinematicTargets = new List<CinematicTarget>
         {
-            if (!PauseController.IsPaused) elapsed += Time.unscaledDeltaTime;
-            float progress = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / _zoomDuration));
-            _camera.UpdateScreenSize(Mathf.Lerp(initialSize, size, progress));
-            var worldPosition = Vector2.Lerp(initialPosition, position, progress);
-            Vector3 localPosition = _camera.transform.parent == null
-                ? (Vector3)worldPosition
-                : _camera.transform.parent.InverseTransformPoint(worldPosition);
-            _camera.MoveCameraInstantlyToPosition(localPosition);
-            yield return null;
-        }
-    }
-
-    private Vector2 GetPlayerCameraPosition()
-    {
-        return (Vector2)_player.transform.position + new Vector2(_camera.OffsetX, _camera.OffsetY);
+            new CinematicTarget
+            {
+                TargetTransform = _monsterFocus,
+                EaseInDuration = _zoomDuration,
+                HoldDuration = _monsterFocusDuration,
+                Zoom = 1f / _monsterZoomRatio,
+                EaseType = EaseType.EaseInOut
+            }
+        };
+        _cinematics.Play();
+        while (_cinematics.IsPlaying) yield return null;
+        SetPlayerControl(_normalInputWasEnabled);
     }
 
     private void FaceEachOther()
@@ -523,7 +533,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     private void ReleaseControl()
     {
-        EndCameraPresentation();
+        if (_running && _cinematics != null && _cinematics.IsPlaying) _cinematics.Stop();
         if (_combat != null)
         {
             _combat.StopAttack();

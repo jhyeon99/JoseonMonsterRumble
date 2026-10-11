@@ -197,6 +197,7 @@ GameObject:
   - component: {fileID: 1917770875468322715}
   - component: {fileID: 8959979308618455522}
   - component: {fileID: 1304445005938204694}
+  - component: {fileID: -8421783913766636803}
   - component: {fileID: 7028000000000000001}
   - component: {fileID: 7028000000000000020}
   m_Layer: 6
@@ -383,8 +384,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   _maxHealth: 100
   _currentHealth: 0
-  _potionCount: 0
-  _maxPotionCount: 10
+  _potionCount: 3
+  _maxPotionCount: 3
   _potionHealAmount: 10
   _invincibleTime: 0.7
 --- !u!114 &7552846270097050848
@@ -650,6 +651,23 @@ MonoBehaviour:
     FadeStart: 0.6
     DrawBehind: 1
   _parryAttackEffect: {fileID: 1876055618487696812}
+--- !u!114 &-8421783913766636803
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4748338298722958679}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c42f9fa3196474ca8e914783da512ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerDodgeAfterimage
+  _source: {fileID: 370675339848332899}
+  _spawnInterval: 0.05
+  _lifetime: 0.25
+  _color: {r: 0.5, g: 0.8, b: 1, a: 0.45}
+  _maxImages: 16
 --- !u!114 &7028000000000000001
 MonoBehaviour:
   m_ObjectHideFlags: 0

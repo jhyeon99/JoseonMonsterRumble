@@ -34,6 +34,12 @@ public class PlayerAttack : MonoBehaviour
     // 한 번의 공격 단계에서 같은 적은 한 번만 맞도록
     private readonly HashSet<IDamageable> _hitTargets = new HashSet<IDamageable>();
     private AttackData _activeStep;
+    private Player _player;
+
+    private void Awake()
+    {
+        _player = GetComponent<Player>();
+    }
 
     public bool TryGetAttackData(int index, out AttackData attackData)
     {
@@ -117,12 +123,20 @@ public class PlayerAttack : MonoBehaviour
                 : GetOverlapCenter(center, _activeStep.HitboxSize, hit.bounds, edgePoint);
             Vector3 attackDir = (hit.bounds.center - transform.position).normalized;
 
+            float finalDamage = _activeStep.Damage;
+            bool isBuffed = _player != null && _player.WeaponBuff != null && _player.WeaponBuff.IsBuffActive;
+            if (isBuffed)
+            {
+                finalDamage *= _player.WeaponBuff.DamageMultiplier;
+            }
+
             var hitData = new HitData(
-                _activeStep.Damage,
+                finalDamage,
                 _activeStep.KnockbackForce,
                 hitPoint,
                 attackDir,
-                comboStep: _currentCombo
+                comboStep: _currentCombo,
+                isBuffed: isBuffed
             );
             damageable.TakeDamage(hitData);
         }
