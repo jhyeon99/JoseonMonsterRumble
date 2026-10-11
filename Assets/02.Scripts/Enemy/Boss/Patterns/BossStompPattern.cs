@@ -290,7 +290,6 @@ public class BossStompPattern : BossPattern
         SpawnFloorSpikes();
     }
 
-
     /// <summary>바닥 범위 전체에 간격대로 가시를 깔고 동시에 솟게 함</summary>
     private void SpawnFloorSpikes()
     {
@@ -306,6 +305,8 @@ public class BossStompPattern : BossPattern
             BossFloorSpike spike = Instantiate(_floorSpikePrefab, upPosition, Quaternion.identity);
             spike.Begin(Boss, upPosition, _spikeRiseHeight, _spikeRiseTime, _spikeHoldTime, _spikeSinkTime);
         }
+
+        AudioResult("Boss.NeedleFire", new Vector3((left + right) * 0.5f, upY, Boss.transform.position.z));
     }
 
     private float GetSpikeFloorY()
