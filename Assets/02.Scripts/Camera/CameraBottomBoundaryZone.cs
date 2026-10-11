@@ -16,6 +16,14 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
     [SerializeField, InspectorName("화면 하단 경계")]
     private Transform _bottomEdge;
 
+    [Tooltip("다음 구간의 하단 경계로 전환하는 부드러움입니다. 클수록 천천히 이동하며, 0이면 즉시 적용합니다.")]
+    [SerializeField, Min(0f), InspectorName("경계 전환 시간")]
+    private float _transitionSmoothTime = 0.5f;
+
+    [Tooltip("구간 사이의 짧은 틈에서는 이 시간 동안 이전 하단 제한을 유지합니다.")]
+    [SerializeField, Min(0f), InspectorName("구간 이탈 대기 시간")]
+    private float _exitGraceTime = 0.2f;
+
     private static readonly Dictionary<ProCamera2D, CameraBoundaryState> States =
         new Dictionary<ProCamera2D, CameraBoundaryState>();
     private CameraBoundaryState _state;
@@ -34,6 +42,7 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
             _state = new CameraBoundaryState(_proCamera, boundaries);
             States.Add(_proCamera, _state);
             _proCamera.PreMoveUpdate += _state.UpdateBoundary;
+            _proCamera.OnReset += _state.ResetTransition;
         }
 
         _state.Zones.Add(this);
@@ -48,8 +57,12 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
         _state.UpdateBoundary(0f);
         if (_state.Zones.Count == 0)
         {
+            _state.Release();
             if (_state.Camera != null)
+            {
                 _state.Camera.PreMoveUpdate -= _state.UpdateBoundary;
+                _state.Camera.OnReset -= _state.ResetTransition;
+            }
             States.Remove(_state.Camera);
         }
 
@@ -66,6 +79,13 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
         private bool _previousUseBottomBoundary;
         private float _previousBottomBoundary;
         private float _previousTargetBottomBoundary;
+        private float _currentWorldBottom;
+        private float _targetWorldBottom;
+        private float _transitionVelocity;
+        private float _transitionSmoothTime;
+        private float _exitGraceTime;
+        private float _outsideTime;
+        private bool _hasUpdated;
 
         public CameraBoundaryState(ProCamera2D camera, ProCamera2DNumericBoundaries boundaries)
         {
@@ -75,27 +95,52 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
 
         public void UpdateBoundary(float deltaTime)
         {
+            bool snap = !_hasUpdated;
+            if (deltaTime > 0f) _hasUpdated = true;
+            if (Camera == null || _boundaries == null)
+            {
+                Release();
+                return;
+            }
+
+            bool hasValidZone = false;
             bool insideAnyZone = false;
             float worldBottom = float.NegativeInfinity;
+            CameraBottomBoundaryZone highestZone = null;
             foreach (CameraBottomBoundaryZone zone in Zones)
             {
                 if (zone == null || !zone.isActiveAndEnabled || zone._player == null || zone._bottomEdge == null)
                     continue;
 
+                hasValidZone = true;
                 float halfWidth = Mathf.Abs(zone.transform.lossyScale.x) * 0.5f;
                 if (Mathf.Abs(zone._player.position.x - zone.transform.position.x) > halfWidth)
                     continue;
 
                 insideAnyZone = true;
-                worldBottom = Mathf.Max(worldBottom, zone._bottomEdge.position.y);
+                if (highestZone == null || zone._bottomEdge.position.y > worldBottom)
+                {
+                    highestZone = zone;
+                    worldBottom = zone._bottomEdge.position.y;
+                }
             }
 
-            if (!insideAnyZone || Camera == null || _boundaries == null)
+            if (!insideAnyZone)
             {
-                RestoreBoundary();
+                _outsideTime += Mathf.Max(0f, deltaTime);
+                if (!_ownsBoundary || !hasValidZone || _outsideTime >= _exitGraceTime)
+                {
+                    Release();
+                    return;
+                }
+
+                ApplyBoundary(deltaTime, snap);
                 return;
             }
 
+            _outsideTime = 0f;
+            _transitionSmoothTime = Mathf.Max(0f, highestZone._transitionSmoothTime);
+            _exitGraceTime = Mathf.Max(0f, highestZone._exitGraceTime);
             // Capture once for the camera, so zones cannot snapshot each other's limits.
             if (!_ownsBoundary)
             {
@@ -104,26 +149,65 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
                 _previousBottomBoundary = _boundaries.BottomBoundary;
                 _previousTargetBottomBoundary = _boundaries.TargetBottomBoundary;
                 _ownsBoundary = true;
+                // A later entry starts from the currently visible bottom rather than snapping the camera.
+                UnityEngine.Camera view = Camera.GameCamera;
+                float extentPerSize = Mathf.Abs(view.transform.right.y) * view.aspect +
+                    Mathf.Abs(view.transform.up.y);
+                _currentWorldBottom = view.transform.position.y - view.orthographicSize * extentPerSize;
+                _transitionVelocity = 0f;
             }
 
             float parentY = Camera.transform.parent != null ? Camera.transform.parent.position.y : 0f;
-            float localBottom = worldBottom - parentY;
             if (_previousUseNumericBoundaries && _previousUseBottomBoundary)
-                localBottom = Mathf.Max(localBottom, _previousBottomBoundary);
+                worldBottom = Mathf.Max(worldBottom, _previousBottomBoundary + parentY);
+
+            _targetWorldBottom = worldBottom;
+            ApplyBoundary(deltaTime, snap);
+        }
+
+        private void ApplyBoundary(float deltaTime, bool snap)
+        {
+            if (snap || _transitionSmoothTime <= 0f)
+            {
+                _currentWorldBottom = _targetWorldBottom;
+                _transitionVelocity = 0f;
+            }
+            else if (deltaTime > 0f)
+            {
+                _currentWorldBottom = Mathf.SmoothDamp(_currentWorldBottom, _targetWorldBottom,
+                    ref _transitionVelocity, _transitionSmoothTime, Mathf.Infinity, deltaTime);
+            }
+
+            float parentY = Camera.transform.parent != null ? Camera.transform.parent.position.y : 0f;
+            if (_previousUseNumericBoundaries && _previousUseBottomBoundary)
+                _currentWorldBottom = Mathf.Max(_currentWorldBottom, _previousBottomBoundary + parentY);
 
             _boundaries.UseNumericBoundaries = true;
             _boundaries.UseBottomBoundary = true;
-            _boundaries.BottomBoundary = localBottom;
-            _boundaries.TargetBottomBoundary = localBottom;
+            _boundaries.BottomBoundary = _currentWorldBottom - parentY;
+            _boundaries.TargetBottomBoundary = _targetWorldBottom - parentY;
         }
 
-        private void RestoreBoundary()
+        public void ResetTransition()
+        {
+            // Respawns and explicit camera resets should establish the new floor immediately.
+            _hasUpdated = false;
+            _outsideTime = 0f;
+            _transitionVelocity = 0f;
+        }
+
+        public void Release()
         {
             if (!_ownsBoundary)
                 return;
 
             if (_boundaries != null)
             {
+                // The native follow target keeps moving behind a hard boundary. Resume easing
+                // from the visible camera position so releasing the floor cannot jump to it.
+                if (Camera != null && _transitionSmoothTime > 0f)
+                    Camera.ResetMovement();
+
                 _boundaries.UseNumericBoundaries = _previousUseNumericBoundaries;
                 _boundaries.UseBottomBoundary = _previousUseBottomBoundary;
                 _boundaries.BottomBoundary = _previousBottomBoundary;
@@ -131,6 +215,8 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
             }
 
             _ownsBoundary = false;
+            _transitionVelocity = 0f;
+            _outsideTime = 0f;
         }
     }
 
