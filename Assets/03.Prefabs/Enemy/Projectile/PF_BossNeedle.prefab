@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 1847587895353170384}
   - component: {fileID: 2276803321377502504}
   - component: {fileID: 5484354969703780163}
-  - component: {fileID: 5058110292603855512}
-  m_Layer: 11
+  - component: {fileID: 159123632947961680}
+  m_Layer: 9
   m_Name: PF_BossNeedle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -79,8 +79,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: -1826688615
-  m_SortingLayer: 7
+  m_SortingLayerID: 1334980413
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 8217104239343263581, guid: 5836671f36b3e2c43b12034312495ef9,
@@ -132,15 +132,15 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 7.29, y: 3.16}
+    oldSize: {x: 2.8476562, y: 1.234375}
     newSize: {x: 0.33, y: 0.33}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.33, y: 0.33}
+  m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &5058110292603855512
+--- !u!114 &159123632947961680
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -149,17 +149,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 756193268173233608}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f0b625750ed537f4eb52d79a04ee54c9, type: 3}
+  m_Script: {fileID: 11500000, guid: b4c8f97083c428642a65d6a427b7b63e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossProjectile
-  _speed: 10
-  _lifeTime: 3
-  _spriteFacesRight: 1
+  m_EditorClassIdentifier: Assembly-CSharp::BossFloorSpike
+  _attackName: "\uBC14\uB2E5 \uAC00\uC2DC"
   _damage: 15
   _knockbackForce: 6
   _defense:
-    Parryable: 1
+    Parryable: 0
     Unblockable: 0
     ParryWindowOverride: 0
     GuardGaugeCost: 30
     BlockInvincibleTime: 0
+  _damageRiseThreshold: 0.3
+  _uprightRotation: 90
