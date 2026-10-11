@@ -94,10 +94,15 @@ MonoBehaviour:
     Unblockable: 0
     ParryWindowOverride: 0
     GuardGaugeCost: 20
+    BlockInvincibleTime: 0
   _launchComboStep: 3
   _launchSpeed: 16
   _gimmickDamage: 40
-  _nudgeSpeed: 3
+  _nudgeSpeed: 2
+  _nudgeUpSpeed: 3
+  _nudgeDuration: 0.3
+  _knockbackGroundDeceleration: 20
+  _attackKnockbackMultiplier: 0
   _impactShake:
     Duration: 0.2
     Magnitude: 0.2

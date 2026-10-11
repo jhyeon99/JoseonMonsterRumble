@@ -11,6 +11,10 @@ using UnityEngine;
 public class BossHitbox : MonoBehaviour, IParryable
 {
     [Header("데미지")]
+    [Tooltip("공격 이름 (사망 원인 표시용). 비우면 오브젝트 이름 사용")]
+    [SerializeField]
+    private string _attackName = "";
+
     [SerializeField, Min(0f)] private float _damage = 20f;
     [SerializeField, Min(0f)] private float _knockbackForce = 8f;
 
@@ -130,8 +134,10 @@ public class BossHitbox : MonoBehaviour, IParryable
                 other.ClosestPoint(_collider.bounds.center),
                 direction,
                 _defense,
-                this
+                this,
+                attackName: string.IsNullOrWhiteSpace(_attackName) ? name : _attackName
             );
+            hitData.Attacker = _boss != null ? _boss.gameObject : gameObject;
 
             damageable.TakeDamage(hitData);
             return;
