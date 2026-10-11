@@ -92,11 +92,6 @@ public class BossProjectile : MonoBehaviour, IParryable
                 continue;
             }
 
-            if (damageable is PlayerHealth playerHealth && playerHealth.IsInvincible)
-            {
-                continue;
-            }
-
             var hitData = new HitData(
                 _damage,
                 _knockbackForce,
@@ -105,6 +100,12 @@ public class BossProjectile : MonoBehaviour, IParryable
                 _defense,
                 this
             );
+
+            if (damageable is PlayerHealth playerHealth && playerHealth.IsInvincible)
+            {
+                playerHealth.TakeDamage(hitData);
+                continue;
+            }
 
             damageable.TakeDamage(hitData);
             Destroy(gameObject);
