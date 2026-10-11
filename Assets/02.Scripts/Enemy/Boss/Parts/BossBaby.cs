@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// 올챙이 (독 방울을 터트리면 나옴). 공격 패턴 없이 좌우로 무작위로 돌아다니며 닿으면 약한 접촉 데미지.
 /// 플레이어 콤보 3타에 맞으면 (그 공격으로 죽더라도) 보스에게 날아가 부딪혀 기믹 데미지.
-/// 그 외 공격은 체력이 깎이고 살짝 밀림. 체력이 0이 되면 사라짐.
+/// 그 외 공격은 체력이 깎이고 뒤로 튕겨 나감 (일반 적보다 크게, 살짝 떠오름). 체력이 0이 되면 사라짐.
 /// 레이어는 Enemy (플레이어 근접 공격에 맞도록), Rigidbody2D(Dynamic) + 콜라이더 필요.
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
@@ -56,6 +56,10 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
     [SerializeField, Min(0.05f)]
     private float _contactInterval = 0.8f;
 
+    [Tooltip("접촉 공격 이름 (사망 원인 표시용)")]
+    [SerializeField]
+    private string _contactAttackName = "몸통 박치기";
+
     [SerializeField]
     private AttackDefense _defense = new AttackDefense { Parryable = true, GuardGaugeCost = 5f };
 
@@ -71,9 +75,26 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
     [SerializeField, Min(0f)]
     private float _gimmickDamage = 40f;
 
-    [Tooltip("3타가 아닌 공격에 맞았을 때 밀리는 속도")]
+    [Header("넉백 (3타가 아닌 공격)")]
+    [Tooltip("맞았을 때 공격 방향으로 밀리는 가로 속도")]
     [SerializeField, Min(0f)]
     private float _nudgeSpeed = 3f;
+
+    [Tooltip("맞았을 때 위로 튀어 오르는 속도 (0이면 바닥에서 밀리기만 함)")]
+    [SerializeField, Min(0f)]
+    private float _nudgeUpSpeed = 4f;
+
+    [Tooltip("넉백 직후 최소 이 시간 동안은 스스로 움직이지 않음 (초)")]
+    [SerializeField, Min(0f)]
+    private float _nudgeDuration = 0.3f;
+
+    [Tooltip("넉백 후 착지해서 미끄러질 때 가로 속도를 초당 얼마나 줄일지. 멈출 때까지 좌우 이동을 막음")]
+    [SerializeField, Min(0.1f)]
+    private float _knockbackGroundDeceleration = 20f;
+
+    [Tooltip("공격의 넉백 세기(KnockbackForce)를 가로 속도에 더하는 배율 (0이면 공격과 상관없이 같은 세기)")]
+    [SerializeField, Min(0f)]
+    private float _attackKnockbackMultiplier = 0f;
 
     [SerializeField]
     private CameraShakeSettings _impactShake = new CameraShakeSettings(0.2f, 0.2f);
@@ -97,6 +118,7 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
     private Boss _boss;
     private float _contactTimer;
     private float _nudgeTimer;
+    private bool _isKnockedBack;
     private float _directionTimer;
     private float _direction;
     private bool _isLaunched;
@@ -167,8 +189,30 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
             return;
         }
 
+        bool isGrounded = IsGrounded();
+
+        // 넉백 중에는 좌우 이동 금지: 공중이면 밀리는 속도 유지, 착지하면 미끄러지다 멈출 때까지 대기
+        if (_isKnockedBack)
+        {
+            if (!isGrounded)
+            {
+                return;
+            }
+
+            float slideX = Mathf.MoveTowards(_body.linearVelocity.x, 0f, _knockbackGroundDeceleration * Time.fixedDeltaTime);
+            _body.linearVelocity = new Vector2(slideX, _body.linearVelocity.y);
+            if (Mathf.Abs(slideX) > 0.05f)
+            {
+                return;
+            }
+
+            // 다 멈췄으면 새 방향을 골라 다시 돌아다님
+            _isKnockedBack = false;
+            PickDirection();
+        }
+
         // 방울에서 나와 떨어지는 동안(공중)은 움직이지 않고 그대로 낙하
-        if (!IsGrounded())
+        if (!isGrounded)
         {
             _body.linearVelocity = new Vector2(0f, _body.linearVelocity.y);
             return;
@@ -257,8 +301,10 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
                 _contactKnockback,
                 other.ClosestPoint(transform.position),
                 direction,
-                _defense
+                _defense,
+                attackName: _contactAttackName
             );
+            hitData.Attacker = gameObject;
 
             damageable.TakeDamage(hitData);
             _contactTimer = _contactInterval;
@@ -300,10 +346,13 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
             return true;
         }
 
-        // 그 외 공격은 살짝 밀림
+        // 그 외 공격은 뒤로 튕겨 나감 (위로 살짝 떠서 바닥 마찰에 덜 막힘)
         float pushX = hitData.AttackDirection.x >= 0f ? 1f : -1f;
-        _body.linearVelocity = new Vector2(pushX * _nudgeSpeed, _body.linearVelocity.y);
-        _nudgeTimer = 0.15f;
+        float speedX = _nudgeSpeed + (Mathf.Max(0f, hitData.KnockbackForce) * _attackKnockbackMultiplier);
+        float speedY = Mathf.Max(_body.linearVelocity.y, _nudgeUpSpeed);
+        _body.linearVelocity = new Vector2(pushX * speedX, speedY);
+        _nudgeTimer = _nudgeDuration;
+        _isKnockedBack = true;
         return true;
     }
 
