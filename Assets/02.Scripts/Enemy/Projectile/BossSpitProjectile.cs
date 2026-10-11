@@ -4,7 +4,9 @@ using UnityEngine;
 /// <summary>
 /// 보스 침뱉기 투사체. 중력을 받아 포물선으로 날아감 (발사 속도는 BossSpitPattern이 Launch로 지정).
 /// 애니메이션: 발사 시 시작(start) → 날아가는 동안 반복(loop) → 바닥 / 벽에 닿으면 터지는(end) 애니메이션 후 사라짐.
-/// 플레이어에 맞으면 바로 사라짐 (Projectile 기본 처리). 패링하면 보스 쪽으로 반사.
+/// 플레이어에 맞으면 바로 사라짐 (Projectile 기본 처리).
+/// 발사할 때 패링 가능 여부가 정해짐 (BossSpitPattern). 패링 가능한 침은 날아가는 동안 반짝이고,
+/// 패링하면 그 순간 보스가 있던 위치로 직진. 패링 불가 침은 패링 타이밍에 막으면 게이지 소모 없이 막기만.
 /// 프리팹의 Type을 BossSpit으로 두고 ProjectilePool의 투사체 프리팹 목록에 등록해서 사용.
 /// </summary>
 public class BossSpitProjectile : Projectile
@@ -21,6 +23,26 @@ public class BossSpitProjectile : Projectile
     [Tooltip("스프라이트 원본의 앞쪽이 왼쪽이면 체크 (적 투사체 기본). 오른쪽이면 끄기")]
     [SerializeField]
     private bool _spriteFacesLeft = true;
+
+    [Header("패링 가능 표시 (보스 / 지상 근거리 적의 패링 예고와 같은 노란 반짝임)")]
+    [Tooltip("반짝임 실루엣 머티리얼 (보스 / 적 ParryFlash와 같은 흰색 실루엣 머티리얼). 비우면 스프라이트 색만 깜빡임")]
+    [SerializeField]
+    private Material _parryFlashMaterial;
+
+    [Tooltip("반짝임 색 (보스 / 적 패링 예고와 같은 값)")]
+    [SerializeField]
+    private Color _parryFlashColor = new Color(1f, 0.95f, 0.6f, 1f);
+
+    [SerializeField, Range(0f, 1f)]
+    private float _parryFlashPeakOpacity = 0.9f;
+
+    [Tooltip("반짝임 한 번의 시간 (초)")]
+    [SerializeField, Min(0.01f)]
+    private float _parryFlashDuration = 0.25f;
+
+    [Tooltip("반짝임을 반복하는 간격 (초). 날아가는 동안 계속 반복")]
+    [SerializeField, Min(0.05f)]
+    private float _parryFlashInterval = 0.35f;
 
     [Header("땅에 닿았을 때 (end 애니메이션)")]
     [Tooltip("땅에 닿으면 켤 애니메이터 Bool (loop → end 전이 조건)")]
@@ -44,6 +66,13 @@ public class BossSpitProjectile : Projectile
     private Collider2D _collider;
     private bool _isEnding;
     private Coroutine _endRoutine;
+    private bool _isParryable;
+    private float _parryFlashElapsed;
+    private SpriteRenderer _renderer;
+    private SpriteRenderer _flashRenderer;
+    private Color _rendererBaseColor = Color.white;
+
+    private const int FlashSortingOffset = 2;
 
     /// <summary>패턴이 발사 속도를 계산할 때 쓰는 중력</summary>
     public float Gravity => _gravity;
@@ -56,6 +85,13 @@ public class BossSpitProjectile : Projectile
         base.Awake();
         _animator = GetComponentInChildren<Animator>();
         _collider = GetComponent<Collider2D>();
+        _renderer = GetComponentInChildren<SpriteRenderer>(true);
+        if (_renderer != null)
+        {
+            _rendererBaseColor = _renderer.color;
+            CreateFlashRenderer();
+        }
+
         EnsureKinematicBody();
     }
 
@@ -95,6 +131,37 @@ public class BossSpitProjectile : Projectile
         Launch(CalculateVelocity(MuzzlePosition, target, 1f, _gravity));
     }
 
+    /// <summary>
+    /// 이번 발사의 패링 가능 여부. 패링 가능하면 날아가는 동안 반짝임,
+    /// 불가면 패링 타이밍에 막을 때 게이지 소모 없이 막기만 (프리팹 Defense 기준으로 덮어씀)
+    /// </summary>
+    public void SetParryable(bool parryable)
+    {
+        AttackDefense defense = BaseDefense;
+        defense.Parryable = parryable;
+        defense.FreeBlockOnParryTiming = !parryable;
+        SetDefenseOverride(defense);
+
+        _isParryable = parryable;
+        _parryFlashElapsed = 0f;
+        RestoreRendererColor();
+    }
+
+    /// <summary>원본 스프라이트 위에 겹쳐 그릴 흰 실루엣 (ParryWarningFlash와 같은 방식). 원본 자식이라 애니메이션 / 회전을 그대로 따라감</summary>
+    private void CreateFlashRenderer()
+    {
+        if (_parryFlashMaterial == null)
+        {
+            return;
+        }
+
+        var flashObject = new GameObject("ParryFlash");
+        flashObject.transform.SetParent(_renderer.transform, false);
+        _flashRenderer = flashObject.AddComponent<SpriteRenderer>();
+        _flashRenderer.sharedMaterial = _parryFlashMaterial;
+        _flashRenderer.enabled = false;
+    }
+
     /// <summary>발사 속도 지정 (위치는 그대로)</summary>
     public void Launch(Vector2 velocity)
     {
@@ -109,6 +176,73 @@ public class BossSpitProjectile : Projectile
         float time = Mathf.Max(0.05f, flightTime);
         Vector2 offset = to - from;
         return new Vector2(offset.x / time, (offset.y / time) + (0.5f * gravity * time));
+    }
+
+    // 애니메이터가 스프라이트를 바꾼 뒤에 따라 그리도록 LateUpdate
+    private void LateUpdate()
+    {
+        UpdateParryFlash();
+    }
+
+    /// <summary>
+    /// 패링 가능한 침은 날아가는 동안 Interval마다 노랗게 반짝임 (반사 / 터지는 중에는 끔).
+    /// 반짝임 모양은 ParryWarningFlash와 같음: 빠르게 밝아졌다가 천천히 어두워짐
+    /// </summary>
+    private void UpdateParryFlash()
+    {
+        if (!_isParryable || IsReflected || _isEnding || _renderer == null)
+        {
+            return;
+        }
+
+        _parryFlashElapsed += Time.deltaTime;
+        float interval = Mathf.Max(_parryFlashInterval, _parryFlashDuration);
+        float t = Mathf.Repeat(_parryFlashElapsed, interval);
+
+        float opacity = 0f;
+        if (t < _parryFlashDuration)
+        {
+            float pulse = t / _parryFlashDuration;
+            opacity = pulse < 0.25f
+                ? Mathf.SmoothStep(0f, 1f, pulse / 0.25f)
+                : Mathf.SmoothStep(1f, 0f, (pulse - 0.25f) / 0.75f);
+        }
+
+        if (_flashRenderer != null)
+        {
+            _flashRenderer.enabled = _renderer.enabled && opacity > 0f;
+            if (!_flashRenderer.enabled)
+            {
+                return;
+            }
+
+            _flashRenderer.sprite = _renderer.sprite;
+            _flashRenderer.flipX = _renderer.flipX;
+            _flashRenderer.flipY = _renderer.flipY;
+            _flashRenderer.sortingLayerID = _renderer.sortingLayerID;
+            _flashRenderer.sortingOrder = _renderer.sortingOrder + FlashSortingOffset;
+
+            Color color = _parryFlashColor;
+            color.a *= _renderer.color.a * _parryFlashPeakOpacity * opacity;
+            _flashRenderer.color = color;
+            return;
+        }
+
+        // 실루엣 머티리얼이 없으면 스프라이트 색을 노랗게 깜빡임
+        _renderer.color = Color.Lerp(_rendererBaseColor, _parryFlashColor, opacity * _parryFlashPeakOpacity);
+    }
+
+    private void RestoreRendererColor()
+    {
+        if (_renderer != null)
+        {
+            _renderer.color = _rendererBaseColor;
+        }
+
+        if (_flashRenderer != null)
+        {
+            _flashRenderer.enabled = false;
+        }
     }
 
     protected override void Fire()
@@ -174,6 +308,7 @@ public class BossSpitProjectile : Projectile
     /// <summary>땅에 닿음: 멈추고 판정을 끈 뒤 end 애니메이션 → 사라짐</summary>
     private void BeginEnd(Collider2D ground)
     {
+        RestoreRendererColor();
         Vector2 incoming = _velocity;
         _isEnding = true;
         _isLaunching = false;
@@ -276,6 +411,8 @@ public class BossSpitProjectile : Projectile
         _isLaunching = false;
         _isEnding = false;
         _endRoutine = null;
+        _isParryable = false;
+        RestoreRendererColor();
 
         // 다음에 풀에서 꺼낼 때 맞을 수 있도록
         if (_collider != null)
