@@ -51,6 +51,7 @@ public class ParryWarningFlash : MonoBehaviour
 
     private float _elapsed;
     private bool _isPlaying;
+    private Color _currentColor;
 
     /// <summary>공격 판정 시작 몇 초 전에 재생해야 하는지</summary>
     public float LeadTime => _leadTime;
@@ -87,10 +88,18 @@ public class ParryWarningFlash : MonoBehaviour
     /// <summary>반짝임 재생 (재생 중이면 처음부터 다시)</summary>
     public void Play()
     {
+        Play(_color);
+    }
+
+    /// <summary>지정한 색으로 반짝임 재생 (패링 예고 외의 다른 예고에 다른 색을 쓸 때. 예: 피해야 하는 공격은 빨강)</summary>
+    public void Play(Color color)
+    {
         if (!isActiveAndEnabled)
         {
             return;
         }
+
+        _currentColor = color;
 
         _elapsed = 0f;
         _isPlaying = true;
@@ -151,7 +160,7 @@ public class ParryWarningFlash : MonoBehaviour
             ? Mathf.SmoothStep(0f, 1f, pulse / 0.25f)
             : Mathf.SmoothStep(1f, 0f, (pulse - 0.25f) / 0.75f);
 
-        Color color = _color;
+        Color color = _currentColor;
         color.a *= _sourceRenderer.color.a * _peakOpacity * opacity;
         _flashRenderer.color = color;
     }

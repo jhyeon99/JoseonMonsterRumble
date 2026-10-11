@@ -313,6 +313,25 @@ public abstract class BossPattern : MonoBehaviour
         return false;
     }
 
+    /// <summary>이어지는 클립 중 반복(Loop Time) 클립 (없으면 null). 반복 구간이 있는 패턴의 자동 설정용</summary>
+    protected AnimationClip FindLoopingFollowingClip()
+    {
+        if (_followingClips == null)
+        {
+            return null;
+        }
+
+        foreach (AnimationClip clip in _followingClips)
+        {
+            if (clip != null && clip.isLooping)
+            {
+                return clip;
+            }
+        }
+
+        return null;
+    }
+
     /// <summary>지금 재생 중인 이 패턴의 클립 (없으면 null)</summary>
     protected AnimationClip GetPlayingPatternClip()
     {
