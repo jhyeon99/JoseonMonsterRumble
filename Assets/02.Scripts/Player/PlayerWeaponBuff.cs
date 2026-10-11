@@ -16,6 +16,7 @@ public class PlayerWeaponBuff : MonoBehaviour
     private const float MinimumDuration = 0.05f;
     private const float DefaultDuration = 4.0f;
     private const float DefaultMultiplier = 1.30f;
+    private const string GlowShaderName = "Team06/ProjectileGlow";
 
     public event Action OnBuffActivated;
     public event Action OnBuffDeactivated;
@@ -41,6 +42,9 @@ public class PlayerWeaponBuff : MonoBehaviour
 
     private MaterialPropertyBlock _propBlock;
     private Material _originalMaterial;
+    private Material _ownedGlowMaterial;
+    private Material _ownedParticleMaterial;
+    private PlayerPotionAura _potionAura;
 
     public bool IsBuffActive => _isBuffActive;
     public float RemainingDuration => _remainingDuration;
@@ -49,6 +53,7 @@ public class PlayerWeaponBuff : MonoBehaviour
 
     private void Awake()
     {
+        _potionAura = GetComponent<PlayerPotionAura>();
         if (_sourceRenderer == null)
         {
             _sourceRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -67,10 +72,11 @@ public class PlayerWeaponBuff : MonoBehaviour
 
         if (_glowMaterial == null)
         {
-            var glowShader = Shader.Find("Team06/ProjectileGlow");
+            var glowShader = Shader.Find(GlowShaderName);
             if (glowShader != null)
             {
-                _glowMaterial = new Material(glowShader);
+                _ownedGlowMaterial = new Material(glowShader);
+                _glowMaterial = _ownedGlowMaterial;
             }
         }
 
@@ -82,9 +88,32 @@ public class PlayerWeaponBuff : MonoBehaviour
         DeactivateBuff();
     }
 
+    private void OnDestroy()
+    {
+        DeactivateBuff();
+        if (_ownedGlowMaterial != null)
+        {
+            Destroy(_ownedGlowMaterial);
+        }
+        if (_ownedParticleMaterial != null)
+        {
+            Destroy(_ownedParticleMaterial);
+        }
+    }
+
+    internal bool HasActiveVisuals(SpriteRenderer renderer)
+    {
+        return isActiveAndEnabled && _isBuffActive && _sourceRenderer == renderer && _glowMaterial != null;
+    }
+
     public void ActivateBuff(float duration = DefaultDuration, float multiplier = DefaultMultiplier)
     {
         if (!isActiveAndEnabled) return;
+
+        if (_potionAura == null)
+        {
+            _potionAura = GetComponent<PlayerPotionAura>();
+        }
 
         _duration = Mathf.Max(MinimumDuration, duration);
         _damageMultiplier = Mathf.Max(1.0f, multiplier);
@@ -93,10 +122,7 @@ public class PlayerWeaponBuff : MonoBehaviour
         bool wasActive = _isBuffActive;
         _isBuffActive = true;
 
-        if (_sourceRenderer != null && _glowMaterial != null)
-        {
-            _sourceRenderer.sharedMaterial = _glowMaterial;
-        }
+        ApplyRendererVisuals();
 
         if (_auraParticles != null)
         {
@@ -148,7 +174,22 @@ public class PlayerWeaponBuff : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!_isBuffActive || _sourceRenderer == null || _propBlock == null) return;
+        ApplyRendererVisuals();
+    }
+
+    internal void ApplyRendererVisuals()
+    {
+        if (!HasActiveVisuals(_sourceRenderer) || _sourceRenderer == null || _propBlock == null)
+        {
+            return;
+        }
+        // 물약 연출 동안 공격력 버프는 유지하되 본체 색상을 덮어쓰지 않는다.
+        if (_potionAura != null && _potionAura.HasActiveVisuals(_sourceRenderer))
+        {
+            return;
+        }
+
+        _sourceRenderer.sharedMaterial = _glowMaterial;
 
         float pulse = Mathf.Sin(Time.time * _pulseSpeed) * 0.5f + 0.5f;
         float brightness = Mathf.Lerp(_minBrightness, _maxBrightness, pulse);
@@ -172,6 +213,12 @@ public class PlayerWeaponBuff : MonoBehaviour
     private void ResetRendererVisuals()
     {
         if (_sourceRenderer == null) return;
+
+        if (_potionAura != null && _potionAura.HasActiveVisuals(_sourceRenderer))
+        {
+            _potionAura.ApplyRendererVisuals();
+            return;
+        }
 
         if (_propBlock != null)
         {
@@ -228,9 +275,9 @@ public class PlayerWeaponBuff : MonoBehaviour
 
             if (particleShader != null)
             {
-                var fallbackMat = new Material(particleShader);
-                fallbackMat.color = new Color(0.4f, 0.85f, 1.0f, 0.9f);
-                psRenderer.sharedMaterial = fallbackMat;
+                _ownedParticleMaterial = new Material(particleShader);
+                _ownedParticleMaterial.color = new Color(0.4f, 0.85f, 1.0f, 0.9f);
+                psRenderer.sharedMaterial = _ownedParticleMaterial;
             }
         }
 
@@ -255,11 +302,13 @@ public class PlayerWeaponBuff : MonoBehaviour
         shape.shapeType = ParticleSystemShapeType.Circle;
         shape.radius = 0.28f;
 
-        // 수명에 따른 상승 기류 속도 모듈
+        // 수명에 따른 상승 기류 속도 모듈 (세 축의 커브 모드를 동일하게 맞춰 엔진 경고 방지)
         ParticleSystem.VelocityOverLifetimeModule velocityOverLifetime = _auraParticles.velocityOverLifetime;
         velocityOverLifetime.enabled = true;
         velocityOverLifetime.space = ParticleSystemSimulationSpace.World;
+        velocityOverLifetime.x = new ParticleSystem.MinMaxCurve(0f, 0f);
         velocityOverLifetime.y = new ParticleSystem.MinMaxCurve(0.7f, 1.4f);
+        velocityOverLifetime.z = new ParticleSystem.MinMaxCurve(0f, 0f);
 
         // 유기적 일렁임을 위한 노이즈 모듈
         ParticleSystem.NoiseModule noise = _auraParticles.noise;
