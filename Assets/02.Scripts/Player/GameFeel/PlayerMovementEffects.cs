@@ -87,6 +87,9 @@ public class PlayerMovementEffects : MonoBehaviour
         _effects.PlayWalkDust(_feet.position, transform.lossyScale.x < 0f);
     }
 
+    private const float LandingGroundRaycastDistance = 0.8f;
+    private const float LandingGroundRaycastOriginOffset = 0.2f;
+
     private void UpdateLandingEffect(bool isGrounded)
     {
         if (_groundState == GroundState.Uninitialized)
@@ -104,11 +107,32 @@ public class PlayerMovementEffects : MonoBehaviour
 
         if (_groundState == GroundState.Airborne && _airTime >= _minimumAirTime)
         {
-            _effects.PlayLandingDust(_landingDustPoint.position);
+            Vector2 spawnPosition = GetLandingDustPosition();
+            _effects.PlayLandingDust(spawnPosition);
             _walkDistance = 0f;
         }
 
         _groundState = GroundState.Grounded;
         _airTime = 0f;
+    }
+
+    private Vector2 GetLandingDustPosition()
+    {
+        Vector2 defaultPos = _landingDustPoint.position;
+        var origin = new Vector2(defaultPos.x, defaultPos.y + LandingGroundRaycastOriginOffset);
+
+        RaycastHit2D hit = Physics2D.Raycast(
+            origin,
+            Vector2.down,
+            LandingGroundRaycastDistance,
+            Constants.Layers.GroundAllMask
+        );
+
+        if (hit.collider != null)
+        {
+            return new Vector2(defaultPos.x, hit.point.y);
+        }
+
+        return defaultPos;
     }
 }
