@@ -3244,6 +3244,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _animationSpeed
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _nextStompRatio
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _durationOverride
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _spawnLine
