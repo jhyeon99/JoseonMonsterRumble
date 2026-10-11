@@ -7,11 +7,16 @@ using UnityEngine;
 /// </summary>
 public class PlayerFinisherState : PlayerBaseState
 {
+    private const string AttackAnimationState = "Player_Attack_3rd";
+
     private IFinishable _target;
     private float _elapsedTime;
     private float _impactDelay;
     private float _duration;
     private bool _hasImpacted;
+    private bool _hasPlayedParryEffect;
+    private float _parryEffectNormalizedTime;
+    private float _impactNormalizedTime;
     private RigidbodyConstraints2D _originalConstraints;
 
     public PlayerFinisherState(Player player, StateMachine stateMachine)
@@ -30,6 +35,9 @@ public class PlayerFinisherState : PlayerBaseState
 
         _elapsedTime = 0f;
         _hasImpacted = false;
+        _hasPlayedParryEffect = false;
+        _parryEffectNormalizedTime = _player.Finisher.GetParryEffectNormalizedTime(_player.Animator);
+        _impactNormalizedTime = _player.Finisher.GetImpactNormalizedTime(_player.Animator);
         _player.Finisher.GetTiming(_player.Animator, _player.Attack, out _impactDelay, out _duration);
 
         _originalConstraints = _rigidbody2D.constraints;
@@ -57,7 +65,9 @@ public class PlayerFinisherState : PlayerBaseState
 
         _elapsedTime += Time.deltaTime;
 
-        if (!_hasImpacted && _elapsedTime >= _impactDelay)
+        UpdateFinisherAnimation();
+
+        if (!_hasImpacted && float.IsPositiveInfinity(_impactNormalizedTime) && _elapsedTime >= _impactDelay)
         {
             Impact();
         }
@@ -95,6 +105,11 @@ public class PlayerFinisherState : PlayerBaseState
             _target.ReleaseFinisherHold();
         }
 
+        if (!_hasImpacted)
+        {
+            GameEvents.TriggerFinisherAnticipationCancelled();
+        }
+
         _target = null;
     }
 
@@ -104,6 +119,7 @@ public class PlayerFinisherState : PlayerBaseState
 
         if (!IsTargetAlive() || !_target.CanBeFinished)
         {
+            GameEvents.TriggerFinisherAnticipationCancelled();
             return;
         }
 
@@ -112,10 +128,48 @@ public class PlayerFinisherState : PlayerBaseState
         Vector2 point = targetTransform.position;
 
         _target.ReceiveFinisher(_player.Finisher.Launch, directionX);
-        GameEvents.TriggerFinisher(point);
+        GameEvents.TriggerFinisher(point, _player.transform, targetTransform);
     }
 
-    // 대상이 파괴됐거나 꺼졌는지 (인터페이스라 Unity의 null 비교가 적용되지 않아 직접 확인)
+    private void UpdateFinisherAnimation()
+    {
+        Animator animator = _player.Animator;
+        if (animator == null)
+        {
+            return;
+        }
+
+        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+        if (!stateInfo.IsName(AttackAnimationState))
+        {
+            return;
+        }
+
+        if (!_hasPlayedParryEffect && stateInfo.normalizedTime >= _parryEffectNormalizedTime)
+        {
+            _hasPlayedParryEffect = true;
+            _player.Finisher.PlayParryAttackEffect();
+        }
+
+        if (_hasImpacted || float.IsPositiveInfinity(_impactNormalizedTime))
+        {
+            return;
+        }
+        if (!IsTargetAlive())
+        {
+            GameEvents.TriggerFinisherAnticipationCancelled();
+            return;
+        }
+
+        float progress = Mathf.Clamp01(stateInfo.normalizedTime / _impactNormalizedTime);
+        GameEvents.TriggerFinisherAnticipation(_player.transform, _target.FinisherTransform, progress);
+        if (stateInfo.normalizedTime >= _impactNormalizedTime)
+        {
+            Impact();
+        }
+    }
+
+    // 대상이 파괴됐거나 꺼졌는지 확인.
     private bool IsTargetAlive()
     {
         return _target is Behaviour behaviour && behaviour != null && behaviour.isActiveAndEnabled;
