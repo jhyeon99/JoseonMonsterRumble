@@ -38,6 +38,7 @@ public class UI_EnemyDamageText : MonoBehaviour
     [SerializeField, Min(1f)] private float _finisherSizeMultiplier = 2f;
     [SerializeField] private Color _textColor = new Color(1f, 0.96f, 0.86f);
     [SerializeField] private Color _playerDamageColor = new Color(1f, 0.22f, 0.18f, 1f);
+    [SerializeField, Min(1f)] private float _strongPlayerHitMotionMultiplier = 1.45f;
     [SerializeField] private Color _finisherColor = new Color(1f, 0.75f, 0.18f);
     [SerializeField] private Color _buffedColor = new Color(0.35f, 0.85f, 1.0f, 1.0f);
     [SerializeField, Min(1f)] private float _fontSize = 56f;
@@ -134,7 +135,9 @@ public class UI_EnemyDamageText : MonoBehaviour
 
         // OnPlayerHit is raised after defence checks and before HP is reduced.
         float damage = Mathf.Min(Mathf.Max(0f, hitData.Damage), _playerHealth.CurrentHealth);
-        ShowDamage(damage, hitData.HitPoint, false, hitData.AttackDirection, 1f,
+        float hitStrength = Mathf.InverseLerp(_baseSizeDamage, Mathf.Max(_baseSizeDamage + MinimumDuration, _maxSizeDamage), hitData.Damage);
+        float motionMultiplier = Mathf.Lerp(1f, _strongPlayerHitMotionMultiplier, hitStrength);
+        ShowDamage(damage, hitData.HitPoint, false, hitData.AttackDirection, motionMultiplier,
             isPlayerDamage: true);
     }
 

@@ -14,7 +14,10 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
     private const string GhostMaskName = "GhostMask";
     private const string FillName = "Fill";
     private const string FrameName = "Frame";
+    private const string ShieldMaskName = "ShieldMask";
+    private const string HealMaskName = "HealMask";
     private const float MinimumDuration = 0.01f;
+    private static readonly int HighlightColorId = Shader.PropertyToID("_HighlightColor");
     private static readonly Vector2 LeftCenter = new Vector2(0f, 0.5f);
     private static readonly Vector2 Center = new Vector2(0.5f, 0.5f);
 
@@ -34,6 +37,11 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
     [SerializeField, Min(0f)] private float _damageDelay = 0.25f;
     [SerializeField, Min(MinimumDuration)] private float _damageCatchupDuration = 0.35f;
     [SerializeField, Min(MinimumDuration)] private float _healCatchupDuration = 0.2f;
+    [Header("도깨비불 효과")]
+    [SerializeField] private Color _shieldOverlayColor = new Color(1f, 1f, 1f, 0.38f);
+    [SerializeField] private Color _healOverlayColor = new Color(0.12f, 0.78f, 0.32f, 0.85f);
+    [SerializeField, Min(MinimumDuration)] private float _healTintDuration = 0.35f;
+    [SerializeField, Range(0f, 1f)] private float _healTintMaxWidthRatio = 0.06f;
 
     private enum TrailPhase
     {
@@ -51,6 +59,12 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
         public RectTransform Root;
         public RectTransform MainMask;
         public RectTransform GhostMask;
+        public RectTransform ShieldMask;
+        public RectTransform HealMask;
+        public RectTransform HealArtwork;
+        public RawImage HealImage;
+        public float HealStartRatio;
+        public float HealTintRemaining;
         public float TargetRatio;
         public float MainRatio;
         public float GhostRatio;
@@ -61,6 +75,7 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
 
     private RectTransform _container;
     private Canvas _canvas;
+    private Material _overlayMaterial;
     private readonly List<UI_HealthBar> _bars = new List<UI_HealthBar>();
     private readonly Dictionary<Enemy, UI_HealthBar> _barsByEnemy = new Dictionary<Enemy, UI_HealthBar>();
 
@@ -73,6 +88,18 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
         {
             Debug.LogWarning(MissingReferencesWarning, this);
             enabled = false;
+            return;
+        }
+        // One owned material for all bars; image colours distinguish the two overlays.
+        _overlayMaterial = new Material(_damageGhostMaterial);
+        _overlayMaterial.SetColor(HighlightColorId, Color.white);
+    }
+
+    private void OnDestroy()
+    {
+        if (_overlayMaterial != null)
+        {
+            Destroy(_overlayMaterial);
         }
     }
 
@@ -132,6 +159,7 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
             }
 
             UpdateHealth(bar, deltaTime);
+            UpdateBuffOverlays(bar, deltaTime);
             UpdatePosition(bar, worldCamera, uiCamera);
         }
     }
@@ -164,11 +192,19 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
         CreateArtwork(BackgroundName, bar.Root, _backgroundTexture, Color.white, Center);
         bar.GhostMask = CreateMask(GhostMaskName, bar.Root, _damageGhostMaterial);
         bar.MainMask = CreateMask(MainMaskName, bar.Root, _fillMaterial);
+        bar.HealMask = CreateMask(HealMaskName, bar.Root, _overlayMaterial);
+        RawImage healArtwork = bar.HealMask.GetComponentInChildren<RawImage>();
+        healArtwork.color = _healOverlayColor;
+        bar.HealImage = healArtwork;
+        bar.HealArtwork = healArtwork.rectTransform;
+        bar.ShieldMask = CreateMask(ShieldMaskName, bar.Root, _overlayMaterial);
+        bar.ShieldMask.GetComponentInChildren<RawImage>().color = _shieldOverlayColor;
         CreateArtwork(FrameName, bar.Root, _frameTexture, Color.white, Center);
         bar.TargetRatio = CalculateHealthRatio(bar);
         bar.MainRatio = bar.TargetRatio;
         bar.GhostRatio = bar.TargetRatio;
         ApplyMaskWidths(bar);
+        UpdateBuffOverlays(bar, 0f);
         _bars.Add(bar);
         _barsByEnemy.Add(enemy, bar);
     }
@@ -219,6 +255,17 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
         if (!Mathf.Approximately(targetRatio, bar.TargetRatio))
         {
             bool isDamage = targetRatio < bar.TargetRatio;
+            if (isDamage)
+            {
+                bar.HealTintRemaining = 0f;
+                bar.HealStartRatio = targetRatio;
+            }
+            else
+            {
+                float healStart = bar.HealTintRemaining > 0f ? bar.HealStartRatio : bar.TargetRatio;
+                bar.HealStartRatio = Mathf.Max(healStart, targetRatio - _healTintMaxWidthRatio);
+                bar.HealTintRemaining = _healTintDuration;
+            }
             bar.TargetRatio = targetRatio;
             bar.Elapsed = 0f;
             if (isDamage)
@@ -284,6 +331,27 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
     {
         bar.MainMask.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, _barSize.x * bar.MainRatio);
         bar.GhostMask.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, _barSize.x * bar.GhostRatio);
+    }
+
+    private void UpdateBuffOverlays(UI_HealthBar bar, float deltaTime)
+    {
+        float maxHp = bar.Enemy.Data.MaxHp;
+        float shieldRatio = maxHp > 0f ? Mathf.Clamp01(bar.Health.ShieldHp / maxHp) : 0f;
+        bar.ShieldMask.gameObject.SetActive(shieldRatio > 0f);
+        bar.ShieldMask.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, _barSize.x * shieldRatio);
+
+        // The full brush stays aligned with HP; only the newly filling interval is revealed.
+        bar.HealTintRemaining = Mathf.Max(0f, bar.HealTintRemaining - deltaTime);
+        float healWidth = bar.HealTintRemaining > 0f
+            ? Mathf.Max(0f, bar.TargetRatio - bar.HealStartRatio) * _barSize.x : 0f;
+        bar.HealMask.gameObject.SetActive(healWidth > 0f);
+        float healStart = bar.HealStartRatio * _barSize.x;
+        bar.HealMask.anchoredPosition = new Vector2(healStart, 0f);
+        bar.HealMask.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, healWidth);
+        bar.HealArtwork.anchoredPosition = new Vector2(-healStart, 0f);
+        Color healColor = _healOverlayColor;
+        healColor.a *= Mathf.Clamp01(bar.HealTintRemaining / Mathf.Max(MinimumDuration, _healTintDuration));
+        bar.HealImage.color = healColor;
     }
 
     private void UpdatePosition(UI_HealthBar bar, Camera worldCamera, Camera uiCamera)
