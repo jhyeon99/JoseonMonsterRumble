@@ -156,7 +156,6 @@ public class BossSpitPattern : BossPattern
                     yield return new WaitForSeconds(_spitDelay);
                 }
             }
-            
             int min = Mathf.Max(1, _projectilesPerSpit.x);
             int max = Mathf.Max(min, _projectilesPerSpit.y);
             int count = Random.Range(min, max + 1);

@@ -50,7 +50,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     public event Action OnPotionUsed;
     public event Action<HitData> OnHit;
     public event Action<int> OnPotionChanged;
-    public event Action OnPotionUsed;
     public event Action<HitData> OnDodgeSuccess;
 
 
