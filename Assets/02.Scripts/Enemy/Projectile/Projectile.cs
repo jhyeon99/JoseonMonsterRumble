@@ -214,6 +214,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
             // 플레이어가 닷지(회피) 등 무적 상태일 때는 투사체를 소멸시키지 않고 관통하여 지나감
             if (damageable is PlayerHealth playerHealth && playerHealth.IsInvincible)
             {
+                NotifyInvincibleHit(playerHealth, hitPoint);
                 return;
             }
 
@@ -222,6 +223,13 @@ public abstract class Projectile : MonoBehaviour, IParryable
         }
 
         gameObject.SetActive(false);
+    }
+
+    protected void NotifyInvincibleHit(IDamageable damageable, Vector2 hitPoint)
+    {
+        var hitData = new HitData(_projectileDamage, _data.KnockbackForce, hitPoint,
+            HitDirection, _defense, this, 0, AttackName);
+        damageable.TakeDamage(hitData);
     }
 
     protected void ApplyHit(IDamageable damageable, Vector2 hitPoint)
