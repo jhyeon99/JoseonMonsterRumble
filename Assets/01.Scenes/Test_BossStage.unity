@@ -2337,23 +2337,24 @@ MonoBehaviour:
   _animationTrigger: hop
   _animationClip: {fileID: 7400000, guid: ddb241990f77e6c43a82851448213d21, type: 2}
   _followingClips: []
-  _durationOverride: 0.5
+  _durationOverride: 0
   _fallbackDuration: 1.5
   _animationSpeed: 1
   _animationStartTimeout: 1.5
   _afterDelay: 0
-  _disableContactDamage: 0
+  _disableContactDamage: 1
   _hitStartRatio: 0
   _hitEndRatio: 1
   _minDistance: 0
-  _maxDistance: 10
+  _maxDistance: 20
   _hopCount: 1
-  _hopDistance: 3
-  _hopHeight: 3
+  _hopDistance: 25
+  _hopHeight: 7.5
   _takeoffRatio: 0.3
   _landRatio: 0.9
   _nextHopRatio: 1
-  _stopShortDistance: 0
+  _overshootDistance: 5
+  _overshootJitter: 0.3
   _edgeMargin: 2
   _landingShake:
     Duration: 0.12

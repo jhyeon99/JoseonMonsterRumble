@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 짧은 점프 접근. 플레이어가 가까이 있을 때 플레이어 쪽으로 짧게 뛰어서 덮침.
+/// 짧은 점프. 플레이어가 가까이 있을 때 플레이어를 뛰어넘어 살짝 반대편에 착지.
 /// - 별도 공격 판정 없음. 보스 몸통 접촉 데미지(EnemyContactDamage)로 공격 (Disable Contact Damage는 꺼 둘 것)
 /// - 0 ~ 이륙 비율: 제자리 (웅크리기), 이륙 ~ 착지 비율: 점프 이동, 이후: 착지 후 마무리
 /// - 점프 횟수가 2 이상이면 애니메이션을 처음부터 다시 재생해 연속으로 뜀
@@ -24,9 +24,9 @@ public class BossHopPattern : BossPattern
     [SerializeField, Min(1)]
     private int _hopCount = 1;
 
-    [Tooltip("한 번에 이동하는 최대 가로 거리. 플레이어가 더 가까우면 플레이어 위치까지만")]
+    [Tooltip("한 번에 이동하는 최대 가로 거리. 플레이어 + 넘어가는 거리가 이보다 멀면 여기까지만 (넘어가지 못할 수 있음)")]
     [SerializeField, Min(0f)]
-    private float _hopDistance = 3f;
+    private float _hopDistance = 8f;
 
     [Tooltip("점프 높이")]
     [SerializeField, Min(0f)]
@@ -44,9 +44,13 @@ public class BossHopPattern : BossPattern
     [SerializeField, Range(0f, 1f)]
     private float _nextHopRatio = 1f;
 
-    [Tooltip("플레이어 위치보다 이만큼 앞에 착지 (0이면 플레이어 위치까지 덮침)")]
+    [Tooltip("플레이어를 넘어 반대편으로 이만큼 더 가서 착지 (0이면 플레이어 위치에 착지)")]
     [SerializeField, Min(0f)]
-    private float _stopShortDistance = 0f;
+    private float _overshootDistance = 1.5f;
+
+    [Tooltip("넘어가는 거리에 더해지는 랜덤 폭 (± 값)")]
+    [SerializeField, Min(0f)]
+    private float _overshootJitter = 0.3f;
 
     [Tooltip("맵 양 끝에서 이만큼 안쪽까지만 이동")]
     [SerializeField, Min(0f)]
@@ -119,7 +123,7 @@ public class BossHopPattern : BossPattern
         CameraShake.Shake(_landingShake);
     }
 
-    /// <summary>플레이어 쪽으로 최대 Hop Distance만큼, 플레이어보다 Stop Short Distance만큼 앞까지</summary>
+    /// <summary>플레이어를 넘어 Overshoot Distance만큼 반대편까지 (최대 Hop Distance, 맵 안쪽으로 제한)</summary>
     private float GetTargetX(float startX)
     {
         if (Boss.Player == null)
@@ -128,8 +132,13 @@ public class BossHopPattern : BossPattern
         }
 
         float toPlayer = Boss.Player.position.x - startX;
-        float distance = Mathf.Clamp(Mathf.Abs(toPlayer) - _stopShortDistance, 0f, _hopDistance);
-        float x = startX + (Mathf.Sign(toPlayer) * distance);
+
+        // 플레이어가 바로 위 / 아래면 보스가 보는 방향으로
+        float direction = Mathf.Abs(toPlayer) > 0.01f ? Mathf.Sign(toPlayer) : Boss.FacingX;
+
+        float overshoot = Mathf.Max(0f, _overshootDistance + Random.Range(-_overshootJitter, _overshootJitter));
+        float distance = Mathf.Min(Mathf.Abs(toPlayer) + overshoot, _hopDistance);
+        float x = startX + (direction * distance);
         return Boss.Arena != null ? Boss.Arena.ClampX(x, _edgeMargin) : x;
     }
 
