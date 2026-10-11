@@ -24,6 +24,8 @@ public struct HitData
 
     public bool IsTalisman;
 
+    public bool IsBuffed;
+
     public bool IsHeavyImpact => ComboStep == HeavyComboStep || IsReflectedProjectile;
 
     public HitData(
@@ -36,7 +38,8 @@ public struct HitData
         int comboStep = 0,
         string attackName = "",
         bool isReflectedProjectile = false,
-        bool isTalisman = false
+        bool isTalisman = false,
+        bool isBuffed = false
     )
     {
         Damage = damage;
@@ -48,6 +51,7 @@ public struct HitData
         ComboStep = comboStep;
         IsReflectedProjectile = isReflectedProjectile;
         IsTalisman = isTalisman;
+        IsBuffed = isBuffed;
         AttackName = attackName;
     }
 }
