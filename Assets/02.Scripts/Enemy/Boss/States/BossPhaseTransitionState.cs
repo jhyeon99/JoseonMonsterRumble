@@ -22,6 +22,8 @@ public class BossPhaseTransitionState : BossState
         _boss.ClearMinions();
         _boss.SnapToGround();
         _boss.FacePlayer();
+        // 진행 중이던 애니메이션(패턴 / 그로기 등)을 바로 끊고 대기에서 하울링 시작
+        _boss.ForceIdleAnimation();
         _boss.SetTrigger(_boss.HowlTrigger);
 
         // 이펙트를 먼저 재생. SetPhase(2)가 부르는 페이즈 변경 이벤트(연출 등)에서 예외가 나도 이펙트는 나오게 함

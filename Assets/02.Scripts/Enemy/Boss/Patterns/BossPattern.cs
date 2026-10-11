@@ -95,7 +95,7 @@ public abstract class BossPattern : MonoBehaviour
     public virtual bool BlocksDirectDamage => false;
 
     /// <summary>이 패턴 중 몸통 접촉 데미지를 끄는지</summary>
-    public bool DisablesContactDamage => _disableContactDamage;
+    public virtual bool DisablesContactDamage => _disableContactDamage;
 
     /// <summary>패턴 전체 길이 (초) = 클립 길이 / 재생 속도</summary>
     public float Duration
@@ -205,6 +205,14 @@ public abstract class BossPattern : MonoBehaviour
     {
         _startTime = Time.time;
         OnPatternStart();
+
+        // 애니메이션 전에 할 일 (소환 위치로 점프 등)
+        foreach (object step in Flatten(BeforeAnimation()))
+        {
+            yield return step;
+        }
+
+        _startTime = Time.time;
         Boss.SetTrigger(_animationTrigger);
 
         // 애니메이터가 실제로 이 클립을 재생하기 시작한 순간부터 진행도를 셈
@@ -227,27 +235,9 @@ public abstract class BossPattern : MonoBehaviour
             _startTime = Time.time;
         }
 
-        // 중첩된 IEnumerator(RunHitWindow, WaitUntilProgress 등)까지 이 코루틴 하나에서 직접 돌림.
-        // Unity에 중첩 코루틴으로 넘기면 Stop(그로기 등) 후에도 안쪽이 계속 돌아 판정이 켜질 수 있음
-        var stack = new Stack<IEnumerator>();
-        stack.Push(Execute());
-
-        while (stack.Count > 0)
+        foreach (object step in Flatten(Execute()))
         {
-            IEnumerator current = stack.Peek();
-            if (!current.MoveNext())
-            {
-                stack.Pop();
-                continue;
-            }
-
-            if (current.Current is IEnumerator nested)
-            {
-                stack.Push(nested);
-                continue;
-            }
-
-            yield return current.Current;
+            yield return step;
         }
 
         // 애니메이션이 끝날 때까지 기다림 (패턴이 직접 끝을 판단하면 생략)
@@ -281,6 +271,43 @@ public abstract class BossPattern : MonoBehaviour
         Action onFinished = _onFinished;
         _onFinished = null;
         onFinished?.Invoke();
+    }
+
+    /// <summary>
+    /// 중첩된 IEnumerator(RunHitWindow, WaitUntilProgress 등)까지 이 코루틴 하나에서 직접 돌림.
+    /// Unity에 중첩 코루틴으로 넘기면 Stop(그로기 등) 후에도 안쪽이 계속 돌아 판정이 켜질 수 있음
+    /// </summary>
+    private static IEnumerable<object> Flatten(IEnumerator root)
+    {
+        var stack = new Stack<IEnumerator>();
+        stack.Push(root);
+
+        while (stack.Count > 0)
+        {
+            IEnumerator current = stack.Peek();
+            if (!current.MoveNext())
+            {
+                stack.Pop();
+                continue;
+            }
+
+            if (current.Current is IEnumerator nested)
+            {
+                stack.Push(nested);
+                continue;
+            }
+
+            yield return current.Current;
+        }
+    }
+
+    /// <summary>
+    /// 패턴 애니메이션(트리거)을 시작하기 전에 할 일 (특정 위치로 이동 등). 기본은 없음.
+    /// 이 동안은 진행도(Progress)를 세지 않음
+    /// </summary>
+    protected virtual IEnumerator BeforeAnimation()
+    {
+        yield break;
     }
 
     /// <summary>
