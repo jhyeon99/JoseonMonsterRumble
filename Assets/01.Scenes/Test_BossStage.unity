@@ -444,6 +444,37 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8a7bc951cf5d47958bd643b4c7cafa50, type: 3}
+--- !u!1 &117914722
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 117914723}
+  m_Layer: 0
+  m_Name: SpikeSpawnLine
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &117914723
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 117914722}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &420952916
 GameObject:
   m_ObjectHideFlags: 0
@@ -1451,6 +1482,18 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 7819398031366263473}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1234674639 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8545551412376162361, guid: 83fb014387212d64b92ba347ab7440f5,
+    type: 3}
+  m_PrefabInstance: {fileID: 7819398031366263473}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4f7da2a49420764ba97c0accee10964, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossArena
 --- !u!1 &1244738809
 GameObject:
   m_ObjectHideFlags: 0
@@ -2729,8 +2772,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1841528165
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 2887422426852493428, guid: cd5209001fd83054da7d36fe8aba1450,
@@ -3194,6 +3237,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Boss
       objectReference: {fileID: 0}
+    - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _arena
+      value: 
+      objectReference: {fileID: 1234674639}
     - target: {fileID: 3711774888999376504, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3246,6 +3294,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
+      propertyPath: _spikeFloor
+      value: 
+      objectReference: {fileID: 117914723}
+    - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _spikeSpacing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _spikeHoldTime
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _spikeRiseTime
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _spikeSinkTime
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
       propertyPath: _animationSpeed
       value: 1
       objectReference: {fileID: 0}
@@ -3259,6 +3332,12 @@ PrefabInstance:
       propertyPath: _durationOverride
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _floorSpikePrefab
+      value: 
+      objectReference: {fileID: 159123632947961680, guid: e77274ac9c54c834f9fbd20a49cbc6a1,
+        type: 3}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _spawnLine
@@ -3402,4 +3481,5 @@ SceneRoots:
   - {fileID: 881613705}
   - {fileID: 559170393}
   - {fileID: 2063176564}
+  - {fileID: 117914723}
   - {fileID: 12639082}
