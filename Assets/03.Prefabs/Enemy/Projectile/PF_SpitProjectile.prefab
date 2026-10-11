@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2687719582197613227}
   - component: {fileID: -6531947746095513752}
   - component: {fileID: 428999622848586487}
+  - component: {fileID: -7856952879670572140}
   m_Layer: 11
   m_Name: PF_SpitProjectile
   m_TagString: Untagged
@@ -145,7 +146,7 @@ MonoBehaviour:
   _data: {fileID: 11400000, guid: 7d713fa217c403341be393d0f65d19be, type: 2}
   _attackName: "\uBCF4\uC2A4 \uCE68\uBC49\uAE30"
   _type: 3
-  _returnPoolTimer: 15
+  _returnPoolTimer: 8
   _offscreenMargin: 2
   _offscreenTopExtra: 5
   _defense:
@@ -156,3 +157,28 @@ MonoBehaviour:
     BlockInvincibleTime: 0
   _reflectToShooter: 1
   _ignoreGroundWhenReturning: 1
+  _gravity: 20
+  _rotateToVelocity: 1
+  _spriteFacesLeft: 1
+--- !u!95 &-7856952879670572140
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3648046410072997247}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 139584f4d14e5284caecbbc542084b20, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
