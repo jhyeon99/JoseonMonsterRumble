@@ -2,8 +2,8 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 침뱉기. 한 번 뱉는 애니메이션을 개수 배열 길이만큼 반복 재생하고, 매번 발사 비율 지점에서 배열 값만큼 뱉음.
-/// 예: Shot Counts = 3, 5, 3 → 애니메이션 3번 재생, 3개 / 5개 / 3개 발사.
+/// 침뱉기. 뱉는 횟수를 가중치로 고르고, 그 횟수만큼 한 번 뱉는 애니메이션을 반복 재생하며 매번 발사 비율 지점에서 n ~ m개를 뱉음.
+/// 예: Spit Count Weights = 0.2, 0.5, 0.3 / Projectiles Per Spit = 3 ~ 5 → 20% 1번 / 50% 2번 / 30% 3번 뱉고, 매번 3 ~ 5개 발사.
 /// 보스 침(BossSpit)은 중력을 받는 포물선으로 날아가며, 플레이어의 움직임을 어느 정도 예측하되
 /// 착지 지점 / 비행 시간 / 발사 위치에 랜덤을 섞어 자연스럽게 흩뿌림 (일부는 크게 빗나가는 견제탄).
 /// 그 외 타입(Flying 등)은 기존처럼 플레이어 방향 기준 부채꼴로 직선 발사.
@@ -22,9 +22,13 @@ public class BossSpitPattern : BossPattern
     [SerializeField]
     private Transform _muzzle;
 
-    [Tooltip("뱉을 때마다 한 번에 나가는 개수. 원소 수 = 뱉는 횟수 (애니메이션을 그 횟수만큼 반복 재생). 비어 있으면 1번 1개")]
+    [Tooltip("뱉는 횟수별 가중치. 원소 순서 = 1번, 2번, 3번... 뱉을 확률 (예: 0.2, 0.5, 0.3이면 20% 1번 / 50% 2번 / 30% 3번). 최대 횟수 = 배열 크기. 비어 있으면 1번")]
     [SerializeField]
-    private int[] _shotCounts = { 3, 5, 3 };
+    private float[] _spitCountWeights = { 0.2f, 0.5f, 0.3f };
+
+    [Tooltip("한 번 뱉을 때 나가는 침 개수 (최소 ~ 최대, 뱉을 때마다 랜덤)")]
+    [SerializeField]
+    private Vector2Int _projectilesPerSpit = new Vector2Int(3, 5);
 
     [Tooltip("한 번 뱉는 애니메이션에서 뱉기를 시작하는 지점 (애니메이션 길이 대비 비율). 입 이펙트가 여기서 나오고, Spit Delay 뒤에 침이 나감")]
     [SerializeField, Range(0f, 1f)]
@@ -116,7 +120,8 @@ public class BossSpitPattern : BossPattern
 
     protected override IEnumerator Execute()
     {
-        int shots = _shotCounts != null && _shotCounts.Length > 0 ? _shotCounts.Length : 1;
+        int shots = PickSpitCount();
+        Boss.Log($"{PatternName}: {shots}번 뱉기");
         float nextShotRatio = Mathf.Max(_nextShotRatio, _fireRatio);
 
         for (int shot = 0; shot < shots; shot++)
@@ -146,7 +151,9 @@ public class BossSpitPattern : BossPattern
                 }
             }
 
-            int count = _shotCounts != null && shot < _shotCounts.Length ? Mathf.Max(1, _shotCounts[shot]) : 1;
+            int min = Mathf.Max(1, _projectilesPerSpit.x);
+            int max = Mathf.Max(min, _projectilesPerSpit.y);
+            int count = Random.Range(min, max + 1);
             for (int i = 0; i < count; i++)
             {
                 Fire(GetSpreadOffset(i, count));
@@ -175,6 +182,47 @@ public class BossSpitPattern : BossPattern
             Transform point = _vfxPoint != null ? _vfxPoint : _muzzle;
             EffectManager.Instance.PlayBossSpit(point.position, Boss.IsFacingRight);
         }
+    }
+
+    /// <summary>가중치 배열로 이번에 뱉을 횟수 결정 (1 ~ 배열 크기). 배열이 비었거나 합이 0이면 1번</summary>
+    private int PickSpitCount()
+    {
+        if (_spitCountWeights == null || _spitCountWeights.Length == 0)
+        {
+            return 1;
+        }
+
+        float total = 0f;
+        foreach (float weight in _spitCountWeights)
+        {
+            total += Mathf.Max(0f, weight);
+        }
+
+        if (total <= 0f)
+        {
+            return 1;
+        }
+
+        float pick = Random.value * total;
+        for (int i = 0; i < _spitCountWeights.Length; i++)
+        {
+            pick -= Mathf.Max(0f, _spitCountWeights[i]);
+            if (pick <= 0f && _spitCountWeights[i] > 0f)
+            {
+                return i + 1;
+            }
+        }
+
+        // 부동소수점 오차로 끝까지 온 경우: 가중치가 있는 마지막 횟수
+        for (int i = _spitCountWeights.Length - 1; i >= 0; i--)
+        {
+            if (_spitCountWeights[i] > 0f)
+            {
+                return i + 1;
+            }
+        }
+
+        return 1;
     }
 
     /// <summary>
