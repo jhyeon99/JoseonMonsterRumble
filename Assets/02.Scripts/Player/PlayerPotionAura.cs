@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 /// <summary>
@@ -15,6 +14,7 @@ public class PlayerPotionAura : MonoBehaviour
     private const string MissingRendererWarning = "[PlayerPotionAura] SpriteRenderer 참조를 찾을 수 없습니다.";
     private const string AuraObjectName = "PotionAura";
     private const float DefaultDuration = 1.4f;
+    private const string GlowShaderName = "Team06/ProjectileGlow";
 
     [Header("시각 연출 설정")]
     [SerializeField] private Color _auraColor = new Color(0.2f, 0.95f, 0.45f, 1.0f);
@@ -32,11 +32,15 @@ public class PlayerPotionAura : MonoBehaviour
 
     private MaterialPropertyBlock _propBlock;
     private Material _originalMaterial;
+    private Material _ownedGlowMaterial;
+    private Material _ownedParticleMaterial;
+    private PlayerWeaponBuff _weaponBuff;
 
     public bool IsAuraActive => _isAuraActive;
 
     private void Awake()
     {
+        _weaponBuff = GetComponent<PlayerWeaponBuff>();
         if (_sourceRenderer == null)
         {
             _sourceRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -55,10 +59,11 @@ public class PlayerPotionAura : MonoBehaviour
 
         if (_glowMaterial == null)
         {
-            var glowShader = Shader.Find("Team06/ProjectileGlow");
+            var glowShader = Shader.Find(GlowShaderName);
             if (glowShader != null)
             {
-                _glowMaterial = new Material(glowShader);
+                _ownedGlowMaterial = new Material(glowShader);
+                _glowMaterial = _ownedGlowMaterial;
             }
         }
 
@@ -70,17 +75,37 @@ public class PlayerPotionAura : MonoBehaviour
         StopAura();
     }
 
+    private void OnDestroy()
+    {
+        StopAura();
+        if (_ownedGlowMaterial != null)
+        {
+            Destroy(_ownedGlowMaterial);
+        }
+        if (_ownedParticleMaterial != null)
+        {
+            Destroy(_ownedParticleMaterial);
+        }
+    }
+
+    internal bool HasActiveVisuals(SpriteRenderer renderer)
+    {
+        return isActiveAndEnabled && _isAuraActive && _sourceRenderer == renderer && _glowMaterial != null;
+    }
+
     public void PlayAura(float duration = DefaultDuration)
     {
         if (!isActiveAndEnabled) return;
 
+        if (_weaponBuff == null)
+        {
+            _weaponBuff = GetComponent<PlayerWeaponBuff>();
+        }
+
         _remainingDuration = Mathf.Max(0.1f, duration);
         _isAuraActive = true;
 
-        if (_sourceRenderer != null && _glowMaterial != null)
-        {
-            _sourceRenderer.sharedMaterial = _glowMaterial;
-        }
+        ApplyRendererVisuals();
 
         if (_auraParticles != null)
         {
@@ -121,7 +146,17 @@ public class PlayerPotionAura : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!_isAuraActive || _sourceRenderer == null || _propBlock == null) return;
+        ApplyRendererVisuals();
+    }
+
+    internal void ApplyRendererVisuals()
+    {
+        if (!HasActiveVisuals(_sourceRenderer) || _sourceRenderer == null || _propBlock == null)
+        {
+            return;
+        }
+
+        _sourceRenderer.sharedMaterial = _glowMaterial;
 
         float pulse = Mathf.Sin(Time.time * _pulseSpeed) * 0.5f + 0.5f;
         float brightness = Mathf.Lerp(_minBrightness, _maxBrightness, pulse);
@@ -145,6 +180,12 @@ public class PlayerPotionAura : MonoBehaviour
     private void ResetRendererVisuals()
     {
         if (_sourceRenderer == null) return;
+
+        if (_weaponBuff != null && _weaponBuff.HasActiveVisuals(_sourceRenderer))
+        {
+            _weaponBuff.ApplyRendererVisuals();
+            return;
+        }
 
         if (_propBlock != null)
         {
@@ -201,9 +242,9 @@ public class PlayerPotionAura : MonoBehaviour
 
             if (particleShader != null)
             {
-                var fallbackMat = new Material(particleShader);
-                fallbackMat.color = new Color(0.2f, 0.95f, 0.45f, 0.9f);
-                psRenderer.sharedMaterial = fallbackMat;
+                _ownedParticleMaterial = new Material(particleShader);
+                _ownedParticleMaterial.color = new Color(0.2f, 0.95f, 0.45f, 0.9f);
+                psRenderer.sharedMaterial = _ownedParticleMaterial;
             }
         }
 
@@ -228,7 +269,9 @@ public class PlayerPotionAura : MonoBehaviour
         ParticleSystem.VelocityOverLifetimeModule velocityOverLifetime = _auraParticles.velocityOverLifetime;
         velocityOverLifetime.enabled = true;
         velocityOverLifetime.space = ParticleSystemSimulationSpace.World;
+        velocityOverLifetime.x = new ParticleSystem.MinMaxCurve(0f, 0f);
         velocityOverLifetime.y = new ParticleSystem.MinMaxCurve(0.8f, 1.6f);
+        velocityOverLifetime.z = new ParticleSystem.MinMaxCurve(0f, 0f);
 
         ParticleSystem.NoiseModule noise = _auraParticles.noise;
         noise.enabled = true;
