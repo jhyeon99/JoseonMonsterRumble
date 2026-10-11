@@ -11,6 +11,7 @@ public class UI_EnemyDamageText : MonoBehaviour
     private const string DamageFormat = "0";
     private const string MissingCanvasWarning = "UI_EnemyDamageText requires a parent Canvas.";
     private const string MissingFontWarning = "UI_EnemyDamageText: damage font or material is missing.";
+    private const string MissingPlayerHealthWarning = "UI_EnemyDamageText: PlayerHealth is missing for player damage display.";
     private const float MinimumSizeMultiplier = 0.1f;
     private const float MaximumFadeStart = 0.99f;
     private const int HeavyComboStep = 3;
@@ -36,6 +37,7 @@ public class UI_EnemyDamageText : MonoBehaviour
     [SerializeField] private Vector2 _finisherOffset = new Vector2(40f, -24f);
     [SerializeField, Min(1f)] private float _finisherSizeMultiplier = 2f;
     [SerializeField] private Color _textColor = new Color(1f, 0.96f, 0.86f);
+    [SerializeField] private Color _playerDamageColor = new Color(1f, 0.22f, 0.18f, 1f);
     [SerializeField] private Color _finisherColor = new Color(1f, 0.75f, 0.18f);
     [SerializeField] private Color _buffedColor = new Color(0.35f, 0.85f, 1.0f, 1.0f);
     [SerializeField, Min(1f)] private float _fontSize = 56f;
@@ -53,6 +55,7 @@ public class UI_EnemyDamageText : MonoBehaviour
     [SerializeField, Min(1f)] private float _maxSizeMultiplier = 1.25f;
 
     private Canvas _canvas;
+    private PlayerHealth _playerHealth;
     private RectTransform _container;
     private Transform _finisherTarget;
     private EnemyHealth _finisherEnemyHealth;
@@ -82,6 +85,7 @@ public class UI_EnemyDamageText : MonoBehaviour
     private void OnEnable()
     {
         GameEvents.OnEnemyHit += HandleEnemyHit;
+        GameEvents.OnPlayerHit += HandlePlayerHit;
         GameEvents.OnFinisherAnticipation += HandleFinisherAnticipation;
         GameEvents.OnFinisherAnticipationCancelled += ResetFinisher;
         GameEvents.OnFinisherImpact += HandleFinisherImpact;
@@ -90,11 +94,13 @@ public class UI_EnemyDamageText : MonoBehaviour
     private void OnDisable()
     {
         GameEvents.OnEnemyHit -= HandleEnemyHit;
+        GameEvents.OnPlayerHit -= HandlePlayerHit;
         GameEvents.OnFinisherAnticipation -= HandleFinisherAnticipation;
         GameEvents.OnFinisherAnticipationCancelled -= ResetFinisher;
         GameEvents.OnFinisherImpact -= HandleFinisherImpact;
         ResetFinisher();
         _nextLaneSign = 1f;
+        _playerHealth = null;
         StopAllCoroutines();
         foreach (TextMeshProUGUI text in _activeTexts)
         {
@@ -112,6 +118,24 @@ public class UI_EnemyDamageText : MonoBehaviour
         float motionMultiplier = hitData.ComboStep == HeavyComboStep ? _heavyMotionMultiplier : 1f;
         ShowDamage(hitData.Damage, hitData.HitPoint, false, hitData.AttackDirection, motionMultiplier,
             hitData.IsTalisman, hitData.IsBuffed);
+    }
+
+    private void HandlePlayerHit(HitData hitData)
+    {
+        if (_playerHealth == null)
+        {
+            _playerHealth = FindFirstObjectByType<PlayerHealth>();
+        }
+        if (_playerHealth == null)
+        {
+            Debug.LogWarning(MissingPlayerHealthWarning, this);
+            return;
+        }
+
+        // OnPlayerHit is raised after defence checks and before HP is reduced.
+        float damage = Mathf.Min(Mathf.Max(0f, hitData.Damage), _playerHealth.CurrentHealth);
+        ShowDamage(damage, hitData.HitPoint, false, hitData.AttackDirection, 1f,
+            isPlayerDamage: true);
     }
 
     private void HandleFinisherAnticipation(Transform attacker, Transform target, float progress)
@@ -173,7 +197,8 @@ public class UI_EnemyDamageText : MonoBehaviour
     }
 
     private void ShowDamage(float damage, Vector3 position, bool isFinisher,
-        Vector2 attackDirection, float motionMultiplier, bool isTalisman = false, bool isBuffed = false)
+        Vector2 attackDirection, float motionMultiplier, bool isTalisman = false, bool isBuffed = false,
+        bool isPlayerDamage = false)
     {
         if (_canvas == null || damage <= 0f)
         {
@@ -213,7 +238,11 @@ public class UI_EnemyDamageText : MonoBehaviour
         text.enableAutoSizing = false;
 
         Color targetColor;
-        if (usesYellowFont)
+        if (isPlayerDamage)
+        {
+            targetColor = _playerDamageColor;
+        }
+        else if (usesYellowFont)
         {
             targetColor = _finisherColor;
         }
