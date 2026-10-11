@@ -1,84 +1,85 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class AttackPrepareGroundState : EnemyState
 {
+    private enum PreparationPhase { WaitingForIdle, Preparing, Committed }
+    private PreparationPhase _phase;
     protected Enemy _enemy;
     protected float _attackPrepareTimer = 0;
+    private ParryWarningFlash _parryWarning;
+    private bool _hasWarned;
 
     public AttackPrepareGroundState(Enemy enemy)
     {
         _enemy = enemy;
     }
 
-    public override void Enter()
+    public static EnemyState CreateAttackEntryState(Enemy enemy)
     {
-        Debug.Log("적 공격 준비 시작");
-        _attackPrepareTimer = _enemy.Data.AttackPrepareTime;
-        _enemy.MoveType.StopMove();
-        if (_enemy.Combat is EnemyMeleeCombat)
+        if (enemy.Combat is EnemyRangedCombat &&
+            (enemy.Data.RangedAttackIdleDuration <= 0f || Random.value >= enemy.Data.RangedAttackIdleChance))
         {
-            // 뒤로 물러나던 방향(플레이어 반대)을 보고 있을 수 있으므로, 방향을 잠그기 전에 플레이어 쪽을 보게 함
-            // (휴식 → 추적 → 공격 준비가 한 프레임에 이어지면 Flip이 돌기 전에 잠겨서 뒤를 보고 공격하던 문제)
-            FacePlayer();
-            _enemy.Animation.PlayAttack();
-            _enemy.DirectionLock.LockDirection();
+            return new AttackState(enemy);
         }
+        return new AttackPrepareGroundState(enemy);
     }
 
-    public override void FixedUpdate()
+    public override void Enter()
     {
-        if (_enemy.Combat is EnemyRangedCombat)
+        bool isRanged = _enemy.Combat is EnemyRangedCombat;
+        _phase = isRanged ? PreparationPhase.WaitingForIdle : PreparationPhase.Preparing;
+        _attackPrepareTimer = isRanged ? _enemy.Data.RangedAttackIdleDuration : _enemy.Data.AttackPrepareTime;
+        _enemy.MoveType.StopMove();
+        _enemy.Animation.SetRunning(false);
+        ((EnemyGroundMove)_enemy.MoveType).FaceTarget();
+        _enemy.DirectionLock.LockDirection();
+        if (_enemy.Combat is EnemyMeleeCombat)
         {
-            if (_enemy.GetDistanceToPlayer() <= _enemy.Data.AttackDetectRange)
-            {
-                _enemy.Animation.SetRunning(true);
-                _enemy.MoveType.BackMove(_enemy.GetDirectionToPlayer());
-            }
+            _enemy.Animation.PlayAttack();
+
+            // 패링 그로기 공격 예고 (적에 ParryWarningFlash가 있을 때만)
+            _parryWarning = _enemy.GetComponentInChildren<ParryWarningFlash>();
         }
+
+        _hasWarned = false;
     }
 
     public override void Update()
     {
-        _attackPrepareTimer -= Time.deltaTime;
-        if (_attackPrepareTimer <= 0)
+        if (_phase == PreparationPhase.WaitingForIdle)
         {
-            Debug.Log("지상 적 공격 준비");
-            _enemy.StateMachine.ChangeState(new AttackState(_enemy));
-        }
-    }
-
-    private void FacePlayer()
-    {
-        float directionX = _enemy.GetDirectionToPlayer().x;
-        if (Mathf.Abs(directionX) < 0.01f)
-        {
+            if (_enemy.Animation.GetWalkPhase(out _) == EnemyWalkPhase.None &&
+                !_enemy.Animation.IsPlayingAttack() && !_enemy.Animation.IsPlayingHit())
+            {
+                _phase = PreparationPhase.Preparing;
+            }
             return;
         }
+        _attackPrepareTimer -= Time.deltaTime;
 
-        Vector3 scale = _enemy.transform.localScale;
-        scale.x = directionX > 0f ? Mathf.Abs(scale.x) : -Mathf.Abs(scale.x);
-        _enemy.transform.localScale = scale;
+        // 공격 판정이 켜지기 Lead Time초 전에 반짝임
+        if (_parryWarning != null && !_hasWarned && _attackPrepareTimer <= _parryWarning.LeadTime)
+        {
+            _parryWarning.Play();
+            _hasWarned = true;
+        }
+
+        if (_attackPrepareTimer <= 0)
+        {
+            _phase = PreparationPhase.Committed;
+            _enemy.StateMachine.ChangeState(new AttackState(_enemy));
+        }
     }
 
     public override void Exit()
     {
         _enemy.MoveType.IsBackMove = false;
         _enemy.MoveType.StopMove();
-        if (_enemy.Combat is EnemyRangedCombat)
+        if (_phase != PreparationPhase.Committed)
         {
-            Vector3 scale = _enemy.transform.localScale;
-            if (_enemy.GetDirectionToPlayer().x > 0f)
-            {
-                scale.x = Mathf.Abs(scale.x);
-            }
-            else if (_enemy.GetDirectionToPlayer().x < 0f)
-            {
-                scale.x = -Mathf.Abs(scale.x);
-            }
-
-            _enemy.transform.localScale = scale;
+            _enemy.Animation.ResetAttackTrigger();
         }
-
-        Debug.Log("적 공격 준비 완료");
+        _attackPrepareTimer = 0f;
+        _phase = PreparationPhase.Preparing;
     }
 }

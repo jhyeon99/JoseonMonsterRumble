@@ -2,7 +2,9 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 침뱉기. 애니메이션 길이 대비 발사 비율마다 한 발씩 발사.
+/// 침뱉기. 한 번 뱉는 애니메이션을 개수 배열 길이만큼 반복 재생하고, 매번 발사 비율 지점에서 배열 값만큼 뱉음.
+/// 예: Shot Counts = 3, 5, 3 → 애니메이션 3번 재생, 3개 / 5개 / 3개 발사.
+/// 직선 투사체는 플레이어 방향 기준 부채꼴로 퍼지고, 발사 간격을 주면 한 개씩 연달아 나감.
 /// 기존 적 투사체(ProjectilePool)를 그대로 사용하므로 패링하면 보스 입 쪽으로 반사됨.
 /// 씬의 ProjectilePool에 해당 타입 투사체 프리팹이 등록되어 있어야 함.
 /// (판정 시작 / 끝 비율은 사용하지 않음)
@@ -10,17 +12,50 @@ using UnityEngine;
 public class BossSpitPattern : BossPattern
 {
     [Header("침뱉기")]
-    [Tooltip("ProjectilePool에 등록된 투사체 타입 (Flying = 직선, Ground = 곡사)")]
+    [Tooltip("ProjectilePool에 등록된 투사체 타입 (BossSpit = 보스 침 전용 직선, Flying = 직선, Ground = 곡사)")]
     [SerializeField]
-    private ProjectileType _projectileType = ProjectileType.Flying;
+    private ProjectileType _projectileType = ProjectileType.BossSpit;
 
     [Tooltip("발사 위치 (입). 반사된 투사체도 이쪽으로 돌아옴")]
     [SerializeField]
     private Transform _muzzle;
 
-    [Tooltip("발사 지점들 (애니메이션 길이 대비 비율). 3발이면 0.4, 0.55, 0.7 처럼 입력")]
+    [Tooltip("뱉을 때마다 한 번에 나가는 개수. 원소 수 = 뱉는 횟수 (애니메이션을 그 횟수만큼 반복 재생). 비어 있으면 1번 1개")]
     [SerializeField]
-    private float[] _fireRatios = { 0.5f };
+    private int[] _shotCounts = { 3, 5, 3 };
+
+    [Tooltip("한 번 뱉는 애니메이션에서 뱉기를 시작하는 지점 (애니메이션 길이 대비 비율). 입 이펙트가 여기서 나오고, Spit Delay 뒤에 침이 나감")]
+    [SerializeField, Range(0f, 1f)]
+    private float _fireRatio = 0.5f;
+
+    [Tooltip("마지막이 아닌 뱉기에서 다음 뱉기 애니메이션을 시작하는 지점 (비율). 1 = 애니메이션이 끝난 뒤")]
+    [SerializeField, Range(0f, 1f)]
+    private float _nextShotRatio = 1f;
+
+    [Tooltip("뱉기 사이 추가 대기 (초)")]
+    [SerializeField, Min(0f)]
+    private float _delayBetweenShots = 0f;
+
+    [Tooltip("한 번에 여러 개를 뱉을 때 퍼지는 전체 각도 (도). 직선(BossSpit / Flying) 투사체만 적용, 곡사(Ground)는 모두 플레이어 위치로 떨어짐")]
+    [SerializeField, Range(0f, 180f)]
+    private float _spreadAngle = 30f;
+
+    [Tooltip("한 번에 여러 개를 뱉을 때 하나씩 나가는 간격 (초). 0이면 동시에")]
+    [SerializeField, Min(0f)]
+    private float _projectileInterval = 0f;
+
+    [Header("입 이펙트")]
+    [Tooltip("켜면 뱉을 때마다 BossSpit 이펙트 재생 (EffectPool에 BossSpit 등록 필요)")]
+    [SerializeField]
+    private bool _playMouthVfx = true;
+
+    [Tooltip("입 이펙트가 나오는 위치. 비어 있으면 발사 위치(Muzzle) 사용")]
+    [SerializeField]
+    private Transform _vfxPoint;
+
+    [Tooltip("입 이펙트가 나온 뒤 침이 실제로 나가기까지 (초). 입 이펙트를 끄면 사용 안 함")]
+    [SerializeField, Min(0f)]
+    private float _spitDelay = 0.1f;
 
     [Tooltip("투사체 데미지 증가율 (%)")]
     [SerializeField]
@@ -38,27 +73,80 @@ public class BossSpitPattern : BossPattern
             _muzzle = transform;
         }
 
-        if (_fireRatios != null)
-        {
-            System.Array.Sort(_fireRatios);
-        }
     }
 
     protected override IEnumerator Execute()
     {
-        if (_fireRatios == null)
-        {
-            yield break;
-        }
+        int shots = _shotCounts != null && _shotCounts.Length > 0 ? _shotCounts.Length : 1;
+        float nextShotRatio = Mathf.Max(_nextShotRatio, _fireRatio);
 
-        foreach (float ratio in _fireRatios)
+        for (int shot = 0; shot < shots; shot++)
         {
-            yield return WaitUntilProgress(Mathf.Clamp01(ratio));
-            Fire();
+            if (shot > 0)
+            {
+                if (_delayBetweenShots > 0f)
+                {
+                    yield return new WaitForSeconds(_delayBetweenShots);
+                }
+
+                // 한 번 뱉는 애니메이션을 처음부터 다시 재생 (진행도도 0부터)
+                Boss.FacePlayer();
+                ReplayAnimation();
+            }
+
+            yield return WaitUntilProgress(_fireRatio);
+
+            // 입 이펙트 먼저 → Spit Delay 뒤에 침 발사
+            if (_playMouthVfx)
+            {
+                PlayMouthVfx();
+
+                if (_spitDelay > 0f)
+                {
+                    yield return new WaitForSeconds(_spitDelay);
+                }
+            }
+
+            int count = _shotCounts != null && shot < _shotCounts.Length ? Mathf.Max(1, _shotCounts[shot]) : 1;
+            for (int i = 0; i < count; i++)
+            {
+                Fire(GetSpreadOffset(i, count));
+
+                if (_projectileInterval > 0f && i < count - 1)
+                {
+                    yield return new WaitForSeconds(_projectileInterval);
+                }
+            }
+
+            if (shot < shots - 1)
+            {
+                yield return WaitUntilProgress(nextShotRatio);
+            }
         }
     }
 
-    private void Fire()
+    private void PlayMouthVfx()
+    {
+        if (EffectManager.Instance != null)
+        {
+            Transform point = _vfxPoint != null ? _vfxPoint : _muzzle;
+            EffectManager.Instance.PlayBossSpit(point.position, Boss.IsFacingRight);
+        }
+    }
+
+    /// <summary>부채꼴에서 index번째 투사체의 각도 (가운데가 플레이어 방향)</summary>
+    private float GetSpreadOffset(int index, int count)
+    {
+        // 곡사(Ground)는 모두 플레이어 위치로 떨어지므로 퍼뜨리지 않음 (직선 / 보스 침은 퍼짐)
+        if (count <= 1 || _projectileType == ProjectileType.Ground)
+        {
+            return 0f;
+        }
+
+        return Mathf.Lerp(-_spreadAngle * 0.5f, _spreadAngle * 0.5f, index / (float)(count - 1));
+    }
+
+    private void Fire(float angleOffset)
     {
         if (ProjectilePool.Instance == null || Boss.Player == null)
         {
@@ -83,7 +171,7 @@ public class BossSpitPattern : BossPattern
 
         // 직선 투사체는 로컬 왼쪽(-right)으로 날아가므로 플레이어 방향 + 180도
         Vector2 toPlayer = (Vector2)Boss.Player.position - (Vector2)_muzzle.position;
-        float angle = Mathf.Atan2(toPlayer.y, toPlayer.x) * Mathf.Rad2Deg + 180f;
+        float angle = (Mathf.Atan2(toPlayer.y, toPlayer.x) * Mathf.Rad2Deg) + 180f + angleOffset;
         projectile.transform.rotation = Quaternion.Euler(0f, 0f, angle);
     }
 }

@@ -31,6 +31,14 @@ public class PlayerDodgeState : PlayerBaseState
         _player.Health.SetInvincible(true);
         _player.TriggerDodge();
 
+        // 방향키 입력이 있으면 먼저 그 방향으로 뒤를 돌아봄
+        float inputX = _inputHandler.MoveInputX;
+        if (Mathf.Abs(inputX) > 0.01f)
+        {
+            _player.transform.localScale = new Vector3(Mathf.Sign(inputX), 1f, 1f);
+        }
+
+        // 닷지는 항상 현재 바라보고 있는 방향의 반대쪽(순수 백스텝)으로 이동
         float facingDirection = _player.transform.localScale.x > 0 ? 1f : -1f;
         _dodgeDirection = -facingDirection;
 

@@ -27,6 +27,7 @@ public sealed class StageManager : MonoBehaviour
     private float _displayDuration = 0.8f;
 
     [Header("디버그 (에디터 전용)")]
+
     [Tooltip("TODO: 테스트용. 에디터에서만 R 키로 스테이지 재시작 (빌드에는 포함되지 않음)")]
 #pragma warning disable 0414 // 빌드에서는 사용하지 않는 필드 (직렬화 구조를 에디터와 맞추기 위해 남겨둠)
     [SerializeField]
@@ -42,6 +43,7 @@ public sealed class StageManager : MonoBehaviour
     private string _activeSceneName;
     private string _activeCheckpointId;
     private bool _isRespawning;
+    private bool _isChangingScene;
 
     public bool IsRespawning => _isRespawning;
 
@@ -56,6 +58,11 @@ public sealed class StageManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
         SceneManager.sceneLoaded += HandleSceneLoaded;
+
+        if (_deathScreen == null)
+        {
+            _deathScreen = FindFirstObjectByType<DeathScreenView>(FindObjectsInactive.Include);
+        }
 
         if (_deathScreen == null)
         {
@@ -79,7 +86,7 @@ public sealed class StageManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.F12))
         {
-            SceneManager.LoadScene("Test_Boss");
+            TryLoadStageScene("Test_Boss");
         }
     }
 
@@ -105,7 +112,7 @@ public sealed class StageManager : MonoBehaviour
             return false;
         }
 
-        if (_isRespawning)
+        if (_isRespawning || _isChangingScene)
         {
             return false;
         }
@@ -131,17 +138,70 @@ public sealed class StageManager : MonoBehaviour
     /// </summary>
     public void RestartStage()
     {
-        TryStartRespawn(false);
+        TryStartRespawn(false, string.Empty);
+    }
+
+    /// <summary>지정한 스테이지 씬으로 전환한다. 중복 전환과 리스폰 중 전환은 막는다.</summary>
+    public bool TryLoadStageScene(string sceneName, float fadeOutDuration = 0.5f, float fadeInDuration = 0.75f)
+    {
+        if (_isRespawning || _isChangingScene || SceneArrivalFade.IsTransitioning || string.IsNullOrWhiteSpace(sceneName))
+            return false;
+
+        if (SceneManager.GetActiveScene().name == sceneName)
+            return false;
+
+        if (!Application.CanStreamedLevelBeLoaded(sceneName))
+        {
+            Debug.LogWarning($"{name}: '{sceneName}' 씬을 Build Settings에서 찾을 수 없습니다.", this);
+            return false;
+        }
+
+        StartCoroutine(ChangeStageSceneRoutine(sceneName, fadeOutDuration, fadeInDuration));
+        return true;
+    }
+
+    private IEnumerator ChangeStageSceneRoutine(string sceneName, float fadeOutDuration, float fadeInDuration)
+    {
+        _isChangingScene = true;
+        CameraShake.Stop();
+        Time.timeScale = 1f;
+        yield return SceneArrivalFade.FadeOut(Mathf.Max(0f, fadeOutDuration));
+        SceneArrivalFade.Prepare(fadeInDuration);
+        UnbindPlayerHealth();
+
+        AsyncOperation loadOperation = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
+        if (loadOperation == null)
+        {
+            Debug.LogWarning($"{sceneName}: 씬 전환을 시작하지 못했습니다.", this);
+            SceneArrivalFade.Cancel();
+            BindPlayerHealth(SceneManager.GetActiveScene());
+            _isChangingScene = false;
+            yield break;
+        }
+
+        loadOperation.allowSceneActivation = false;
+        while (loadOperation.progress < 0.9f) yield return null;
+        Time.timeScale = 1f;
+        loadOperation.allowSceneActivation = true;
+        yield return loadOperation;
+        while (SceneArrivalFade.IsTransitioning) yield return null;
+        _isChangingScene = false;
     }
 
     private void HandlePlayerDied()
     {
-        TryStartRespawn(true);
+        string causeOfDeath = _playerHealth != null ? _playerHealth.LastFatalHitData.AttackName : string.Empty;
+        if (string.IsNullOrWhiteSpace(causeOfDeath))
+        {
+            causeOfDeath = "알 수 없는 원인";
+        }
+
+        TryStartRespawn(true, causeOfDeath);
     }
 
-    private void TryStartRespawn(bool waitForDeath)
+    private void TryStartRespawn(bool waitForDeath, string causeOfDeath = "")
     {
-        if (_isRespawning)
+        if (_isRespawning || _isChangingScene)
         {
             return;
         }
@@ -156,10 +216,10 @@ public sealed class StageManager : MonoBehaviour
             return;
         }
 
-        StartCoroutine(RespawnRoutine(activeScene.name, waitForDeath));
+        StartCoroutine(RespawnRoutine(activeScene.name, waitForDeath, causeOfDeath));
     }
 
-    private IEnumerator RespawnRoutine(string sceneName, bool waitForDeath)
+    private IEnumerator RespawnRoutine(string sceneName, bool waitForDeath, string causeOfDeath)
     {
         _isRespawning = true;
 
@@ -168,8 +228,14 @@ public sealed class StageManager : MonoBehaviour
             yield return new WaitForSecondsRealtime(_deathDelay);
         }
 
+        if (_deathScreen == null)
+        {
+            _deathScreen = FindFirstObjectByType<DeathScreenView>(FindObjectsInactive.Include);
+        }
+
         if (_deathScreen != null)
         {
+            _deathScreen.SetCauseOfDeath($"{causeOfDeath}에 의해 사망");
             yield return _deathScreen.FadeIn();
         }
 
@@ -215,6 +281,11 @@ public sealed class StageManager : MonoBehaviour
 
     private void InitializeScene(Scene scene, bool preserveCheckpoint)
     {
+        if (_deathScreen == null)
+        {
+            _deathScreen = FindFirstObjectByType<DeathScreenView>(FindObjectsInactive.Include);
+        }
+
         RespawnPoint[] points = FindSceneRespawnPoints(scene);
         if (points.Length == 0)
         {

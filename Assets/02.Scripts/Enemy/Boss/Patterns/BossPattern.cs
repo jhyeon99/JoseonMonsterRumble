@@ -36,9 +36,17 @@ public abstract class BossPattern : MonoBehaviour
     [SerializeField]
     private string _animationTrigger;
 
-    [Tooltip("패턴 애니메이션 클립. 이 길이가 패턴 전체 길이가 됨")]
+    [Tooltip("패턴 애니메이션의 첫 클립. 이 클립이 재생되기 시작한 순간부터 패턴 진행도를 셈")]
     [SerializeField]
     private AnimationClip _animationClip;
+
+    [Tooltip("첫 클립 뒤에 이어서 재생되는 클립들 (준비 → 돌진 → 정지처럼 여러 상태로 나뉜 경우). 패턴 길이 = 첫 클립 + 이어지는 클립 길이 합")]
+    [SerializeField]
+    private AnimationClip[] _followingClips;
+
+    [Tooltip("0보다 크면 클립 길이 대신 이 값을 패턴 전체 길이(초)로 사용 (반복 클립이 섞여 있는 경우 등)")]
+    [SerializeField, Min(0f)]
+    private float _durationOverride = 0f;
 
     [Tooltip("클립이 없을 때 패턴 전체 길이 (초)")]
     [SerializeField, Min(0.05f)]
@@ -48,9 +56,17 @@ public abstract class BossPattern : MonoBehaviour
     [SerializeField, Min(0.01f)]
     private float _animationSpeed = 1f;
 
+    [Tooltip("트리거를 보낸 뒤 애니메이터가 이 클립 재생을 시작할 때까지 기다리는 최대 시간 (초). 이전 애니메이션이 끝나기를 기다려야 할 때")]
+    [SerializeField, Min(0f)]
+    private float _animationStartTimeout = 1.5f;
+
     [Tooltip("애니메이션이 끝난 뒤 다음 행동까지 추가 대기 (초)")]
     [SerializeField, Min(0f)]
     private float _afterDelay = 0f;
+
+    [Tooltip("이 패턴 중에는 보스 몸통 접촉 데미지(EnemyContactDamage)를 끔. 찍기 / 돌진처럼 자체 공격 판정이 있어 몸통과 겹쳐 두 번 맞는 패턴용")]
+    [SerializeField]
+    protected bool _disableContactDamage = false;
 
     [Header("판정 구간 (애니메이션 길이 대비 비율)")]
     [Tooltip("판정 시작 지점 (0 ~ 1)")]
@@ -65,14 +81,52 @@ public abstract class BossPattern : MonoBehaviour
     private float _startTime;
     private Coroutine _routine;
     private Action _onFinished;
+    private int _patternStateHash;
 
     protected Boss Boss { get; private set; }
 
     public string PatternName => string.IsNullOrEmpty(_patternName) ? GetType().Name : _patternName;
     public float Weight => _weight;
 
+    /// <summary>true면 CanUse일 때 다른 패턴보다 먼저, 대기 시간 없이 바로 사용 (체력 비율 발동 패턴 등)</summary>
+    public virtual bool IsForced => false;
+
+    /// <summary>true면 이 패턴 중 보스가 플레이어의 직접 공격을 받지 않음 (기믹 데미지는 받음)</summary>
+    public virtual bool BlocksDirectDamage => false;
+
+    /// <summary>이 패턴 중 몸통 접촉 데미지를 끄는지</summary>
+    public bool DisablesContactDamage => _disableContactDamage;
+
     /// <summary>패턴 전체 길이 (초) = 클립 길이 / 재생 속도</summary>
-    public float Duration => _animationClip != null ? _animationClip.length / _animationSpeed : _fallbackDuration;
+    public float Duration
+    {
+        get
+        {
+            if (_durationOverride > 0f)
+            {
+                return _durationOverride;
+            }
+
+            if (_animationClip == null)
+            {
+                return _fallbackDuration;
+            }
+
+            float total = _animationClip.length;
+            if (_followingClips != null)
+            {
+                foreach (AnimationClip clip in _followingClips)
+                {
+                    if (clip != null)
+                    {
+                        total += clip.length;
+                    }
+                }
+            }
+
+            return total / _animationSpeed;
+        }
+    }
 
     protected float HitStartRatio => _hitStartRatio;
     protected float HitEndRatio => Mathf.Max(_hitStartRatio, _hitEndRatio);
@@ -153,6 +207,26 @@ public abstract class BossPattern : MonoBehaviour
         OnPatternStart();
         Boss.SetTrigger(_animationTrigger);
 
+        // 애니메이터가 실제로 이 클립을 재생하기 시작한 순간부터 진행도를 셈
+        // (이전 애니메이션이 끝나기를 기다리는 동안 판정 / 발사가 먼저 나가지 않도록)
+        if (_animationClip != null && Boss.HasAnimator)
+        {
+            float waitUntil = Time.time + _animationStartTimeout;
+            while (!Boss.IsPlayingClip(_animationClip) && Time.time < waitUntil)
+            {
+                yield return null;
+            }
+
+            if (!Boss.IsPlayingClip(_animationClip))
+            {
+                Debug.LogWarning($"{name}: {PatternName} 클립({_animationClip.name})이 재생되지 않아 트리거 기준으로 진행합니다. 트리거 이름 / 애니메이터 전이를 확인하세요.", this);
+            }
+
+            // 반복 재생(ReplayAnimation)용. 애니메이션이 끝나 대기 상태로 넘어간 뒤에도 다시 재생할 수 있도록 기억
+            _patternStateHash = Boss.TryGetClipState(_animationClip, out int stateHash, out float _) ? stateHash : 0;
+            _startTime = Time.time;
+        }
+
         // 중첩된 IEnumerator(RunHitWindow, WaitUntilProgress 등)까지 이 코루틴 하나에서 직접 돌림.
         // Unity에 중첩 코루틴으로 넘기면 Stop(그로기 등) 후에도 안쪽이 계속 돌아 판정이 켜질 수 있음
         var stack = new Stack<IEnumerator>();
@@ -176,11 +250,25 @@ public abstract class BossPattern : MonoBehaviour
             yield return current.Current;
         }
 
-        // 애니메이션이 끝날 때까지 기다림
-        while (Progress < 1f)
+        // 애니메이션이 끝날 때까지 기다림 (패턴이 직접 끝을 판단하면 생략)
+        while (WaitForDurationAfterExecute && Progress < 1f)
         {
             yield return null;
         }
+
+        // 시간이 다 됐어도 애니메이터가 아직 이 패턴 클립을 재생 중이면 끝날 때까지 기다림
+        // (다음 패턴 트리거가 이전 애니메이션 도중에 들어가 두 번째부터 꼬이는 문제 방지)
+        if (_animationClip != null && Boss.HasAnimator)
+        {
+            float waitUntil = Time.time + _animationStartTimeout;
+            while (IsPlayingPatternClip() && Time.time < waitUntil)
+            {
+                yield return null;
+            }
+        }
+
+        // 소비되지 않고 남은 트리거가 다음에 엉뚱하게 재생되지 않도록 정리
+        Boss.ResetTrigger(_animationTrigger);
 
         if (_afterDelay > 0f)
         {
@@ -193,6 +281,99 @@ public abstract class BossPattern : MonoBehaviour
         Action onFinished = _onFinished;
         _onFinished = null;
         onFinished?.Invoke();
+    }
+
+    /// <summary>
+    /// Execute가 끝난 뒤 패턴 길이(Duration)만큼 채워서 기다릴지.
+    /// 반복 클립처럼 길이가 정해지지 않은 패턴은 false로 두고 Execute에서 직접 끝을 판단
+    /// </summary>
+    protected virtual bool WaitForDurationAfterExecute => true;
+
+    /// <summary>애니메이터가 이 패턴의 클립(첫 클립 + 이어지는 클립) 중 하나를 재생 중인지</summary>
+    protected bool IsPlayingPatternClip()
+    {
+        if (Boss.IsPlayingClip(_animationClip))
+        {
+            return true;
+        }
+
+        if (_followingClips == null)
+        {
+            return false;
+        }
+
+        foreach (AnimationClip clip in _followingClips)
+        {
+            if (clip != null && Boss.IsPlayingClip(clip))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>이어지는 클립 중 반복(Loop Time) 클립 (없으면 null). 반복 구간이 있는 패턴의 자동 설정용</summary>
+    protected AnimationClip FindLoopingFollowingClip()
+    {
+        if (_followingClips == null)
+        {
+            return null;
+        }
+
+        foreach (AnimationClip clip in _followingClips)
+        {
+            if (clip != null && clip.isLooping)
+            {
+                return clip;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>지금 재생 중인 이 패턴의 클립 (없으면 null)</summary>
+    protected AnimationClip GetPlayingPatternClip()
+    {
+        if (Boss.IsPlayingClip(_animationClip))
+        {
+            return _animationClip;
+        }
+
+        if (_followingClips == null)
+        {
+            return null;
+        }
+
+        foreach (AnimationClip clip in _followingClips)
+        {
+            if (clip != null && Boss.IsPlayingClip(clip))
+            {
+                return clip;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// 지금 재생 중인 패턴 애니메이션을 처음부터 다시 재생하고 진행도(Progress)도 0부터 다시 셈.
+    /// 같은 동작을 여러 번 반복하는 패턴용 (연속 찍기 등). 애니메이터 전이 설정 불필요
+    /// </summary>
+    protected void ReplayAnimation()
+    {
+        AnimationClip clip = GetPlayingPatternClip();
+        if (clip != null && Boss.TryGetClipState(clip, out int stateHash, out float _))
+        {
+            Boss.PlayStateFromStart(stateHash);
+        }
+        else if (_patternStateHash != 0)
+        {
+            // 이미 끝나서 다른 상태로 넘어갔으면 처음 재생했던 패턴 상태를 다시 재생
+            Boss.PlayStateFromStart(_patternStateHash);
+        }
+
+        _startTime = Time.time;
     }
 
     /// <summary>트리거를 보내기 직전 (방향 전환 등)</summary>
@@ -218,7 +399,28 @@ public abstract class BossPattern : MonoBehaviour
         }
     }
 
-    /// <summary>판정 구간 처리: 시작 전까지 예고 → 시작~끝 판정 → 끄기</summary>
+    /// <summary>
+    /// 패링 그로기 판정이면, 판정 시작(hitStartRatio)보다 반짝임 Lead Time만큼 앞선 지점인지 확인해 한 번 반짝임.
+    /// 루프 안에서 매 프레임 호출. 이미 반짝였으면 true 유지
+    /// </summary>
+    protected bool UpdateParryWarning(BossHitbox hitbox, float hitStartRatio, bool hasWarned)
+    {
+        if (hasWarned || hitbox == null || !hitbox.GroggyOnParry || Boss.ParryWarning == null)
+        {
+            return hasWarned;
+        }
+
+        float leadRatio = Duration > 0f ? Boss.ParryWarning.LeadTime / Duration : 0f;
+        if (Progress < hitStartRatio - leadRatio)
+        {
+            return false;
+        }
+
+        Boss.ParryWarning.Play();
+        return true;
+    }
+
+    /// <summary>판정 구간 처리: 시작 전까지 예고 → 시작~끝 판정 → 끄기 (패링 그로기 판정이면 직전에 반짝임)</summary>
     protected IEnumerator RunHitWindow(BossHitbox hitbox, bool showTelegraph = true)
     {
         if (showTelegraph)
@@ -226,7 +428,12 @@ public abstract class BossPattern : MonoBehaviour
             hitbox.SetTelegraph(true);
         }
 
-        yield return WaitUntilProgress(HitStartRatio);
+        bool hasWarned = false;
+        while (Progress < HitStartRatio)
+        {
+            hasWarned = UpdateParryWarning(hitbox, HitStartRatio, hasWarned);
+            yield return null;
+        }
 
         hitbox.SetTelegraph(false);
         hitbox.Activate();

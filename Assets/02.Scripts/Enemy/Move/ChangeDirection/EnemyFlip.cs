@@ -1,10 +1,8 @@
-using System;
 using UnityEngine;
 
 public abstract class EnemyFlip : MonoBehaviour
 {
     protected Enemy Enemy { get; private set; }
-    private Vector2 _direction;
 
     private void Awake()
     {

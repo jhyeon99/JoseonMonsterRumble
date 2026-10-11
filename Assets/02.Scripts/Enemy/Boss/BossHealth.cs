@@ -90,13 +90,17 @@ public class BossHealth : MonoBehaviour, IDamageable
 
     public bool TakeDamage(HitData hitData)
     {
-        if (!_boss.CanTakeDamage || hitData.Damage <= 0f)
+        // 소환 패턴 중에는 직접 공격 무효 (올챙이 기믹 데미지만)
+        if (!_boss.CanTakeDirectDamage || hitData.Damage <= 0f)
         {
             return false;
         }
 
         // 보스는 넉백 없음
         ApplyDamage(hitData.Damage);
+
+        // 일반 적과 같은 피격 공통 반응 (타격 소울, 히트스톱, 카메라 흔들림)
+        GameEvents.TriggerEnemyHit(hitData);
         OnDamaged?.Invoke(hitData);
         return true;
     }
@@ -111,6 +115,9 @@ public class BossHealth : MonoBehaviour, IDamageable
 
         _boss.Log($"기믹 데미지 {damage}");
         ApplyDamage(damage);
+
+        // 피격 연출용 (올챙이 충돌은 강한 피격으로 취급)
+        OnDamaged?.Invoke(new HitData(damage, 0f, _boss.CenterPosition, Vector2.zero, comboStep: 3));
         return true;
     }
 

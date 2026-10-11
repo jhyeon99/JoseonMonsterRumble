@@ -49,6 +49,10 @@ MonoBehaviour:
   - Type: 0
     Prefab: {fileID: 781400923103392496, guid: f1e99aa345f345e4cbd94aca17e4e61d, type: 3}
     AllowFlip: 0
+  - Type: 1
+    Prefab: {fileID: 6465918771199132150, guid: 09f360ddc51e4bb44a40b391858eea23,
+      type: 3}
+    AllowFlip: 1
   _poolSize: 5
   _fallbackDuration: 1
 --- !u!114 &3081748420882183073
@@ -63,3 +67,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd1bc488d27551c4f9c25c57f3bfe8c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EffectManager
+  _lightEnemyHitScale: 1.495
+  _talismanHitScale: 0.65
+  _heavyEnemyHitScale: 1.72
