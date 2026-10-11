@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// 올챙이 (독 방울을 터트리면 나옴). 공격 패턴 없이 좌우로 무작위로 돌아다니며 닿으면 약한 접촉 데미지.
 /// 플레이어 콤보 3타에 맞으면 (그 공격으로 죽더라도) 보스에게 날아가 부딪혀 기믹 데미지.
-/// 그 외 공격은 체력이 깎이고 뒤로 튕겨 나감 (일반 적보다 크게, 살짝 떠오름). 체력이 0이 되면 사라짐.
+/// 그 외 공격은 체력이 깎이고 뒤로 튕겨 나감 (일반 적보다 크게, 살짝 떠오름). 체력이 0이 되면 죽는 애니메이션 후 사라짐.
 /// 레이어는 Enemy (플레이어 근접 공격에 맞도록), Rigidbody2D(Dynamic) + 콜라이더 필요.
 /// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
@@ -102,6 +102,23 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
     [SerializeField]
     private HitStopSettings _impactHitStop = new HitStopSettings(0.06f, 0.05f);
 
+    [Header("애니메이션 (애니메이터에 없으면 무시)")]
+    [Tooltip("걷는 동안 켜 둘 Bool")]
+    [SerializeField]
+    private string _moveBool = "isMoving";
+
+    [Tooltip("죽을 때 보낼 트리거")]
+    [SerializeField]
+    private string _dieTrigger = "die";
+
+    [Tooltip("죽는 애니메이션 클립. 이 길이만큼 재생한 뒤 사라짐. 비우면 애니메이터에서 이름에 die가 들어간 클립을 찾음")]
+    [SerializeField]
+    private AnimationClip _deathClip;
+
+    [Tooltip("죽는 클립을 찾지 못했을 때 사라지기까지 시간 (초)")]
+    [SerializeField, Min(0f)]
+    private float _deathFallbackDuration = 0.6f;
+
     [Header("상태 (확인용)")]
     [SerializeField, ReadOnly]
     private float _currentHp;
@@ -124,6 +141,8 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
     private bool _isLaunched;
     private bool _isDead;
     private float _invincibleUntil;
+    private Animator _animator;
+    private readonly HashSet<int> _animatorParameters = new HashSet<int>();
 
     /// <summary>맞았을 때 (EnemyHitFeedback 피격 연출용)</summary>
     public event System.Action<HitData> OnHitFeedback;
@@ -152,6 +171,8 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
         _collider = GetComponent<Collider2D>();
         _hitFlash = GetComponent<HitFlash>();
         _currentHp = _maxHp;
+        _animator = GetComponentInChildren<Animator>();
+        CacheAnimatorParameters();
 
         _playerFilter = new ContactFilter2D();
         _playerFilter.SetLayerMask(Constants.Layers.PlayerMask);
@@ -164,6 +185,13 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
 
     private void FixedUpdate()
     {
+        // 죽는 애니메이션 중에는 제자리 (떠 있었으면 그대로 떨어짐)
+        if (_isDead)
+        {
+            _body.linearVelocity = new Vector2(0f, _body.linearVelocity.y);
+            return;
+        }
+
         if (_isLaunched)
         {
             FlyToBoss();
@@ -186,6 +214,7 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
         if (_nudgeTimer > 0f)
         {
             _nudgeTimer -= Time.fixedDeltaTime;
+            SetMoving(false);
             return;
         }
 
@@ -194,6 +223,7 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
         // 넉백 중에는 좌우 이동 금지: 공중이면 밀리는 속도 유지, 착지하면 미끄러지다 멈출 때까지 대기
         if (_isKnockedBack)
         {
+            SetMoving(false);
             if (!isGrounded)
             {
                 return;
@@ -215,6 +245,7 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
         if (!isGrounded)
         {
             _body.linearVelocity = new Vector2(0f, _body.linearVelocity.y);
+            SetMoving(false);
             return;
         }
 
@@ -240,6 +271,7 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
         }
 
         _body.linearVelocity = new Vector2(_direction * _moveSpeed, _body.linearVelocity.y);
+        SetMoving(_direction != 0f && _moveSpeed > 0f);
 
         if (_direction != 0f)
         {
@@ -365,8 +397,82 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
             Instantiate(_deathEffect, transform.position, Quaternion.identity);
         }
 
-        Destroy(gameObject);
+        // 죽는 애니메이션을 끝까지 보여준 뒤 사라짐 (그동안 데미지 / 이동 / 접촉 데미지 없음)
+        _body.linearVelocity = new Vector2(0f, _body.linearVelocity.y);
+        SetMoving(false);
+        SetTrigger(_dieTrigger);
+        Destroy(gameObject, GetDeathDuration());
     }
+
+    private float GetDeathDuration()
+    {
+        AnimationClip clip = _deathClip;
+        if (clip == null && _animator != null && _animator.runtimeAnimatorController != null)
+        {
+            foreach (AnimationClip candidate in _animator.runtimeAnimatorController.animationClips)
+            {
+                if (candidate != null && candidate.name.ToLower().Contains("die"))
+                {
+                    clip = candidate;
+                    break;
+                }
+            }
+        }
+
+        if (clip == null || _animator == null || !TryGetParameter(_dieTrigger, out _))
+        {
+            return _deathFallbackDuration;
+        }
+
+        float speed = _animator.speed > 0f ? _animator.speed : 1f;
+        return clip.length / speed;
+    }
+
+    #region 애니메이터
+
+    private void CacheAnimatorParameters()
+    {
+        _animatorParameters.Clear();
+        if (_animator == null || _animator.runtimeAnimatorController == null)
+        {
+            return;
+        }
+
+        foreach (AnimatorControllerParameter parameter in _animator.parameters)
+        {
+            _animatorParameters.Add(parameter.nameHash);
+        }
+    }
+
+    private bool TryGetParameter(string parameter, out int hash)
+    {
+        hash = 0;
+        if (_animator == null || string.IsNullOrEmpty(parameter))
+        {
+            return false;
+        }
+
+        hash = Animator.StringToHash(parameter);
+        return _animatorParameters.Contains(hash);
+    }
+
+    private void SetMoving(bool moving)
+    {
+        if (TryGetParameter(_moveBool, out int hash))
+        {
+            _animator.SetBool(hash, moving);
+        }
+    }
+
+    private void SetTrigger(string parameter)
+    {
+        if (TryGetParameter(parameter, out int hash))
+        {
+            _animator.SetTrigger(hash);
+        }
+    }
+
+    #endregion
 
     private void Launch()
     {
@@ -415,7 +521,9 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
             HitStop.Play(_impactHitStop);
         }
 
-        Destroy(gameObject);
+        // 부딪힌 자리에서 회전을 멈추고 죽는 애니메이션 후 사라짐
+        transform.rotation = Quaternion.identity;
+        Die();
     }
 
     private void OnDestroy()
