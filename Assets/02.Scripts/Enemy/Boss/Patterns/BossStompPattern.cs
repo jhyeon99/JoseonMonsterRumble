@@ -436,6 +436,7 @@ public class BossStompPattern : BossPattern
     {
         Vector3 position = _needleSpawnPoint != null ? _needleSpawnPoint.position : (Vector3)Boss.Position;
         BossProjectile needle = Instantiate(_needlePrefab, position, Quaternion.identity);
+        needle.SetAttacker(Boss.gameObject);
         needle.Launch(direction);
     }
 }

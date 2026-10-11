@@ -56,6 +56,10 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
     [SerializeField, Min(0.05f)]
     private float _contactInterval = 0.8f;
 
+    [Tooltip("접촉 공격 이름 (사망 원인 표시용)")]
+    [SerializeField]
+    private string _contactAttackName = "몸통 박치기";
+
     [SerializeField]
     private AttackDefense _defense = new AttackDefense { Parryable = true, GuardGaugeCost = 5f };
 
@@ -297,8 +301,10 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
                 _contactKnockback,
                 other.ClosestPoint(transform.position),
                 direction,
-                _defense
+                _defense,
+                attackName: _contactAttackName
             );
+            hitData.Attacker = gameObject;
 
             damageable.TakeDamage(hitData);
             _contactTimer = _contactInterval;
