@@ -384,8 +384,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   _maxHealth: 100
   _currentHealth: 0
-  _potionCount: 0
-  _maxPotionCount: 10
+  _potionCount: 3
+  _maxPotionCount: 3
   _potionHealAmount: 10
   _invincibleTime: 0.7
 --- !u!114 &7552846270097050848

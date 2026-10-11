@@ -1184,7 +1184,7 @@ MonoBehaviour:
   _screenOffset: {x: 0, y: -28}
   _damageDelay: 0.25
   _damageCatchupDuration: 0.35
-  _healCatchupDuration: 0.2
+  _healCatchupDuration: 0.35
 --- !u!223 &1453143635954567954
 Canvas:
   m_ObjectHideFlags: 0
@@ -1960,7 +1960,7 @@ MonoBehaviour:
   _healGhostColor: {r: 0.2, g: 0.85, b: 0.3, a: 1}
   _damageDelay: 0.25
   _damageCatchupDuration: 0.35
-  _healCatchupDuration: 0.2
+  _healCatchupDuration: 0.35
   _currentRatio: 1
   _ghostRatio: 1
   _punchTarget: {fileID: 0}
@@ -3490,6 +3490,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UI_PotionCount
   _playerHealth: {fileID: 0}
   _countText: {fileID: 952626523245104332}
+  _cooldownOverlay: {fileID: 1393855247581596490}
 --- !u!1 &6614055952133699858
 GameObject:
   m_ObjectHideFlags: 0

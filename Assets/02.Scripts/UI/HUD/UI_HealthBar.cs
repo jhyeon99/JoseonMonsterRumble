@@ -20,7 +20,7 @@ public class UI_HealthBar : MonoBehaviour
     [Header("시간 및 보간 설정")]
     [SerializeField] private float _damageDelay = 0.25f;
     [SerializeField] private float _damageCatchupDuration = 0.35f;
-    [SerializeField] private float _healCatchupDuration = 0.2f;
+    [SerializeField] private float _healCatchupDuration = 0.35f;
 
     [SerializeField] private float _currentRatio = 1f;
     [SerializeField] private float _ghostRatio = 1f;
