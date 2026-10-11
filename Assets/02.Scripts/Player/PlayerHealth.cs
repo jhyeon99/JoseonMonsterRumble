@@ -23,10 +23,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     // 보스 등장 / 하울링 / 처치 등 연출 중 무적 (피격 후 무적과 별개로 유지)
     private bool _isCinematicInvincible;
+    [SerializeField, ReadOnly] private bool _isRespawnProtected;
 
     // 가드 / 패링으로 막은 직후 잠깐 무적 (공격의 AttackDefense.BlockInvincibleTime)
     private float _blockInvincibleUntil = float.NegativeInfinity;
-    public bool IsInvincible => _isInvincible || _isCinematicInvincible;
+    public bool IsInvincible => _isInvincible || _isCinematicInvincible || _isRespawnProtected;
 
     public HitData LastFatalHitData { get; private set; }
 
@@ -48,6 +49,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     {
         _currentHealth = _maxHealth;
         _isDead = false;
+        _isRespawnProtected = false;
         LastFatalHitData = default;
         _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
@@ -63,6 +65,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     public bool TakeDamage(HitData hitdata)
     {
         if (IsDead) return false;
+
+        if (_isRespawnProtected)
+        {
+            return false;
+        }
 
         if (_isInvincible || _isCinematicInvincible)
         {
@@ -205,6 +212,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         _isCinematicInvincible = isInvincible;
     }
 
+    public void SetRespawnProtected(bool isProtected)
+    {
+        _isRespawnProtected = isProtected;
+    }
+
     /// <param name="showVisual">false면 반투명 표시 없이 무적만 적용 (해제할 때는 항상 원래대로)</param>
     public void SetInvincible(bool isInvincible, bool showVisual = true)
     {
@@ -228,6 +240,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     private void OnDisable()
     {
+        _isRespawnProtected = false;
         int playerLayer = gameObject.layer;
         int enemyAttackLayer = Constants.Layers.EnemyAttack;
 

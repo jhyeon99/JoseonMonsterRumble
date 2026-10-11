@@ -18,7 +18,9 @@ public class PauseController : MonoBehaviour
     [SerializeField] private string _titleSceneName = "Test_TitleScene";
     [SerializeField, ReadOnly] private bool _isPaused;
 
-    public static bool IsPaused { get; private set; }
+    private static bool _isMenuPaused;
+    public static bool IsPaused => _isMenuPaused ||
+                                   (StageManager.Instance != null && StageManager.Instance.IsRespawnWorldFrozen);
     private static int _pauseTransitionFrame = -1;
     public static bool IsGameplayInputBlocked => IsPaused || Time.frameCount == _pauseTransitionFrame ||
                                                  (StageManager.Instance != null && StageManager.Instance.IsRespawning);
@@ -35,7 +37,7 @@ public class PauseController : MonoBehaviour
         }
 
         _isPaused = false;
-        IsPaused = false;
+        _isMenuPaused = false;
         _pauseTransitionFrame = -1;
         if (_pauseMenuPanel != null)
         {
@@ -75,6 +77,10 @@ public class PauseController : MonoBehaviour
 
     private void Update()
     {
+        if (StageManager.Instance != null && StageManager.Instance.IsRespawning)
+        {
+            return;
+        }
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (_isPaused && _isSettingsAvailable && _settingsPanel.activeSelf)
@@ -188,21 +194,25 @@ public class PauseController : MonoBehaviour
             return;
         }
 
-        RestoreTimeScale();
         _isPaused = false;
-        IsPaused = false;
+        _isMenuPaused = false;
+        RestoreTimeScale();
         SceneManager.LoadScene(_titleSceneName);
     }
 
     private void SetPaused(bool isPaused)
     {
+        if (isPaused && StageManager.Instance != null && StageManager.Instance.IsRespawning)
+        {
+            return;
+        }
         if (_isPaused == isPaused)
         {
             return;
         }
 
         _isPaused = isPaused;
-        IsPaused = isPaused;
+        _isMenuPaused = isPaused;
         _pauseTransitionFrame = Time.frameCount;
         GameCursorController.SetPauseVisible(isPaused);
 
@@ -304,7 +314,7 @@ public class PauseController : MonoBehaviour
     // 일시정지 직전 값(히트스톱 중이면 0.02 등)을 복원하면 슬로우모션이 남으므로 항상 정상 속도로 복귀
     private void RestoreTimeScale()
     {
-        Time.timeScale = 1f;
+        Time.timeScale = IsPaused ? 0f : 1f;
     }
 
     private void Select(Selectable selectable)

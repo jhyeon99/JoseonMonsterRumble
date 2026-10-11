@@ -12,6 +12,18 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public sealed class StageManager : MonoBehaviour
 {
+    private const float SceneReadyProgress = 0.9f;
+    private const float DefaultMinLoadingDuration = 3f;
+
+    private enum RespawnPhase
+    {
+        Idle,
+        DeathAnimation,
+        DeathScreen,
+        Loading,
+        Revealing
+    }
+
     public static StageManager Instance { get; private set; }
 
     [Header("사망 / 재시작 연출")]
@@ -25,6 +37,10 @@ public sealed class StageManager : MonoBehaviour
     [Tooltip("화면이 완전히 어두워진 뒤 씬을 다시 로드하기 전까지 유지하는 시간")]
     [SerializeField, Min(0f)]
     private float _displayDuration = 0.8f;
+
+    [Tooltip("로딩 화면이 완전히 사라진 뒤 유지하는 리스폰 보호 시간")]
+    [SerializeField, Min(0f)]
+    private float _respawnProtectionDuration = 1.5f;
 
     [Header("디버그 (에디터 전용)")]
 
@@ -42,10 +58,14 @@ public sealed class StageManager : MonoBehaviour
     private PlayerHealth _playerHealth;
     private string _activeSceneName;
     private string _activeCheckpointId;
-    private bool _isRespawning;
+    [SerializeField, ReadOnly] private RespawnPhase _respawnPhase;
+    private Coroutine _respawnProtectionCoroutine;
     private bool _isChangingScene;
 
-    public bool IsRespawning => _isRespawning;
+    public bool IsRespawning => _respawnPhase != RespawnPhase.Idle;
+    public bool IsRespawnWorldFrozen => _respawnPhase == RespawnPhase.DeathScreen ||
+                                       _respawnPhase == RespawnPhase.Loading ||
+                                       _respawnPhase == RespawnPhase.Revealing;
 
     private void Awake()
     {
@@ -56,6 +76,7 @@ public sealed class StageManager : MonoBehaviour
         }
 
         Instance = this;
+        _respawnPhase = RespawnPhase.Idle;
         DontDestroyOnLoad(gameObject);
         SceneManager.sceneLoaded += HandleSceneLoaded;
 
@@ -102,6 +123,26 @@ public sealed class StageManager : MonoBehaviour
         Instance = null;
     }
 
+    private void OnDisable()
+    {
+        if (Instance != this)
+        {
+            return;
+        }
+        StopAllCoroutines();
+        StopRespawnProtection();
+        ResetRespawnTransition();
+    }
+
+    private void LateUpdate()
+    {
+        // Scene initialization and cinematic scripts may restore time during loading.
+        if (IsRespawnWorldFrozen && !Mathf.Approximately(Time.timeScale, 0f))
+        {
+            Time.timeScale = 0f;
+        }
+    }
+
     /// <summary>
     /// 체크포인트 활성화. 새로 세이브된 경우에만 true (세이브 연출 여부 판단용).
     /// </summary>
@@ -112,7 +153,7 @@ public sealed class StageManager : MonoBehaviour
             return false;
         }
 
-        if (_isRespawning || _isChangingScene)
+        if (IsRespawning || _isChangingScene)
         {
             return false;
         }
@@ -144,7 +185,7 @@ public sealed class StageManager : MonoBehaviour
     /// <summary>지정한 스테이지 씬으로 전환한다. 중복 전환과 리스폰 중 전환은 막는다.</summary>
     public bool TryLoadStageScene(string sceneName, float fadeOutDuration = 0.5f, float fadeInDuration = 0.75f)
     {
-        if (_isRespawning || _isChangingScene || SceneArrivalFade.IsTransitioning || string.IsNullOrWhiteSpace(sceneName))
+        if (IsRespawning || _isChangingScene || SceneArrivalFade.IsTransitioning || string.IsNullOrWhiteSpace(sceneName))
             return false;
 
         if (SceneManager.GetActiveScene().name == sceneName)
@@ -201,7 +242,7 @@ public sealed class StageManager : MonoBehaviour
 
     private void TryStartRespawn(bool waitForDeath, string causeOfDeath = "")
     {
-        if (_isRespawning || _isChangingScene)
+        if (IsRespawning || _isChangingScene)
         {
             return;
         }
@@ -221,86 +262,117 @@ public sealed class StageManager : MonoBehaviour
 
     private IEnumerator RespawnRoutine(string sceneName, bool waitForDeath, string causeOfDeath)
     {
-        _isRespawning = true;
-
-        if (waitForDeath)
-        {
-            yield return new WaitForSecondsRealtime(_deathDelay);
-        }
-
-        if (_deathScreen == null)
-        {
-            _deathScreen = FindFirstObjectByType<DeathScreenView>(FindObjectsInactive.Include);
-        }
-
-        if (_deathScreen != null)
+        StopRespawnProtection();
+        _respawnPhase = RespawnPhase.DeathAnimation;
+        Coroutine loadingAnimCoroutine = null;
+        bool completed = false;
+        try
         {
             if (waitForDeath)
+            {
+                yield return new WaitForSecondsRealtime(_deathDelay);
+            }
+
+            _respawnPhase = RespawnPhase.DeathScreen;
+            HitStop.Stop();
+            CameraShake.Stop();
+            PauseController pauseController = FindFirstObjectByType<PauseController>();
+            if (pauseController != null)
+            {
+                pauseController.ResumeGame();
+            }
+            Time.timeScale = 0f;
+            if (_playerHealth != null)
+            {
+                _playerHealth.SetRespawnProtected(true);
+            }
+
+            if (_deathScreen == null)
+            {
+                _deathScreen = FindFirstObjectByType<DeathScreenView>(FindObjectsInactive.Include);
+            }
+            if (_deathScreen != null && waitForDeath)
             {
                 _deathScreen.SetCauseOfDeath(causeOfDeath);
                 yield return _deathScreen.FadeIn();
                 yield return _deathScreen.WaitForRestartInput();
             }
-        }
-        else if (waitForDeath)
-        {
-            yield return new WaitForSecondsRealtime(_displayDuration);
-        }
+            else if (waitForDeath)
+            {
+                yield return new WaitForSecondsRealtime(_displayDuration);
+            }
 
-        UnbindPlayerHealth();
-
-        // 일시정지 / 히트스톱 중에 재시작해도 정상 속도로 시작
-        Time.timeScale = 1f;
-
-        Coroutine loadingAnimCoroutine = null;
-        if (_deathScreen != null)
-        {
-            loadingAnimCoroutine = StartCoroutine(_deathScreen.PlayLoadingRoutine());
-        }
-
-        float minLoadingTime = _deathScreen != null ? _deathScreen.MinLoadingDuration : 3f;
-        float loadingStartTime = Time.realtimeSinceStartup;
-
-        AsyncOperation loadOperation = SceneManager.LoadSceneAsync(
-            sceneName,
-            LoadSceneMode.Single
-        );
-
-        if (loadOperation == null)
-        {
-            Debug.LogWarning(
-                $"{sceneName}: 씬 재로딩을 시작하지 못했습니다.",
-                this
-            );
-            _deathScreen?.HideImmediate();
-            _isRespawning = false;
-            yield break;
-        }
-
-        yield return loadOperation;
-
-        while (Time.realtimeSinceStartup - loadingStartTime < minLoadingTime)
-        {
+            _respawnPhase = RespawnPhase.Loading;
+            UnbindPlayerHealth();
+            if (_deathScreen != null)
+            {
+                loadingAnimCoroutine = StartCoroutine(_deathScreen.PlayLoadingRoutine());
+            }
+            float minLoadingTime = _deathScreen != null
+                ? _deathScreen.MinLoadingDuration : DefaultMinLoadingDuration;
+            float loadingStartTime = Time.realtimeSinceStartup;
+            AsyncOperation loadOperation = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
+            if (loadOperation == null)
+            {
+                Debug.LogWarning($"{sceneName}: 씬 재로딩을 시작하지 못했습니다.", this);
+                BindPlayerHealth(SceneManager.GetActiveScene());
+                yield break;
+            }
+            loadOperation.allowSceneActivation = false;
+            while (loadOperation.progress < SceneReadyProgress ||
+                   Time.realtimeSinceStartup - loadingStartTime < minLoadingTime)
+            {
+                yield return null;
+            }
+            loadOperation.allowSceneActivation = true;
+            yield return loadOperation;
+            // sceneLoaded applies protection and position before Start; let startup finish
+            // beneath the loading screen without advancing physics or AI timers.
             yield return null;
-        }
 
-        if (_deathScreen != null)
+            _respawnPhase = RespawnPhase.Revealing;
+            if (loadingAnimCoroutine != null)
+            {
+                StopCoroutine(loadingAnimCoroutine);
+                loadingAnimCoroutine = null;
+            }
+            if (_deathScreen != null)
+            {
+                yield return _deathScreen.FadeOutLoading();
+            }
+            completed = true;
+        }
+        finally
         {
             if (loadingAnimCoroutine != null)
             {
                 StopCoroutine(loadingAnimCoroutine);
             }
-
-            yield return _deathScreen.FadeOutLoading();
+            _deathScreen?.HideImmediate();
+            ResetRespawnTransition();
+            if (!completed)
+            {
+                StopRespawnProtection();
+            }
         }
 
-        _isRespawning = false;
+        if (_playerHealth != null)
+        {
+            if (_respawnProtectionDuration > 0f)
+            {
+                _respawnProtectionCoroutine = StartCoroutine(ReleaseRespawnProtectionRoutine(_playerHealth));
+            }
+            else
+            {
+                _playerHealth.SetRespawnProtected(false);
+            }
+        }
     }
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode loadMode)
     {
         bool preserveCheckpoint =
-            _isRespawning && scene.name == _activeSceneName;
+            IsRespawning && scene.name == _activeSceneName;
         InitializeScene(scene, preserveCheckpoint);
     }
 
@@ -503,10 +575,15 @@ public sealed class StageManager : MonoBehaviour
         }
 
         _playerHealth.OnDied += HandlePlayerDied;
+        if (IsRespawning)
+        {
+            _playerHealth.SetRespawnProtected(true);
+        }
     }
 
     private void UnbindPlayerHealth()
     {
+        StopRespawnProtection();
         if (_playerHealth == null)
         {
             return;
@@ -514,6 +591,40 @@ public sealed class StageManager : MonoBehaviour
 
         _playerHealth.OnDied -= HandlePlayerDied;
         _playerHealth = null;
+    }
+
+    private IEnumerator ReleaseRespawnProtectionRoutine(PlayerHealth playerHealth)
+    {
+        yield return new WaitForSeconds(_respawnProtectionDuration);
+        if (playerHealth != null)
+        {
+            playerHealth.SetRespawnProtected(false);
+        }
+        _respawnProtectionCoroutine = null;
+    }
+
+    private void StopRespawnProtection()
+    {
+        if (_respawnProtectionCoroutine != null)
+        {
+            StopCoroutine(_respawnProtectionCoroutine);
+            _respawnProtectionCoroutine = null;
+        }
+        if (_playerHealth != null)
+        {
+            _playerHealth.SetRespawnProtected(false);
+        }
+    }
+
+    private void ResetRespawnTransition()
+    {
+        bool wasFrozen = IsRespawnWorldFrozen;
+        _respawnPhase = RespawnPhase.Idle;
+        if (wasFrozen)
+        {
+            HitStop.Stop();
+            Time.timeScale = PauseController.IsPaused ? 0f : 1f;
+        }
     }
 
     private void MovePlayerTo(RespawnPoint point)
