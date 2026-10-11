@@ -1040,6 +1040,7 @@ RectTransform:
   - {fileID: 420562276022660254}
   - {fileID: 890300000000000002}
   - {fileID: 890400000000000002}
+  - {fileID: 890500000000000002}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1123,6 +1124,66 @@ MonoBehaviour:
   _baseSizeDamage: 15
   _maxSizeDamage: 50
   _maxSizeMultiplier: 1.25
+--- !u!1 &890500000000000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 890500000000000002}
+  - component: {fileID: 890500000000000003}
+  m_Layer: 5
+  m_Name: EnemyHealthBars
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &890500000000000002
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 890500000000000001}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2930149289742138257}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &890500000000000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 890500000000000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39c3ac5b7c45407087bd3b7ff8328d61, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  _backgroundTexture: {fileID: 2800000, guid: bab6a011180f6264d808c2c445f02506, type: 3}
+  _fillTexture: {fileID: 2800000, guid: 94d08b21ed8bc6942aa1dd03a7ff4f23, type: 3}
+  _frameTexture: {fileID: 2800000, guid: 031dff43efba67e48968fa7d70c42036, type: 3}
+  _fillMaterial: {fileID: 2100000, guid: 528c70b4373c455eaa08e3962edb852f, type: 2}
+  _damageGhostMaterial: {fileID: 2100000, guid: 3c696384715244dc86f5c037c7c9346b, type: 2}
+  _artUvRegion: {x: 0.1, y: 0.37, z: 0.8, w: 0.26}
+  _worldCamera: {fileID: 0}
+  _barSize: {x: 234, y: 38}
+  _screenOffset: {x: 0, y: -28}
+  _damageDelay: 0.25
+  _damageCatchupDuration: 0.35
+  _healCatchupDuration: 0.2
 --- !u!223 &1453143635954567954
 Canvas:
   m_ObjectHideFlags: 0
