@@ -59,6 +59,8 @@ public class Player : MonoBehaviour
     public PlayerGuard Guard => _guard;
     private PlayerFinisher _finisher;
     public PlayerFinisher Finisher => _finisher;
+    private PlayerWeaponBuff _weaponBuff;
+    public PlayerWeaponBuff WeaponBuff => _weaponBuff;
 
     [SerializeField] private Animator _animator;
     public Animator Animator => _animator;
@@ -129,6 +131,12 @@ public class Player : MonoBehaviour
         {
             Debug.LogWarning($"{name}: PlayerFinisher가 없어 기본값으로 추가합니다. 수치를 조정하려면 프리팹에 직접 추가하세요.", this);
             _finisher = gameObject.AddComponent<PlayerFinisher>();
+        }
+
+        _weaponBuff = GetComponent<PlayerWeaponBuff>();
+        if (_weaponBuff == null)
+        {
+            _weaponBuff = gameObject.AddComponent<PlayerWeaponBuff>();
         }
 
         if (_animator == null)

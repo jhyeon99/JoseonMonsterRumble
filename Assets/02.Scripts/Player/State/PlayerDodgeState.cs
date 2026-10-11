@@ -213,5 +213,10 @@ public class PlayerDodgeState : PlayerBaseState
         {
             _afterimage.TriggerDodgeSuccessGlow();
         }
+
+        if (_player != null && _player.WeaponBuff != null)
+        {
+            _player.WeaponBuff.ActivateBuff(4f, 1.30f);
+        }
     }
 }

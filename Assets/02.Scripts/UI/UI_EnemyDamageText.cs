@@ -37,6 +37,7 @@ public class UI_EnemyDamageText : MonoBehaviour
     [SerializeField, Min(1f)] private float _finisherSizeMultiplier = 2f;
     [SerializeField] private Color _textColor = new Color(1f, 0.96f, 0.86f);
     [SerializeField] private Color _finisherColor = new Color(1f, 0.75f, 0.18f);
+    [SerializeField] private Color _buffedColor = new Color(0.35f, 0.85f, 1.0f, 1.0f);
     [SerializeField, Min(1f)] private float _fontSize = 56f;
     [SerializeField] private float _characterSpacing = -3f;
     [SerializeField] private float _finisherCharacterSpacing = -3f;
@@ -110,7 +111,7 @@ public class UI_EnemyDamageText : MonoBehaviour
     {
         float motionMultiplier = hitData.ComboStep == HeavyComboStep ? _heavyMotionMultiplier : 1f;
         ShowDamage(hitData.Damage, hitData.HitPoint, false, hitData.AttackDirection, motionMultiplier,
-            hitData.IsTalisman);
+            hitData.IsTalisman, hitData.IsBuffed);
     }
 
     private void HandleFinisherAnticipation(Transform attacker, Transform target, float progress)
@@ -172,7 +173,7 @@ public class UI_EnemyDamageText : MonoBehaviour
     }
 
     private void ShowDamage(float damage, Vector3 position, bool isFinisher,
-        Vector2 attackDirection, float motionMultiplier, bool isTalisman = false)
+        Vector2 attackDirection, float motionMultiplier, bool isTalisman = false, bool isBuffed = false)
     {
         if (_canvas == null || damage <= 0f)
         {
@@ -210,7 +211,21 @@ public class UI_EnemyDamageText : MonoBehaviour
         text.fontSize = _fontSize;
         text.characterSpacing = usesYellowFont ? _finisherCharacterSpacing : _characterSpacing;
         text.enableAutoSizing = false;
-        text.color = usesYellowFont ? _finisherColor : _textColor;
+
+        Color targetColor;
+        if (usesYellowFont)
+        {
+            targetColor = _finisherColor;
+        }
+        else if (isBuffed)
+        {
+            targetColor = _buffedColor;
+        }
+        else
+        {
+            targetColor = _textColor;
+        }
+        text.color = targetColor;
         text.alignment = TextAlignmentOptions.Center;
         text.rectTransform.sizeDelta = TextArea;
 
