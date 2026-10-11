@@ -129,6 +129,8 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
 
     public void PlayBgm(AudioClip clip, float fadeDuration = 0.5f)
     {
+        if (this == null || _instance != this || !isActiveAndEnabled)
+            return;
         if (clip != null)
         {
             RequestLegacyBgm(clip, fadeDuration);
@@ -137,6 +139,8 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
 
     public void StopBgm(float fadeDuration = 0.5f)
     {
+        if (this == null || _instance != this || !isActiveAndEnabled)
+            return;
         BeginMusicStop(Mathf.Max(0f, fadeDuration));
     }
 
@@ -147,6 +151,8 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
 
     public AudioSource PlaySfxTracked(AudioClip clip, float volumeScale = 1f, float gain = 1f)
     {
+        if (this == null || _instance != this || !isActiveAndEnabled)
+            return null;
         if (clip == null || _isSfxMuted)
             return null;
         return PlayLegacySfx(clip, Mathf.Clamp01(volumeScale) * Mathf.Clamp(gain, 0f, 3f));
@@ -155,6 +161,8 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
     // Once assigned, the catalog is authoritative, including silent/disabled entries.
     public PlayHandle PlayUiEvent(string eventId, AudioClip legacyClip = null, float legacyVolume = 1f)
     {
+        if (this == null || _instance != this || !isActiveAndEnabled)
+            return PlayHandle.Empty;
         if (_catalog != null && _catalog.UI != null)
             return PlayEventCore(_catalog.UI, eventId, default, AudioTimeMode.RealTime, LifetimePolicy.Global, AudioOutputGroup.Sfx);
         if (!isActiveAndEnabled || legacyClip == null ||
@@ -189,6 +197,8 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
 
     public PlayHandle PlayMusicEvent(string eventId, Scene scene)
     {
+        if (this == null || _instance != this || !isActiveAndEnabled)
+            return PlayHandle.Empty;
         if (!scene.IsValid() || !scene.isLoaded)
             return PlayHandle.Empty;
         return PlayEventCore(_catalog != null ? _catalog.Music : null, eventId,
@@ -201,6 +211,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
     {
         if (_instance != this)
             return;
+        UnsubscribeSceneEvents();
         SceneManager.sceneLoaded += OnAudioSceneLoaded;
         SceneManager.activeSceneChanged += OnAudioActiveSceneChanged;
     }
@@ -224,6 +235,14 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
     private void OnAudioActiveSceneChanged(Scene previous, Scene next) => RequestSceneMusic(next);
     private void RequestSceneMusic(Scene scene)
     {
+        // A static event may still be dispatching while this component is destroyed.
+        if (this == null)
+        {
+            UnsubscribeSceneEvents();
+            return;
+        }
+        if (_instance != this || !isActiveAndEnabled)
+            return;
         if (!scene.IsValid() || !scene.isLoaded)
             return;
         AudioSceneKey key = AudioLifetimeRegistry.ForScene(scene);
@@ -366,7 +385,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
     private PlayHandle PlayEventCore(SoundSetSO set, string eventId, AudioContext context,
         AudioTimeMode? timeOverride = null, LifetimePolicy? requiredLifetime = null, AudioOutputGroup? requiredOutput = null)
     {
-        if (!isActiveAndEnabled || string.IsNullOrWhiteSpace(eventId) || set == null || !set.TryGetEvent(eventId, out EventBinding binding) ||
+        if (this == null || _instance != this || !isActiveAndEnabled || string.IsNullOrWhiteSpace(eventId) || set == null || !set.TryGetEvent(eventId, out EventBinding binding) ||
             binding == null || !binding.Enabled || !binding.HasValidLifetime || !context.Supports(binding.LifetimePolicy) ||
             (requiredLifetime.HasValue && binding.LifetimePolicy != requiredLifetime.Value))
         {
@@ -956,10 +975,15 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         return IsHandleValid(request.Handle) ? request.Source : null;
     }
 
-    private void OnDisable()
+    private void UnsubscribeSceneEvents()
     {
         SceneManager.sceneLoaded -= OnAudioSceneLoaded;
         SceneManager.activeSceneChanged -= OnAudioActiveSceneChanged;
+    }
+
+    private void OnDisable()
+    {
+        UnsubscribeSceneEvents();
         _sceneMusicKey = default;
         StopAllCoroutines();
         foreach (AudioSource source in _sfxPool)
@@ -982,6 +1006,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
 
     private void OnDestroy()
     {
+        UnsubscribeSceneEvents();
         if (_instance == this)
         {
             _instance = null;
