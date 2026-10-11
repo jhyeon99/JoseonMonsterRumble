@@ -353,10 +353,10 @@ public class CameraShake : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!PauseController.IsPaused)
-        {
-            _clock += Time.unscaledDeltaTime;
-        }
+        // ProCamera2D also skips movement while paused, so reapplying an offset
+        // here would accumulate it and move the camera away from frozen souls.
+        if (PauseController.IsPaused) return;
+        _clock += Time.unscaledDeltaTime;
 
         // 추적 카메라는 매 프레임 기준 위치를 새로 쓰므로 오프셋을 다시 빼지 않는다.
         if ((_follow == null || !_follow.isActiveAndEnabled) &&

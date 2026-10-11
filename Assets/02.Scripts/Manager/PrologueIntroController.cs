@@ -170,6 +170,11 @@ public class PrologueIntroController : MonoBehaviour
     private readonly HashSet<ParallaxManager> _destinationParallax =
         new HashSet<ParallaxManager>();
 
+    private void OnEnable()
+    {
+        Canvas.preWillRenderCanvases += UpdateHintsBeforeRender;
+    }
+
     private void Awake()
     {
         if (_player == null || _camera == null || _cinematics == null ||
@@ -759,17 +764,19 @@ public class PrologueIntroController : MonoBehaviour
 
         if (_boardKeyHint == null) CreateBoardKeyHint();
         _boardKeyHint.gameObject.SetActive(true);
+        // The first read is owned by ReadNoticeBoard; subsequent reads use the same Enter prompt.
+        if (_posterRead && idle && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
+            StartCoroutine(ReadWantedPoster(false));
+    }
+
+    private void UpdateBoardHintPosition()
+    {
+        if (_boardKeyHint == null || !_boardKeyHint.gameObject.activeInHierarchy || _noticeBoard == null) return;
         SpriteRenderer renderer = _noticeBoard.GetComponentInChildren<SpriteRenderer>();
         Vector3 top = renderer != null
             ? new Vector3(renderer.bounds.center.x, renderer.bounds.max.y, _noticeBoard.position.z)
             : _noticeBoard.position + Vector3.up * 2f;
-        Vector3 screen = _camera.GetComponent<Camera>().WorldToScreenPoint(top);
-        RectTransform canvasRect = _boardKeyHint.parent.GetComponent<RectTransform>();
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screen, null, out Vector2 position))
-            _boardKeyHint.anchoredPosition = position + Vector2.up * 48f;
-        // The first read is owned by ReadNoticeBoard; subsequent reads use the same Enter prompt.
-        if (_posterRead && idle && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
-            StartCoroutine(ReadWantedPoster(false));
+        TutorialHintPositioning.Position(_boardKeyHint, _camera.GetComponent<Camera>(), top, Vector2.up * 48f);
     }
 
     private void CreateBoardKeyHint()
@@ -779,6 +786,7 @@ public class PrologueIntroController : MonoBehaviour
         Canvas canvas = canvasObject.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 32765;
+        canvas.pixelPerfect = true;
         CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
@@ -874,15 +882,18 @@ public class PrologueIntroController : MonoBehaviour
         _moveHintRow.SetActive(!showJump && !_movementLearned);
         _jumpHintRow.SetActive(showJump);
         _controlHintRoot.gameObject.SetActive(showJump || !_movementLearned);
-        Canvas canvas = _controlHintRoot.GetComponentInParent<Canvas>();
-        RectTransform canvasRect = canvas.GetComponent<RectTransform>();
-        Collider2D body = _player.GetComponent<Collider2D>();
-        Vector3 head = body != null
-            ? new Vector3(body.bounds.center.x, body.bounds.max.y, _player.transform.position.z)
-            : _player.transform.position + Vector3.up * 1.5f;
-        Vector3 screen = _camera.GetComponent<Camera>().WorldToScreenPoint(head);
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screen, null, out Vector2 position))
-            _controlHintRoot.anchoredPosition = position + _controlHintOffset;
+    }
+
+    private void UpdateHintsBeforeRender()
+    {
+        if (!_ready || _camera == null) return;
+        if (_controlHintRoot != null && _controlHintRoot.gameObject.activeInHierarchy && _player != null)
+        {
+            TutorialHintPositioning.Position(_controlHintRoot, _camera.GetComponent<Camera>(),
+                TutorialHintPositioning.GetRenderedPlayerAnchor(_player, true), _controlHintOffset);
+        }
+
+        UpdateBoardHintPosition();
     }
 
     private void CreateControlHints()
@@ -892,6 +903,7 @@ public class PrologueIntroController : MonoBehaviour
         Canvas canvas = canvasObject.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 32765;
+        canvas.pixelPerfect = true;
         CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
@@ -1196,6 +1208,7 @@ public class PrologueIntroController : MonoBehaviour
 
     private void OnDisable()
     {
+        Canvas.preWillRenderCanvases -= UpdateHintsBeforeRender;
         StopAllCoroutines();
         StopOpeningSounds();
         if (_cinematics != null)

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -25,11 +25,14 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
     private Camera _camera;
     private RectTransform _hint;
     private RectTransform _canvas;
+    private Canvas _hintCanvas;
     private bool _shown;
     private bool _jumpStarted;
     private bool _heldLongEnough;
     private float _heldTime;
     private float _displayElapsed;
+    private bool IsTalismanHint => _hintType == Ep1TutorialHintType.TalismanTap ||
+        _hintType == Ep1TutorialHintType.TalismanCharge;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Register()
@@ -78,6 +81,11 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
                     continue;
                 }
                 Ep1HighJumpHint hint = point.GetComponentInChildren<Ep1HighJumpHint>(true);
+                if (manager != null && hintType == Ep1TutorialHintType.Respawn)
+                {
+                    if (hint != null) hint.Configure(manager, hintType);
+                    continue;
+                }
                 if (hint == null)
                 {
                     GameObject prefab = Resources.Load<GameObject>(prefabName);
@@ -97,8 +105,24 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
         if (_messageText != null) ApplyPresentation();
     }
 
+    private void OnEnable()
+    {
+        Canvas.preWillRenderCanvases += UpdateHintPosition;
+    }
+
+    private void OnDisable()
+    {
+        Canvas.preWillRenderCanvases -= UpdateHintPosition;
+    }
+
     private void Start()
     {
+        if (!IsTalismanHint && Ep1TutorialManager.HasShownHint(_hintType))
+        {
+            FinishHint();
+            return;
+        }
+
         _player = FindFirstObjectByType<Player>();
         _camera = Camera.main;
         if (_player == null || _camera == null)
@@ -110,9 +134,10 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
         var canvasObject = new GameObject("HighJumpHintUI", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
         canvasObject.transform.SetParent(transform, false);
         _canvas = canvasObject.GetComponent<RectTransform>();
-        Canvas canvas = canvasObject.GetComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 32765;
+        _hintCanvas = canvasObject.GetComponent<Canvas>();
+        _hintCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        _hintCanvas.sortingOrder = 32765;
+        _hintCanvas.pixelPerfect = true;
         CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
@@ -133,9 +158,26 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
     private void Update()
     {
         if (_hint == null || _player == null || _input == null) return;
+        bool respawning = StageManager.Instance != null && StageManager.Instance.IsRespawning;
+        if (_shown && (_player.Health.IsDead || respawning))
+        {
+            if (_hintType == Ep1TutorialHintType.Guard || IsTalismanHint)
+            {
+                _hint.gameObject.SetActive(false);
+                _shown = false;
+                return;
+            }
+            FinishHint();
+            return;
+        }
         bool available = !PauseController.IsPaused && !SceneArrivalFade.IsTransitioning &&
-            !_player.Health.IsDead && _input.enabled;
+            !respawning && !_player.Health.IsDead && _input.enabled;
         if (!available)
+        {
+            _hint.gameObject.SetActive(false);
+            return;
+        }
+        if (_tutorialManager != null && !_tutorialManager.CanShowHint(_hintType))
         {
             _hint.gameObject.SetActive(false);
             return;
@@ -143,18 +185,35 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
         if (!_shown)
         {
             float distance = _tutorialManager != null ? _tutorialManager.TriggerDistance : _triggerDistance;
-            if (Vector2.Distance(_player.transform.position, transform.position) > distance) return;
+            bool forceParry = _tutorialManager != null && _tutorialManager.ShouldStartParryHint;
+            bool forceHighJump = _tutorialManager != null && _tutorialManager.ShouldStartHighJumpHint;
+            bool withinRange = _tutorialManager != null ?
+                _tutorialManager.IsWithinHintRange(_hintType, _player.transform.position, transform.position) :
+                Vector2.Distance(_player.transform.position, transform.position) <= distance;
+            if (!IsTalismanHint && !(_hintType == Ep1TutorialHintType.Parry && forceParry) &&
+                !(_hintType == Ep1TutorialHintType.HighJump && forceHighJump) &&
+                !withinRange)
+            {
+                return;
+            }
+            // Record the first display, even if the player dies before finishing the hint.
+            if (_hintType != Ep1TutorialHintType.Guard && !IsTalismanHint && !Ep1TutorialManager.TryMarkHintShown(_hintType))
+            {
+                FinishHint();
+                return;
+            }
             _shown = true;
+            if (_tutorialManager != null) _tutorialManager.NotifyHintDisplayed(_hintType);
         }
         _hint.gameObject.SetActive(true);
+        if (_hintType == Ep1TutorialHintType.Guard || IsTalismanHint) return;
         if (!_showJumpKeys)
         {
             _displayElapsed += Time.deltaTime;
             float duration = _tutorialManager != null ? _tutorialManager.DisplayDuration : _displayDuration;
             if (_displayElapsed >= duration)
             {
-                _hint.gameObject.SetActive(false);
-                enabled = false;
+                FinishHint();
             }
             return;
         }
@@ -178,25 +237,47 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
         {
             if (_heldLongEnough)
             {
-                _hint.gameObject.SetActive(false);
-                enabled = false;
+                FinishHint();
             }
             _jumpStarted = false;
         }
+    }
+
+    private void FinishHint()
+    {
+        if (_hint != null) _hint.gameObject.SetActive(false);
+        enabled = false;
     }
 
     private void LateUpdate()
     {
         if (_tutorialManager != null && _presentationVersion != _tutorialManager.PresentationVersion)
             ApplyPresentation();
-        if (_hint == null || !_hint.gameObject.activeSelf || _player == null) return;
+    }
+
+    private void UpdateHintPosition()
+    {
+        if (_hint == null || !_hint.gameObject.activeSelf || _player == null || _camera == null) return;
         Collider2D body = _player.GetComponent<Collider2D>();
         Vector3 top = body != null
             ? new Vector3(body.bounds.center.x, body.bounds.max.y, _player.transform.position.z)
             : _player.transform.position + Vector3.up * 2f;
-        Vector3 screen = _camera.WorldToScreenPoint(top);
+        Rigidbody2D rigidbody = body != null ? body.attachedRigidbody : null;
+        if (rigidbody != null && rigidbody.interpolation != RigidbodyInterpolation2D.None)
+        {
+            // Collider bounds use the physics pose; the sprite uses the interpolated transform.
+            Vector2 renderOffset = (Vector2)rigidbody.transform.position - rigidbody.position;
+            top += (Vector3)renderOffset;
+        }
+        // Follow the final camera pose, after camera movement, shake and zoom in LateUpdate.
+        // Run before the canvas rebuild so text vertices use this frame's pixel alignment.
+        Vector2 screen = _camera.WorldToScreenPoint(top);
+        Vector2 offset = _tutorialManager != null ? _tutorialManager.HeadOffset : _headOffset;
+        screen += offset * _hintCanvas.scaleFactor;
+        screen.x = Mathf.Round(screen.x);
+        screen.y = Mathf.Round(screen.y);
         if (RectTransformUtility.ScreenPointToLocalPointInRectangle(_canvas, screen, null, out Vector2 position))
-            _hint.anchoredPosition = position + (_tutorialManager != null ? _tutorialManager.HeadOffset : _headOffset);
+            _hint.anchoredPosition = position;
     }
 
     private void ApplyPresentation()
@@ -205,6 +286,14 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
         _messageText.text = _tutorialManager.GetMessage(_hintType);
         Vector2 textSize = _showJumpKeys ? _tutorialManager.JumpTextSize : _tutorialManager.InfoTextSize;
         _messageText.rectTransform.sizeDelta = textSize;
+        Sprite hintKey = _hintType == Ep1TutorialHintType.Guard ? _tutorialManager.GuardKeySprite :
+            IsTalismanHint ? _tutorialManager.TalismanKeySprite : null;
+        if (hintKey != null)
+        {
+            if (_cKeyRect == null)
+                _cKeyRect = AddKey(hintKey, new Vector2(0f, -36f), 64f);
+            _messageText.rectTransform.anchoredPosition = new Vector2(0f, 36f + (textSize.y - 52f) * 0.5f);
+        }
         _tutorialManager.ApplyTextStyle(_messageText);
         textSize.y = Mathf.Max(textSize.y, _messageText.preferredHeight);
         _messageText.rectTransform.sizeDelta = textSize;

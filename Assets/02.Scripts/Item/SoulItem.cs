@@ -3,6 +3,13 @@ using UnityEngine;
 
 public class SoulItem : Item
 {
+    public static event System.Action<SoulItem> OnCollected;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetCollectionListeners()
+    {
+        OnCollected = null;
+    }
     private const float HeadFlameIntensity = 1f;
     private const float HeadCoreThreshold = 0.93f;
     private const float HeadCoreSoftness = 0.025f;
@@ -102,7 +109,7 @@ public class SoulItem : Item
 
     private void Update()
     {
-        if (_playerTransform == null)
+        if (_playerTransform == null || PauseController.IsPaused)
         {
             return;
         }
@@ -335,5 +342,6 @@ public class SoulItem : Item
         if (_isCollected) return;
         _isCollected = true;
         player.Soul.AddSoul(_soulAmount);
+        OnCollected?.Invoke(this);
     }
 }
