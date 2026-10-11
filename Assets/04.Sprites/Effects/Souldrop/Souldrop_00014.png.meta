@@ -1,0 +1,845 @@
+fileFormatVersion: 2
+guid: 9609e222131353b41b399677109501d7
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2641148512612181139
+    second: Souldrop_00014_0
+  - first:
+      213: -385728903108841882
+    second: Souldrop_00014_1
+  - first:
+      213: -7667494811673765452
+    second: Souldrop_00014_2
+  - first:
+      213: 1053555075206256809
+    second: Souldrop_00014_3
+  - first:
+      213: -4315858740311704132
+    second: Souldrop_00014_4
+  - first:
+      213: -5347755115317241021
+    second: Souldrop_00014_5
+  - first:
+      213: -6900696633215091442
+    second: Souldrop_00014_6
+  - first:
+      213: 1104733689665279857
+    second: Souldrop_00014_7
+  - first:
+      213: 4493326134471066405
+    second: Souldrop_00014_8
+  - first:
+      213: 6768660287837841715
+    second: Souldrop_00014_9
+  - first:
+      213: -6320080243336063176
+    second: Souldrop_00014_10
+  - first:
+      213: -3025883411389433842
+    second: Souldrop_00014_11
+  - first:
+      213: 7650101452990401606
+    second: Souldrop_00014_12
+  - first:
+      213: 1191853918173878901
+    second: Souldrop_00014_13
+  - first:
+      213: 7601745889378994440
+    second: Souldrop_00014_14
+  - first:
+      213: 4519484801093652399
+    second: Souldrop_00014_15
+  - first:
+      213: -8020862482073725664
+    second: Souldrop_00014_16
+  - first:
+      213: 505417395484769934
+    second: Souldrop_00014_17
+  - first:
+      213: 7794492718989919824
+    second: Souldrop_00014_18
+  - first:
+      213: 3174516210303271895
+    second: Souldrop_00014_19
+  - first:
+      213: -4202334464382858248
+    second: Souldrop_00014_20
+  - first:
+      213: -264652516832072212
+    second: Souldrop_00014_21
+  - first:
+      213: 3592481306054979351
+    second: Souldrop_00014_22
+  - first:
+      213: 8985658214445629081
+    second: Souldrop_00014_23
+  - first:
+      213: 6526891820214629002
+    second: Souldrop_00014_24
+  - first:
+      213: -8984558798546164631
+    second: Souldrop_00014_25
+  - first:
+      213: 6829104392116792054
+    second: Souldrop_00014_26
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Souldrop_00014_0
+      rect:
+        serializedVersion: 2
+        x: 633
+        y: 554
+        width: 12
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d6b13b2db61c85bd0800000000000000
+      internalID: -2641148512612181139
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_1
+      rect:
+        serializedVersion: 2
+        x: 439
+        y: 533
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 66ea8963b9d95aaf0800000000000000
+      internalID: -385728903108841882
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_2
+      rect:
+        serializedVersion: 2
+        x: 542
+        y: 210
+        width: 185
+        height: 333
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b9d809c716979590800000000000000
+      internalID: -7667494811673765452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_3
+      rect:
+        serializedVersion: 2
+        x: 882
+        y: 516
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a89af842cafe9e00800000000000000
+      internalID: 1053555075206256809
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_4
+      rect:
+        serializedVersion: 2
+        x: 505
+        y: 506
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cbdb4f2975dfa14c0800000000000000
+      internalID: -4315858740311704132
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_5
+      rect:
+        serializedVersion: 2
+        x: 419
+        y: 481
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34bdcb56e05f8c5b0800000000000000
+      internalID: -5347755115317241021
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_6
+      rect:
+        serializedVersion: 2
+        x: 531
+        y: 433
+        width: 50
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0dfa7a39fccb30a0800000000000000
+      internalID: -6900696633215091442
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_7
+      rect:
+        serializedVersion: 2
+        x: 788
+        y: 433
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 177d7e7007dc45f00800000000000000
+      internalID: 1104733689665279857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_8
+      rect:
+        serializedVersion: 2
+        x: 437
+        y: 406
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 523802900508b5e30800000000000000
+      internalID: 4493326134471066405
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_9
+      rect:
+        serializedVersion: 2
+        x: 491
+        y: 406
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3392edd7bac1fed50800000000000000
+      internalID: 6768660287837841715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_10
+      rect:
+        serializedVersion: 2
+        x: 721
+        y: 403
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8375dfff0809a48a0800000000000000
+      internalID: -6320080243336063176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_11
+      rect:
+        serializedVersion: 2
+        x: 495
+        y: 371
+        width: 19
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e08b264b117e106d0800000000000000
+      internalID: -3025883411389433842
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_12
+      rect:
+        serializedVersion: 2
+        x: 763
+        y: 385
+        width: 13
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64c41315dbe9a2a60800000000000000
+      internalID: 7650101452990401606
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_13
+      rect:
+        serializedVersion: 2
+        x: 822
+        y: 376
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57a59e8e2d05a8010800000000000000
+      internalID: 1191853918173878901
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_14
+      rect:
+        serializedVersion: 2
+        x: 369
+        y: 352
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 80988315c93de7960800000000000000
+      internalID: 7601745889378994440
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_15
+      rect:
+        serializedVersion: 2
+        x: 425
+        y: 360
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fafc6f83b7f68be30800000000000000
+      internalID: 4519484801093652399
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_16
+      rect:
+        serializedVersion: 2
+        x: 456
+        y: 292
+        width: 37
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 025dcb3a11c20b090800000000000000
+      internalID: -8020862482073725664
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_17
+      rect:
+        serializedVersion: 2
+        x: 510
+        y: 331
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e8e3c21817a930700800000000000000
+      internalID: 505417395484769934
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_18
+      rect:
+        serializedVersion: 2
+        x: 805
+        y: 324
+        width: 10
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05643c7b4d99b2c60800000000000000
+      internalID: 7794492718989919824
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_19
+      rect:
+        serializedVersion: 2
+        x: 359
+        y: 300
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d388d88ca52e0c20800000000000000
+      internalID: 3174516210303271895
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_20
+      rect:
+        serializedVersion: 2
+        x: 883
+        y: 306
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8fb041fc11f4ea5c0800000000000000
+      internalID: -4202334464382858248
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_21
+      rect:
+        serializedVersion: 2
+        x: 646
+        y: 262
+        width: 14
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cedaf4920f3c35cf0800000000000000
+      internalID: -264652516832072212
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_22
+      rect:
+        serializedVersion: 2
+        x: 475
+        y: 190
+        width: 55
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 71f63adc6be0bd130800000000000000
+      internalID: 3592481306054979351
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_23
+      rect:
+        serializedVersion: 2
+        x: 697
+        y: 96
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99e3a19b98873bc70800000000000000
+      internalID: 8985658214445629081
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_24
+      rect:
+        serializedVersion: 2
+        x: 708
+        y: 96
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a82bb4f878d249a50800000000000000
+      internalID: 6526891820214629002
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_25
+      rect:
+        serializedVersion: 2
+        x: 657
+        y: 70
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 964ab0dff5f605380800000000000000
+      internalID: -8984558798546164631
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Souldrop_00014_26
+      rect:
+        serializedVersion: 2
+        x: 729
+        y: 78
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6fa6e22334ad5ce50800000000000000
+      internalID: 6829104392116792054
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Souldrop_00014_0: -2641148512612181139
+      Souldrop_00014_1: -385728903108841882
+      Souldrop_00014_10: -6320080243336063176
+      Souldrop_00014_11: -3025883411389433842
+      Souldrop_00014_12: 7650101452990401606
+      Souldrop_00014_13: 1191853918173878901
+      Souldrop_00014_14: 7601745889378994440
+      Souldrop_00014_15: 4519484801093652399
+      Souldrop_00014_16: -8020862482073725664
+      Souldrop_00014_17: 505417395484769934
+      Souldrop_00014_18: 7794492718989919824
+      Souldrop_00014_19: 3174516210303271895
+      Souldrop_00014_2: -7667494811673765452
+      Souldrop_00014_20: -4202334464382858248
+      Souldrop_00014_21: -264652516832072212
+      Souldrop_00014_22: 3592481306054979351
+      Souldrop_00014_23: 8985658214445629081
+      Souldrop_00014_24: 6526891820214629002
+      Souldrop_00014_25: -8984558798546164631
+      Souldrop_00014_26: 6829104392116792054
+      Souldrop_00014_3: 1053555075206256809
+      Souldrop_00014_4: -4315858740311704132
+      Souldrop_00014_5: -5347755115317241021
+      Souldrop_00014_6: -6900696633215091442
+      Souldrop_00014_7: 1104733689665279857
+      Souldrop_00014_8: 4493326134471066405
+      Souldrop_00014_9: 6768660287837841715
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
