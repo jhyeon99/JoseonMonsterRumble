@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -13,21 +14,29 @@ public class PlayerPotionAura : MonoBehaviour
 
     private const string MissingRendererWarning = "[PlayerPotionAura] SpriteRenderer 참조를 찾을 수 없습니다.";
     private const string AuraObjectName = "PotionAura";
-    private const float DefaultDuration = 1.4f;
+    private const float DefaultDuration = 0.45f;
     private const string GlowShaderName = "Team06/ProjectileGlow";
+    private const float PotionSampleRate = 16f;
+    private const int BurstParticleCount = 16;
+    private static readonly int PotionStateHash = Animator.StringToHash("Player_Heal");
+    private enum AuraPhase { Idle, WaitingForSip, Active }
+
+    public event Action OnRecoveryPulse;
+
+    [Header("곰방대 회복 타이밍")]
+    [SerializeField, Min(0)] private int _sipFrame = 3;
 
     [Header("시각 연출 설정")]
     [SerializeField] private Color _auraColor = new Color(0.2f, 0.95f, 0.45f, 1.0f);
     [SerializeField, Min(1.0f)] private float _minBrightness = 1.15f;
     [SerializeField, Min(1.0f)] private float _maxBrightness = 1.45f;
-    [SerializeField, Min(0.1f)] private float _pulseSpeed = 6.0f;
     [SerializeField] private Material _glowMaterial;
     [SerializeField] private Material _particleMaterial;
     [SerializeField] private SpriteRenderer _sourceRenderer;
     [SerializeField] private ParticleSystem _auraParticles;
 
     [Header("상태 모니터링")]
-    [SerializeField, ReadOnly] private bool _isAuraActive;
+    [SerializeField, ReadOnly] private AuraPhase _phase;
     [SerializeField, ReadOnly] private float _remainingDuration;
 
     private MaterialPropertyBlock _propBlock;
@@ -35,12 +44,18 @@ public class PlayerPotionAura : MonoBehaviour
     private Material _ownedGlowMaterial;
     private Material _ownedParticleMaterial;
     private PlayerWeaponBuff _weaponBuff;
+    private Player _player;
+    private Animator _animator;
+    private float _sipElapsed;
+    private float _pulseDuration;
 
-    public bool IsAuraActive => _isAuraActive;
+    public bool IsAuraActive => _phase == AuraPhase.Active;
+    public bool IsWaitingForSip => _phase == AuraPhase.WaitingForSip;
 
     private void Awake()
     {
         _weaponBuff = GetComponent<PlayerWeaponBuff>();
+        _player = GetComponent<Player>();
         if (_sourceRenderer == null)
         {
             _sourceRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -59,7 +74,9 @@ public class PlayerPotionAura : MonoBehaviour
 
         if (_glowMaterial == null)
         {
-            var glowShader = Shader.Find(GlowShaderName);
+#pragma warning disable IDE0007 // 프로젝트 규칙: 메서드 반환값은 명시적 형식으로 선언한다.
+            Shader glowShader = Shader.Find(GlowShaderName);
+#pragma warning restore IDE0007
             if (glowShader != null)
             {
                 _ownedGlowMaterial = new Material(glowShader);
@@ -90,7 +107,7 @@ public class PlayerPotionAura : MonoBehaviour
 
     internal bool HasActiveVisuals(SpriteRenderer renderer)
     {
-        return isActiveAndEnabled && _isAuraActive && _sourceRenderer == renderer && _glowMaterial != null;
+        return isActiveAndEnabled && IsAuraActive && _sourceRenderer == renderer && _glowMaterial != null;
     }
 
     public void PlayAura(float duration = DefaultDuration)
@@ -102,9 +119,18 @@ public class PlayerPotionAura : MonoBehaviour
             _weaponBuff = GetComponent<PlayerWeaponBuff>();
         }
 
-        _remainingDuration = Mathf.Max(0.1f, duration);
-        _isAuraActive = true;
+        StopAura();
+        _pulseDuration = Mathf.Max(0.1f, duration);
+        _sipElapsed = 0f;
+        _animator = _player != null ? _player.Animator : null;
+        _phase = AuraPhase.WaitingForSip;
+    }
 
+    private void StartRecoveryPulse()
+    {
+        _phase = AuraPhase.Active;
+        _sipElapsed = 0f;
+        _remainingDuration = _pulseDuration;
         ApplyRendererVisuals();
 
         if (_auraParticles != null)
@@ -113,18 +139,24 @@ public class PlayerPotionAura : MonoBehaviour
             {
                 _auraParticles.Play();
             }
-            _auraParticles.Emit(16);
+            _auraParticles.Emit(BurstParticleCount);
+            _auraParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         }
+        OnRecoveryPulse?.Invoke();
     }
 
     public void StopAura()
     {
-        if (!_isAuraActive) return;
-
-        _isAuraActive = false;
+        bool wasActive = IsAuraActive;
+        _phase = AuraPhase.Idle;
+        _sipElapsed = 0f;
+        _pulseDuration = 0f;
         _remainingDuration = 0f;
 
-        ResetRendererVisuals();
+        if (wasActive)
+        {
+            ResetRendererVisuals();
+        }
 
         if (_auraParticles != null)
         {
@@ -134,7 +166,34 @@ public class PlayerPotionAura : MonoBehaviour
 
     private void Update()
     {
-        if (!_isAuraActive) return;
+        if (_phase == AuraPhase.WaitingForSip)
+        {
+            if (Time.deltaTime <= 0f)
+            {
+                return;
+            }
+            if (_player != null && _player.Health.IsDead)
+            {
+                StopAura();
+                return;
+            }
+            _sipElapsed += Time.deltaTime;
+            float sipTime = _sipFrame / PotionSampleRate;
+            bool isInterrupted = _player != null && _player.StateMachine.CurrentState != _player.PotionState;
+            AnimatorStateInfo state = _animator != null ? _animator.GetCurrentAnimatorStateInfo(0) : default;
+            bool isSipReached = state.shortNameHash == PotionStateHash
+                ? state.normalizedTime * state.length >= sipTime : _sipElapsed >= sipTime;
+            if (isSipReached || isInterrupted)
+            {
+                // 실제 회복은 이미 적용됐으므로 동작이 중단돼도 결과 표시는 누락하지 않는다.
+                StartRecoveryPulse();
+            }
+            return;
+        }
+        if (!IsAuraActive)
+        {
+            return;
+        }
 
         _remainingDuration -= Time.deltaTime;
 
@@ -156,9 +215,14 @@ public class PlayerPotionAura : MonoBehaviour
             return;
         }
 
-        _sourceRenderer.sharedMaterial = _glowMaterial;
+        if (_sourceRenderer.sharedMaterial != _glowMaterial)
+        {
+            _sourceRenderer.sharedMaterial = _glowMaterial;
+        }
 
-        float pulse = Mathf.Sin(Time.time * _pulseSpeed) * 0.5f + 0.5f;
+        // 한 번 강하게 나타난 뒤 감쇠한다. 반복 점멸하지 않는다.
+        float pulse = Mathf.Clamp01(_remainingDuration / Mathf.Max(0.1f, _pulseDuration));
+        pulse *= pulse;
         float brightness = Mathf.Lerp(_minBrightness, _maxBrightness, pulse);
         float tintStrength = Mathf.Lerp(0.25f, 0.45f, pulse);
 
@@ -259,8 +323,8 @@ public class PlayerPotionAura : MonoBehaviour
         main.maxParticles = 50;
 
         ParticleSystem.EmissionModule emission = _auraParticles.emission;
-        emission.rateOverTime = 18f;
-        emission.rateOverDistance = 8f;
+        emission.rateOverTime = 0f;
+        emission.rateOverDistance = 0f;
 
         ParticleSystem.ShapeModule shape = _auraParticles.shape;
         shape.shapeType = ParticleSystemShapeType.Circle;

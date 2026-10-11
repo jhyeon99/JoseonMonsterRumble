@@ -9,6 +9,7 @@ public class UI_EnemyDamageText : MonoBehaviour
     private const float MinimumDuration = 0.01f;
     private const string DamageTextName = "Enemy Damage";
     private const string DamageFormat = "0";
+    private const string HealFormat = "+0";
     private const string MissingCanvasWarning = "UI_EnemyDamageText requires a parent Canvas.";
     private const string MissingFontWarning = "UI_EnemyDamageText: damage font or material is missing.";
     private const string MissingPlayerHealthWarning = "UI_EnemyDamageText: PlayerHealth is missing for player damage display.";
@@ -27,6 +28,13 @@ public class UI_EnemyDamageText : MonoBehaviour
     [SerializeField, Min(0.01f)] private float _duration = 0.8f;
     [SerializeField, Min(MinimumDuration)] private float _popDuration = 0.12f;
     [SerializeField, Min(1f)] private float _popScale = 1.18f;
+    [Header("숫자 정지와 회복 표시")]
+    [SerializeField, Min(0f)] private float _impactHoldDuration = 0.075f;
+    [SerializeField, Min(1f)] private float _impactPeakScale = 1.3f;
+    [SerializeField, Min(0f)] private float _healHoldDuration = 0.15f;
+    [SerializeField, Min(1f)] private float _healPeakScale = 1.2f;
+    [SerializeField, Min(0.01f)] private float _healDuration = 1f;
+    [SerializeField] private Vector2 _healOffset = new Vector2(0f, 75f);
     [SerializeField, Range(0f, 0.99f)] private float _fadeStart = 0.55f;
     [SerializeField, Min(0f)] private float _laneSpacing = 12f;
     [SerializeField, Min(0f)] private float _horizontalTravel = 26f;
@@ -38,6 +46,7 @@ public class UI_EnemyDamageText : MonoBehaviour
     [SerializeField, Min(1f)] private float _finisherSizeMultiplier = 2f;
     [SerializeField] private Color _textColor = new Color(1f, 0.96f, 0.86f);
     [SerializeField] private Color _playerDamageColor = new Color(1f, 0.22f, 0.18f, 1f);
+    [SerializeField] private Color _playerHealColor = new Color(0.18f, 0.88f, 0.38f, 1f);
     [SerializeField, Min(1f)] private float _strongPlayerHitMotionMultiplier = 1.45f;
     [SerializeField] private Color _finisherColor = new Color(1f, 0.75f, 0.18f);
     [SerializeField] private Color _buffedColor = new Color(0.35f, 0.85f, 1.0f, 1.0f);
@@ -57,6 +66,10 @@ public class UI_EnemyDamageText : MonoBehaviour
 
     private Canvas _canvas;
     private PlayerHealth _playerHealth;
+    private float _lastPlayerHealth = -1f;
+    private PlayerPotionAura _potionAura;
+    private Player _player;
+    private float _pendingHealAmount;
     private RectTransform _container;
     private Transform _finisherTarget;
     private EnemyHealth _finisherEnemyHealth;
@@ -83,6 +96,11 @@ public class UI_EnemyDamageText : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        SubscribePlayerHealth();
+    }
+
     private void OnEnable()
     {
         GameEvents.OnEnemyHit += HandleEnemyHit;
@@ -90,6 +108,7 @@ public class UI_EnemyDamageText : MonoBehaviour
         GameEvents.OnFinisherAnticipation += HandleFinisherAnticipation;
         GameEvents.OnFinisherAnticipationCancelled += ResetFinisher;
         GameEvents.OnFinisherImpact += HandleFinisherImpact;
+        SubscribePlayerHealth();
     }
 
     private void OnDisable()
@@ -99,9 +118,9 @@ public class UI_EnemyDamageText : MonoBehaviour
         GameEvents.OnFinisherAnticipation -= HandleFinisherAnticipation;
         GameEvents.OnFinisherAnticipationCancelled -= ResetFinisher;
         GameEvents.OnFinisherImpact -= HandleFinisherImpact;
+        UnsubscribePlayerHealth();
         ResetFinisher();
         _nextLaneSign = 1f;
-        _playerHealth = null;
         StopAllCoroutines();
         foreach (TextMeshProUGUI text in _activeTexts)
         {
@@ -112,6 +131,83 @@ public class UI_EnemyDamageText : MonoBehaviour
         }
 
         _activeTexts.Clear();
+    }
+
+    private void SubscribePlayerHealth()
+    {
+        if (_playerHealth == null)
+        {
+            _playerHealth = FindFirstObjectByType<PlayerHealth>();
+        }
+
+        if (_playerHealth != null)
+        {
+            _playerHealth.OnHealthChanged -= HandlePlayerHealthChanged;
+            _playerHealth.OnHealthChanged += HandlePlayerHealthChanged;
+            _lastPlayerHealth = _playerHealth.CurrentHealth;
+            _potionAura = _playerHealth.GetComponent<PlayerPotionAura>();
+            _player = _playerHealth.GetComponent<Player>();
+            if (_potionAura != null)
+            {
+                _potionAura.OnRecoveryPulse -= HandleRecoveryPulse;
+                _potionAura.OnRecoveryPulse += HandleRecoveryPulse;
+            }
+        }
+    }
+
+    private void UnsubscribePlayerHealth()
+    {
+        if (_potionAura != null)
+        {
+            _potionAura.OnRecoveryPulse -= HandleRecoveryPulse;
+            _potionAura = null;
+        }
+        _pendingHealAmount = 0f;
+        _player = null;
+        if (_playerHealth != null)
+        {
+            _playerHealth.OnHealthChanged -= HandlePlayerHealthChanged;
+            _playerHealth = null;
+        }
+
+        _lastPlayerHealth = -1f;
+    }
+
+    private void HandlePlayerHealthChanged(float currentHealth, float maxHealth)
+    {
+        if (_lastPlayerHealth < 0f)
+        {
+            _lastPlayerHealth = currentHealth;
+            return;
+        }
+
+        float healAmount = currentHealth - _lastPlayerHealth;
+        _lastPlayerHealth = currentHealth;
+
+        if (healAmount > 0.01f && _playerHealth != null && !_playerHealth.IsDead)
+        {
+            if (_potionAura != null && _player != null && _player.StateMachine.CurrentState == _player.PotionState &&
+                (_potionAura.IsWaitingForSip || _playerHealth.PotionCooldownTimer <= 0f))
+            {
+                _pendingHealAmount += healAmount;
+                return;
+            }
+            ShowDamage(healAmount, _playerHealth.transform.position, false, Vector2.up, 1f, isPlayerHeal: true);
+        }
+        if (currentHealth <= 0f)
+        {
+            _pendingHealAmount = 0f;
+        }
+    }
+
+    private void HandleRecoveryPulse()
+    {
+        float healAmount = _pendingHealAmount;
+        _pendingHealAmount = 0f;
+        if (healAmount > 0f && _playerHealth != null && !_playerHealth.IsDead)
+        {
+            ShowDamage(healAmount, _playerHealth.transform.position, false, Vector2.up, 1f, isPlayerHeal: true);
+        }
     }
 
     private void HandleEnemyHit(HitData hitData)
@@ -125,7 +221,7 @@ public class UI_EnemyDamageText : MonoBehaviour
     {
         if (_playerHealth == null)
         {
-            _playerHealth = FindFirstObjectByType<PlayerHealth>();
+            SubscribePlayerHealth();
         }
         if (_playerHealth == null)
         {
@@ -201,7 +297,7 @@ public class UI_EnemyDamageText : MonoBehaviour
 
     private void ShowDamage(float damage, Vector3 position, bool isFinisher,
         Vector2 attackDirection, float motionMultiplier, bool isTalisman = false, bool isBuffed = false,
-        bool isPlayerDamage = false)
+        bool isPlayerDamage = false, bool isPlayerHeal = false)
     {
         if (_canvas == null || damage <= 0f)
         {
@@ -241,7 +337,11 @@ public class UI_EnemyDamageText : MonoBehaviour
         text.enableAutoSizing = false;
 
         Color targetColor;
-        if (isPlayerDamage)
+        if (isPlayerHeal)
+        {
+            targetColor = _playerHealColor;
+        }
+        else if (isPlayerDamage)
         {
             targetColor = _playerDamageColor;
         }
@@ -271,33 +371,37 @@ public class UI_EnemyDamageText : MonoBehaviour
                 Mathf.InverseLerp(baseDamage, maxDamage, damage));
         float finisherSize = isFinisher ? Mathf.Max(1f, _finisherSizeMultiplier) : 1f;
         Vector3 baseScale = Vector3.one * (sizeMultiplier * finisherSize);
-        text.text = damage.ToString(DamageFormat);
+        text.text = damage.ToString(isPlayerHeal ? HealFormat : DamageFormat);
         text.raycastTarget = false;
         text.gameObject.SetActive(true);
         _activeTexts.Add(text);
-        float lateralOffset = isFinisher ? 0f : _nextLaneSign * _laneSpacing;
-        if (!isFinisher)
+        float lateralOffset = isFinisher || isPlayerHeal ? 0f : _nextLaneSign * _laneSpacing;
+        if (!isFinisher && !isPlayerHeal)
         {
             _nextLaneSign = -_nextLaneSign;
         }
         float horizontalDirection = Mathf.Approximately(attackDirection.x, 0f) ? 0f : Mathf.Sign(attackDirection.x);
         StartCoroutine(AnimateDamage(text, position, worldCamera, baseScale, lateralOffset,
-            horizontalDirection, Mathf.Max(1f, motionMultiplier), isFinisher));
+            horizontalDirection, Mathf.Max(1f, motionMultiplier), isFinisher, isPlayerHeal));
     }
 
     private IEnumerator AnimateDamage(TextMeshProUGUI text, Vector3 position, Camera worldCamera,
         Vector3 baseScale, float lateralOffset, float horizontalDirection, float motionMultiplier,
-        bool isFinisher)
+        bool isFinisher, bool isPlayerHeal)
     {
         float elapsed = 0f;
         float popElapsed = 0f;
-        float duration = Mathf.Max(MinimumDuration, _duration);
+        float duration = Mathf.Max(MinimumDuration, isPlayerHeal ? _healDuration : _duration);
         float popDuration = Mathf.Clamp(_popDuration, MinimumDuration, duration);
         float peakTime = popDuration * PopPeakRatio;
-        float peakScale = 1f + (Mathf.Max(1f, _popScale) - 1f) * motionMultiplier;
+        float requestedPeak = isPlayerHeal ? _healPeakScale : Mathf.Max(_popScale, _impactPeakScale);
+        float peakScale = 1f + (Mathf.Max(1f, requestedPeak) - 1f) * motionMultiplier;
+        float holdDuration = Mathf.Max(0f, isPlayerHeal ? _healHoldDuration : _impactHoldDuration);
+        float departureTime = peakTime + holdDuration;
+        duration += holdDuration;
         float fadeStart = Mathf.Clamp(_fadeStart, 0f, MaximumFadeStart);
         Color color = text.color;
-        Vector2 offset = isFinisher ? _finisherOffset : _offset;
+        Vector2 offset = isPlayerHeal ? _healOffset : isFinisher ? _finisherOffset : _offset;
         Canvas root = _canvas.rootCanvas;
         Camera uiCamera = root.renderMode == RenderMode.ScreenSpaceOverlay ? null : root.worldCamera;
         while (elapsed < duration && text != null && worldCamera != null)
@@ -311,7 +415,9 @@ public class UI_EnemyDamageText : MonoBehaviour
             if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
                     _container, screenPosition, uiCamera, out Vector2 localPosition))
             {
-                float riseProgress = 1f - (1f - progress) * (1f - progress) * (1f - progress);
+                float travelProgress = Mathf.Clamp01((elapsed - departureTime) / Mathf.Max(MinimumDuration, duration - departureTime));
+                float riseProgress = isPlayerHeal ? Mathf.SmoothStep(0f, 1f, travelProgress)
+                    : 1f - (1f - travelProgress) * (1f - travelProgress) * (1f - travelProgress);
                 text.rectTransform.localPosition = localPosition + offset +
                     new Vector2(lateralOffset + horizontalDirection * _horizontalTravel * motionMultiplier * riseProgress,
                         _riseDistance * riseProgress);
@@ -321,12 +427,17 @@ public class UI_EnemyDamageText : MonoBehaviour
             if (popElapsed < peakTime)
             {
                 float expansion = Mathf.Clamp01(popElapsed / peakTime);
-                popScale = Vector3.Lerp(CompressedScale, Vector3.one * peakScale,
+                Vector3 initialScale = isPlayerHeal ? Vector3.one : CompressedScale;
+                popScale = Vector3.Lerp(initialScale, Vector3.one * peakScale,
                     1f - (1f - expansion) * (1f - expansion));
+            }
+            else if (popElapsed < departureTime)
+            {
+                popScale = Vector3.one * peakScale;
             }
             else
             {
-                float settling = Mathf.Clamp01((popElapsed - peakTime) / (popDuration - peakTime));
+                float settling = Mathf.Clamp01((popElapsed - departureTime) / (popDuration - peakTime));
                 popScale = Vector3.one * Mathf.Lerp(peakScale, 1f,
                     1f - (1f - settling) * (1f - settling));
             }

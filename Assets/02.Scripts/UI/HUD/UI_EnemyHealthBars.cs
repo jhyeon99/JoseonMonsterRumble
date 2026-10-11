@@ -267,9 +267,9 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
                 bar.HealTintRemaining = _healTintDuration;
             }
             bar.TargetRatio = targetRatio;
-            bar.Elapsed = 0f;
             if (isDamage)
             {
+                bar.Elapsed = 0f;
                 bar.MainRatio = targetRatio;
                 bar.GhostRatio = Mathf.Max(bar.GhostRatio, targetRatio);
                 bar.StartRatio = bar.GhostRatio;
@@ -278,8 +278,13 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
             else
             {
                 bar.GhostRatio = targetRatio;
-                bar.StartRatio = bar.MainRatio;
-                bar.Phase = TrailPhase.HealCatchup;
+                // 지속 회복은 목표만 갱신하고 진행 중인 보간 시간을 유지한다.
+                if (bar.Phase != TrailPhase.HealCatchup)
+                {
+                    bar.Elapsed = 0f;
+                    bar.StartRatio = bar.MainRatio;
+                    bar.Phase = TrailPhase.HealCatchup;
+                }
             }
         }
 
