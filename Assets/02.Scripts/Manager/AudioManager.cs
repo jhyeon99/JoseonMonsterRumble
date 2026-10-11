@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AudioManager : MonoBehaviour
+public partial class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
 {
     private const string PrefKeyBgmVolume = "Audio_BgmVolume";
     private const string PrefKeySfxVolume = "Audio_SfxVolume";
     private const string PrefKeyBgmMute = "Audio_BgmMuted";
     private const string PrefKeySfxMute = "Audio_SfxMuted";
-    private const int SfxChannelCount = 10;
+    [SerializeField, Min(1)] private int _sfxChannelCount = 10;
     private const float DefaultVolume = 1f;
 
     private static AudioManager _instance;
@@ -25,8 +25,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField, ReadOnly] private bool _isBgmMuted;
     [SerializeField, ReadOnly] private bool _isSfxMuted;
 
-    private readonly List<AudioSource> _sfxPool = new List<AudioSource>(SfxChannelCount);
-    private int _sfxPoolIndex;
+    private readonly List<AudioSource> _sfxPool = new List<AudioSource>(10);
     private Coroutine _bgmFadeCoroutine;
 
     public static AudioManager Instance
@@ -69,6 +68,7 @@ public class AudioManager : MonoBehaviour
 
         InitializeAudioSources();
         LoadSettings();
+        InitializeRuntime();
     }
 
     public float GetBgmVolume()
@@ -125,37 +125,12 @@ public class AudioManager : MonoBehaviour
 
     public void PlayBgm(AudioClip clip, float fadeDuration = 0.5f)
     {
-        if (clip == null)
-        {
-            return;
-        }
-
-        if (_bgmSource.clip == clip && _bgmSource.isPlaying)
-        {
-            return;
-        }
-
-        if (_bgmFadeCoroutine != null)
-        {
-            StopCoroutine(_bgmFadeCoroutine);
-        }
-
-        _bgmFadeCoroutine = StartCoroutine(FadeBgmRoutine(clip, fadeDuration));
+        if (clip != null) RequestLegacyBgm(clip, fadeDuration);
     }
 
     public void StopBgm(float fadeDuration = 0.5f)
     {
-        if (!_bgmSource.isPlaying)
-        {
-            return;
-        }
-
-        if (_bgmFadeCoroutine != null)
-        {
-            StopCoroutine(_bgmFadeCoroutine);
-        }
-
-        _bgmFadeCoroutine = StartCoroutine(FadeBgmRoutine(null, fadeDuration));
+        BeginMusicStop(Mathf.Max(0f, fadeDuration));
     }
 
     public void PlaySfx(AudioClip clip, float volumeScale = 1f, float gain = 1f)
@@ -165,20 +140,8 @@ public class AudioManager : MonoBehaviour
 
     public AudioSource PlaySfxTracked(AudioClip clip, float volumeScale = 1f, float gain = 1f)
     {
-        if (clip == null || _isSfxMuted)
-        {
-            return null;
-        }
-
-        AudioSource source = GetNextSfxSource();
-        if (source == null)
-        {
-            return null;
-        }
-
-        float finalVolume = Mathf.Clamp01(volumeScale) * _sfxVolume * Mathf.Clamp(gain, 0f, 3f);
-        source.PlayOneShot(clip, finalVolume);
-        return source;
+        if (clip == null || _isSfxMuted) return null;
+        return PlayLegacySfx(clip, Mathf.Clamp01(volumeScale) * Mathf.Clamp(gain, 0f, 3f));
     }
 
     public void PlayButtonHover()
@@ -230,7 +193,7 @@ public class AudioManager : MonoBehaviour
             var sfxRoot = new GameObject("SfxPool");
             sfxRoot.transform.SetParent(transform);
 
-            for (int i = 0; i < SfxChannelCount; i++)
+            for (int i = 0; i < Mathf.Max(1, _sfxChannelCount); i++)
             {
                 var sfxObject = new GameObject($"SfxChannel_{i:D2}");
                 sfxObject.transform.SetParent(sfxRoot.transform);
@@ -262,79 +225,16 @@ public class AudioManager : MonoBehaviour
     private void ApplyBgmVolume()
     {
         if (_bgmSource != null)
-        {
-            _bgmSource.volume = _isBgmMuted ? 0f : _bgmVolume;
-        }
+            _bgmSource.volume = (_isBgmMuted ? 0f : _bgmVolume) * _musicVolume * _musicFade;
     }
 
     private void ApplySfxVolume()
     {
-        for (int i = 0; i < _sfxPool.Count; i++)
+        foreach (AudioSource source in _sfxPool)
         {
-            if (_sfxPool[i] != null)
-            {
-                _sfxPool[i].volume = _isSfxMuted ? 0f : 1f;
-            }
+            float gain = 1f;
+            if (_channels.TryGetValue(source, out Request request)) gain = request.Volume;
+            source.volume = (_isSfxMuted ? 0f : _sfxVolume) * gain;
         }
-    }
-
-    private AudioSource GetNextSfxSource()
-    {
-        if (_sfxPool.Count == 0)
-        {
-            return null;
-        }
-
-        for (int i = 0; i < _sfxPool.Count; i++)
-        {
-            int checkIndex = (_sfxPoolIndex + i) % _sfxPool.Count;
-            if (!_sfxPool[checkIndex].isPlaying)
-            {
-                _sfxPoolIndex = (checkIndex + 1) % _sfxPool.Count;
-                return _sfxPool[checkIndex];
-            }
-        }
-
-        AudioSource fallbackSource = _sfxPool[_sfxPoolIndex];
-        _sfxPoolIndex = (_sfxPoolIndex + 1) % _sfxPool.Count;
-        return fallbackSource;
-    }
-
-    private IEnumerator FadeBgmRoutine(AudioClip newClip, float duration)
-    {
-        float startVolume = _bgmSource.volume;
-        float targetVolume = _isBgmMuted ? 0f : _bgmVolume;
-
-        if (duration > 0f && _bgmSource.isPlaying)
-        {
-            float elapsed = 0f;
-            while (elapsed < duration)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                _bgmSource.volume = Mathf.Lerp(startVolume, 0f, elapsed / duration);
-                yield return null;
-            }
-        }
-
-        _bgmSource.Stop();
-        _bgmSource.clip = newClip;
-
-        if (newClip != null)
-        {
-            _bgmSource.Play();
-            if (duration > 0f)
-            {
-                float elapsed = 0f;
-                while (elapsed < duration)
-                {
-                    elapsed += Time.unscaledDeltaTime;
-                    _bgmSource.volume = Mathf.Lerp(0f, targetVolume, elapsed / duration);
-                    yield return null;
-                }
-            }
-            _bgmSource.volume = targetVolume;
-        }
-
-        _bgmFadeCoroutine = null;
     }
 }
