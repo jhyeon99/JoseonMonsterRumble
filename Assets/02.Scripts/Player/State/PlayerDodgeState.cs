@@ -10,6 +10,7 @@ public class PlayerDodgeState : PlayerBaseState
     private bool _hasEnteredDodgeAnimation;
     private bool _isInvincibleEnded;
     private bool _isDashEnded;
+    private bool _hasTriggeredDodgeSuccess;
 
     public override PlatformInteractionMode PlatformMode => PlatformInteractionMode.ManualWithDelta;
 
@@ -26,10 +27,12 @@ public class PlayerDodgeState : PlayerBaseState
         _hasEnteredDodgeAnimation = false;
         _isInvincibleEnded = false;
         _isDashEnded = false;
+        _hasTriggeredDodgeSuccess = false;
 
         _originalConstraints = _rigidbody2D.constraints;
 
         _player.Health.SetInvincible(true);
+        _player.Health.OnDodgeSuccess += HandleDodgeSuccess;
         _player.TriggerDodge();
 
         // 방향키 입력이 있으면 먼저 그 방향으로 뒤를 돌아봄
@@ -133,6 +136,37 @@ public class PlayerDodgeState : PlayerBaseState
                 _rigidbody2D.constraints = _originalConstraints | RigidbodyConstraints2D.FreezePositionX;
             }
         }
+
+        if (!_hasTriggeredDodgeSuccess && _elapsedTime < _player.Movement.DodgeInvincibleDuration)
+        {
+            CheckActiveDodgeSuccess();
+        }
+    }
+
+    private void CheckActiveDodgeSuccess()
+    {
+        if (_hasTriggeredDodgeSuccess)
+        {
+            return;
+        }
+
+        Collider2D playerCollider = _player.GetComponent<Collider2D>();
+        if (playerCollider == null)
+        {
+            return;
+        }
+
+        int mask = LayerMask.GetMask("EnemyAttack", "Enemy");
+        var filter = new ContactFilter2D();
+        filter.SetLayerMask(mask);
+        filter.useTriggers = true;
+
+        var results = new Collider2D[4];
+        int count = playerCollider.Overlap(filter, results);
+        if (count > 0)
+        {
+            TriggerSuccessDodgeMotion();
+        }
     }
 
     private void EndDodge()
@@ -147,6 +181,8 @@ public class PlayerDodgeState : PlayerBaseState
     {
         base.Exit();
 
+        _player.Health.OnDodgeSuccess -= HandleDodgeSuccess;
+
         if (_afterimage != null)
         {
             _afterimage.Stop();
@@ -155,5 +191,27 @@ public class PlayerDodgeState : PlayerBaseState
         _rigidbody2D.constraints = _originalConstraints;
         _player.Health.SetInvincible(false);
         _player.Movement.StartDodgeCooldown();
+    }
+
+    private void HandleDodgeSuccess(HitData hitData)
+    {
+        TriggerSuccessDodgeMotion();
+    }
+
+    private void TriggerSuccessDodgeMotion()
+    {
+        if (_hasTriggeredDodgeSuccess)
+        {
+            return;
+        }
+
+        _hasTriggeredDodgeSuccess = true;
+        HitStop.Play(0.18f, 0.01f);
+        CameraShake.Shake(new CameraShakeSettings(0.15f, 0.35f));
+
+        if (_afterimage != null)
+        {
+            _afterimage.TriggerDodgeSuccessGlow();
+        }
     }
 }

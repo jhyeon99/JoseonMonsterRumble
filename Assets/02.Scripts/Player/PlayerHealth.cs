@@ -41,6 +41,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     public event Action OnDied;
     public event Action<HitData> OnHit;
     public event Action<int> OnPotionChanged;
+    public event Action<HitData> OnDodgeSuccess;
 
 
     private void Awake()
@@ -61,7 +62,17 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     public bool TakeDamage(HitData hitdata)
     {
-        if (IsDead || _isInvincible || _isCinematicInvincible) return false;
+        if (IsDead) return false;
+
+        if (_isInvincible || _isCinematicInvincible)
+        {
+            if (_isInvincible && _player != null && _player.StateMachine != null && _player.StateMachine.CurrentState is PlayerDodgeState)
+            {
+                OnDodgeSuccess?.Invoke(hitdata);
+            }
+
+            return false;
+        }
 
         // 가드 / 패링으로 막은 직후 잠깐은 후속 공격에 맞지 않음 (가드 게이지도 깎이지 않음)
         if (Time.time < _blockInvincibleUntil) return false;
