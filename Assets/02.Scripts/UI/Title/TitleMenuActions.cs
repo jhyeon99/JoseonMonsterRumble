@@ -15,6 +15,7 @@ public class TitleMenuActions : MonoBehaviour
             return;
         }
 
+        Ep1TutorialManager.ResetShownHints();
         SceneManager.LoadScene(_gameSceneName);
     }
 

@@ -61,6 +61,9 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     public bool TakeDamage(HitData hitdata)
     {
+        // 가드, 피격 이벤트보다 먼저 차단해야 넉백과 피격 연출도 발생하지 않는다.
+        if (MapTestMode.IsEnabled) return false;
+
         if (IsDead || _isInvincible || _isCinematicInvincible) return false;
 
         // 가드 / 패링으로 막은 직후 잠깐은 후속 공격에 맞지 않음 (가드 게이지도 깎이지 않음)

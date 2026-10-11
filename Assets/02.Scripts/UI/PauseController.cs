@@ -18,7 +18,9 @@ public class PauseController : MonoBehaviour
     [SerializeField] private string _titleSceneName = "Test_TitleScene";
     [SerializeField, ReadOnly] private bool _isPaused;
 
-    public static bool IsPaused { get; private set; }
+    private static bool _menuPaused;
+    private static Object _tutorialPauseOwner;
+    public static bool IsPaused => _menuPaused || _tutorialPauseOwner != null;
     private static int _pauseTransitionFrame = -1;
     public static bool IsGameplayInputBlocked => IsPaused || Time.frameCount == _pauseTransitionFrame ||
                                                  (StageManager.Instance != null && StageManager.Instance.IsRespawning);
@@ -35,7 +37,7 @@ public class PauseController : MonoBehaviour
         }
 
         _isPaused = false;
-        IsPaused = false;
+        _menuPaused = false;
         _pauseTransitionFrame = -1;
         if (_pauseMenuPanel != null)
         {
@@ -75,6 +77,7 @@ public class PauseController : MonoBehaviour
 
     private void Update()
     {
+        if (_tutorialPauseOwner != null) return;
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (_isPaused && _isSettingsAvailable && _settingsPanel.activeSelf)
@@ -188,21 +191,22 @@ public class PauseController : MonoBehaviour
             return;
         }
 
-        RestoreTimeScale();
         _isPaused = false;
-        IsPaused = false;
+        _menuPaused = false;
+        RestoreTimeScale();
         SceneManager.LoadScene(_titleSceneName);
     }
 
     private void SetPaused(bool isPaused)
     {
+        if (_tutorialPauseOwner != null) return;
         if (_isPaused == isPaused)
         {
             return;
         }
 
         _isPaused = isPaused;
-        IsPaused = isPaused;
+        _menuPaused = isPaused;
         _pauseTransitionFrame = Time.frameCount;
         GameCursorController.SetPauseVisible(isPaused);
 
@@ -304,7 +308,35 @@ public class PauseController : MonoBehaviour
     // 일시정지 직전 값(히트스톱 중이면 0.02 등)을 복원하면 슬로우모션이 남으므로 항상 정상 속도로 복귀
     private void RestoreTimeScale()
     {
-        Time.timeScale = 1f;
+        Time.timeScale = IsPaused ? 0f : 1f;
+    }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetPauseState()
+    {
+        _menuPaused = false;
+        _tutorialPauseOwner = null;
+        _pauseTransitionFrame = -1;
+    }
+
+    // Tutorial owns the pause without opening the Escape menu. Existing input and hit-stop
+    // checks use IsPaused too, so they cannot resume time or accept attacks behind the card.
+    public static bool TryPauseForTutorial(Object owner)
+    {
+        if (owner == null || IsPaused) return false;
+        HitStop.Stop();
+        _tutorialPauseOwner = owner;
+        _pauseTransitionFrame = Time.frameCount;
+        Time.timeScale = 0f;
+        return true;
+    }
+
+    public static void ResumeFromTutorial(Object owner)
+    {
+        if (_tutorialPauseOwner != owner || owner == null) return;
+        _tutorialPauseOwner = null;
+        _pauseTransitionFrame = Time.frameCount;
+        Time.timeScale = _menuPaused ? 0f : 1f;
     }
 
     private void Select(Selectable selectable)

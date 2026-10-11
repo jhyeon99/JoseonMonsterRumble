@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -5,15 +6,34 @@ public enum Ep1TutorialHintType
 {
     HighJump,
     Respawn,
-    Parry
+    Parry,
+    Guard,
+    TalismanTap,
+    TalismanCharge
 }
 
 [DisallowMultipleComponent]
-public sealed class Ep1TutorialManager : MonoBehaviour
+public sealed partial class Ep1TutorialManager : MonoBehaviour
 {
+    // Keep first-display history when death reloads the EP1 scene.
+    private static readonly HashSet<Ep1TutorialHintType> ShownHints = new HashSet<Ep1TutorialHintType>();
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    public static void ResetShownHints()
+    {
+        ShownHints.Clear();
+        ResetCombatProgress();
+    }
+
+    internal static bool HasShownHint(Ep1TutorialHintType hintType) => ShownHints.Contains(hintType);
+    internal static bool TryMarkHintShown(Ep1TutorialHintType hintType) => ShownHints.Add(hintType);
+
     [SerializeField] private Transform _highJumpHintPoint;
     [SerializeField] private Transform _respawnHintPoint;
     [SerializeField] private Transform _parryHintPoint;
+    [SerializeField] private bool _followHintTargets = true;
+    [SerializeField] private RespawnPoint _respawnHintTarget;
+    [SerializeField, Min(0.1f)] private float _guardEncounterDistance = 8f;
 
     [SerializeField] private Font _font;
     [SerializeField, Min(1)] private int _fontSize = 26;
@@ -45,9 +65,76 @@ public sealed class Ep1TutorialManager : MonoBehaviour
 
     private void Awake()
     {
+        ResolveRespawnHintTarget();
         AttachHint(_highJumpHintPoint, "Ep1HighJumpHint", Ep1TutorialHintType.HighJump);
-        AttachHint(_respawnHintPoint, "Ep1RespawnHint", Ep1TutorialHintType.Respawn);
+        if (_respawnHintPoint != null)
+        {
+            foreach (Ep1HighJumpHint hint in _respawnHintPoint.GetComponentsInChildren<Ep1HighJumpHint>(true))
+                hint.Configure(this, Ep1TutorialHintType.Respawn);
+        }
+
         AttachHint(_parryHintPoint, "Ep1ParryHint", Ep1TutorialHintType.Parry);
+        if (_guardHintPoint == null && _parryHintPoint != null)
+        {
+            _guardHintPoint = new GameObject("GuardHint").transform;
+            _guardHintPoint.SetParent(_parryHintPoint.parent, false);
+            _guardHintPoint.position = _parryHintPoint.position + Vector3.left * 1.5f;
+        }
+        AttachHint(_guardHintPoint, "Ep1RespawnHint", Ep1TutorialHintType.Guard);
+    }
+
+    public void ResolveHintTargets()
+    {
+        ResolveRespawnHintTarget();
+        ResolveTalismanTutorialTargets();
+    }
+
+    private void ResolveRespawnHintTarget()
+    {
+        if (_respawnHintTarget != null || !gameObject.scene.IsValid()) return;
+        RespawnPoint closest = null;
+        float closestDistance = float.PositiveInfinity;
+        foreach (GameObject root in gameObject.scene.GetRootGameObjects())
+        {
+            foreach (RespawnPoint point in root.GetComponentsInChildren<RespawnPoint>(true))
+            {
+                if (point.IsDefault) continue;
+                // EP1's first checkpoint keeps its identity when the level layout changes.
+                if (point.CheckpointId == "Jangseung_01")
+                {
+                    _respawnHintTarget = point;
+                    return;
+                }
+                float distance = _respawnHintPoint != null ?
+                    ((Vector2)(point.transform.position - _respawnHintPoint.position)).sqrMagnitude :
+                    point.transform.position.x;
+                if (distance >= closestDistance) continue;
+                closest = point;
+                closestDistance = distance;
+            }
+        }
+        _respawnHintTarget = closest;
+    }
+
+    internal bool IsWithinHintRange(Ep1TutorialHintType hintType, Vector2 playerPosition, Vector2 hintPosition)
+    {
+        if (_followHintTargets)
+        {
+            if (hintType == Ep1TutorialHintType.Respawn && _respawnHintTarget != null)
+            {
+                return _respawnHintTarget.isActiveAndEnabled &&
+                    Vector2.Distance(playerPosition, _respawnHintTarget.transform.position) <= _triggerDistance;
+            }
+
+            if (hintType == Ep1TutorialHintType.Guard && _boundPrerequisites != null &&
+                _boundPrerequisites.Length > 0 && _boundPrerequisites[0] != null)
+            {
+                EnemyHealth first = _boundPrerequisites[0];
+                return first.gameObject.activeInHierarchy && first.IsAlive &&
+                    Vector2.Distance(playerPosition, first.transform.position) <= _guardEncounterDistance;
+            }
+        }
+        return Vector2.Distance(playerPosition, hintPosition) <= _triggerDistance;
     }
 
     private void AttachHint(Transform point, string resourceName, Ep1TutorialHintType hintType)
@@ -72,6 +159,9 @@ public sealed class Ep1TutorialManager : MonoBehaviour
         {
             case Ep1TutorialHintType.Respawn: return _respawnMessage;
             case Ep1TutorialHintType.Parry: return _parryMessage;
+            case Ep1TutorialHintType.Guard: return _guardHoldMessage;
+            case Ep1TutorialHintType.TalismanTap: return _talismanTapMessage;
+            case Ep1TutorialHintType.TalismanCharge: return _talismanChargeMessage;
             default: return _highJumpMessage;
         }
     }
@@ -96,8 +186,12 @@ public sealed class Ep1TutorialManager : MonoBehaviour
         _jumpTextSize = new Vector2(Mathf.Max(1f, _jumpTextSize.x), Mathf.Max(1f, _jumpTextSize.y));
         _infoTextSize = new Vector2(Mathf.Max(1f, _infoTextSize.x), Mathf.Max(1f, _infoTextSize.y));
         _triggerDistance = Mathf.Max(0.1f, _triggerDistance);
+        _guardEncounterDistance = Mathf.Max(0.1f, _guardEncounterDistance);
         _displayDuration = Mathf.Max(0.1f, _displayDuration);
         _holdDuration = Mathf.Max(0.1f, _holdDuration);
+        ValidateCombatSettings();
+        ValidateCheckpointSettings();
+        ValidateTalismanSettings();
         PresentationVersion++;
     }
 }
