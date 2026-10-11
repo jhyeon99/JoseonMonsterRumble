@@ -209,6 +209,10 @@ public class PlayerDodgeState : PlayerBaseState
         HitStop.Play(0.18f, 0.01f);
         CameraShake.Shake(new CameraShakeSettings(0.15f, 0.35f));
 
+        if (!AbilityItemProgress.HasItem(AbilityItemProgress.DokkaebiGamtuId))
+        {
+            return;
+        }
         if (_afterimage != null)
         {
             _afterimage.TriggerDodgeSuccessGlow();

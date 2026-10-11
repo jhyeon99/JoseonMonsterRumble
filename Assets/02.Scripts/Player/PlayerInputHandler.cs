@@ -8,7 +8,7 @@ public class PlayerInputHandler : MonoBehaviour
     private static readonly KeyCode[] GameplayKeys =
     {
         KeyCode.LeftArrow, KeyCode.RightArrow, KeyCode.DownArrow,
-        KeyCode.C, KeyCode.Space, KeyCode.Z, KeyCode.X, KeyCode.V, KeyCode.B
+        KeyCode.C, KeyCode.Space, KeyCode.Z, KeyCode.X, KeyCode.V, KeyCode.Alpha1, KeyCode.Keypad1
     };
     private readonly HashSet<KeyCode> _suppressedKeys = new HashSet<KeyCode>(GameplayKeys.Length);
     private bool _wasRangedAttackHeld;
