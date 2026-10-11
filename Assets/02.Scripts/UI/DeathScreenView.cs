@@ -2,6 +2,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(CanvasGroup))]
@@ -9,16 +10,24 @@ public sealed class DeathScreenView : MonoBehaviour
 {
     private const float MinimumScrollDuration = 0.01f;
     private const string DeathEventSystemObjectName = "DeathUIEventSystem";
+    private static readonly int RevealProgressId = Shader.PropertyToID("_RevealProgress");
+    private static readonly int BackgroundRectId = Shader.PropertyToID("_BackgroundRect");
     [Header("페이드 설정")]
     [Tooltip("게임 화면의 암전 시간")]
     [SerializeField, Min(0f)] private float _fadeInDuration = 1.5f;
     [SerializeField, Min(0f)] private float _fadeOutDuration = 0.5f;
-    [SerializeField, Min(0f)] private float _backgroundFadeInDuration = 1.2f;
+    [FormerlySerializedAs("_backgroundFadeInDuration")]
+    [SerializeField, Min(0f)] private float _backgroundSpreadDuration = 2.6f;
 
     [Header("배경")]
     [SerializeField] private Image _blackoutImage;
     [SerializeField] private CanvasGroup _bgOverlayCanvasGroup;
     [SerializeField] private Image _bgOverlayImage;
+    [SerializeField] private Material _backgroundInkMaterial;
+    [Tooltip("고정된 브러시 결을 따라 그림이 짙어지는 진행률. 시작부터 완만하게 감속한다.")]
+    [SerializeField]
+    private AnimationCurve _backgroundSpreadCurve = new AnimationCurve(
+        new Keyframe(0f, 0f, 1.5f, 1.5f), new Keyframe(1f, 1f, 0f, 0f));
     [SerializeField] private Image _scrollShadowImage;
     [SerializeField, Range(0f, 1f)] private float _scrollShadowOpacity = 0.32f;
     [SerializeField] private Vector2 _scrollShadowPadding = new Vector2(160f, 140f);
@@ -41,7 +50,6 @@ public sealed class DeathScreenView : MonoBehaviour
     private AnimationCurve _scrollArrivalCurve = new AnimationCurve(
         new Keyframe(0f, 16f), new Keyframe(0.45f, -2f),
         new Keyframe(0.65f, 0f), new Keyframe(1f, 0f));
-    [SerializeField] private Vector2 _backgroundStartOffset = new Vector2(0f, -8f);
 
     [Header("사망 원인")]
     [SerializeField] private TextMeshProUGUI _causeOfDeathText;
@@ -67,13 +75,14 @@ public sealed class DeathScreenView : MonoBehaviour
     private Coroutine _scrollAnimCoroutine;
     private Vector2 _scrollRestPosition;
     private Vector2 _maskRestPosition;
-    private Vector2 _backgroundRestPosition;
-    private RectTransform _backgroundRect;
     private GameObject _ownedEventSystem;
+    private Material _backgroundMaterialInstance;
+    private Material _originalBackgroundMaterial;
 
     private void Awake()
     {
         _canvasGroup = GetComponent<CanvasGroup>();
+        InitializeBackgroundInkMaterial();
         if (_deadScrollImage != null)
         {
             _scrollRestPosition = _deadScrollImage.rectTransform.anchoredPosition;
@@ -81,11 +90,6 @@ public sealed class DeathScreenView : MonoBehaviour
         if (_scrollMaskRect != null)
         {
             _maskRestPosition = _scrollMaskRect.anchoredPosition;
-        }
-        _backgroundRect = _bgOverlayImage != null ? _bgOverlayImage.rectTransform : null;
-        if (_backgroundRect != null)
-        {
-            _backgroundRestPosition = _backgroundRect.anchoredPosition;
         }
         Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas != null && canvas.renderMode == RenderMode.ScreenSpaceCamera && canvas.worldCamera == null)
@@ -107,6 +111,14 @@ public sealed class DeathScreenView : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (_backgroundMaterialInstance != null)
+        {
+            if (_bgOverlayImage != null)
+            {
+                _bgOverlayImage.material = _originalBackgroundMaterial;
+            }
+            Destroy(_backgroundMaterialInstance);
+        }
         DestroyOwnedEventSystem();
         GameCursorController.SetDeathScreenVisible(false);
         if (_deadRunButton != null)
@@ -173,6 +185,9 @@ public sealed class DeathScreenView : MonoBehaviour
         if (_causeOfDeathText != null)
         {
             _causeOfDeathText.text = GetCauseOfDeathMessage(text);
+            // Prepare dynamic glyphs and the text mesh while the death UI is hidden.
+            // The scroll mask still controls when the already-prepared text appears.
+            _causeOfDeathText.ForceMeshUpdate(ignoreActiveState: true);
         }
     }
 
@@ -180,12 +195,12 @@ public sealed class DeathScreenView : MonoBehaviour
     {
         return causeOfDeath switch
         {
-            "방망이 공격" => "두억시니의 방망이에 두들겨 맞아 사망.",
-            "돌진 공격" => "인면조의 박치기에 정신을 놓고 사망.",
-            "돌멩이 공격" => "목객이 던진 돌에 정통으로 맞아 사망.",
-            "화살 공격" => "도전복의 화살에 맞아 사망. 피하기엔 한발 늦었다.",
+            "방망이 공격" => "두억시니의 방망이에\n두들겨 맞아 사망.",
+            "돌진 공격" => "인면조의 박치기에\n정신을 놓고 사망.",
+            "돌멩이 공격" => "목객이 던진 돌에\n정통으로 맞아 사망.",
+            "화살 공격" => "도전복의 화살에 맞아 사망.\n피하기엔 한발 늦었다.",
             "폭발 공격" => "도깨비불과 함께 장렬히 폭발.",
-            "접촉 피해" => "너무 가까이 다가갔다가 사망. 거리 두기에 실패했다.",
+            "접촉 피해" => "너무 가까이 다가갔다가 사망.\n거리 두기에 실패했다.",
             "추락" => "발을 헛디뎌 추락사.",
             _ => causeOfDeath
         };
@@ -341,6 +356,8 @@ public sealed class DeathScreenView : MonoBehaviour
     private IEnumerator PlayBackgroundRevealRoutine()
     {
         SetScrollVerticalOffset(0f);
+        UpdateBackgroundInkCoordinates();
+        ApplyBackgroundReveal(0f);
         if (_scrollShadowImage != null && _deadScrollImage != null)
         {
             _scrollShadowImage.rectTransform.anchoredPosition = _scrollRestPosition + _scrollShadowOffset;
@@ -352,11 +369,13 @@ public sealed class DeathScreenView : MonoBehaviour
         }
         float elapsed = 0f;
         float buttonRevealDuration = _deadRunButtonMotion != null ? _deadRunButtonMotion.RevealDuration : 0f;
-        while (elapsed < _backgroundFadeInDuration)
+        while (elapsed < _backgroundSpreadDuration)
         {
-            float progress = Mathf.SmoothStep(0f, 1f, elapsed / _backgroundFadeInDuration);
+            float time = elapsed / _backgroundSpreadDuration;
+            float progress = _backgroundSpreadCurve != null
+                ? Mathf.Clamp01(_backgroundSpreadCurve.Evaluate(time)) : time;
             ApplyBackgroundReveal(progress);
-            if (elapsed >= _backgroundFadeInDuration - buttonRevealDuration && _deadRunButton != null)
+            if (elapsed >= _backgroundSpreadDuration - buttonRevealDuration && _deadRunButton != null)
             {
                 _deadRunButton.gameObject.SetActive(true);
             }
@@ -376,26 +395,55 @@ public sealed class DeathScreenView : MonoBehaviour
 
     private void ApplyBackgroundReveal(float progress)
     {
+        if (_backgroundMaterialInstance != null)
+        {
+            _backgroundMaterialInstance.SetFloat(RevealProgressId, progress);
+        }
         if (_scrollShadowImage != null)
         {
             Color shadowColor = _scrollShadowImage.color;
             shadowColor.a = _scrollShadowOpacity * progress;
             _scrollShadowImage.color = shadowColor;
         }
-        if (_backgroundRect != null)
-        {
-            _backgroundRect.anchoredPosition = _backgroundRestPosition + _backgroundStartOffset * (1f - progress);
-        }
         if (_bgOverlayCanvasGroup != null)
         {
-            _bgOverlayCanvasGroup.alpha = progress;
+            _bgOverlayCanvasGroup.alpha = _backgroundMaterialInstance != null ? 1f : progress;
         }
         else if (_bgOverlayImage != null)
         {
             Color color = _bgOverlayImage.color;
-            color.a = progress;
+            color.a = _backgroundMaterialInstance != null ? 1f : progress;
             _bgOverlayImage.color = color;
         }
+    }
+
+    private void InitializeBackgroundInkMaterial()
+    {
+        if (_bgOverlayImage == null || _backgroundInkMaterial == null)
+        {
+            Debug.LogWarning("죽음 UI: 배경 Image 또는 먹 확산 Material 참조가 없습니다.", this);
+            return;
+        }
+        _originalBackgroundMaterial = _bgOverlayImage.material;
+        _backgroundMaterialInstance = new Material(_backgroundInkMaterial);
+        _bgOverlayImage.material = _backgroundMaterialInstance;
+    }
+
+    private void UpdateBackgroundInkCoordinates()
+    {
+        if (_backgroundMaterialInstance == null || _bgOverlayImage == null)
+        {
+            return;
+        }
+        RectTransform backgroundRect = _bgOverlayImage.rectTransform;
+        Rect rect = backgroundRect.rect;
+        if (rect.width <= 0f || rect.height <= 0f)
+        {
+            Debug.LogWarning("죽음 UI: 먹 확산 배경의 크기가 0입니다.", this);
+            return;
+        }
+        _backgroundMaterialInstance.SetVector(BackgroundRectId,
+            new Vector4(rect.xMin, rect.yMin, rect.width, rect.height));
     }
 
     private void ApplyScrollTextMask(Sprite sprite, float displayHeight)
