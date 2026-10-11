@@ -4,9 +4,11 @@ using UnityEngine;
 [RequireComponent(typeof(SpriteRenderer))]
 public sealed class KillZone : MonoBehaviour
 {
+    [SerializeField] private string _deathReason = "추락";
+
     [SerializeField]
     private LayerMask _targetLayers =
-        Constants.Layers.PlayerMask;
+        Constants.Layers.PlayerMask | Constants.Layers.EnemyMask;
 
     private bool _hasWarnedMissingKillable;
 
@@ -37,6 +39,17 @@ public sealed class KillZone : MonoBehaviour
         IKillable killable = other.GetComponentInParent<IKillable>();
         if (killable != null)
         {
+            if (killable is EnemyHealth enemyHealth && !enemyHealth.CanDieInKillZone)
+            {
+                return;
+            }
+
+            if (killable is PlayerHealth playerHealth)
+            {
+                playerHealth.Kill(_deathReason);
+                return;
+            }
+
             killable.Kill();
             return;
         }

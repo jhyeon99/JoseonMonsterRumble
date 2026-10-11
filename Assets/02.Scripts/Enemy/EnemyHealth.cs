@@ -1,8 +1,10 @@
 using System;
 using UnityEngine;
 
-public class EnemyHealth : MonoBehaviour, IDamageable
+public class EnemyHealth : MonoBehaviour, IDamageable, IKillable
 {
+    private const int FirstComboStep = 1;
+    private const int SecondComboStep = 2;
     private Enemy _enemy;
     private float _currentHp;
     public event Action OnDeath;
@@ -12,6 +14,31 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     public bool IsAlive => _currentHp > 0f;
     public bool IsDamaged => IsAlive && _currentHp < _enemy.Data.MaxHp;
     public float CurrentHp => _currentHp;
+    public bool CanDieInKillZone => _enemy.MoveType is EnemyGroundMove;
+
+    private float _shieldHp;
+    public float ShieldHp => _shieldHp;
+    public bool HasShield => _shieldHp > 0f;
+
+    public void Heal(float amount)
+    {
+        if (!IsAlive || _enemy.IsDefeated || amount <= 0f)
+        {
+            return;
+        }
+
+        _currentHp = Mathf.Min(_currentHp + amount, _enemy.Data.MaxHp);
+    }
+
+    public void SetShield(float amount)
+    {
+        _shieldHp = Mathf.Max(0f, amount);
+    }
+
+    public void ClearShield()
+    {
+        _shieldHp = 0f;
+    }
 
     private void Awake()
     {
@@ -23,43 +50,64 @@ public class EnemyHealth : MonoBehaviour, IDamageable
     {
         if (_enemy.IsDefeated) return false;
 
-        // 그로기 중에는 넉백으로 그로기가 풀리지 않게 데미지만 받음
-        if (hitData.KnockbackForce > 0f && !_enemy.IsGroggy)
+        if (_shieldHp > 0f)
         {
-            _currentHp -= hitData.Damage;
-            Debug.Log($"현재 체력 {_currentHp}");
-
-            if (_currentHp <= 0f)
+            if (hitData.IsTalisman || hitData.IsHeavyImpact)
             {
-                _currentHp = 0f;
-                OnDeath?.Invoke();
-                _enemy.StateMachine.ChangeState(new DeadState(_enemy));
-                return true;
+                _shieldHp = 0f;
             }
-
-            _enemy.HitFlash.Flash();
-            _enemy.Animation.PlayHit();
-            OnHit?.Invoke(hitData);
-            _enemy.StateMachine.ChangeState(new KnockbackState(_enemy, hitData));
-            return true;
+            else
+            {
+                float damageToShield = Mathf.Min(_shieldHp, hitData.Damage);
+                _shieldHp -= damageToShield;
+                hitData.Damage -= damageToShield;
+            }
         }
 
+        bool shouldKnockback = hitData.KnockbackForce > 0f && !_enemy.IsGroggy;
         _currentHp -= hitData.Damage;
+        GameEvents.TriggerEnemyHit(hitData);
 
         if (_currentHp <= 0f)
         {
-            _currentHp = 0f;
-            OnDeath?.Invoke();
-            _enemy.StateMachine.ChangeState(new DeadState(_enemy));
+            Die();
             return true;
         }
 
-        Debug.Log($"현재 체력 {_currentHp}");
-        _enemy.HitFlash.Flash();
-        _enemy.Animation.PlayHit();
+        _enemy.Animation.PlayDamageHit(hitData);
         OnHit?.Invoke(hitData);
 
+        // 그로기 중에는 넉백으로 그로기가 풀리지 않게 데미지만 받음
+        if (shouldKnockback)
+        {
+            bool isLightComboHit = hitData.ComboStep == FirstComboStep ||
+                hitData.ComboStep == SecondComboStep ||
+                hitData.IsReflectedProjectile;
+            if (!isLightComboHit || !_enemy.MoveType.TryStartLightKnockback(hitData))
+            {
+                _enemy.StateMachine.ChangeState(new KnockbackState(_enemy, hitData));
+            }
+        }
+
         return true;
+    }
+
+    public void Kill()
+    {
+        if (!IsAlive || _enemy.IsDefeated)
+        {
+            return;
+        }
+
+        Die();
+    }
+
+    private void Die()
+    {
+        _currentHp = 0f;
+        _enemy.MoveType.ResetLightKnockback();
+        OnDeath?.Invoke();
+        _enemy.StateMachine.ChangeState(new DeadState(_enemy));
     }
 
     /// <summary>마무리 공격으로 날려 보냄. 체력과 관계없이 사망 처리 (OnDeath 발생)</summary>
@@ -68,6 +116,7 @@ public class EnemyHealth : MonoBehaviour, IDamageable
         if (_enemy.IsDefeated) return;
 
         _currentHp = 0f;
+        _enemy.MoveType.ResetLightKnockback();
         OnDeath?.Invoke();
         _enemy.StateMachine.ChangeState(new LaunchedState(_enemy, settings, directionX));
     }

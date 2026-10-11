@@ -63,18 +63,28 @@ public class PlayerAttackState : PlayerBaseState
         }
 
         AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
-        if (!stateInfo.IsName(AnimStateAttack3rd))
+        bool is3rdReady = stateInfo.IsName(AnimStateAttack3rdReady);
+        bool is3rdAttack = stateInfo.IsName(AnimStateAttack3rd);
+
+        // 3타 준비(Ready) 및 3타 공격(Attack) 중일 때 슈퍼아머 활성화
+        if (!is3rdReady && !is3rdAttack)
         {
+            if (animator.IsInTransition(0))
+            {
+                AnimatorStateInfo nextInfo = animator.GetNextAnimatorStateInfo(0);
+                return nextInfo.IsName(AnimStateAttack3rdReady) || nextInfo.IsName(AnimStateAttack3rd);
+            }
             return false;
         }
 
-        if (!animator.IsInTransition(0))
+        // Recover(후딜레이)로 빠져나가는 전이 중이면 슈퍼아머 해제
+        if (animator.IsInTransition(0))
         {
-            return true;
+            AnimatorStateInfo nextStateInfo = animator.GetNextAnimatorStateInfo(0);
+            return !nextStateInfo.IsName(AnimStateAttack3rdRecover);
         }
 
-        AnimatorStateInfo nextStateInfo = animator.GetNextAnimatorStateInfo(0);
-        return !nextStateInfo.IsName(AnimStateAttack3rdRecover);
+        return true;
     }
 
     public override void Enter()
@@ -368,13 +378,22 @@ public class PlayerAttackState : PlayerBaseState
             // 회피 캔슬: 현재 콤보의 Recover 애니메이션이 시작되면 (Recover로 넘어가는 전이 중 포함) 바로 가능
             // Recover 시작 직전에 누른 입력도 입력 버퍼(0.1초) 안이면 시작하자마자 회피
             bool isEnteringComboRecover = inTransition && IsCurrentComboRecoverState(nextInfo);
-            if ((isCurrentComboRecover || isEnteringComboRecover) &&
-                _player.IsGrounded &&
-                _player.Movement.CanDodge &&
-                _inputHandler.TryUseDodgeInput())
+            if (isCurrentComboRecover || isEnteringComboRecover)
             {
-                _stateMachine.ChangeState(_player.DodgeState);
-                return;
+                // Recover 중 방향키를 누르면 캐릭터가 즉시 뒤를 돌아봄
+                float moveX = _inputHandler.MoveInputX;
+                if (Mathf.Abs(moveX) > 0.01f)
+                {
+                    _player.transform.localScale = new Vector3(Mathf.Sign(moveX), 1f, 1f);
+                }
+
+                if (_player.IsGrounded &&
+                    _player.Movement.CanDodge &&
+                    _inputHandler.TryUseDodgeInput())
+                {
+                    _stateMachine.ChangeState(_player.DodgeState);
+                    return;
+                }
             }
 
             // 현재 진행 중인 콤보의 리커버 상태일 때만 종료 처리

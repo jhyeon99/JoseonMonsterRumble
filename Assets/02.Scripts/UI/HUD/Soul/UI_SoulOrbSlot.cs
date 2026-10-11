@@ -70,11 +70,22 @@ public class UI_SoulOrbSlot : MonoBehaviour
         float normalizedFill = Mathf.Clamp01(fillAmount);
         if (_fillImage != null)
         {
-            _fillImage.fillAmount = normalizedFill;
+            _fillImage.fillAmount = CalculateImageFillAmount(normalizedFill);
         }
 
         OrbState nextState = CalculateStableState(normalizedFill);
         TransitionTo(nextState, playFeedback);
+    }
+
+    private float CalculateImageFillAmount(float normalizedFill)
+    {
+        if (normalizedFill <= 0f || normalizedFill >= 1f)
+        {
+            return normalizedFill;
+        }
+
+        Vector2 heightRange = _settings.FillVisibleHeightRange;
+        return Mathf.Clamp01(Mathf.Lerp(heightRange.x, heightRange.y, normalizedFill));
     }
 
     private OrbState CalculateStableState(float fillAmount)
