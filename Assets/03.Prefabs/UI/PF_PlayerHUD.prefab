@@ -1039,6 +1039,7 @@ RectTransform:
   - {fileID: 890100000000000002}
   - {fileID: 420562276022660254}
   - {fileID: 890300000000000002}
+  - {fileID: 890400000000000002}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1046,6 +1047,82 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &890400000000000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 890400000000000002}
+  - component: {fileID: 890400000000000003}
+  m_Layer: 5
+  m_Name: EnemyDamageTexts
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &890400000000000002
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 890400000000000001}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2930149289742138257}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &890400000000000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 890400000000000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ed6f2d5351244a4b2a0234c1626ef24, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  _worldCamera: {fileID: 0}
+  _textPrefab: {fileID: 0}
+  _damageFont: {fileID: 11400000, guid: 67ee05c03968c204688fb944f42eed7b, type: 2}
+  _damageMaterial: {fileID: 2100000, guid: b96c77d44f3adc54e99f55f6cdb23dcb, type: 2}
+  _finisherFont: {fileID: 11400000, guid: 1de61f9bc15be0e4f871d808990a96c2, type: 2}
+  _finisherMaterial: {fileID: 2100000, guid: 246bd34aaabb3274786619365cbc18c5, type: 2}
+  _duration: 0.8
+  _popDuration: 0.12
+  _popScale: 1.18
+  _fadeStart: 0.55
+  _laneSpacing: 12
+  _horizontalTravel: 26
+  _heavyMotionMultiplier: 1.3
+  _finisherMotionMultiplier: 1.5
+  _riseDistance: 45
+  _offset: {x: 10, y: 40}
+  _finisherOffset: {x: 40, y: -24}
+  _finisherSizeMultiplier: 2
+  _textColor: {r: 1, g: 0.96, b: 0.86, a: 1}
+  _finisherColor: {r: 1, g: 0.75, b: 0.18, a: 1}
+  _fontSize: 56
+  _characterSpacing: -3
+  _finisherCharacterSpacing: -3
+  _minSizeDamage: 5
+  _minSizeMultiplier: 0.85
+  _baseSizeDamage: 15
+  _maxSizeDamage: 50
+  _maxSizeMultiplier: 1.25
 --- !u!223 &1453143635954567954
 Canvas:
   m_ObjectHideFlags: 0
