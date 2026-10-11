@@ -54,6 +54,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
     // 반사 상태
     private int _originalLayer;
     private Collider2D _shooterCollider;
+    private GameObject _shooter;
     private bool _isReflected;
     private Vector2 _reflectDirection;
     private float _reflectSpeed;
@@ -145,6 +146,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
     {
         MuzzlePosition = muzzlePoint.position;
         _shooterCollider = FindShooterCollider(muzzlePoint);
+        _shooter = FindShooter(muzzlePoint);
         Transform player = playerPoint;
 
         if (player != null)
@@ -203,6 +205,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
     {
         var hitData = new HitData(_projectileDamage, _data.KnockbackForce, hitPoint,
             HitDirection, _defense, this, 0, AttackName);
+        hitData.Attacker = _shooter;
         damageable.TakeDamage(hitData);
         // 무적과 가드에는 소멸하고, 피해 처리 중 패링됐을 때만 반사를 유지한다.
         if (!_isReflected)
@@ -278,6 +281,24 @@ public abstract class Projectile : MonoBehaviour, IParryable
     }
 
     /// <summary>총구에서 위로 올라가며 쏜 적 본체의 피격 콜라이더를 찾음</summary>
+    /// <summary>쏜 적 / 보스 (사망 원인 표시용)</summary>
+    private static GameObject FindShooter(Transform muzzlePoint)
+    {
+        if (muzzlePoint == null)
+        {
+            return null;
+        }
+
+        Enemy enemy = muzzlePoint.GetComponentInParent<Enemy>();
+        if (enemy != null)
+        {
+            return enemy.gameObject;
+        }
+
+        Boss boss = muzzlePoint.GetComponentInParent<Boss>();
+        return boss != null ? boss.gameObject : muzzlePoint.root.gameObject;
+    }
+
     private static Collider2D FindShooterCollider(Transform muzzlePoint)
     {
         if (muzzlePoint == null)

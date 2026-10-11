@@ -26,6 +26,11 @@ public sealed class StageManager : MonoBehaviour
     [SerializeField, Min(0f)]
     private float _displayDuration = 0.8f;
 
+    [Header("디버그")]
+    [Tooltip("끄면 사망해도 씬을 다시 로드하지 않음 (사망 원인 로그만 출력, 테스트용)")]
+    [SerializeField]
+    private bool _reloadOnDeath = true;
+
     [Header("디버그 (에디터 전용)")]
 
     [Tooltip("TODO: 테스트용. 에디터에서만 R 키로 스테이지 재시작 (빌드에는 포함되지 않음)")]
@@ -196,13 +201,32 @@ public sealed class StageManager : MonoBehaviour
 
     private void HandlePlayerDied()
     {
-        string causeOfDeath = _playerHealth != null ? _playerHealth.LastFatalHitData.AttackName : string.Empty;
+        HitData fatalHit = _playerHealth != null ? _playerHealth.LastFatalHitData : default;
+        Debug.Log($"[사망] {BuildDeathLog(fatalHit)}", _playerHealth);
+
+        if (!_reloadOnDeath)
+        {
+            return;
+        }
+
+        string causeOfDeath = fatalHit.AttackName;
         if (string.IsNullOrWhiteSpace(causeOfDeath))
         {
             causeOfDeath = "알 수 없는 원인";
         }
 
         TryStartRespawn(true, causeOfDeath);
+    }
+
+    /// <summary>누구에게 무엇을 맞아 죽었는지 (공격자를 모르면 공격 이름만)</summary>
+    private static string BuildDeathLog(HitData hit)
+    {
+        string attackName = string.IsNullOrWhiteSpace(hit.AttackName) ? "알 수 없는 공격" : hit.AttackName;
+        string attacker = hit.AttackerName;
+
+        return string.IsNullOrEmpty(attacker)
+            ? $"'{attackName}'(으)로 사망 (데미지 {hit.Damage:0.#})"
+            : $"{attacker}의 '{attackName}'에 맞아 사망 (데미지 {hit.Damage:0.#})";
     }
 
     private void TryStartRespawn(bool waitForDeath, string causeOfDeath = "")
