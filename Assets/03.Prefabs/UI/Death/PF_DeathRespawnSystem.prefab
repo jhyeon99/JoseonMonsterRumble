@@ -190,14 +190,39 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DeathScreenView
   _fadeInDuration: 1.5
   _fadeOutDuration: 0.5
-  _backgroundFadeInDuration: 1.2
+  _backgroundSpreadDuration: 2.6
   _blackoutImage: {fileID: 882000000000000093}
   _bgOverlayCanvasGroup: {fileID: 882000000000000024}
   _bgOverlayImage: {fileID: 882000000000000023}
+  _backgroundInkMaterial: {fileID: 2100000, guid: cf5dfa56167c4edbac6f5b860b3c1768, type: 2}
+  _backgroundSpreadCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 1.5
+      outSlope: 1.5
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   _scrollShadowImage: {fileID: 882000000000000103}
-  _scrollShadowOpacity: 0.32
-  _scrollShadowPadding: {x: 160, y: 140}
-  _scrollShadowOffset: {x: 10, y: -14}
+  _scrollShadowOpacity: 0.2
+  _scrollShadowPadding: {x: 110, y: 60}
+  _scrollShadowOffset: {x: 10, y: -28}
   _deadScrollImage: {fileID: 882000000000000033}
   _deadScrollSprites:
   - {fileID: 2593464916087076205, guid: aacb4187c9a29f84ca9d752cce0635d1, type: 3}
@@ -597,7 +622,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.16, g: 0.1, b: 0.055, a: 0.32}
+  m_Color: {r: 0.075, g: 0.078, b: 0.082, a: 0.2}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -700,7 +725,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 550, y: 80}
+  m_SizeDelta: {x: 550, y: 110}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &882000000000000052
 CanvasRenderer:
@@ -732,15 +757,15 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 05f2fc7da2320b44a89b705c11f119aa, type: 2}
-  m_sharedMaterial: {fileID: -6785333531334178411, guid: 05f2fc7da2320b44a89b705c11f119aa, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 5645eadd0a91df74aa0b1a4045f316ba, type: 2}
+  m_sharedMaterial: {fileID: 5816675528776590654, guid: 5645eadd0a91df74aa0b1a4045f316ba, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4280295460
-  m_fontColor: {r: 0.18, g: 0.1, b: 0.1, a: 1}
+    rgba: 4279704612
+  m_fontColor: {r: 0.1411765, g: 0.1098039, b: 0.09019608, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -757,9 +782,9 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
-  m_fontWeight: 600
+  m_fontSize: 28
+  m_fontSizeBase: 28
+  m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
