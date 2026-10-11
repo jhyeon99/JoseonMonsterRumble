@@ -30,9 +30,9 @@ public class BossSpitPattern : BossPattern
     [SerializeField]
     private Vector2Int _projectilesPerSpit = new Vector2Int(3, 5);
 
-    [Tooltip("침 하나가 패링 가능한 침이 될 확률 (0 ~ 1). 패링 가능한 침은 반짝이고 패링하면 보스 쪽으로 반사, 나머지는 막기만 가능")]
-    [SerializeField, Range(0f, 1f)]
-    private float _parryableChance = 0.3f;
+    [Tooltip("켜면 한 번 뱉을 때 나오는 침 중 무작위로 1개만 패링 가능 (반짝임, 패링하면 보스 쪽으로 반사). 나머지는 막기만 가능")]
+    [SerializeField]
+    private bool _oneParryablePerSpit = true;
 
     [Tooltip("한 번 뱉는 애니메이션에서 뱉기를 시작하는 지점 (애니메이션 길이 대비 비율). 입 이펙트가 여기서 나오고, Spit Delay 뒤에 침이 나감")]
     [SerializeField, Range(0f, 1f)]
@@ -158,9 +158,12 @@ public class BossSpitPattern : BossPattern
             int min = Mathf.Max(1, _projectilesPerSpit.x);
             int max = Mathf.Max(min, _projectilesPerSpit.y);
             int count = Random.Range(min, max + 1);
+
+            // 이번 뱉기에서 패링 가능한 침 1개를 무작위로 정함
+            int parryableIndex = _oneParryablePerSpit ? Random.Range(0, count) : -1;
             for (int i = 0; i < count; i++)
             {
-                Fire(GetSpreadOffset(i, count));
+                Fire(GetSpreadOffset(i, count), i == parryableIndex);
 
                 if (i < count - 1)
                 {
@@ -270,7 +273,7 @@ public class BossSpitPattern : BossPattern
         return Mathf.Lerp(-_spreadAngle * 0.5f, _spreadAngle * 0.5f, index / (float)(count - 1));
     }
 
-    private void Fire(float angleOffset)
+    private void Fire(float angleOffset, bool parryable)
     {
         if (ProjectilePool.Instance == null || Boss.Player == null)
         {
@@ -299,7 +302,7 @@ public class BossSpitPattern : BossPattern
             Vector2 target = PickTarget(flightTime);
 
             spit.transform.position = origin;
-            spit.SetParryable(Random.value < _parryableChance);
+            spit.SetParryable(parryable);
             spit.Launch(BossSpitProjectile.CalculateVelocity(origin, target, flightTime, spit.Gravity));
             return;
         }
