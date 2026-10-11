@@ -14,6 +14,9 @@ public sealed class CameraBottomBoundaryZoneEditor : Editor
         EditorGUILayout.HelpBox(
             "씬의 초록색 범위 좌우·위아래 화살표를 드래그하세요. 반대쪽 끝을 고정한 채 한쪽으로만 늘리거나 줄일 수 있습니다. 실제 카메라 하단 한계는 '화면 하단 경계'로 조절합니다.",
             MessageType.Info);
+        EditorGUILayout.HelpBox(
+            "'경계 전환 시간'은 기본 0.5초입니다. 더 천천히 바꾸려면 값을 올리세요. '구간 이탈 대기 시간' 동안에는 짧은 구간 틈에서 제한을 유지합니다. 높아지는 경계에서는 전환 중 밑부분이 보이지 않도록 해당 구간을 조금 앞에서 시작하세요.",
+            MessageType.Info);
         if (EditorApplication.isPlayingOrWillChangePlaymode)
             EditorGUILayout.HelpBox("범위를 편집하려면 플레이 모드를 종료하세요.", MessageType.Info);
         DrawDefaultInspector();
