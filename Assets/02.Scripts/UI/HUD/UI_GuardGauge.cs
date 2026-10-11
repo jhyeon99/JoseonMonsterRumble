@@ -6,6 +6,7 @@ public class UI_GuardGauge : MonoBehaviour
 {
     private const float TwoPi = Mathf.PI * 2f;
     private const float ShakeCycleCount = 3f;
+    private const float StrongBlockLossRatio = 0.5f;
 
     [System.Serializable]
     private struct FeedbackProfile
@@ -46,6 +47,7 @@ public class UI_GuardGauge : MonoBehaviour
         0.12f,
         1.5f,
         new Color(1f, 1f, 1f, 0f));
+    [SerializeField, Min(1f)] private float _strongBlockShakeMultiplier = 2f;
     [SerializeField]
     private FeedbackProfile _parryFeedback = new FeedbackProfile(
         0.1f,
@@ -121,7 +123,12 @@ public class UI_GuardGauge : MonoBehaviour
     public void PlayBlockFeedback(float ghostDuration)
     {
         StartGhostFeedback(ghostDuration);
-        StartFeedback(_blockFeedback);
+        float lossRatio = Mathf.Max(0f, _gaugeRatioBeforeLatestChange - _previousGaugeRatio);
+        float pressure = Mathf.Clamp01(lossRatio / StrongBlockLossRatio);
+        float shakeMultiplier = Mathf.Lerp(1f, _strongBlockShakeMultiplier, pressure);
+        var feedback = new FeedbackProfile(_blockFeedback.Duration,
+            _blockFeedback.ShakeStrength * shakeMultiplier, _blockFeedback.FlashColor);
+        StartFeedback(feedback);
     }
 
     public void PlayParryFeedback()
