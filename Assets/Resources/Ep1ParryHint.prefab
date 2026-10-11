@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1001}
+  - component: {fileID: 1002}
+  m_Layer: 0
+  m_Name: Ep1ParryHint
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!4 &1001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+--- !u!114 &1002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d15b48c46ae405bb6a63a18bbcb5bba, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Ep1HighJumpHint
+  _message: 반짝이는 공격을 패링하면 적을 그로기 상태로 만들 수 있습니다.
+  _showJumpKeys: 0
+  _displayDuration: 6
+  _font: {fileID: 12800000, guid: 21bb382be0384decb2eb04b15aecb846, type: 3}
+  _cKey: {fileID: 21300014, guid: 8ce7e7c466d746ed81978a9de9c5f59d, type: 3}
+  _spaceKey: {fileID: 21300000, guid: a8829beb1c13453c8ed8423026a1cd59, type: 3}
+  _triggerDistance: 3
+  _holdDuration: 0.3
+  _headOffset: {x: 0, y: 95}

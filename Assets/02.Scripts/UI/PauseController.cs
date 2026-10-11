@@ -198,6 +198,7 @@ public class PauseController : MonoBehaviour
 
         _isPaused = isPaused;
         IsPaused = isPaused;
+        GameCursorController.SetPauseVisible(isPaused);
 
         if (isPaused)
         {
