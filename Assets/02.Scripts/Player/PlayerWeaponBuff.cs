@@ -189,7 +189,10 @@ public class PlayerWeaponBuff : MonoBehaviour
             return;
         }
 
-        _sourceRenderer.sharedMaterial = _glowMaterial;
+        if (_sourceRenderer.sharedMaterial != _glowMaterial)
+        {
+            _sourceRenderer.sharedMaterial = _glowMaterial;
+        }
 
         float pulse = Mathf.Sin(Time.time * _pulseSpeed) * 0.5f + 0.5f;
         float brightness = Mathf.Lerp(_minBrightness, _maxBrightness, pulse);
