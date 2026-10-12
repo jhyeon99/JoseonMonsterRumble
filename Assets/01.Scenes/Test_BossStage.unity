@@ -1973,6 +1973,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: PF_Player 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5784287867887489289, guid: 02dae753a2a50bc49bc239cc07eb60a5,
+        type: 3}
+      propertyPath: _landingJumpDelay
+      value: 0.02
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3811,12 +3816,12 @@ PrefabInstance:
     - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _spikeHoldTime
-      value: 0.2
+      value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _spikeRiseTime
-      value: 0.4
+      value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
