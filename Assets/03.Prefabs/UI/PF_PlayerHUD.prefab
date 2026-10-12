@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1505528262201362718}
   - component: {fileID: 1792257696949276166}
   - component: {fileID: 2118139926107821441}
+  - component: {fileID: 884400000000000001}
   m_Layer: 5
   m_Name: BottomLeft_ItemSlots
   m_TagString: Untagged
@@ -78,6 +79,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
   m_HorizontalFit: 2
   m_VerticalFit: 2
+--- !u!114 &884400000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 65695683629228405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ce7f6b017563045d531bd760c5664b1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::UI_AbilityItemSlots
+  _slots:
+  - Item: {fileID: 11400000, guid: 60350cb89adb147d3f9567c83f3149f8, type: 2}
+    Icon: {fileID: 3868949573959374460}
 --- !u!1 &67524509540968881
 GameObject:
   m_ObjectHideFlags: 0
@@ -927,6 +943,157 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &890400000000000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 890400000000000002}
+  - component: {fileID: 890400000000000003}
+  m_Layer: 5
+  m_Name: EnemyDamageTexts
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &890400000000000002
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 890400000000000001}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2930149289742138257}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &890400000000000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 890400000000000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ed6f2d5351244a4b2a0234c1626ef24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _worldCamera: {fileID: 0}
+  _textPrefab: {fileID: 0}
+  _damageFont: {fileID: 11400000, guid: 67ee05c03968c204688fb944f42eed7b, type: 2}
+  _damageMaterial: {fileID: 2100000, guid: b96c77d44f3adc54e99f55f6cdb23dcb, type: 2}
+  _finisherFont: {fileID: 11400000, guid: 1de61f9bc15be0e4f871d808990a96c2, type: 2}
+  _finisherMaterial: {fileID: 2100000, guid: 246bd34aaabb3274786619365cbc18c5, type: 2}
+  _duration: 0.8
+  _popDuration: 0.12
+  _popScale: 1.18
+  _impactHoldDuration: 0.075
+  _impactPeakScale: 1.3
+  _healHoldDuration: 0.15
+  _healPeakScale: 1.2
+  _healDuration: 1
+  _healOffset: {x: 0, y: 75}
+  _fadeStart: 0.55
+  _laneSpacing: 12
+  _horizontalTravel: 26
+  _heavyMotionMultiplier: 1.3
+  _finisherMotionMultiplier: 1.5
+  _riseDistance: 45
+  _offset: {x: 10, y: 40}
+  _finisherOffset: {x: 40, y: -24}
+  _finisherSizeMultiplier: 2
+  _textColor: {r: 1, g: 0.96, b: 0.86, a: 1}
+  _playerDamageColor: {r: 1, g: 0.22, b: 0.18, a: 1}
+  _playerHealColor: {r: 0.18, g: 0.88, b: 0.38, a: 1}
+  _strongPlayerHitMotionMultiplier: 1.45
+  _finisherColor: {r: 1, g: 0.75, b: 0.18, a: 1}
+  _buffedColor: {r: 0.35, g: 0.85, b: 1, a: 1}
+  _fontSize: 56
+  _characterSpacing: -3
+  _finisherCharacterSpacing: -3
+  _minSizeDamage: 5
+  _minSizeMultiplier: 0.85
+  _baseSizeDamage: 15
+  _maxSizeDamage: 50
+  _maxSizeMultiplier: 1.25
+--- !u!1 &890500000000000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 890500000000000002}
+  - component: {fileID: 890500000000000003}
+  m_Layer: 5
+  m_Name: EnemyHealthBars
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &890500000000000002
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 890500000000000001}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2930149289742138257}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &890500000000000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 890500000000000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39c3ac5b7c45407087bd3b7ff8328d61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _backgroundTexture: {fileID: 2800000, guid: bab6a011180f6264d808c2c445f02506, type: 3}
+  _fillTexture: {fileID: 2800000, guid: 94d08b21ed8bc6942aa1dd03a7ff4f23, type: 3}
+  _frameTexture: {fileID: 2800000, guid: 031dff43efba67e48968fa7d70c42036, type: 3}
+  _fillMaterial: {fileID: 2100000, guid: 528c70b4373c455eaa08e3962edb852f, type: 2}
+  _damageGhostMaterial: {fileID: 2100000, guid: 3c696384715244dc86f5c037c7c9346b,
+    type: 2}
+  _artUvRegion: {x: 0.1, y: 0.37, z: 0.8, w: 0.26}
+  _worldCamera: {fileID: 0}
+  _barSize: {x: 234, y: 38}
+  _screenOffset: {x: 0, y: -28}
+  _damageDelay: 0.25
+  _damageCatchupDuration: 0.35
+  _healCatchupDuration: 0.35
+  _shieldOverlayColor: {r: 1, g: 1, b: 1, a: 0.38}
+  _healOverlayColor: {r: 0.12, g: 0.78, b: 0.32, a: 0.85}
+  _healTintDuration: 0.35
+  _healTintMaxWidthRatio: 0.06
 --- !u!1 &1406511915751209384
 GameObject:
   m_ObjectHideFlags: 0
@@ -1048,144 +1215,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!1 &890400000000000001
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 890400000000000002}
-  - component: {fileID: 890400000000000003}
-  m_Layer: 5
-  m_Name: EnemyDamageTexts
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &890400000000000002
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 890400000000000001}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2930149289742138257}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &890400000000000003
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 890400000000000001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ed6f2d5351244a4b2a0234c1626ef24, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  _worldCamera: {fileID: 0}
-  _textPrefab: {fileID: 0}
-  _damageFont: {fileID: 11400000, guid: 67ee05c03968c204688fb944f42eed7b, type: 2}
-  _damageMaterial: {fileID: 2100000, guid: b96c77d44f3adc54e99f55f6cdb23dcb, type: 2}
-  _finisherFont: {fileID: 11400000, guid: 1de61f9bc15be0e4f871d808990a96c2, type: 2}
-  _finisherMaterial: {fileID: 2100000, guid: 246bd34aaabb3274786619365cbc18c5, type: 2}
-  _duration: 0.8
-  _popDuration: 0.12
-  _popScale: 1.18
-  _fadeStart: 0.55
-  _laneSpacing: 12
-  _horizontalTravel: 26
-  _heavyMotionMultiplier: 1.3
-  _finisherMotionMultiplier: 1.5
-  _riseDistance: 45
-  _offset: {x: 10, y: 40}
-  _finisherOffset: {x: 40, y: -24}
-  _finisherSizeMultiplier: 2
-  _textColor: {r: 1, g: 0.96, b: 0.86, a: 1}
-  _playerDamageColor: {r: 1, g: 0.22, b: 0.18, a: 1}
-  _playerHealColor: {r: 0.18, g: 0.88, b: 0.38, a: 1}
-  _finisherColor: {r: 1, g: 0.75, b: 0.18, a: 1}
-  _fontSize: 56
-  _characterSpacing: -3
-  _finisherCharacterSpacing: -3
-  _minSizeDamage: 5
-  _minSizeMultiplier: 0.85
-  _baseSizeDamage: 15
-  _maxSizeDamage: 50
-  _maxSizeMultiplier: 1.25
---- !u!1 &890500000000000001
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 890500000000000002}
-  - component: {fileID: 890500000000000003}
-  m_Layer: 5
-  m_Name: EnemyHealthBars
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &890500000000000002
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 890500000000000001}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2930149289742138257}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &890500000000000003
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 890500000000000001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39c3ac5b7c45407087bd3b7ff8328d61, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  _backgroundTexture: {fileID: 2800000, guid: bab6a011180f6264d808c2c445f02506, type: 3}
-  _fillTexture: {fileID: 2800000, guid: 94d08b21ed8bc6942aa1dd03a7ff4f23, type: 3}
-  _frameTexture: {fileID: 2800000, guid: 031dff43efba67e48968fa7d70c42036, type: 3}
-  _fillMaterial: {fileID: 2100000, guid: 528c70b4373c455eaa08e3962edb852f, type: 2}
-  _damageGhostMaterial: {fileID: 2100000, guid: 3c696384715244dc86f5c037c7c9346b, type: 2}
-  _artUvRegion: {x: 0.1, y: 0.37, z: 0.8, w: 0.26}
-  _worldCamera: {fileID: 0}
-  _barSize: {x: 234, y: 38}
-  _screenOffset: {x: 0, y: -28}
-  _damageDelay: 0.25
-  _damageCatchupDuration: 0.35
-  _healCatchupDuration: 0.35
 --- !u!223 &1453143635954567954
 Canvas:
   m_ObjectHideFlags: 0
@@ -2435,7 +2464,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 99ff01e4abb618941944bc2bbdc660ae, type: 3}
+  m_Sprite: {fileID: -5290532956313091460, guid: 499a42e2cbdefd74fbe80bf7c9bbcc0c,
+    type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -3070,7 +3100,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8203601450949851391
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3086,9 +3116,9 @@ RectTransform:
   - {fileID: 4451829570200520151}
   m_Father: {fileID: 3811608909788288432}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 110.8, y: -22}
   m_SizeDelta: {x: 90, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6218797793147802346
@@ -4354,6 +4384,7 @@ MonoBehaviour:
     _duration: 0.12
     _shakeStrength: 1.5
     _flashColor: {r: 1, g: 1, b: 1, a: 0}
+  _strongBlockShakeMultiplier: 2
   _parryFeedback:
     _duration: 0.1
     _shakeStrength: 0
@@ -5270,7 +5301,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8093980399535894102
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5286,9 +5317,9 @@ RectTransform:
   - {fileID: 4314290890369210240}
   m_Father: {fileID: 3811608909788288432}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 110.8, y: -22}
   m_SizeDelta: {x: 90, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6109140372561555549
@@ -5340,12 +5371,12 @@ GameObject:
   - component: {fileID: 3811608909788288432}
   - component: {fileID: 8887416082747362645}
   m_Layer: 5
-  m_Name: Skill_Icons
+  m_Name: Item_Slot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &3811608909788288432
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5365,7 +5396,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 19, y: -95}
+  m_AnchoredPosition: {x: 0.5, y: -119.6}
   m_SizeDelta: {x: 180, y: 44}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &8887416082747362645

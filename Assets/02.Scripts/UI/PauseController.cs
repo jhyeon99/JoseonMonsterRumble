@@ -19,9 +19,36 @@ public class PauseController : MonoBehaviour
     [SerializeField, ReadOnly] private bool _isPaused;
 
     private static bool _isMenuPaused;
-    public static bool IsPaused => _isMenuPaused ||
+    private static bool _isItemModalPaused;
+    public static bool IsPaused => _isMenuPaused || _isItemModalPaused ||
                                    (StageManager.Instance != null && StageManager.Instance.IsRespawnWorldFrozen);
     private static int _pauseTransitionFrame = -1;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetModalState()
+    {
+        _isItemModalPaused = false;
+    }
+
+    public static bool TryStartItemModal()
+    {
+        if (IsGameplayInputBlocked)
+        {
+            return false;
+        }
+        HitStop.Stop();
+        _isItemModalPaused = true;
+        _pauseTransitionFrame = Time.frameCount;
+        Time.timeScale = 0f;
+        return true;
+    }
+
+    public static void StopItemModal()
+    {
+        _isItemModalPaused = false;
+        _pauseTransitionFrame = Time.frameCount;
+        Time.timeScale = IsPaused ? 0f : 1f;
+    }
     public static bool IsGameplayInputBlocked => IsPaused || Time.frameCount == _pauseTransitionFrame ||
                                                  (StageManager.Instance != null && StageManager.Instance.IsRespawning);
 
@@ -77,6 +104,10 @@ public class PauseController : MonoBehaviour
 
     private void Update()
     {
+        if (_isItemModalPaused)
+        {
+            return;
+        }
         if (StageManager.Instance != null && StageManager.Instance.IsRespawning)
         {
             return;
@@ -202,6 +233,10 @@ public class PauseController : MonoBehaviour
 
     private void SetPaused(bool isPaused)
     {
+        if (isPaused && _isItemModalPaused)
+        {
+            return;
+        }
         if (isPaused && StageManager.Instance != null && StageManager.Instance.IsRespawning)
         {
             return;
