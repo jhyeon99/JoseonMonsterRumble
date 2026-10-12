@@ -141,6 +141,19 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField]
     private string _defeatTrigger = "defeat";
 
+    [Header("처치 직전 표시 (마무리 공격 대기 중 머리 위)")]
+    [Tooltip("마무리 공격 대기(완전 그로기) 동안 머리 위에 띄울 이펙트 (PF_Boss_Here). 비우면 표시 안 함")]
+    [SerializeField]
+    private GameObject _finishMarkerPrefab;
+
+    [Tooltip("표시 위치 기준점 (선택). 비우면 몸통 콜라이더 맨 위(머리)")]
+    [SerializeField]
+    private Transform _finishMarkerPoint;
+
+    [Tooltip("기준점에서 추가로 옮길 위치 (y가 클수록 더 위)")]
+    [SerializeField]
+    private Vector2 _finishMarkerOffset = new Vector2(0f, 0.5f);
+
     [Header("점프 / 착지 먼지 (PF_Boss_JumpDust_VFX, 짧은 점프 / 소환 점프 / 찍기 공통)")]
     [Tooltip("먼지 크기 배율")]
     [SerializeField, Min(0f)]
@@ -400,6 +413,7 @@ public class Boss : MonoBehaviour, IFinishable
     {
         StageBossFightGate.Cancel(this);
         ClearMinions();
+        HideFinishMarker();
     }
 
     #endregion
@@ -705,6 +719,59 @@ public class Boss : MonoBehaviour, IFinishable
     }
 
     /// <summary>남은 독 방울 / 아기 모두 제거 (페이즈 전환, 완전 그로기 시)</summary>
+    private GameObject _finishMarker;
+
+    /// <summary>머리 위 처치 직전 표시 위치</summary>
+    public Vector2 FinishMarkerPosition
+    {
+        get
+        {
+            Vector2 basePosition;
+            if (_finishMarkerPoint != null)
+            {
+                basePosition = _finishMarkerPoint.position;
+            }
+            else if (_bodyCollider != null)
+            {
+                Bounds bounds = _bodyCollider.bounds;
+                basePosition = new Vector2(bounds.center.x, bounds.max.y);
+            }
+            else
+            {
+                basePosition = transform.position;
+            }
+
+            return basePosition + _finishMarkerOffset;
+        }
+    }
+
+    /// <summary>마무리 공격 대기 표시를 머리 위에 띄움 (BossFinalGroggyState에서 호출)</summary>
+    public void ShowFinishMarker()
+    {
+        if (_finishMarkerPrefab == null)
+        {
+            return;
+        }
+
+        if (_finishMarker == null)
+        {
+            // 보스 자식으로 두면 좌우 반전(스케일)을 같이 받으므로 따로 생성
+            _finishMarker = Instantiate(_finishMarkerPrefab);
+        }
+
+        _finishMarker.transform.position = FinishMarkerPosition;
+        _finishMarker.SetActive(true);
+    }
+
+    public void HideFinishMarker()
+    {
+        if (_finishMarker != null)
+        {
+            Destroy(_finishMarker);
+            _finishMarker = null;
+        }
+    }
+
     public void ClearMinions()
     {
         for (int i = _minions.Count - 1; i >= 0; i--)
