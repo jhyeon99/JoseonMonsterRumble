@@ -2571,7 +2571,7 @@ MonoBehaviour:
   _patternName: "\uC9E7\uC740 \uC810\uD504 \uC811\uADFC"
   _phases: -1
   _floors: 1
-  _weight: 5
+  _weight: 1
   _cooldown: 0
   _animationTrigger: hop
   _animationClip: {fileID: 7400000, guid: ddb241990f77e6c43a82851448213d21, type: 2}
@@ -3886,9 +3886,24 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
+      propertyPath: _phases
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _hitClip
+      value: 
+      objectReference: {fileID: 7400000, guid: efa43d4278994e74fa25cf0aec476790, type: 2}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
       propertyPath: _spawnLine
       value: 
       objectReference: {fileID: 2063176564}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _chargeClip
+      value: 
+      objectReference: {fileID: 7400000, guid: 2cc376f3d5e1c8343904541b904cd5b6, type: 2}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _despawnLine
@@ -3899,6 +3914,27 @@ PrefabInstance:
       propertyPath: _summonPoint
       value: 
       objectReference: {fileID: 626587057}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _deathVfxPrefab
+      value: 
+      objectReference: {fileID: 6588398902190464614, guid: 2df137e57e861d04293453c94de8d46e,
+        type: 3}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _releaseTrigger
+      value: ultimateCancel
+      objectReference: {fileID: 0}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _phase1HpRatios.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: '_phase1HpRatios.Array.data[0]'
+      value: 0.9
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
