@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 891208160252990315}
   - component: {fileID: 6647221213600829916}
   - component: {fileID: 5878692554205907625}
+  - component: {fileID: 7813204000000000001}
   m_Layer: 0
   m_Name: PF_ParryAtk_LastEffect_VFX
   m_TagString: Untagged
@@ -92,6 +93,19 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &7813204000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8040303701944770453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fb1b268b02341b0b0c6e24f85e6ba5a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ParallaxEffectMotion
+  _backgroundLayerName: Far Mountain
 --- !u!95 &5878692554205907625
 Animator:
   serializedVersion: 7
