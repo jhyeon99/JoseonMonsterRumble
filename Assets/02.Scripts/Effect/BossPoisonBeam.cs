@@ -122,7 +122,6 @@ public sealed class BossPoisonBeam : MonoBehaviour
     private float _angularVelocity;
     private Vector2 _mouthVelocity;
     private bool _isDepressurizing;
-    private MaterialPropertyBlock _impactCloudProperties;
     private ParticleSystemRenderer _impactCloudRenderer;
 
     public bool IsFiring => _isFiring;
@@ -138,7 +137,6 @@ public sealed class BossPoisonBeam : MonoBehaviour
 
     private void Awake()
     {
-        _impactCloudProperties = new MaterialPropertyBlock();
         if (_mouth == null || _line == null || _mouthParticles == null || _headParticles == null
             || _line.sharedMaterial == null || string.IsNullOrEmpty(_textureProperty)
             || !_line.sharedMaterial.HasProperty(_textureProperty))
@@ -631,13 +629,6 @@ public sealed class BossPoisonBeam : MonoBehaviour
     private void EmitImpactCloud(Vector3 origin, Vector2 normal, Vector2 side, bool isBurst)
     {
         if (_impactCloudParticles == null) return;
-        // 큰 충돌 덩어리가 벽 뒤까지 관통해 보이지 않도록 접촉면으로 잘라낸다.
-        if (_impactCloudRenderer != null)
-        {
-            _impactCloudProperties.SetFloat("_UseImpactPlane", 1f);
-            _impactCloudProperties.SetVector("_ImpactPlane", new Vector4(normal.x, normal.y, -Vector2.Dot(normal, _impactPoint), 0f));
-            _impactCloudRenderer.SetPropertyBlock(_impactCloudProperties);
-        }
         _impactCloudParticles.Play(true);
         int count = isBurst ? 18 : 3;
         for (int i = 0; i < count; i++)
