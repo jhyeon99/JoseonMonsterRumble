@@ -98,6 +98,11 @@ public class EnemyBuffMove : EnemyMoveType
 
     private Vector2 GetTargetCenter(Enemy target)
     {
+        if (target == null)
+        {
+            return Vector2.zero;
+        }
+
         CacheTargetComponents(target);
 
         if (_cachedTargetRenderer != null && _cachedTargetRenderer.sprite != null)
