@@ -16,9 +16,9 @@ MonoBehaviour:
   - Damage: 15
     HitStartRatio: 0.4
     HitEndRatio: 0.8
-    KnockbackForce: 3
-    HitboxOffset: {x: 0.42, y: 0.54}
-    HitboxSize: {x: 1.6, y: 2.2}
+    KnockbackForce: 1
+    HitboxOffset: {x: -0.01, y: 0.58}
+    HitboxSize: {x: 3.68, y: 2.46}
     ForwardDisplacementCurve:
       serializedVersion: 2
       m_Curve: []
