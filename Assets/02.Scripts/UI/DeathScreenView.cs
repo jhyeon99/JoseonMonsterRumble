@@ -8,55 +8,37 @@ using UnityEngine.UI;
 [RequireComponent(typeof(CanvasGroup))]
 public sealed class DeathScreenView : MonoBehaviour
 {
-    private const float MinimumScrollDuration = 0.01f;
     private const string DeathEventSystemObjectName = "DeathUIEventSystem";
     private static readonly int RevealProgressId = Shader.PropertyToID("_RevealProgress");
     private static readonly int BackgroundRectId = Shader.PropertyToID("_BackgroundRect");
-    [Header("페이드 설정")]
-    [Tooltip("게임 화면의 암전 시간")]
-    [SerializeField, Min(0f)] private float _fadeInDuration = 1.5f;
+
+    [Header("화면 전환")]
+    [SerializeField, Min(0f)] private float _fadeInDuration = 0.6f;
     [SerializeField, Min(0f)] private float _fadeOutDuration = 0.5f;
     [FormerlySerializedAs("_backgroundFadeInDuration")]
-    [SerializeField, Min(0f)] private float _backgroundSpreadDuration = 2.6f;
+    [SerializeField, Min(0f)] private float _backgroundSpreadDuration = 1.2f;
+    [SerializeField]
+    private AnimationCurve _backgroundSpreadCurve =
+        new AnimationCurve(new Keyframe(0f, 0f, 1.5f, 1.5f), new Keyframe(1f, 1f, 0f, 0f));
 
     [Header("배경")]
     [SerializeField] private Image _blackoutImage;
     [SerializeField] private CanvasGroup _bgOverlayCanvasGroup;
     [SerializeField] private Image _bgOverlayImage;
     [SerializeField] private Material _backgroundInkMaterial;
-    [Tooltip("고정된 브러시 결을 따라 그림이 짙어지는 진행률. 시작부터 완만하게 감속한다.")]
-    [SerializeField]
-    private AnimationCurve _backgroundSpreadCurve = new AnimationCurve(
-        new Keyframe(0f, 0f, 1.5f, 1.5f), new Keyframe(1f, 1f, 0f, 0f));
-    [SerializeField] private Image _scrollShadowImage;
-    [SerializeField, Range(0f, 1f)] private float _scrollShadowOpacity = 0.32f;
-    [SerializeField] private Vector2 _scrollShadowPadding = new Vector2(160f, 140f);
-    [SerializeField] private Vector2 _scrollShadowOffset = new Vector2(10f, -14f);
 
-    [Header("스크롤 연출")]
-    [SerializeField] private Image _deadScrollImage;
-    [SerializeField] private Sprite[] _deadScrollSprites;
-    [Tooltip("암전 시작 후 두루마리를 보여주기까지의 시간")]
-    [SerializeField, Min(0f)] private float _scrollStartDelay = 0.6f;
-    [SerializeField, Min(0.1f)] private float _scrollDuration = 1.8f;
-    [SerializeField] private RectTransform _scrollMaskRect;
-    [SerializeField, Min(0f)] private float _targetScrollHeight = 400f;
-    [SerializeField, Min(0f)] private float _maxScrollWidth = 600f;
-    [Tooltip("좌우 말린 부분의 합계 폭 / 스프라이트 높이. 펼쳐진 종이만 글씨 노출에 사용한다.")]
-    [SerializeField, Min(0f)] private float _scrollRollWidthRatio = 0.27f;
-    [SerializeField] private AnimationCurve _scrollUnfoldCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
-    [Tooltip("펼침 초반의 세로 이동. 정착 이후와 마지막 값은 0으로 유지한다.")]
-    [SerializeField]
-    private AnimationCurve _scrollArrivalCurve = new AnimationCurve(
-        new Keyframe(0f, 16f), new Keyframe(0.45f, -2f),
-        new Keyframe(0.65f, 0f), new Keyframe(1f, 0f));
-
-    [Header("사망 원인")]
+    [Header("그림 속 사망 원인")]
+    [SerializeField] private CanvasGroup _causeOfDeathCanvasGroup;
     [SerializeField] private TextMeshProUGUI _causeOfDeathText;
+    [SerializeField, Min(0f)] private float _causeOfDeathFadeDuration = 0.3f;
+    [Tooltip("두루마리 글씨와 버튼 크기의 기준 배경 너비")]
+    [SerializeField, Min(1f)] private float _artworkReferenceWidth = 1920f;
+    [SerializeField, Min(1f)] private float _causeOfDeathFontSize = 30f;
 
     [Header("버튼")]
     [SerializeField] private Button _deadRunButton;
     [SerializeField] private DeathRunButtonMotion _deadRunButtonMotion;
+    [SerializeField, Min(1f)] private float _runButtonWidth = 320f;
     [SerializeField] private AudioClip _runButtonClickClip;
     [SerializeField, Range(0f, 1f)] private float _runButtonClickVolume = 1f;
 
@@ -64,17 +46,14 @@ public sealed class DeathScreenView : MonoBehaviour
     [SerializeField] private CanvasGroup _loadingCanvasGroup;
     [SerializeField] private Image _loadingImage;
     [SerializeField] private Sprite[] _loadingSprites;
-    [SerializeField, Min(0.01f)] private float _loadingFrameInterval = 1.0f;
+    [SerializeField, Min(0.01f)] private float _loadingFrameInterval = 1f;
 
     public float MinLoadingDuration => _loadingSprites != null && _loadingSprites.Length > 0
-        ? _loadingSprites.Length * _loadingFrameInterval
-        : 3f;
+        ? _loadingSprites.Length * _loadingFrameInterval : 3f;
 
     private CanvasGroup _canvasGroup;
     private bool _restartTriggered;
-    private Coroutine _scrollAnimCoroutine;
-    private Vector2 _scrollRestPosition;
-    private Vector2 _maskRestPosition;
+    private Vector2 _lastArtworkSize;
     private GameObject _ownedEventSystem;
     private Material _backgroundMaterialInstance;
     private Material _originalBackgroundMaterial;
@@ -82,30 +61,18 @@ public sealed class DeathScreenView : MonoBehaviour
     private void Awake()
     {
         _canvasGroup = GetComponent<CanvasGroup>();
-        InitializeBackgroundInkMaterial();
-        if (_deadScrollImage != null)
+        if (_bgOverlayImage != null && _backgroundInkMaterial != null)
         {
-            _scrollRestPosition = _deadScrollImage.rectTransform.anchoredPosition;
+            _originalBackgroundMaterial = _bgOverlayImage.material;
+            _backgroundMaterialInstance = new Material(_backgroundInkMaterial);
+            _bgOverlayImage.material = _backgroundMaterialInstance;
         }
-        if (_scrollMaskRect != null)
-        {
-            _maskRestPosition = _scrollMaskRect.anchoredPosition;
-        }
-        Canvas canvas = GetComponentInParent<Canvas>();
-        if (canvas != null && canvas.renderMode == RenderMode.ScreenSpaceCamera && canvas.worldCamera == null)
-        {
-            canvas.worldCamera = Camera.main;
-        }
-
         if (_deadRunButton != null)
-        {
             _deadRunButton.onClick.AddListener(HandleRunButtonClick);
-        }
         if (_deadRunButtonMotion != null)
-        {
             _deadRunButtonMotion.Pressed += PlayRunButtonClickSound;
-        }
 
+        UpdateArtworkLayout();
         HideImmediate();
     }
 
@@ -114,81 +81,82 @@ public sealed class DeathScreenView : MonoBehaviour
         if (_backgroundMaterialInstance != null)
         {
             if (_bgOverlayImage != null)
-            {
                 _bgOverlayImage.material = _originalBackgroundMaterial;
-            }
             Destroy(_backgroundMaterialInstance);
         }
         DestroyOwnedEventSystem();
         GameCursorController.SetDeathScreenVisible(false);
         if (_deadRunButton != null)
-        {
             _deadRunButton.onClick.RemoveListener(HandleRunButtonClick);
-        }
         if (_deadRunButtonMotion != null)
-        {
             _deadRunButtonMotion.Pressed -= PlayRunButtonClickSound;
-        }
     }
 
     private void Update()
     {
-        if (_canvasGroup != null && _canvasGroup.interactable && !_restartTriggered)
+        if (_canvasGroup != null && _canvasGroup.interactable && !_restartTriggered &&
+            (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) ||
+             Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Escape)))
         {
-            if (Input.GetKeyDown(KeyCode.Return) ||
-                Input.GetKeyDown(KeyCode.KeypadEnter) ||
-                Input.GetKeyDown(KeyCode.Space) ||
-                Input.GetKeyDown(KeyCode.Escape))
-            {
-                TriggerRestart();
-            }
+            TriggerRestart();
         }
     }
 
-    public void TriggerRestart()
+    private void LateUpdate()
     {
-        TriggerRestart(true);
+        UpdateArtworkLayout();
     }
 
-    private void HandleRunButtonClick()
+    private void UpdateArtworkLayout()
     {
-        TriggerRestart(false);
-    }
-
-    private void PlayRunButtonClickSound()
-    {
-        if (!_restartTriggered && _canvasGroup != null && _canvasGroup.interactable && _runButtonClickClip != null)
-        {
-            AudioManager.Instance.PlaySfx(_runButtonClickClip, _runButtonClickVolume);
-        }
-    }
-
-    private void TriggerRestart(bool playClickSound)
-    {
-        if (_restartTriggered || _canvasGroup == null || !_canvasGroup.interactable)
+        if (_bgOverlayImage == null || _bgOverlayImage.sprite == null ||
+            _bgOverlayImage.rectTransform.parent is not RectTransform parent)
         {
             return;
         }
-        if (_deadRunButtonMotion != null)
+
+        Vector2 viewport = parent.rect.size;
+        Vector2 spriteSize = _bgOverlayImage.sprite.rect.size;
+        if (viewport.x <= 0f || viewport.y <= 0f || spriteSize.x <= 0f || spriteSize.y <= 0f)
+            return;
+
+        // Keep the paper and its text together when the window aspect ratio changes.
+        Vector2 artworkSize = spriteSize * Mathf.Max(viewport.x / spriteSize.x, viewport.y / spriteSize.y);
+        if (artworkSize == _lastArtworkSize)
+            return;
+
+        _lastArtworkSize = artworkSize;
+        RectTransform artwork = _bgOverlayImage.rectTransform;
+        artwork.sizeDelta = artworkSize;
+        float scale = artworkSize.x / Mathf.Max(1f, _artworkReferenceWidth);
+        if (_causeOfDeathText != null)
         {
-            _deadRunButtonMotion.ApplyPressedVisual();
+            _causeOfDeathText.fontSize = _causeOfDeathFontSize * scale;
+            _causeOfDeathText.fontSizeMax = _causeOfDeathFontSize * scale;
+            _causeOfDeathText.fontSizeMin = _causeOfDeathFontSize * 0.7f * scale;
         }
-        if (playClickSound)
+        if (_deadRunButton != null && _deadRunButton.image != null && _deadRunButton.image.sprite != null)
         {
-            PlayRunButtonClickSound();
+            Rect spriteRect = _deadRunButton.image.sprite.rect;
+            float width = _runButtonWidth * scale;
+            ((RectTransform)_deadRunButton.transform).sizeDelta =
+                new Vector2(width, width * spriteRect.height / spriteRect.width);
         }
-        _restartTriggered = true;
+        if (_backgroundMaterialInstance != null)
+        {
+            Rect rect = artwork.rect;
+            _backgroundMaterialInstance.SetVector(BackgroundRectId,
+                new Vector4(rect.xMin, rect.yMin, rect.width, rect.height));
+        }
     }
 
     public void SetCauseOfDeath(string text)
     {
-        if (_causeOfDeathText != null)
-        {
-            _causeOfDeathText.text = GetCauseOfDeathMessage(text);
-            // Prepare dynamic glyphs and the text mesh while the death UI is hidden.
-            // The scroll mask still controls when the already-prepared text appears.
-            _causeOfDeathText.ForceMeshUpdate(ignoreActiveState: true);
-        }
+        if (_causeOfDeathText == null)
+            return;
+
+        _causeOfDeathText.text = GetCauseOfDeathMessage(text);
+        _causeOfDeathText.ForceMeshUpdate(ignoreActiveState: true);
     }
 
     private static string GetCauseOfDeathMessage(string causeOfDeath)
@@ -208,203 +176,61 @@ public sealed class DeathScreenView : MonoBehaviour
 
     public IEnumerator FadeIn()
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayMusicEvent("Music.Death", gameObject.scene);
+        }
         InitializeDeathEventSystem();
         GameCursorController.SetDeathScreenVisible(true);
         _restartTriggered = false;
-
-        float baseHeight = _targetScrollHeight > 0f ? _targetScrollHeight : 400f;
-
-        if (_deadScrollImage != null)
-        {
-            _deadScrollImage.preserveAspect = true;
-            if (_deadScrollSprites != null && _deadScrollSprites.Length > 0)
-            {
-                Sprite firstSprite = _deadScrollSprites[0];
-                _deadScrollImage.sprite = firstSprite;
-                if (firstSprite != null && firstSprite.rect.height > 0f)
-                {
-                    float aspect = firstSprite.rect.width / firstSprite.rect.height;
-                    _deadScrollImage.rectTransform.sizeDelta = new Vector2(baseHeight * aspect, baseHeight);
-                }
-            }
-            _deadScrollImage.gameObject.SetActive(false);
-        }
-
-        if (_scrollMaskRect != null)
-        {
-            _scrollMaskRect.sizeDelta = new Vector2(0f, baseHeight);
-            _scrollMaskRect.gameObject.SetActive(false);
-        }
+        UpdateArtworkLayout();
+        if (_causeOfDeathCanvasGroup != null)
+            _causeOfDeathCanvasGroup.alpha = 0f;
         if (_causeOfDeathText != null)
-        {
-            _causeOfDeathText.enabled = false;
-        }
-
+            _causeOfDeathText.enabled = _causeOfDeathCanvasGroup != null;
         if (_deadRunButton != null)
-        {
             _deadRunButton.gameObject.SetActive(false);
-        }
 
         _canvasGroup.alpha = 1f;
         _canvasGroup.blocksRaycasts = true;
         _canvasGroup.interactable = false;
+        ApplyBackgroundReveal(0f);
 
-        if (_bgOverlayCanvasGroup != null)
-        {
-            _bgOverlayCanvasGroup.alpha = 0f;
-        }
-        else if (_bgOverlayImage != null)
-        {
-            Color backgroundColor = _bgOverlayImage.color;
-            backgroundColor.a = 0f;
-            _bgOverlayImage.color = backgroundColor;
-        }
-
-        if (_scrollAnimCoroutine != null)
-        {
-            StopCoroutine(_scrollAnimCoroutine);
-        }
-        _scrollAnimCoroutine = StartCoroutine(PlayDelayedScrollAnimationRoutine());
         yield return FadeImageAlpha(_blackoutImage, 1f, _fadeInDuration);
-        yield return _scrollAnimCoroutine;
-        _scrollAnimCoroutine = null;
-
         yield return PlayBackgroundRevealRoutine();
+        if (_causeOfDeathText != null)
+            _causeOfDeathText.enabled = true;
+        yield return FadeCanvasGroup(_causeOfDeathCanvasGroup, 1f, _causeOfDeathFadeDuration);
 
+        if (_deadRunButton != null)
+            _deadRunButton.gameObject.SetActive(true);
+        if (_deadRunButtonMotion != null)
+        {
+            if (_deadRunButtonMotion.RevealDuration > 0f)
+                yield return new WaitForSecondsRealtime(_deadRunButtonMotion.RevealDuration);
+            _deadRunButtonMotion.CompleteReveal();
+        }
         _canvasGroup.interactable = true;
-    }
-
-    private IEnumerator PlayDelayedScrollAnimationRoutine()
-    {
-        if (_scrollStartDelay > 0f)
-        {
-            yield return new WaitForSecondsRealtime(_scrollStartDelay);
-        }
-        yield return PlayScrollAnimationRoutine();
-    }
-
-    private IEnumerator PlayScrollAnimationRoutine()
-    {
-        if (_deadScrollImage == null || _deadScrollSprites == null || _deadScrollSprites.Length == 0)
-        {
-            yield break;
-        }
-
-        _deadScrollImage.preserveAspect = true;
-        _deadScrollImage.gameObject.SetActive(true);
-        if (_scrollMaskRect != null)
-        {
-            _scrollMaskRect.gameObject.SetActive(true);
-        }
-
-        float baseHeight = _targetScrollHeight > 0f ? _targetScrollHeight : 400f;
-        float duration = Mathf.Max(MinimumScrollDuration, _scrollDuration);
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            float t = Mathf.Clamp01(elapsed / duration);
-            float unfoldProgress = _scrollUnfoldCurve != null
-                ? Mathf.Clamp01(_scrollUnfoldCurve.Evaluate(t))
-                : t;
-
-            int spriteIndex = Mathf.Clamp(
-                (int)(unfoldProgress * _deadScrollSprites.Length),
-                0,
-                _deadScrollSprites.Length - 1
-            );
-            Sprite currentSprite = _deadScrollSprites[spriteIndex];
-            _deadScrollImage.sprite = currentSprite;
-
-            if (currentSprite != null && currentSprite.rect.height > 0f)
-            {
-                float aspect = currentSprite.rect.width / currentSprite.rect.height;
-                _deadScrollImage.rectTransform.sizeDelta = new Vector2(baseHeight * aspect, baseHeight);
-            }
-
-            ApplyScrollTextMask(currentSprite, baseHeight);
-            float offset = _scrollArrivalCurve != null ? _scrollArrivalCurve.Evaluate(t) : 0f;
-            SetScrollVerticalOffset(offset);
-
-            elapsed += Time.unscaledDeltaTime;
-            yield return null;
-        }
-
-        Sprite finalSprite = _deadScrollSprites[_deadScrollSprites.Length - 1];
-        _deadScrollImage.sprite = finalSprite;
-        if (finalSprite != null && finalSprite.rect.height > 0f)
-        {
-            float finalAspect = finalSprite.rect.width / finalSprite.rect.height;
-            _deadScrollImage.rectTransform.sizeDelta = new Vector2(baseHeight * finalAspect, baseHeight);
-        }
-
-        ApplyScrollTextMask(finalSprite, baseHeight);
-    }
-
-    private void SetScrollVerticalOffset(float offset)
-    {
-        if (_deadScrollImage != null)
-        {
-            _deadScrollImage.rectTransform.anchoredPosition = _scrollRestPosition + Vector2.up * offset;
-        }
-        if (_scrollMaskRect != null)
-        {
-            _scrollMaskRect.anchoredPosition = _maskRestPosition + Vector2.up * offset;
-        }
     }
 
     private IEnumerator PlayBackgroundRevealRoutine()
     {
-        SetScrollVerticalOffset(0f);
-        UpdateBackgroundInkCoordinates();
-        ApplyBackgroundReveal(0f);
-        if (_scrollShadowImage != null && _deadScrollImage != null)
-        {
-            _scrollShadowImage.rectTransform.anchoredPosition = _scrollRestPosition + _scrollShadowOffset;
-            _scrollShadowImage.rectTransform.sizeDelta = _deadScrollImage.rectTransform.sizeDelta + _scrollShadowPadding;
-            Color shadowColor = _scrollShadowImage.color;
-            shadowColor.a = 0f;
-            _scrollShadowImage.color = shadowColor;
-            _scrollShadowImage.gameObject.SetActive(true);
-        }
         float elapsed = 0f;
-        float buttonRevealDuration = _deadRunButtonMotion != null ? _deadRunButtonMotion.RevealDuration : 0f;
         while (elapsed < _backgroundSpreadDuration)
         {
             float time = elapsed / _backgroundSpreadDuration;
-            float progress = _backgroundSpreadCurve != null
-                ? Mathf.Clamp01(_backgroundSpreadCurve.Evaluate(time)) : time;
-            ApplyBackgroundReveal(progress);
-            if (elapsed >= _backgroundSpreadDuration - buttonRevealDuration && _deadRunButton != null)
-            {
-                _deadRunButton.gameObject.SetActive(true);
-            }
+            ApplyBackgroundReveal(_backgroundSpreadCurve != null
+                ? Mathf.Clamp01(_backgroundSpreadCurve.Evaluate(time)) : time);
             elapsed += Time.unscaledDeltaTime;
             yield return null;
         }
         ApplyBackgroundReveal(1f);
-        if (_deadRunButton != null)
-        {
-            _deadRunButton.gameObject.SetActive(true);
-        }
-        if (_deadRunButtonMotion != null)
-        {
-            _deadRunButtonMotion.CompleteReveal();
-        }
     }
 
     private void ApplyBackgroundReveal(float progress)
     {
         if (_backgroundMaterialInstance != null)
-        {
             _backgroundMaterialInstance.SetFloat(RevealProgressId, progress);
-        }
-        if (_scrollShadowImage != null)
-        {
-            Color shadowColor = _scrollShadowImage.color;
-            shadowColor.a = _scrollShadowOpacity * progress;
-            _scrollShadowImage.color = shadowColor;
-        }
         if (_bgOverlayCanvasGroup != null)
         {
             _bgOverlayCanvasGroup.alpha = _backgroundMaterialInstance != null ? 1f : progress;
@@ -417,67 +243,40 @@ public sealed class DeathScreenView : MonoBehaviour
         }
     }
 
-    private void InitializeBackgroundInkMaterial()
+    public void TriggerRestart()
     {
-        if (_bgOverlayImage == null || _backgroundInkMaterial == null)
-        {
-            Debug.LogWarning("죽음 UI: 배경 Image 또는 먹 확산 Material 참조가 없습니다.", this);
-            return;
-        }
-        _originalBackgroundMaterial = _bgOverlayImage.material;
-        _backgroundMaterialInstance = new Material(_backgroundInkMaterial);
-        _bgOverlayImage.material = _backgroundMaterialInstance;
+        TriggerRestart(true);
     }
 
-    private void UpdateBackgroundInkCoordinates()
+    private void HandleRunButtonClick()
     {
-        if (_backgroundMaterialInstance == null || _bgOverlayImage == null)
-        {
-            return;
-        }
-        RectTransform backgroundRect = _bgOverlayImage.rectTransform;
-        Rect rect = backgroundRect.rect;
-        if (rect.width <= 0f || rect.height <= 0f)
-        {
-            Debug.LogWarning("죽음 UI: 먹 확산 배경의 크기가 0입니다.", this);
-            return;
-        }
-        _backgroundMaterialInstance.SetVector(BackgroundRectId,
-            new Vector4(rect.xMin, rect.yMin, rect.width, rect.height));
+        TriggerRestart(false);
     }
 
-    private void ApplyScrollTextMask(Sprite sprite, float displayHeight)
+    private void PlayRunButtonClickSound()
     {
-        float paperWidth = CalculateScrollTextWidth(sprite, displayHeight);
-        if (_scrollMaskRect != null)
-        {
-            _scrollMaskRect.sizeDelta = new Vector2(paperWidth, displayHeight);
-        }
-        if (_causeOfDeathText != null)
-        {
-            _causeOfDeathText.enabled = _scrollMaskRect != null && paperWidth > 0f;
-        }
+        if (!_restartTriggered && _canvasGroup != null && _canvasGroup.interactable && AudioManager.Instance != null)
+            AudioManager.Instance.PlayUiEvent("UI.Click", _runButtonClickClip, _runButtonClickVolume);
     }
 
-    private float CalculateScrollTextWidth(Sprite sprite, float displayHeight)
+    private void TriggerRestart(bool playClickSound)
     {
-        if (sprite == null || sprite.rect.height <= 0f)
-        {
-            return 0f;
-        }
+        if (_restartTriggered || _canvasGroup == null || !_canvasGroup.interactable)
+            return;
 
-        // The closed frame overlaps the two rolls, so its width is not their combined width.
-        float rollWidth = sprite.rect.height * _scrollRollWidthRatio;
-        float paperWidth = Mathf.Max(0f, sprite.rect.width - rollWidth) * displayHeight / sprite.rect.height;
-        return Mathf.Min(_maxScrollWidth, paperWidth);
+        if (_deadRunButtonMotion != null)
+            _deadRunButtonMotion.ApplyPressedVisual();
+        if (playClickSound)
+            PlayRunButtonClickSound();
+        _restartTriggered = true;
+        // Stop repeated clicks while StageManager begins its existing loading routine.
+        _canvasGroup.interactable = false;
     }
 
     public IEnumerator WaitForRestartInput()
     {
         while (!_restartTriggered)
-        {
             yield return null;
-        }
     }
 
     public IEnumerator PlayLoadingRoutine()
@@ -487,12 +286,10 @@ public sealed class DeathScreenView : MonoBehaviour
         _canvasGroup.interactable = false;
         _canvasGroup.blocksRaycasts = false;
         _canvasGroup.alpha = 0f;
-
         if (_loadingCanvasGroup != null)
         {
             _loadingCanvasGroup.alpha = 1f;
             _loadingCanvasGroup.blocksRaycasts = true;
-
             int frameIndex = 0;
             while (true)
             {
@@ -501,7 +298,6 @@ public sealed class DeathScreenView : MonoBehaviour
                     _loadingImage.sprite = _loadingSprites[frameIndex % _loadingSprites.Length];
                     frameIndex++;
                 }
-
                 yield return new WaitForSecondsRealtime(_loadingFrameInterval);
             }
         }
@@ -509,11 +305,7 @@ public sealed class DeathScreenView : MonoBehaviour
 
     public IEnumerator FadeOutLoading()
     {
-        if (_loadingCanvasGroup != null)
-        {
-            yield return FadeCanvasGroup(_loadingCanvasGroup, 0f, _fadeOutDuration);
-        }
-
+        yield return FadeCanvasGroup(_loadingCanvasGroup, 0f, _fadeOutDuration);
         HideImmediate();
     }
 
@@ -521,114 +313,60 @@ public sealed class DeathScreenView : MonoBehaviour
     {
         DestroyOwnedEventSystem();
         GameCursorController.SetDeathScreenVisible(false);
-        if (_scrollShadowImage != null)
-        {
-            _scrollShadowImage.gameObject.SetActive(false);
-        }
-        SetScrollVerticalOffset(0f);
-        ApplyBackgroundReveal(1f);
         if (_canvasGroup != null)
         {
             _canvasGroup.alpha = 0f;
             _canvasGroup.interactable = false;
             _canvasGroup.blocksRaycasts = false;
         }
-
         if (_bgOverlayCanvasGroup != null)
-        {
             _bgOverlayCanvasGroup.alpha = 0f;
-        }
-
+        if (_backgroundMaterialInstance != null)
+            _backgroundMaterialInstance.SetFloat(RevealProgressId, 0f);
         if (_blackoutImage != null)
         {
-            Color blackoutColor = _blackoutImage.color;
-            blackoutColor.a = 0f;
-            _blackoutImage.color = blackoutColor;
+            Color color = _blackoutImage.color;
+            color.a = 0f;
+            _blackoutImage.color = color;
         }
-
         if (_bgOverlayImage != null && _bgOverlayCanvasGroup == null)
         {
-            Color c = _bgOverlayImage.color;
-            c.a = 0f;
-            _bgOverlayImage.color = c;
+            Color color = _bgOverlayImage.color;
+            color.a = 0f;
+            _bgOverlayImage.color = color;
         }
-
         if (_loadingCanvasGroup != null)
         {
             _loadingCanvasGroup.alpha = 0f;
             _loadingCanvasGroup.interactable = false;
             _loadingCanvasGroup.blocksRaycasts = false;
         }
-
-        if (_scrollAnimCoroutine != null)
-        {
-            StopCoroutine(_scrollAnimCoroutine);
-            _scrollAnimCoroutine = null;
-        }
-
-        float baseHeight = _targetScrollHeight > 0f ? _targetScrollHeight : 400f;
-
-        if (_deadScrollImage != null)
-        {
-            _deadScrollImage.gameObject.SetActive(false);
-            _deadScrollImage.preserveAspect = true;
-            if (_deadScrollSprites != null && _deadScrollSprites.Length > 0)
-            {
-                Sprite firstSprite = _deadScrollSprites[0];
-                _deadScrollImage.sprite = firstSprite;
-                if (firstSprite != null && firstSprite.rect.height > 0f)
-                {
-                    float aspect = firstSprite.rect.width / firstSprite.rect.height;
-                    _deadScrollImage.rectTransform.sizeDelta = new Vector2(baseHeight * aspect, baseHeight);
-                }
-            }
-        }
-
-        if (_scrollMaskRect != null)
-        {
-            _scrollMaskRect.gameObject.SetActive(false);
-            _scrollMaskRect.sizeDelta = new Vector2(0f, baseHeight);
-        }
-
-        if (_deadRunButton != null)
-        {
-            _deadRunButton.gameObject.SetActive(false);
-        }
-
+        if (_causeOfDeathCanvasGroup != null)
+            _causeOfDeathCanvasGroup.alpha = 0f;
         if (_causeOfDeathText != null)
         {
             _causeOfDeathText.enabled = false;
             _causeOfDeathText.text = string.Empty;
         }
-
+        if (_deadRunButton != null)
+            _deadRunButton.gameObject.SetActive(false);
         _restartTriggered = false;
     }
 
     private void InitializeDeathEventSystem()
     {
-        if (EventSystem.current != null && EventSystem.current.isActiveAndEnabled)
-        {
+        if ((EventSystem.current != null && EventSystem.current.isActiveAndEnabled) || _ownedEventSystem != null)
             return;
-        }
-
-        if (_ownedEventSystem != null)
-        {
-            return;
-        }
 
         _ownedEventSystem = new GameObject(DeathEventSystemObjectName,
             typeof(EventSystem), typeof(StandaloneInputModule));
         _ownedEventSystem.transform.SetParent(transform, false);
-        Debug.LogWarning("죽음 UI: 활성 EventSystem이 없어 전용 입력 처리를 생성했습니다.", this);
     }
 
     private void DestroyOwnedEventSystem()
     {
         if (_ownedEventSystem == null)
-        {
             return;
-        }
-
         Destroy(_ownedEventSystem);
         _ownedEventSystem = null;
     }
@@ -636,54 +374,32 @@ public sealed class DeathScreenView : MonoBehaviour
     private static IEnumerator FadeCanvasGroup(CanvasGroup group, float targetAlpha, float duration)
     {
         if (group == null)
-        {
             yield break;
-        }
-
-        if (duration <= 0f)
-        {
-            group.alpha = targetAlpha;
-            yield break;
-        }
-
         float startAlpha = group.alpha;
-        float elapsedTime = 0f;
-
-        while (elapsedTime < duration)
+        float elapsed = 0f;
+        while (elapsed < duration)
         {
-            elapsedTime += Time.unscaledDeltaTime;
-            group.alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsedTime / duration);
+            elapsed += Time.unscaledDeltaTime;
+            group.alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsed / duration);
             yield return null;
         }
-
         group.alpha = targetAlpha;
     }
 
     private static IEnumerator FadeImageAlpha(Image image, float targetAlpha, float duration)
     {
         if (image == null)
-        {
             yield break;
-        }
-
         Color startColor = image.color;
-        if (duration <= 0f)
+        float elapsed = 0f;
+        while (elapsed < duration)
         {
-            startColor.a = targetAlpha;
-            image.color = startColor;
-            yield break;
-        }
-
-        float elapsedTime = 0f;
-        while (elapsedTime < duration)
-        {
-            elapsedTime += Time.unscaledDeltaTime;
-            Color c = startColor;
-            c.a = Mathf.SmoothStep(startColor.a, targetAlpha, elapsedTime / duration);
-            image.color = c;
+            elapsed += Time.unscaledDeltaTime;
+            Color color = startColor;
+            color.a = Mathf.SmoothStep(startColor.a, targetAlpha, elapsed / duration);
+            image.color = color;
             yield return null;
         }
-
         startColor.a = targetAlpha;
         image.color = startColor;
     }

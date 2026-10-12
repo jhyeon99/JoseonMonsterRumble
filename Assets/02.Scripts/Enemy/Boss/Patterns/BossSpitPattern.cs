@@ -108,6 +108,8 @@ public class BossSpitPattern : BossPattern
     [SerializeField]
     private float _damageIncreasePercent = 0f;
 
+    private bool _bundleCueSent;
+
     private void Reset()
     {
         SetDefaults("침뱉기", BossPhaseMask.Both, BossFloorMask.Any);
@@ -154,7 +156,6 @@ public class BossSpitPattern : BossPattern
                     yield return new WaitForSeconds(_spitDelay);
                 }
             }
-
             int min = Mathf.Max(1, _projectilesPerSpit.x);
             int max = Mathf.Max(min, _projectilesPerSpit.y);
             int count = Random.Range(min, max + 1);
@@ -313,5 +314,10 @@ public class BossSpitPattern : BossPattern
         Vector2 toPlayer = (Vector2)Boss.Player.position - (Vector2)_muzzle.position;
         float angle = (Mathf.Atan2(toPlayer.y, toPlayer.x) * Mathf.Rad2Deg) + 180f + angleOffset;
         projectile.transform.rotation = Quaternion.Euler(0f, 0f, angle);
+        if (!_bundleCueSent)
+        {
+            _bundleCueSent = true;
+            AudioResult("Boss.Spit", _muzzle.position);
+        }
     }
 }

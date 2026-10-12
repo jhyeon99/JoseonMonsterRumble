@@ -25,6 +25,8 @@ public class EnemyRangedCombat : EnemyCombat
     public bool IsBurstPending => _burstPhase != BurstPhase.None;
 
     public event System.Action OnTelegraphAttack;
+    public event System.Action<Vector3> OnProjectileFired;
+    private bool _spreadGroup, _spreadCueSent;
 
     public void OnTelegraph()
     {
@@ -82,13 +84,24 @@ public class EnemyRangedCombat : EnemyCombat
         Vector2 direction = Enemy.GetDirectionToPlayer();
         float baseCorrection = direction.x <= 0f ? 8.228f : -8.228f;
         projectile.transform.Rotate(0f, 0f, baseCorrection + angleOffset);
+        if (!_spreadGroup || !_spreadCueSent)
+        {
+            _spreadCueSent = true;
+            OnProjectileFired?.Invoke(_muzzlePoint.position);
+        }
     }
 
     private void FireSpreadProjectiles()
     {
-        FireSingleProjectile(0f);
-        FireSingleProjectile(_spreadAngle);
-        FireSingleProjectile(-_spreadAngle);
+        _spreadGroup = true;
+        _spreadCueSent = false;
+        try
+        {
+            FireSingleProjectile(0f);
+            FireSingleProjectile(_spreadAngle);
+            FireSingleProjectile(-_spreadAngle);
+        }
+        finally { _spreadGroup = false; }
     }
 
     private void StartBurst()

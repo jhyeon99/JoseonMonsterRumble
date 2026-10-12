@@ -171,6 +171,7 @@ public class Player : MonoBehaviour
 
         InitializeStates();
         InitializeMotionData();
+        if (!TryGetComponent<PlayerAudio>(out _)) gameObject.AddComponent<PlayerAudio>();
     }
 
     private void InitializeMotionData()

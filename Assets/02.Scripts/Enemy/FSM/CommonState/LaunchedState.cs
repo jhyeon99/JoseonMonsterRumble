@@ -61,7 +61,7 @@ public class LaunchedState : EnemyState
         {
             // A finisher bypasses TakeDamage, so its heavy-hit soul must be spawned here.
             itemPool.SpawnHitSoul(_startCenter, true);
-            itemPool.SpawnDeathSouls(_startCenter, 5);
+            itemPool.SpawnDeathSouls(_startCenter, 5, _enemy.Health);
         }
 
         // 물리와 충돌을 끄고 직접 움직임
