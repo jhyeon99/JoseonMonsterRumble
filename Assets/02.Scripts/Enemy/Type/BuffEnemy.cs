@@ -127,7 +127,7 @@ public class BuffEnemy : Enemy
             return;
         }
 
-        Enemy newTarget = EnemyManager.Instance.GetTargetAttackerForBuff();
+        Enemy newTarget = EnemyManager.Instance.GetTargetAttackerForBuff(transform.position);
 
         if (newTarget != null)
         {
