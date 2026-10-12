@@ -2655,6 +2655,26 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6750697502698295257, guid: 4d47b5d7fe17c144ea67c4205a119ed7,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6750697502698295257, guid: 4d47b5d7fe17c144ea67c4205a119ed7,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6750697502698295257, guid: 4d47b5d7fe17c144ea67c4205a119ed7,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6750697502698295257, guid: 4d47b5d7fe17c144ea67c4205a119ed7,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6823935002172397410, guid: 4d47b5d7fe17c144ea67c4205a119ed7,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -3006,6 +3026,31 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 882100000000000002, guid: 2367f8f9a47ed9844a43d60b7d625648,
+        type: 3}
+      propertyPath: m_Pivot.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 882100000000000002, guid: 2367f8f9a47ed9844a43d60b7d625648,
+        type: 3}
+      propertyPath: m_Pivot.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 882100000000000002, guid: 2367f8f9a47ed9844a43d60b7d625648,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 882100000000000002, guid: 2367f8f9a47ed9844a43d60b7d625648,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 882100000000000002, guid: 2367f8f9a47ed9844a43d60b7d625648,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6005099488989123307, guid: 2367f8f9a47ed9844a43d60b7d625648,
         type: 3}
       propertyPath: m_Name
@@ -3359,15 +3404,45 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 159123632947961680, guid: e77274ac9c54c834f9fbd20a49cbc6a1,
         type: 3}
+    - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _stompVfxLeadTime
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _stompVfxOffset.y
+      value: -1
+      objectReference: {fileID: 0}
     - target: {fileID: 5040009013939251897, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _flightTimeRange.x
-      value: 1.6
+      value: 1.2
       objectReference: {fileID: 0}
     - target: {fileID: 5040009013939251897, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _flightTimeRange.y
-      value: 2.4
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5040009013939251897, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _projectilesPerSpit.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5040009013939251897, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _projectilesPerSpit.y
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5040009013939251897, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: '_spitCountWeights.Array.data[0]'
+      value: 0.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 5040009013939251897, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: '_spitCountWeights.Array.data[2]'
+      value: 0.15
       objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
