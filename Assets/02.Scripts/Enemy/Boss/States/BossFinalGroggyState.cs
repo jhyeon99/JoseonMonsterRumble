@@ -17,10 +17,14 @@ public class BossFinalGroggyState : BossState
         _boss.ResetTrigger(_boss.GroggyEndTrigger);
         _boss.SetTrigger(_boss.GroggyTrigger);
         _boss.SetBool(_boss.GroggyBool, true);
+
+        // 머리 위에 마무리 공격 대기 표시
+        _boss.ShowFinishMarker();
     }
 
     public override void Exit()
     {
         _boss.SetBool(_boss.GroggyBool, false);
+        _boss.HideFinishMarker();
     }
 }
