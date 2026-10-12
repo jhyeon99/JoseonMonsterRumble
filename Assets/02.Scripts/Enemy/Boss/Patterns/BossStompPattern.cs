@@ -255,6 +255,7 @@ public class BossStompPattern : BossPattern
         ShowLandingMarker(false, targetX, groundY);
         CameraShake.Shake(_landingShake);
 
+        AudioResult("Boss.Stomp", Boss.transform.position);
         _stompHitbox.Activate();
         yield return WaitUntilProgress(HitEndRatio);
         _stompHitbox.Deactivate();
@@ -286,7 +287,6 @@ public class BossStompPattern : BossPattern
         }
 
         yield return WaitUntilProgress(_needleRatio);
-
         SpawnFloorSpikes();
     }
 
@@ -305,6 +305,8 @@ public class BossStompPattern : BossPattern
             BossFloorSpike spike = Instantiate(_floorSpikePrefab, upPosition, Quaternion.identity);
             spike.Begin(Boss, upPosition, _spikeRiseHeight, _spikeRiseTime, _spikeHoldTime, _spikeSinkTime);
         }
+
+        AudioResult("Boss.NeedleFire", new Vector3((left + right) * 0.5f, upY, Boss.transform.position.z));
     }
 
     private float GetSpikeFloorY()

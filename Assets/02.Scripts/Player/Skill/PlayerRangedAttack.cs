@@ -49,6 +49,8 @@ public class PlayerRangedAttack : MonoBehaviour
 
     /// <summary>발사 시 호출. 인자 = 실제로 발사된 부적 개수 (사운드, 이펙트 연결용)</summary>
     public event Action<int> OnFired;
+    public event Action<int> OnChargeStep;
+    public event Action OnChargeEnded;
 
     // 지금 활성화할 수 있는 최대 개수 (슬롯 수와 보유 soul 중 작은 값)
     private int MaxActivatable =>
@@ -240,6 +242,7 @@ public class PlayerRangedAttack : MonoBehaviour
     {
         if (slotIndex >= 0 && slotIndex < _slotAnimators.Count)
         {
+            OnChargeStep?.Invoke(slotIndex + 1);
             Animator animator = _slotAnimators[slotIndex];
             if (animator != null && _slots[slotIndex].gameObject.activeSelf)
             {
@@ -268,6 +271,7 @@ public class PlayerRangedAttack : MonoBehaviour
 
     private void ResetCharge()
     {
+        if (_chargeState != ChargeState.Idle) OnChargeEnded?.Invoke();
         if (_chargeState != ChargeState.Idle && _activeCount > 0)
         {
             CancelAllActiveSlots();
