@@ -173,6 +173,18 @@ public class PrologueIntroController : MonoBehaviour
     private void OnEnable()
     {
         Canvas.preWillRenderCanvases += UpdateHintsBeforeRender;
+        if (!_ready) return;
+        BindCinematicCallbacks();
+        if (IsIntroComplete && Phase != "LeavingPrologue")
+            StartCoroutine(ResumeProgression());
+    }
+
+    private void BindCinematicCallbacks()
+    {
+        _cinematics.OnCinematicFinished.RemoveListener(HandleCinematicFinished);
+        _cinematics.OnCinematicTargetReached.RemoveListener(HandleJigeReached);
+        _cinematics.OnCinematicFinished.AddListener(HandleCinematicFinished);
+        _cinematics.OnCinematicTargetReached.AddListener(HandleJigeReached);
     }
 
     private void Awake()
@@ -229,19 +241,7 @@ public class PrologueIntroController : MonoBehaviour
             return;
         }
 
-        // Capture the authored layout before any parallax LateUpdate can move it.
-        foreach (Transform child in _background2.GetComponentsInChildren<Transform>(true))
-            _background2Layout[child] = child.localPosition;
-        // The two background sprites can share a manager on their parent.
-        foreach (ParallaxManager manager in _background2.GetComponentsInParent<ParallaxManager>(true))
-            _destinationParallax.Add(manager);
-        foreach (ParallaxManager manager in _background2.GetComponentsInChildren<ParallaxManager>(true))
-            _destinationParallax.Add(manager);
-        foreach (ParallaxManager manager in _destinationParallax)
-        {
-            foreach (Transform child in manager.GetComponentsInChildren<Transform>(true))
-                _background2Layout[child] = child.localPosition;
-        }
+        CacheDestinationLayout();
 
         _inputWasEnabled = _input.enabled;
         _playerWasEnabled = _player.enabled;
@@ -250,8 +250,7 @@ public class PrologueIntroController : MonoBehaviour
         _input.enabled = false;
         _locked = true;
         Phase = "Preparing";
-        _cinematics.OnCinematicFinished.AddListener(HandleCinematicFinished);
-        _cinematics.OnCinematicTargetReached.AddListener(HandleJigeReached);
+        BindCinematicCallbacks();
 
         if (_gameplayUi != null)
         {
@@ -276,6 +275,50 @@ public class PrologueIntroController : MonoBehaviour
         _noticeBoardFocus = new GameObject("NoticeBoardCameraFocus").transform;
         _noticeBoardFocus.SetParent(transform, false);
         _ready = true;
+    }
+
+    private void CacheDestinationLayout()
+    {
+        // Capture the authored layout before any parallax LateUpdate can move it.
+        foreach (Transform child in _background2.GetComponentsInChildren<Transform>(true))
+            _background2Layout[child] = child.localPosition;
+        // The two background sprites can share a manager on their parent.
+        foreach (ParallaxManager manager in _background2.GetComponentsInParent<ParallaxManager>(true))
+            _destinationParallax.Add(manager);
+        foreach (ParallaxManager manager in _background2.GetComponentsInChildren<ParallaxManager>(true))
+            _destinationParallax.Add(manager);
+        foreach (ParallaxManager manager in _destinationParallax)
+        {
+            foreach (Transform child in manager.GetComponentsInChildren<Transform>(true))
+                _background2Layout[child] = child.localPosition;
+        }
+    }
+
+    private IEnumerator ResumeProgression()
+    {
+        yield return null;
+        if (IsTransitionComplete)
+        {
+            yield return WaitForNextSceneExit();
+            yield break;
+        }
+
+        // Finish any camera return after rebinding before restarting the interrupted progression.
+        while (_cinematics.IsPlaying) yield return null;
+        if (_background2Layout.Count == 0) CacheDestinationLayout();
+        if (Mathf.Approximately(_transitionDirection, 0f))
+        {
+            Transform origin = _noticeBoard != null ? _noticeBoard : _jige;
+            _transitionDirection = _location2TransitionPoint.position.x >= origin.position.x ? 1f : -1f;
+        }
+        _posterBusy = false;
+        if (_wantedPosterRoot != null) _wantedPosterRoot.SetActive(false);
+        if (_continuePrompt != null) _continuePrompt.SetActive(false);
+        ShowSubtitle("");
+        _fade.alpha = 0f;
+        _fade.blocksRaycasts = false;
+        RestoreGameplayUi();
+        yield return ContinueAfterOpening();
     }
 
     private IEnumerator Start()
@@ -331,38 +374,41 @@ public class PrologueIntroController : MonoBehaviour
         _openingSoundSources.Clear();
         Phase = "Gameplay";
         yield return ReadNoticeBoard();
-        float approachDirection = _jige.position.x >= _player.transform.position.x ? 1f : -1f;
-        while (_posterBusy ||
-               (_player.transform.position.x - (_jige.position.x - _jigeTriggerDistance * approachDirection)) * approachDirection < 0f)
+        if (!IsJigeInspected)
         {
-            yield return null;
-        }
+            // Use the route direction even if progression resumes after passing the jige.
+            while (_posterBusy ||
+                   (_player.transform.position.x - (_jige.position.x - _jigeTriggerDistance * _transitionDirection)) * _transitionDirection < 0f)
+            {
+                yield return null;
+            }
 
-        ShowSubtitle("");
-        LockPlayer();
-        Phase = "Inspecting";
-        _cinematicFinished = false;
-        _jigeReached = false;
-        _jigeFocus.position = _jige.position;
-        SpriteRenderer jigeRenderer = _jige.GetComponentInChildren<SpriteRenderer>();
-        if (jigeRenderer != null) _jigeFocus.position = jigeRenderer.bounds.center;
-        _cinematics.CinematicTargets = new List<CinematicTarget> {
-            new CinematicTarget { TargetTransform = _jigeFocus, EaseInDuration = _jigePanDuration,
-                HoldDuration = -1f, Zoom = _jigeZoom, EaseType = EaseType.EaseInOut }
-        };
-        _cinematics.Play();
-        while (!_jigeReached) yield return null;
-        Phase = "JigeDialogue";
-        ShowSubtitle(_jigeStoryText);
-        yield return WaitForAdvance();
-        ShowSubtitle("");
-        _cinematics.Stop();
-        Phase = "ReturningToPlayer";
-        while (!_cinematicFinished) yield return null;
-        UnlockPlayer();
-        IsJigeInspected = true;
-        _fade.blocksRaycasts = false;
-        RestoreGameplayUi();
+            ShowSubtitle("");
+            LockPlayer();
+            Phase = "Inspecting";
+            _cinematicFinished = false;
+            _jigeReached = false;
+            _jigeFocus.position = _jige.position;
+            SpriteRenderer jigeRenderer = _jige.GetComponentInChildren<SpriteRenderer>();
+            if (jigeRenderer != null) _jigeFocus.position = jigeRenderer.bounds.center;
+            _cinematics.CinematicTargets = new List<CinematicTarget> {
+                new CinematicTarget { TargetTransform = _jigeFocus, EaseInDuration = _jigePanDuration,
+                    HoldDuration = -1f, Zoom = _jigeZoom, EaseType = EaseType.EaseInOut }
+            };
+            _cinematics.Play();
+            while (!_jigeReached) yield return null;
+            Phase = "JigeDialogue";
+            ShowSubtitle(_jigeStoryText);
+            yield return WaitForAdvance();
+            ShowSubtitle("");
+            _cinematics.Stop();
+            Phase = "ReturningToPlayer";
+            while (!_cinematicFinished) yield return null;
+            UnlockPlayer();
+            IsJigeInspected = true;
+            _fade.blocksRaycasts = false;
+            RestoreGameplayUi();
+        }
         Phase = "GameplayAfterJige";
         while (_posterBusy ||
                (_player.transform.position.x - _location2TransitionPoint.position.x) * _transitionDirection < 0f)
@@ -680,7 +726,7 @@ public class PrologueIntroController : MonoBehaviour
 
     private IEnumerator ReadNoticeBoard()
     {
-        if (_noticeBoard == null || _noticeBoardTrigger == null) yield break;
+        if (_posterRead || _noticeBoard == null || _noticeBoardTrigger == null) yield break;
         float direction = _noticeBoardTrigger.position.x >= _player.transform.position.x ? 1f : -1f;
         while ((_player.transform.position.x - _noticeBoardTrigger.position.x) * direction < 0f)
             yield return null;
