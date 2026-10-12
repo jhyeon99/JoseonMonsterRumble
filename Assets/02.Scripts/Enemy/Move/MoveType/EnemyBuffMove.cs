@@ -2,6 +2,17 @@ using UnityEngine;
 
 public class EnemyBuffMove : EnemyMoveType
 {
+    public enum OrbitCenterType
+    {
+        Center = 0,
+        AboveHead = 1,
+    }
+
+    [Header("공전 기준 위치")]
+    [SerializeField] private OrbitCenterType _orbitCenterType = OrbitCenterType.Center;
+    [Tooltip("머리 위 모드에서 대상의 상단으로부터 공전 중심까지의 높이입니다.")]
+    [SerializeField, Min(0f)] private float _aboveHeadOffset = 1f;
+
     [Header("동적 공전 마진 및 제한")]
     [SerializeField] private float _orbitMarginX = 0.85f;
     [SerializeField] private float _orbitMarginY = 0.55f;
@@ -86,7 +97,21 @@ public class EnemyBuffMove : EnemyMoveType
 
         if (_cachedTargetRenderer != null && _cachedTargetRenderer.sprite != null)
         {
-            return _cachedTargetRenderer.bounds.center;
+            Bounds bounds = _cachedTargetRenderer.bounds;
+            return _orbitCenterType == OrbitCenterType.AboveHead
+                ? new Vector2(bounds.center.x, bounds.max.y + _aboveHeadOffset)
+                : (Vector2)bounds.center;
+        }
+
+        if (_orbitCenterType == OrbitCenterType.AboveHead)
+        {
+            if (_cachedTargetCollider != null)
+            {
+                Bounds bounds = _cachedTargetCollider.bounds;
+                return new Vector2(bounds.center.x, bounds.max.y + _aboveHeadOffset);
+            }
+
+            return (Vector2)target.GetEnemyCenterPosition() + Vector2.up * _aboveHeadOffset;
         }
 
         return target.GetEnemyCenterPosition();
