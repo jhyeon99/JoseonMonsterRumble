@@ -7,4 +7,6 @@ public enum EffectType
     WalkDust,
     LandingDust,
     ParryLaunchDisappear,
+    BossStompExplosion,
+    BossJumpDust,
 }
