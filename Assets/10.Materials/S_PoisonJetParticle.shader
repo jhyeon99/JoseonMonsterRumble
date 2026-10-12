@@ -7,8 +7,6 @@ Shader "Team06/PoisonJetParticle"
         _BodyColor ("Body", Color) = (0.31, 0.39, 0.14, 1)
         _LightColor ("Light Pigment", Color) = (0.60, 0.64, 0.32, 1)
         _EdgeColor ("Dark Pigment", Color) = (0.16, 0.19, 0.085, 1)
-        _UseImpactPlane ("Clip Impact To Surface", Float) = 0
-        _ImpactPlane ("Impact Surface Plane", Vector) = (1, 0, 0, 0)
     }
     SubShader
     {
@@ -27,23 +25,18 @@ Shader "Team06/PoisonJetParticle"
             sampler2D _BrushTex;
             sampler2D _DetailTex;
             float4 _BodyColor, _LightColor, _EdgeColor;
-            float _UseImpactPlane;
-            float4 _ImpactPlane;
             struct Attributes { float4 position : POSITION; float2 uv : TEXCOORD0; float4 color : COLOR; };
-            struct Varyings { float4 position : SV_POSITION; float2 uv : TEXCOORD0; float4 color : COLOR; float2 worldPosition : TEXCOORD1; };
+            struct Varyings { float4 position : SV_POSITION; float2 uv : TEXCOORD0; float4 color : COLOR; };
             Varyings JetVertex(Attributes input)
             {
                 Varyings output;
                 output.position = UnityObjectToClipPos(input.position);
-                output.worldPosition = mul(unity_ObjectToWorld, input.position).xy;
                 output.uv = input.uv;
                 output.color = input.color;
                 return output;
             }
             float4 JetFragment(Varyings input) : SV_Target
             {
-                if (_UseImpactPlane > 0.5)
-                    clip(dot(input.worldPosition, _ImpactPlane.xy) + _ImpactPlane.z);
                 float2 centered = input.uv * 2.0 - 1.0;
                 float2 paintUV = input.uv * float2(1.2, 1.7);
                 float brush = tex2D(_BrushTex, PoisonBrushUV(paintUV)).a;
