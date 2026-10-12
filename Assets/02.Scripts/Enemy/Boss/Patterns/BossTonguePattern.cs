@@ -168,6 +168,7 @@ public class BossTonguePattern : BossPattern
         }
 
         _parried = false;
+        AudioAction("Boss.Tongue");
         _hitbox.Activate();
 
         float span = Mathf.Max(0.0001f, HitEndRatio - HitStartRatio);
