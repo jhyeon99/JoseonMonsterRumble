@@ -3054,6 +3054,10 @@ MonoBehaviour:
     Duration: 0.1
     Magnitude: 0.3
   _damageMultiplier: 0.02
+  _playerHitKick:
+    Distance: 0.18
+    Duration: 0.12
+    PushRatio: 0.25
   _enemyLightHitShake:
     Duration: 0.092
     Magnitude: 0.046
@@ -3182,11 +3186,11 @@ MonoBehaviour:
   UseBottomBoundary: 1
   BottomBoundary: -10
   TargetBottomBoundary: 0
-  UseLeftBoundary: 0
-  LeftBoundary: -10
+  UseLeftBoundary: 1
+  LeftBoundary: 70
   TargetLeftBoundary: 0
-  UseRightBoundary: 0
-  RightBoundary: 10
+  UseRightBoundary: 1
+  RightBoundary: 285
   TargetRightBoundary: 0
   IsCameraPositionHorizontallyBounded: 0
   IsCameraPositionVerticallyBounded: 0
@@ -7090,7 +7094,7 @@ Transform:
   m_GameObject: {fileID: 976005690}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 162.63, y: -2.92, z: 0}
+  m_LocalPosition: {x: 162.07, y: -2.67, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -10713,7 +10717,7 @@ PrefabInstance:
     - target: {fileID: 202350529642853549, guid: 322a01c30e393914fa7857dfe3381f19,
         type: 3}
       propertyPath: m_Size.x
-      value: 122.97854
+      value: 136.15059
       objectReference: {fileID: 0}
     - target: {fileID: 202350529642853549, guid: 322a01c30e393914fa7857dfe3381f19,
         type: 3}
@@ -10723,7 +10727,7 @@ PrefabInstance:
     - target: {fileID: 202350529642853549, guid: 322a01c30e393914fa7857dfe3381f19,
         type: 3}
       propertyPath: m_Offset.x
-      value: 43.210773
+      value: 36.62475
       objectReference: {fileID: 0}
     - target: {fileID: 202350529642853549, guid: 322a01c30e393914fa7857dfe3381f19,
         type: 3}
@@ -12215,11 +12219,9 @@ MonoBehaviour:
   _nextSceneName: Test_Ep1
   _nextSceneTriggerDistance: 1.5
   _nextSceneRevealDuration: 0.75
-  _screamClip: {fileID: 8300000, guid: a3a7638b7a432d445ac540bff0ece4f5, type: 3}
-  _jigeBreakClip: {fileID: 8300000, guid: 3edceb6a6315b084c908449d237f29a6, type: 3}
-  _doorClip: {fileID: 8300000, guid: 5e51fe6aafe41aa41b3e32db541e2250, type: 3}
   _controlHintDurationMultiplier: 2
   _controlHintOffset: {x: 0, y: 64}
+  _controlHintFont: {fileID: 12800000, guid: 0975dedf52304458a79f6f10c64f0682, type: 3}
   _moveLeftKeySprite: {fileID: 21300000, guid: 8ce7e7c466d746ed81978a9de9c5f59d, type: 3}
   _moveRightKeySprite: {fileID: 21300006, guid: 8ce7e7c466d746ed81978a9de9c5f59d,
     type: 3}
@@ -12940,7 +12942,7 @@ GameObject:
   - component: {fileID: 1969148100}
   - component: {fileID: 1969148099}
   - component: {fileID: 1969148101}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Tutorial_SmallRock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13055,7 +13057,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.34449437}
+  m_Offset: {x: -0.004337311, y: 0.37051105}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0}
@@ -13065,7 +13067,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.1999999, y: 0.68898875}
+  m_Size: {x: 1.2433548, y: 0.7410221}
   m_EdgeRadius: 0
 --- !u!1 &2001806194
 GameObject:
@@ -14005,6 +14007,15 @@ PrefabInstance:
       propertyPath: _prologue
       value: 
       objectReference: {fileID: 1875812139}
+    - target: {fileID: 1003, guid: 338365823df44498b60c62ebd118d693, type: 3}
+      propertyPath: _dodgeText
+      value: "Z\uB97C \uB204\uB974\uBA74 \uB4A4\uB85C \uBB3C\uB7EC\uB098\uBA70 \uD68C\uD53C\uD560
+        \uC218 \uC788\uB2E4."
+      objectReference: {fileID: 0}
+    - target: {fileID: 1003, guid: 338365823df44498b60c62ebd118d693, type: 3}
+      propertyPath: _attackText
+      value: "X\uB97C \uB20C\uB7EC \uC77C\uBC18 \uACF5\uACA9"
+      objectReference: {fileID: 0}
     - target: {fileID: 1003, guid: 338365823df44498b60c62ebd118d693, type: 3}
       propertyPath: _startPoint
       value: 

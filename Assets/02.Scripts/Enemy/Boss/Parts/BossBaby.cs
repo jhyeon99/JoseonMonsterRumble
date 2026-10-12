@@ -391,6 +391,8 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
             return true;
         }
 
+        if (hitData.Damage > 0f) AudioManager.Instance?.PlaySceneEvent("Boss.BabyHurt", this);
+
         // 그 외 공격은 뒤로 튕겨 나감 (위로 살짝 떠서 바닥 마찰에 덜 막힘)
         float pushX = hitData.AttackDirection.x >= 0f ? 1f : -1f;
         float speedX = _nudgeSpeed + (Mathf.Max(0f, hitData.KnockbackForce) * _attackKnockbackMultiplier);
@@ -404,6 +406,7 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
     private void Die()
     {
         _isDead = true;
+        if (!_isLaunched) AudioManager.Instance?.PlaySceneEvent("Boss.BabyDeath", this);
 
         if (_deathEffect != null)
         {
@@ -496,6 +499,7 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
         }
 
         _isLaunched = true;
+        AudioManager.Instance?.PlaySceneEvent("Boss.BabyLaunch", this);
         _body.bodyType = RigidbodyType2D.Kinematic;
         _body.linearVelocity = Vector2.zero;
 
@@ -536,6 +540,7 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
         }
         else if (_boss.Health.TakeGimmickDamage(_gimmickDamage))
         {
+            AudioManager.Instance?.PlaySceneEvent("Boss.BabyHitBoss", this);
             CameraShake.Shake(_impactShake);
             HitStop.Play(_impactHitStop);
         }

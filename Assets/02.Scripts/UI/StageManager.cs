@@ -202,6 +202,7 @@ public sealed class StageManager : MonoBehaviour
         }
         RefreshCheckpointVisuals(point.gameObject.scene);
         point.PlayActivation();
+        AudioManager.Instance?.PlaySceneEvent("Environment.Checkpoint", point);
         return true;
     }
 
@@ -686,8 +687,9 @@ public sealed class StageManager : MonoBehaviour
     /// 리스폰 지점 바로 아래 땅(일방 발판 포함)에 발이 닿는 위치.
     /// 지점이 공중에 떠 있거나 발판에 살짝 묻혀 있어도 발바닥을 표면에 맞춤. 땅을 못 찾으면 지점 그대로
     /// </summary>
-    private Vector2 GetGroundedSpawnPosition(Vector2 point)
+    private Vector2 GetGroundedSpawnPosition(Vector2 point, out Collider2D groundCollider)
     {
+        groundCollider = null;
         Collider2D playerCollider = FindPlayerBodyCollider();
         if (playerCollider == null)
         {
@@ -721,6 +723,7 @@ public sealed class StageManager : MonoBehaviour
                 continue;
             }
 
+            groundCollider = hit.collider;
             return new Vector2(point.x, hit.point.y - footOffset + SpawnSkin);
         }
 
@@ -748,7 +751,8 @@ public sealed class StageManager : MonoBehaviour
             return;
         }
 
-        Vector2 spawnPosition = GetGroundedSpawnPosition(point.Position);
+        Physics2D.SyncTransforms();
+        Vector2 spawnPosition = GetGroundedSpawnPosition(point.Position, out Collider2D groundCollider);
 
         // Rigidbody 위치는 다음 물리 스텝에 Transform에 반영되므로 Transform도 같이 옮김 (카메라 스냅용)
         _playerHealth.transform.position = spawnPosition;
@@ -759,6 +763,16 @@ public sealed class StageManager : MonoBehaviour
             playerBody.linearVelocity = Vector2.zero;
             playerBody.angularVelocity = 0f;
             playerBody.position = spawnPosition;
+        }
+
+        Physics2D.SyncTransforms();
+        if (_playerHealth.TryGetComponent(out Player player))
+        {
+            player.PrepareForRespawn(groundCollider);
+        }
+        else if (_playerHealth.TryGetComponent(out PlayerMovement movement))
+        {
+            movement.PrepareForRespawn(groundCollider);
         }
 
         // 카메라가 시작 위치에서 미끄러져 오지 않도록 바로 붙임

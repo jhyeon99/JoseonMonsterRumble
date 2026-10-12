@@ -201,6 +201,7 @@ public class BossTonguePattern : BossPattern
             yield break;
         }
 
+        AudioAction("Boss.TongueRetract");
         _retracted = true;
         float rate = _retractSpeed / Mathf.Max(0.01f, clip.length);
         Boss.PoseAnimator(stateHash, time);
