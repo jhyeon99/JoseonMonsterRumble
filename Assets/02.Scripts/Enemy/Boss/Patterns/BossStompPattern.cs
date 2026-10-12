@@ -273,6 +273,7 @@ public class BossStompPattern : BossPattern
         bool landingDustPlayed = !_landingDust || _playStompVfx;
 
         // 점프 → 착지 (판정 시작 지점에 착지)
+        _airborne = true;
         while (Progress < landRatio)
         {
             float progress = Progress;
@@ -311,6 +312,7 @@ public class BossStompPattern : BossPattern
         // 착지 + 찍기 판정
         Boss.MoveTo(new Vector2(targetX, groundY));
         Boss.SnapToGround();
+        _airborne = false;
         ShowLandingMarker(false, targetX, groundY);
         CameraShake.Shake(_landingShake);
         if (!vfxPlayed)
@@ -443,12 +445,17 @@ public class BossStompPattern : BossPattern
 
         HideNeedleWarning();
 
-        // 공중에서 끊겼으면 땅으로
-        if (Boss != null)
+        // 점프 도중(공중)에 끊겼을 때만 땅으로.
+        // (패턴 시작 시에도 정리가 한 번 불리므로, 항상 붙이면 높은 곳에서 시작하는 찍기가 바닥으로 순간이동함)
+        if (_airborne && Boss != null)
         {
             Boss.SnapToGround();
         }
+
+        _airborne = false;
     }
+
+    private bool _airborne;
 
     private float GetJumpY(float progress, float apexRatio, float landRatio, float startY, float groundY)
     {

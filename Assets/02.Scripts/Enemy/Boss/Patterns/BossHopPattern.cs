@@ -111,7 +111,12 @@ public class BossHopPattern : BossPattern
     {
         // 이륙 먼지를 일찍 내는 경우 (Boss의 Takeoff Dust Timing이 음수)
         float takeoffTiming = Boss.TakeoffDustTiming;
-        if (_takeoffDust && takeoffTiming < 0f)
+
+        // 높은 곳(시작 위치 등)에서 출발하면 발밑에 땅이 없으므로 이륙 먼지 생략
+        bool startsOnGround = Mathf.Abs(Boss.Position.y - Boss.GroundY) < 0.1f;
+        bool takeoffDust = _takeoffDust && startsOnGround;
+
+        if (takeoffDust && takeoffTiming < 0f)
         {
             float earlyRatio = _takeoffRatio + (takeoffTiming / Mathf.Max(0.0001f, Duration));
             yield return WaitUntilProgress(Mathf.Max(0f, earlyRatio));
@@ -122,11 +127,13 @@ public class BossHopPattern : BossPattern
 
         Boss.FacePlayer();
         float startX = Boss.Position.x;
+        // 지금 높이에서 출발 (높은 시작 위치에서도 바닥으로 먼저 내려가지 않고 그 자리에서 뜀)
+        float startY = Boss.Position.y;
         float groundY = Boss.GroundY;
         float targetX = GetTargetX(startX);
         float landRatio = Mathf.Max(_landRatio, _takeoffRatio + 0.01f);
 
-        if (_takeoffDust && takeoffTiming >= 0f)
+        if (takeoffDust && takeoffTiming >= 0f)
         {
             Boss.PlayJumpDust(startX, groundY, takeoffTiming);
         }
@@ -134,11 +141,13 @@ public class BossHopPattern : BossPattern
         float landingTiming = Boss.LandingDustTiming;
         bool landingDustPlayed = !_landingDust;
 
+        _airborne = true;
         while (Progress < landRatio)
         {
             float t = Mathf.InverseLerp(_takeoffRatio, landRatio, Progress);
             float x = Mathf.Lerp(startX, targetX, t);
-            float y = groundY + (4f * _hopHeight * t * (1f - t));
+            // 출발 높이에서 먼저 위로 뛰어오른 뒤 바닥으로 떨어지는 포물선 (같은 높이면 기존과 동일)
+            float y = GetHopY(t, startY, groundY);
             Boss.MoveTo(new Vector2(x, y));
 
             // 착지 직전에 미리 (Landing Dust Timing이 음수)
@@ -153,12 +162,38 @@ public class BossHopPattern : BossPattern
 
         Boss.MoveTo(new Vector2(targetX, groundY));
         Boss.SnapToGround();
+        _airborne = false;
         CameraShake.Shake(_landingShake);
 
         if (!landingDustPlayed)
         {
             Boss.PlayJumpDust(targetX, groundY, landingTiming);
         }
+    }
+
+    /// <summary>
+    /// 출발 높이 → 최고점(높은 쪽 + Hop Height) → 착지 높이. 중력처럼 올라갈 때 / 내려올 때 시간을 높이에 맞춰 나눔.
+    /// 높은 곳에서 출발해도 바로 떨어지지 않고 그 자리에서 위로 뛰어오른 뒤 내려옴
+    /// </summary>
+    private float GetHopY(float t, float startY, float landY)
+    {
+        float apexY = Mathf.Max(startY, landY) + _hopHeight;
+        float rise = Mathf.Max(0f, apexY - startY);
+        float fall = Mathf.Max(0f, apexY - landY);
+        if (rise + fall <= 0.0001f)
+        {
+            return Mathf.Lerp(startY, landY, t);
+        }
+
+        float apexT = Mathf.Sqrt(rise) / (Mathf.Sqrt(rise) + Mathf.Sqrt(fall));
+        if (t < apexT)
+        {
+            float u = (apexT - t) / Mathf.Max(0.0001f, apexT);
+            return apexY - (rise * u * u);
+        }
+
+        float v = (t - apexT) / Mathf.Max(0.0001f, 1f - apexT);
+        return apexY - (fall * v * v);
     }
 
     /// <summary>플레이어를 넘어 Overshoot Distance만큼 반대편까지 (최대 Hop Distance, 맵 안쪽으로 제한)</summary>
@@ -182,12 +217,17 @@ public class BossHopPattern : BossPattern
 
     protected override void Cleanup()
     {
-        // 공중에서 끊겼으면 땅으로
-        if (Boss != null)
+        // 점프 도중(공중)에 끊겼을 때만 땅으로.
+        // (패턴 시작 시에도 정리가 한 번 불리므로, 항상 붙이면 높은 시작 위치에서 바닥으로 순간이동함)
+        if (_airborne && Boss != null)
         {
             Boss.SnapToGround();
         }
+
+        _airborne = false;
     }
+
+    private bool _airborne;
 
     private void OnDrawGizmosSelected()
     {

@@ -2398,18 +2398,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 7894052878302603946}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1847312044 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
-    type: 3}
-  m_PrefabInstance: {fileID: 7894052878302603946}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 730451388}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f35449425cf622a449b2cc53895e702d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossStompPattern
 --- !u!1001 &1919321932
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3230,12 +3218,12 @@ PrefabInstance:
     - target: {fileID: 1120996850455429521, guid: a7a212515b6fa9848a2a57d112184c9c,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -19.42
+      value: -2
       objectReference: {fileID: 0}
     - target: {fileID: 1120996850455429521, guid: a7a212515b6fa9848a2a57d112184c9c,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 6.01
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1120996850455429521, guid: a7a212515b6fa9848a2a57d112184c9c,
         type: 3}
@@ -3425,7 +3413,7 @@ PrefabInstance:
         type: 3}
       propertyPath: _introNextPattern
       value: 
-      objectReference: {fileID: 1847312044}
+      objectReference: {fileID: 1847312036}
     - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _finishMarkerPoint
@@ -3461,6 +3449,11 @@ PrefabInstance:
         type: 3}
       propertyPath: _phase2MaxHp
       value: 400
+      objectReference: {fileID: 0}
+    - target: {fileID: 2210088866851504016, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _attackName
+      value: "\uB3CC\uC9C4"
       objectReference: {fileID: 0}
     - target: {fileID: 3711774888999376504, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
@@ -3512,6 +3505,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4736397318258663571, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _attackName
+      value: "\uCC0D\uAE30"
+      objectReference: {fileID: 0}
     - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _spikeFloor
@@ -3540,12 +3538,12 @@ PrefabInstance:
     - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _animationSpeed
-      value: 1
+      value: 0.65
       objectReference: {fileID: 0}
     - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _nextStompRatio
-      value: 1
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
