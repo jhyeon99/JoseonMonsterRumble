@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 9d2278e51e982c54eaf1b641ab428b0e
+guid: 4796187bca98b814ab4c6dc41d07ea40
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5943252601512307771
-    second: player_air_atk2_00001_0
+      213: -7595570567024379470
+    second: player_airattack_00006_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: player_air_atk2_00001_0
+      name: player_airattack_00006_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1280
-        height: 616
+        x: 435
+        y: 6
+        width: 446
+        height: 485
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b3cae8b90ccaa7250800000000000000
-      internalID: 5943252601512307771
+      spriteID: 2b97916ffcc179690800000000000000
+      internalID: -7595570567024379470
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      player_air_atk2_00001_0: 5943252601512307771
+      player_airattack_00006_0: -7595570567024379470
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
