@@ -1984,6 +1984,12 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1500655848}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &1560920858 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2228461680813541611, guid: 83fb014387212d64b92ba347ab7440f5,
+    type: 3}
+  m_PrefabInstance: {fileID: 7819398031366263473}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1593993627 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5082515605799688274, guid: 83fb014387212d64b92ba347ab7440f5,
@@ -2686,6 +2692,18 @@ MonoBehaviour:
   _swingShake:
     Duration: 0.1
     Magnitude: 0.12
+--- !u!114 &1847312053 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+    type: 3}
+  m_PrefabInstance: {fileID: 7894052878302603946}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 730451388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7fd1c86870607f49bd5c1394d51ebb1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossSummonPattern
 --- !u!1001 &1919321932
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3694,6 +3712,11 @@ PrefabInstance:
       objectReference: {fileID: 1942571981}
     - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
+      propertyPath: _groundPoint
+      value: 
+      objectReference: {fileID: 1560920858}
+    - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
       propertyPath: _jumpDustOffsetY
       value: 2.5
       objectReference: {fileID: 0}
@@ -3723,6 +3746,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 4110977809489485059, guid: d9ea34398a39b3d449d93258c054522d,
         type: 3}
+    - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _phase2FirstPattern
+      value: 
+      objectReference: {fileID: 1847312053}
     - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _finishMarkerOffset.y
@@ -3887,7 +3915,7 @@ PrefabInstance:
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _phases
-      value: -1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
@@ -3911,6 +3939,11 @@ PrefabInstance:
       objectReference: {fileID: 12639082}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
+      propertyPath: _maxDuration
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
       propertyPath: _summonPoint
       value: 
       objectReference: {fileID: 626587057}
@@ -3927,13 +3960,53 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
+      propertyPath: _animationTrigger
+      value: ultimate
+      objectReference: {fileID: 0}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _followingClips.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
       propertyPath: _phase1HpRatios.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _phase2HpRatios.Array.size
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
+      propertyPath: '_followingClips.Array.data[1]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 2cc376f3d5e1c8343904541b904cd5b6, type: 2}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: '_followingClips.Array.data[2]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 2cc376f3d5e1c8343904541b904cd5b6, type: 2}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: '_followingClips.Array.data[3]'
+      value: 
+      objectReference: {fileID: 7400000, guid: b060ad6bf1139604da5f8707cb910ba6, type: 2}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
       propertyPath: '_phase1HpRatios.Array.data[0]'
       value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: '_phase2HpRatios.Array.data[0]'
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: '_phase2HpRatios.Array.data[1]'
+      value: 0.2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
