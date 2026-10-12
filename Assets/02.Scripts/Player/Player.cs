@@ -390,6 +390,22 @@ public class Player : MonoBehaviour
         Debug.LogWarning($"{name}: 애니메이터에 {PotionAnimState} 상태가 없습니다.", this);
     }
 
+    public void PrepareForRespawn(Collider2D groundCollider)
+    {
+        _movement.PrepareForRespawn(groundCollider);
+        SetRunning(false);
+        SetGrounded(groundCollider != null);
+        if (groundCollider != null)
+        {
+            PlayIdleAnimation();
+            if (_animator != null && _animator.isActiveAndEnabled)
+            {
+                // 시간 정지 중에도 대기 자세를 먼저 적용한 뒤 로딩 화면을 걷는다.
+                _animator.Update(0f);
+            }
+        }
+    }
+
     public void PlayIdleAnimation()
     {
         if (_animator == null)
