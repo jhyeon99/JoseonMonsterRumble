@@ -230,6 +230,8 @@ public class BossSummonPattern : BossPattern
         _pending = false;
     }
 
+    private float _lastHp = float.PositiveInfinity;
+
     private void HandlePhaseChanged(int phase)
     {
         // 새 페이즈는 체력이 가득 찬 상태로 시작하므로 비율 체크를 처음부터
@@ -239,6 +241,14 @@ public class BossSummonPattern : BossPattern
 
     private void HandleHpChanged(float current, float max)
     {
+        // 체력이 차오를 때(2페이즈 전환 시 체력바 다시 채우기 등)는 비율 발동을 검사하지 않음
+        bool increased = current > _lastHp;
+        _lastHp = current;
+        if (increased)
+        {
+            return;
+        }
+
         if (max <= 0f || current <= 0f)
         {
             return;
