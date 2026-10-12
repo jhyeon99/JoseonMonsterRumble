@@ -44,6 +44,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     [SerializeField] private Image _keyImage;
     [SerializeField] private Sprite _attackKeySprite;
     [SerializeField] private Sprite _dodgeKeySprite;
+    [SerializeField] private Font _focusFont;
 
     [Header("Dialogue")]
     [SerializeField, TextArea] private string _encounterText = "요괴?";
@@ -57,6 +58,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     [SerializeField] private Color _focusBorderColor = Color.white;
     [SerializeField, Min(0f)] private float _focusPadding = 24f;
     [SerializeField, Min(1f)] private float _fleeDistance = 45f;
+    [SerializeField, Min(1f)] private float _fleeSpeedMultiplier = 2f;
 
     private PlayerInputHandler _input;
     private EnemyCombat _combat;
@@ -107,8 +109,13 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     private sealed class FleeState : ChaseState
     {
         private readonly Enemy _enemy;
+        private readonly float _speedMultiplier;
 
-        public FleeState(Enemy enemy) : base(enemy) => _enemy = enemy;
+        public FleeState(Enemy enemy, float speedMultiplier) : base(enemy)
+        {
+            _enemy = enemy;
+            _speedMultiplier = speedMultiplier;
+        }
 
         public override void Enter()
         {
@@ -119,17 +126,19 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
             Vector3 scale = _enemy.transform.localScale;
             scale.x = Mathf.Abs(scale.x);
             _enemy.transform.localScale = scale;
+            _enemy.Animation.SetAnimationSpeed(_speedMultiplier);
             _enemy.Animation.SetRunning(true);
         }
 
         public override void Update() { }
 
-        public override void FixedUpdate() => _enemy.MoveType.Move(Vector2.right);
+        public override void FixedUpdate() => _enemy.MoveType.Move(Vector2.right * _speedMultiplier);
 
         public override void Exit()
         {
             _enemy.MoveType.StopMove();
             _enemy.Animation.SetRunning(false);
+            _enemy.Animation.ResetAnimationSpeed();
         }
     }
 
@@ -349,7 +358,8 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     private void ShowDodgeFocus()
     {
         _focusOverlay.Show(null, null, _camera.GameCamera, _dodgeText, "Z를 눌러 회피", _dodgeKeySprite,
-            _dialogue.font, Mathf.Max(24, _hintFontSize), _dialogue.fontStyle, Color.white,
+            _focusFont != null ? _focusFont : _dialogue.font,
+            Mathf.Max(24, _hintFontSize), _dialogue.fontStyle, Color.white,
             Color.black, 0f, _focusOpacity, _focusBorderColor, 0f,
             new Vector2(440f, 100f), _focusPadding, new Vector2(120f, 120f), _enemySprite);
     }
@@ -378,7 +388,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
             area.CenterOffset = new Vector2((left + right) * 0.5f - area.StartPosition.x, area.CenterOffset.y);
             area.AreaSize = new Vector2(right - left, area.AreaSize.y);
         }
-        _enemy.StateMachine.ChangeState(new FleeState(_enemy));
+        _enemy.StateMachine.ChangeState(new FleeState(_enemy, _fleeSpeedMultiplier));
     }
 
     private IEnumerator WaitForNeutralPlayer()

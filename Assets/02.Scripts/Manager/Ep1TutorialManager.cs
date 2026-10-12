@@ -36,6 +36,7 @@ public sealed partial class Ep1TutorialManager : MonoBehaviour
     [SerializeField, Min(0.1f)] private float _guardEncounterDistance = 8f;
 
     [SerializeField] private Font _font;
+    [SerializeField] private Font _headHintFont;
     [SerializeField, Min(1)] private int _fontSize = 26;
     [SerializeField] private FontStyle _fontStyle = FontStyle.Normal;
     [SerializeField] private Color _textColor = Color.black;
@@ -168,7 +169,8 @@ public sealed partial class Ep1TutorialManager : MonoBehaviour
 
     public void ApplyTextStyle(Text text)
     {
-        if (_font != null) text.font = _font;
+        Font hintFont = _headHintFont != null ? _headHintFont : _font;
+        if (hintFont != null) text.font = hintFont;
         text.fontSize = _fontSize;
         text.fontStyle = _fontStyle;
         text.color = _textColor;

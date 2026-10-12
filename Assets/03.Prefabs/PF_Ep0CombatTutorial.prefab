@@ -68,6 +68,7 @@ MonoBehaviour:
   _keyImage: {fileID: 1504}
   _attackKeySprite: {fileID: 21300012, guid: 8ce7e7c466d746ed81978a9de9c5f59d, type: 3}
   _dodgeKeySprite: {fileID: 21300010, guid: 8ce7e7c466d746ed81978a9de9c5f59d, type: 3}
+  _focusFont: {fileID: 12800000, guid: 21bb382be0384decb2eb04b15aecb846, type: 3}
   _encounterText: "요괴?"
   _attackText: "X를 눌러 일반 공격을 해보자."
   _dodgeText: "요괴가 공격하려고 한다.\nZ를 누르면 뒤로 물러나며 회피할 수 있다."
@@ -77,6 +78,7 @@ MonoBehaviour:
   _focusBorderColor: {r: 1, g: 1, b: 1, a: 1}
   _focusPadding: 24
   _fleeDistance: 45
+  _fleeSpeedMultiplier: 2
 --- !u!1 &1101
 GameObject:
   m_ObjectHideFlags: 0
@@ -305,7 +307,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 21bb382be0384decb2eb04b15aecb846, type: 3}
+    m_Font: {fileID: 12800000, guid: 0975dedf52304458a79f6f10c64f0682, type: 3}
     m_FontSize: 24
     m_FontStyle: 0
     m_BestFit: 0
@@ -539,7 +541,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 21bb382be0384decb2eb04b15aecb846, type: 3}
+    m_Font: {fileID: 12800000, guid: 0975dedf52304458a79f6f10c64f0682, type: 3}
     m_FontSize: 48
     m_FontStyle: 0
     m_BestFit: 0
