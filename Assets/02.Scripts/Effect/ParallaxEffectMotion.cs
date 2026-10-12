@@ -10,6 +10,7 @@ public sealed class ParallaxEffectMotion : MonoBehaviour
     [SerializeField] private string _backgroundLayerName = DefaultLayerName;
 
     private Transform _targetCamera;
+    private ParallaxManager _cachedParallax;
     private Vector2 _cameraMovementMultiplier;
     private Vector3 _startCameraPosition;
     private Vector3 _startEffectPosition;
@@ -20,22 +21,53 @@ public sealed class ParallaxEffectMotion : MonoBehaviour
         _targetCamera = null;
         _cameraMovementMultiplier = Vector2.zero;
         _startEffectPosition = transform.position;
-        ParallaxManager parallax = FindFirstObjectByType<ParallaxManager>();
-        if (parallax == null)
+        Camera worldCamera = Camera.main;
+        if (worldCamera == null)
         {
             return;
         }
-        if (!parallax.TryGetLayerCameraMovement(_backgroundLayerName, out _targetCamera, out _cameraMovementMultiplier))
+        if (!TryInitializeCameraMovement(worldCamera.transform))
         {
-            _targetCamera = null;
-            if (!_hasWarnedMissingLayer)
-            {
-                Debug.LogWarning(MissingLayerWarning, this);
-                _hasWarnedMissingLayer = true;
-            }
             return;
         }
         _startCameraPosition = _targetCamera.position;
+    }
+
+    private bool TryInitializeCameraMovement(Transform cameraTransform)
+    {
+        if (TryUseParallaxManager(_cachedParallax, cameraTransform))
+        {
+            return true;
+        }
+        _cachedParallax = null;
+        ParallaxManager[] parallaxes = FindObjectsByType<ParallaxManager>(FindObjectsSortMode.None);
+        foreach (ParallaxManager parallax in parallaxes)
+        {
+            if (TryUseParallaxManager(parallax, cameraTransform))
+            {
+                _cachedParallax = parallax;
+                return true;
+            }
+        }
+        if (parallaxes.Length > 0 && !_hasWarnedMissingLayer)
+        {
+            Debug.LogWarning(MissingLayerWarning, this);
+            _hasWarnedMissingLayer = true;
+        }
+        return false;
+    }
+
+    private bool TryUseParallaxManager(ParallaxManager parallax, Transform cameraTransform)
+    {
+        if (parallax == null ||
+            !parallax.TryGetLayerCameraMovement(_backgroundLayerName, out Transform targetCamera, out Vector2 multiplier) ||
+            targetCamera != cameraTransform)
+        {
+            return false;
+        }
+        _targetCamera = targetCamera;
+        _cameraMovementMultiplier = multiplier;
+        return true;
     }
 
     private void LateUpdate()
