@@ -10,6 +10,7 @@ public class LaunchedState : EnemyState
 {
     // DrawBehind일 때 정렬 순서를 이만큼 뒤로 보냄
     private const int BehindSortingOffset = -100;
+    private const string MissingEffectManagerWarning = "패링 3타 소멸 VFX: EffectManager가 없어 재생하지 못했습니다.";
 
     private readonly Enemy _enemy;
     private readonly LaunchSettings _settings;
@@ -156,6 +157,15 @@ public class LaunchedState : EnemyState
     private void Finish()
     {
         _isFinished = true;
+        EffectManager effectManager = EffectManager.Instance;
+        if (effectManager != null)
+        {
+            effectManager.PlayParryLaunchDisappear(_currentCenter);
+        }
+        else
+        {
+            Debug.LogWarning(MissingEffectManagerWarning, _enemy);
+        }
         _enemy.gameObject.SetActive(false);
     }
 }

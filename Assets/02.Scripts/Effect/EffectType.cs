@@ -6,4 +6,5 @@ public enum EffectType
     BossHowl,
     WalkDust,
     LandingDust,
+    ParryLaunchDisappear,
 }
