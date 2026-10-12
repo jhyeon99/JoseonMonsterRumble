@@ -45,6 +45,7 @@ public class PrologueIntroController : MonoBehaviour
     [Tooltip("동작 완료까지 표시된 시간의 배율입니다. 2면 완료 후 같은 시간만큼 더 표시합니다.")]
     [SerializeField, Min(1f)] private float _controlHintDurationMultiplier = 2f;
     [SerializeField] private Vector2 _controlHintOffset = new Vector2(0f, 64f);
+    [SerializeField] private Font _controlHintFont;
     [SerializeField] private Sprite _moveLeftKeySprite;
     [SerializeField] private Sprite _moveRightKeySprite;
     [SerializeField] private Sprite _jumpCKeySprite;
@@ -1000,7 +1001,7 @@ public class PrologueIntroController : MonoBehaviour
         rect.sizeDelta = new Vector2(width, 64f);
         Text text = label.GetComponent<Text>();
         text.text = value;
-        text.font = _subtitle.font;
+        text.font = _controlHintFont != null ? _controlHintFont : _subtitle.font;
         text.fontSize = 24;
         text.alignment = TextAnchor.MiddleCenter;
         text.color = Color.black;
