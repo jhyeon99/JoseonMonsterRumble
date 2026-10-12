@@ -1,10 +1,22 @@
 fileFormatVersion: 2
-guid: 2246b9acd8f6b7b43b813aea095e9192
+guid: 8368015d94c8b1448b4834657d28f3c0
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2331272655759495269
-    second: player_air_atk2_00006_0
+      213: 2571464586012551143
+    second: player_airattack_00004_0
+  - first:
+      213: 802589711201052509
+    second: player_airattack_00004_1
+  - first:
+      213: 6521036965522101688
+    second: player_airattack_00004_2
+  - first:
+      213: -7667924625796836494
+    second: player_airattack_00004_3
+  - first:
+      213: -4282904703194705139
+    second: player_airattack_00004_4
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +138,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: player_air_atk2_00006_0
+      name: player_airattack_00004_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1280
-        height: 616
+        x: 636
+        y: 497
+        width: 55
+        height: 27
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +153,96 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5605029f0285a5020800000000000000
-      internalID: 2331272655759495269
+      spriteID: 7e766c1ba6dafa320800000000000000
+      internalID: 2571464586012551143
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_airattack_00004_1
+      rect:
+        serializedVersion: 2
+        x: 693
+        y: 511
+        width: 9
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d57a58c071f532b00800000000000000
+      internalID: 802589711201052509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_airattack_00004_2
+      rect:
+        serializedVersion: 2
+        x: 521
+        y: 498
+        width: 10
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b5d229f1906f7a50800000000000000
+      internalID: 6521036965522101688
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_airattack_00004_3
+      rect:
+        serializedVersion: 2
+        x: 778
+        y: 486
+        width: 32
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 273d8e2ed2f069590800000000000000
+      internalID: -7667924625796836494
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: player_airattack_00004_4
+      rect:
+        serializedVersion: 2
+        x: 409
+        y: 9
+        width: 557
+        height: 485
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d03da3f3dd01094c0800000000000000
+      internalID: -4282904703194705139
       vertices: []
       indices: 
       edges: []
@@ -161,7 +261,11 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      player_air_atk2_00006_0: 2331272655759495269
+      player_airattack_00004_0: 2571464586012551143
+      player_airattack_00004_1: 802589711201052509
+      player_airattack_00004_2: 6521036965522101688
+      player_airattack_00004_3: -7667924625796836494
+      player_airattack_00004_4: -4282904703194705139
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
