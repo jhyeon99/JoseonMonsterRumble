@@ -37,6 +37,8 @@ public class IdleState : EnemyState
 
     public override void Update()
     {
+        if (MapTestMode.IsEnabled) return;
+
         if (_enemy.MoveArea != null && _enemy.Target != null)
         {
             if (_enemy.MoveArea.IsPositionDetected(_enemy.Target.position))

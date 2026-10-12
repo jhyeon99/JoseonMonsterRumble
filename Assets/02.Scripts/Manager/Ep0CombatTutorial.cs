@@ -118,6 +118,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     private void OnEnable()
     {
+        Canvas.preWillRenderCanvases += UpdateHintPosition;
         GameEvents.OnParry += HandleParry;
         if (_initialized && _enemy != null) _enemy.Health.OnHit += HandleEnemyHit;
     }
@@ -367,6 +368,8 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     private void ConfigurePlayerHint()
     {
         Canvas canvas = _panel.GetComponentInParent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.pixelPerfect = true;
         RectTransform canvasRect = canvas.GetComponent<RectTransform>();
         // The scene currently overrides this canvas to scale zero and non-stretch anchors.
         canvasRect.localScale = Vector3.one;
@@ -418,20 +421,8 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     {
         if (!_initialized || !_panel.activeSelf || _player == null || _camera == null) return;
         RectTransform panelRect = _panel.GetComponent<RectTransform>();
-        var parent = panelRect.parent as RectTransform;
-        if (parent == null) return;
-        Camera view = _camera.GetComponent<Camera>();
-        Collider2D body = _player.GetComponent<Collider2D>();
-        Vector3 worldPosition = body != null ? body.bounds.center : _player.transform.position;
-        Vector3 screenPosition = view.WorldToScreenPoint(worldPosition);
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, screenPosition, null, out Vector2 localPosition))
-        {
-            Vector2 position = localPosition + _hintOffset;
-            Vector2 halfSize = panelRect.sizeDelta * 0.5f;
-            position.x = Mathf.Clamp(position.x, parent.rect.xMin + halfSize.x, parent.rect.xMax - halfSize.x);
-            position.y = Mathf.Clamp(position.y, parent.rect.yMin + halfSize.y, parent.rect.yMax - halfSize.y);
-            panelRect.anchoredPosition = position;
-        }
+        TutorialHintPositioning.Position(panelRect, _camera.GetComponent<Camera>(),
+            TutorialHintPositioning.GetRenderedPlayerAnchor(_player, false), _hintOffset, true);
     }
 
     private IEnumerator ShowMonsterCinematic()
@@ -559,6 +550,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     private void OnDisable()
     {
+        Canvas.preWillRenderCanvases -= UpdateHintPosition;
         StopAllCoroutines();
         GameEvents.OnParry -= HandleParry;
         if (_initialized && _enemy != null) _enemy.Health.OnHit -= HandleEnemyHit;

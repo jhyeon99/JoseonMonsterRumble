@@ -20,6 +20,9 @@ public class GroggyState : EnemyState
     private float _blinkTimer;
     private bool _isBlinkOn;
 
+    // Tutorial can keep the existing yellow cue moving while the groggy timer stays paused.
+    public bool UseUnscaledBlink { get; set; }
+
     public GroggyState(Enemy enemy, float duration)
     {
         _enemy = enemy;
@@ -92,7 +95,7 @@ public class GroggyState : EnemyState
             return;
         }
 
-        _blinkTimer -= Time.deltaTime;
+        _blinkTimer -= UseUnscaledBlink ? Time.unscaledDeltaTime : Time.deltaTime;
         if (_blinkTimer > 0f)
         {
             return;

@@ -20,15 +20,10 @@ public class PauseController : MonoBehaviour
 
     private static bool _isMenuPaused;
     private static bool _isItemModalPaused;
-    public static bool IsPaused => _isMenuPaused || _isItemModalPaused ||
+    private static Object _tutorialPauseOwner;
+    public static bool IsPaused => _isMenuPaused || _isItemModalPaused || _tutorialPauseOwner != null ||
                                    (StageManager.Instance != null && StageManager.Instance.IsRespawnWorldFrozen);
     private static int _pauseTransitionFrame = -1;
-
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetModalState()
-    {
-        _isItemModalPaused = false;
-    }
 
     public static bool TryStartItemModal()
     {
@@ -104,7 +99,7 @@ public class PauseController : MonoBehaviour
 
     private void Update()
     {
-        if (_isItemModalPaused)
+        if (_tutorialPauseOwner != null || _isItemModalPaused)
         {
             return;
         }
@@ -233,6 +228,7 @@ public class PauseController : MonoBehaviour
 
     private void SetPaused(bool isPaused)
     {
+        if (_tutorialPauseOwner != null) return;
         if (isPaused && _isItemModalPaused)
         {
             return;
@@ -349,6 +345,35 @@ public class PauseController : MonoBehaviour
     // 일시정지 직전 값(히트스톱 중이면 0.02 등)을 복원하면 슬로우모션이 남으므로 항상 정상 속도로 복귀
     private void RestoreTimeScale()
     {
+        Time.timeScale = IsPaused ? 0f : 1f;
+    }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetPauseState()
+    {
+        _isMenuPaused = false;
+        _isItemModalPaused = false;
+        _tutorialPauseOwner = null;
+        _pauseTransitionFrame = -1;
+    }
+
+    // Tutorial owns the pause without opening the Escape menu. Existing input and hit-stop
+    // checks use IsPaused too, so they cannot resume time or accept attacks behind the card.
+    public static bool TryPauseForTutorial(Object owner)
+    {
+        if (owner == null || IsGameplayInputBlocked) return false;
+        HitStop.Stop();
+        _tutorialPauseOwner = owner;
+        _pauseTransitionFrame = Time.frameCount;
+        Time.timeScale = 0f;
+        return true;
+    }
+
+    public static void ResumeFromTutorial(Object owner)
+    {
+        if (_tutorialPauseOwner != owner || owner == null) return;
+        _tutorialPauseOwner = null;
+        _pauseTransitionFrame = Time.frameCount;
         Time.timeScale = IsPaused ? 0f : 1f;
     }
 

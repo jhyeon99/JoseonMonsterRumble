@@ -46,6 +46,7 @@ public class PlayerRangedAttack : MonoBehaviour
     public bool IsCharging => _chargeState == ChargeState.Charging;
     public bool IsReadyToFire => _chargeState == ChargeState.ReadyToFire;
     public int ActiveCount => _activeCount;
+    public float SoulCostPerTalisman => _soulCostPerTalisman;
 
     /// <summary>발사 시 호출. 인자 = 실제로 발사된 부적 개수 (사운드, 이펙트 연결용)</summary>
     public event Action<int> OnFired;
