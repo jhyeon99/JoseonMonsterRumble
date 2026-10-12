@@ -152,10 +152,6 @@ public class BossCinematicDirector : MonoBehaviour
     [SerializeField]
     private Color _bossAngerTint = new Color(1f, 0.72f, 0.72f, 1f);
 
-    [Tooltip("화면 전체에 깔리는 색조 (알파 = 세기, 0이면 사용 안 함)")]
-    [SerializeField]
-    private Color _screenAngerTint = new Color(0.55f, 0f, 0f, 0.12f);
-
     [Tooltip("색조가 바뀌는 시간 (초)")]
     [SerializeField, Min(0.01f)]
     private float _tintTransitionTime = 1.2f;
@@ -237,7 +233,6 @@ public class BossCinematicDirector : MonoBehaviour
     private RectTransform _bottomBar;
     private CanvasGroup _titleGroup;
     private Image _flashImage;
-    private Image _tintImage;
     private float _letterboxAmount;
     private Coroutine _letterboxRoutine;
     private Coroutine _defeatRoutine;
@@ -543,12 +538,10 @@ public class BossCinematicDirector : MonoBehaviour
         _isSlowMotion = false;
     }
 
-    /// <summary>분노 색조 켜기 / 끄기 (보스 스프라이트 + 화면)</summary>
+    /// <summary>분노 색조 켜기 / 끄기 (보스 스프라이트만. 화면 전체 붉은 색조는 사용 안 함)</summary>
     private IEnumerator TintRoutine(bool angry)
     {
         float elapsed = 0f;
-        float startScreen = _tintImage != null ? _tintImage.color.a : 0f;
-        float endScreen = angry ? _screenAngerTint.a : 0f;
 
         while (elapsed < _tintTransitionTime)
         {
@@ -556,11 +549,6 @@ public class BossCinematicDirector : MonoBehaviour
             float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / _tintTransitionTime));
 
             ApplyBossTint(angry ? t : 1f - t);
-            if (_tintImage != null)
-            {
-                SetImageAlpha(_tintImage, _screenAngerTint, Mathf.Lerp(startScreen, endScreen, t));
-            }
-
             yield return null;
         }
     }
@@ -697,11 +685,7 @@ public class BossCinematicDirector : MonoBehaviour
         scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.matchWidthOrHeight = 0.5f;
 
-        // 화면 색조 → 플래시 → 레터박스 → 타이틀 순서로 위에 그려짐
-        _tintImage = CreateImage("AngerTint", canvasObject.transform, _screenAngerTint);
-        Stretch(_tintImage.rectTransform, Vector2.zero, Vector2.one);
-        SetImageAlpha(_tintImage, _screenAngerTint, 0f);
-
+        // 플래시 → 레터박스 → 타이틀 순서로 위에 그려짐
         _flashImage = CreateImage("Flash", canvasObject.transform, _flashColor);
         Stretch(_flashImage.rectTransform, Vector2.zero, Vector2.one);
         SetImageAlpha(_flashImage, _flashColor, 0f);
