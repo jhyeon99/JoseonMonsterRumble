@@ -12,6 +12,7 @@ public sealed class BossPoisonBeam : MonoBehaviour
     [SerializeField] private ParticleSystem _mouthParticles;
     [SerializeField] private ParticleSystem _headParticles;
     [SerializeField] private ParticleSystem _impactCloudParticles;
+    [SerializeField] private ParticleSystem _residualParticles;
     [SerializeField] private SpriteRenderer _bossRenderer;
     [SerializeField] private GameObject _attacker;
     [Tooltip("입 기준점에서 입술 바깥까지의 로컬 보정. 보스 이동, 크기, 반전을 따른다.")]
@@ -57,6 +58,10 @@ public sealed class BossPoisonBeam : MonoBehaviour
     [SerializeField, Range(0.1f, 0.8f)] private float _breakupPressure = 0.45f;
     [SerializeField, Min(0f)] private float _residualDrag = 1.8f;
     [SerializeField, Min(0.1f)] private float _residualParticleLifetime = 2.4f;
+    [Tooltip("종료 독가루의 최소 / 최대 크기. 작은 입자가 더 많이 섞인다.")]
+    [SerializeField] private Vector2 _residualDropletSizeRange = new Vector2(0.02f, 0.28f);
+    [Tooltip("분해 구간마다 생성하는 독가루의 기준 개수. 실제 개수는 조금씩 다르다.")]
+    [SerializeField, Range(1, 12)] private int _residualDropletsPerFragment = 8;
     [SerializeField, ReadOnly] private float _emissionPressure = 1f;
 
     [Header("충돌 / 피해")]
@@ -86,10 +91,12 @@ public sealed class BossPoisonBeam : MonoBehaviour
     }
 
     private const int SampleCapacity = 512;
+    private const int ResidualParticleCapacity = 2048;
     private static readonly WaitForFixedUpdate FixedStep = new WaitForFixedUpdate();
     private readonly LiquidSample[] _samples = new LiquidSample[SampleCapacity];
     private readonly Vector3[] _positions = new Vector3[SampleCapacity + 1];
     private readonly float[] _widths = new float[SampleCapacity + 1];
+    private readonly ParticleSystem.Particle[] _residualParticleBuffer = new ParticleSystem.Particle[ResidualParticleCapacity];
     private readonly AnimationCurve _renderWidthCurve = new AnimationCurve();
     private readonly List<RaycastHit2D> _terrainHits = new List<RaycastHit2D>(16);
     private readonly List<Collider2D> _targetHits = new List<Collider2D>(16);
@@ -125,14 +132,26 @@ public sealed class BossPoisonBeam : MonoBehaviour
     private ParticleSystemRenderer _impactCloudRenderer;
 
     public bool IsFiring => _isFiring;
+    public bool IsReady => _isInitialized && isActiveAndEnabled;
+
+    /// <summary>프리팹 활성화 전에 실제 입과 보스 참조를 연결한다.</summary>
+    public bool SetEmitter(Transform mouth, SpriteRenderer bossRenderer, GameObject attacker)
+    {
+        if (_isInitialized || mouth == null || bossRenderer == null || attacker == null) return false;
+        _mouth = mouth;
+        _bossRenderer = bossRenderer;
+        _attacker = attacker;
+        return true;
+    }
 
     /// <summary>테스트 드라이버가 Awake에서 파티클을 구성한 뒤 호출한다.</summary>
     public void SetParticles(ParticleSystem mouthParticles, ParticleSystem headParticles,
-        ParticleSystem impactCloudParticles = null)
+        ParticleSystem impactCloudParticles = null, ParticleSystem residualParticles = null)
     {
         _mouthParticles = mouthParticles;
         _headParticles = headParticles;
         _impactCloudParticles = impactCloudParticles;
+        _residualParticles = residualParticles;
     }
 
     private void Awake()
@@ -160,6 +179,13 @@ public sealed class BossPoisonBeam : MonoBehaviour
         _targetFilter.SetLayerMask(_targetMask);
         InitializeParticles(_mouthParticles);
         InitializeParticles(_headParticles);
+        if (_residualParticles != null)
+        {
+            InitializeParticles(_residualParticles);
+            ParticleSystem.MainModule residualMain = _residualParticles.main;
+            residualMain.maxParticles = ResidualParticleCapacity;
+            residualMain.gravityModifier = Physics.gravity.y < -0.001f ? _gravity / -Physics.gravity.y : 0f;
+        }
         // 끝부분 파편은 자유 분사와 지형 충돌의 실제 방향으로 직접 방출한다.
         ParticleSystem.EmissionModule headEmission = _headParticles.emission;
         headEmission.enabled = false;
@@ -176,6 +202,7 @@ public sealed class BossPoisonBeam : MonoBehaviour
             _line.sortingOrder = _bossRenderer.sortingOrder + 1;
             SetParticleSorting(_mouthParticles);
             SetParticleSorting(_headParticles);
+            if (_residualParticles != null) SetParticleSorting(_residualParticles);
             if (_impactCloudParticles != null)
             {
                 SetParticleSorting(_impactCloudParticles);
@@ -324,7 +351,6 @@ public sealed class BossPoisonBeam : MonoBehaviour
             ApplyBeamDamage();
             elapsed += Time.fixedDeltaTime;
         }
-        _isEmitting = false;
         _isDepressurizing = true;
         _mouthParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         _headParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
@@ -334,7 +360,8 @@ public sealed class BossPoisonBeam : MonoBehaviour
         resistance.limit = 1000f;
         resistance.dampen = 0f;
         resistance.drag = _residualDrag;
-        // 발사 종료 후에만 압력을 낮춘다. 그동안 잔류 독액은 중력으로 계속 이동한다.
+        // 입에서의 연결과 약한 방출을 유지하며 압력을 낮춘다.
+        // 굵은 줄기를 입에서 떼어 날려 보내는 구간은 만들지 않는다.
         elapsed = 0f;
         while (_sampleCount > 0 && _emissionPressure > _breakupPressure && elapsed < _pressureFalloffDuration)
         {
@@ -343,14 +370,29 @@ public sealed class BossPoisonBeam : MonoBehaviour
             _emissionPressure = 1f - Mathf.SmoothStep(0f, 1f, elapsed / _pressureFalloffDuration);
             UpdateLiquid(Time.fixedDeltaTime);
         }
+        if (_residualParticles != null)
+        {
+            ParticleSystem.LimitVelocityOverLifetimeModule residualResistance = _residualParticles.limitVelocityOverLifetime;
+            residualResistance.enabled = true;
+            residualResistance.limit = 1000f;
+            residualResistance.dampen = 0f;
+            residualResistance.drag = _residualDrag;
+            _residualParticles.Play(true);
+        }
+        // 압력이 분해 기준에 도달하면 전체 줄기를 같은 물리 프레임에 방울로 바꾼다.
+        // 특정 끝점부터 길이를 줄이며 남은 굵은 줄기를 날려 보내지 않는다.
+        _isEmitting = false;
         BreakUpStream();
+        if (_residualParticles != null) _residualParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         _headParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         if (_impactCloudParticles != null) _impactCloudParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         _line.enabled = false;
         while (_mouthParticles.IsAlive(true) || _headParticles.IsAlive(true)
-            || (_impactCloudParticles != null && _impactCloudParticles.IsAlive(true)))
+            || (_impactCloudParticles != null && _impactCloudParticles.IsAlive(true))
+            || (_residualParticles != null && _residualParticles.IsAlive(true)))
         {
             yield return FixedStep;
+            UpdateResidualDropletDrag(Time.fixedDeltaTime);
         }
 
         ResetBeam();
@@ -395,7 +437,7 @@ public sealed class BossPoisonBeam : MonoBehaviour
         }
         if (_isEmitting)
         {
-            _emissionPressure = 1f;
+            if (!_isDepressurizing) _emissionPressure = 1f;
             Vector2 position = GetLipPosition();
             float angle = CalculateEmissionAngle(dt);
             var measuredMouthVelocity = Vector2.ClampMagnitude((position - _previousMouthPosition) / dt, 12f);
@@ -439,36 +481,72 @@ public sealed class BossPoisonBeam : MonoBehaviour
 
     private void BreakUpStream()
     {
-        // 기존 위치와 속도는 유지하고 연결을 끊어 입자로 떨어뜨린다.
-        for (int i = 0; i < _sampleCount; i += 5)
-        {
-            LiquidSample sample = _samples[(_oldestSample + i) % SampleCapacity];
-            if (!sample.IsBlocked) EmitLiquidFragment(sample, _beamWidth * CalculateWidth(sample) * 0.75f, 5);
-        }
-        _sampleCount = _oldestSample = _renderCount = 0;
-        _currentLength = 0f;
+        // 전체 위치에서 동시에 변환한다. 간격은 샘플 개수가 아니라 실제 거리로 정한다.
+        // 이 루프 안에서는 시간을 진행하거나 남은 줄기를 다시 그리지 않는다.
         _line.enabled = false;
         _line.positionCount = 0;
+        while (_sampleCount > 0)
+        {
+            LiquidSample sample = _samples[(_oldestSample + _sampleCount - 1) % SampleCapacity];
+            Vector2 previous = sample.Position;
+            float distance = 0f;
+            float spacing = Random.Range(0.12f, 0.38f);
+            int groupCount = 0;
+            while (_sampleCount > 0 && distance < spacing)
+            {
+                LiquidSample next = _samples[(_oldestSample + _sampleCount - 1) % SampleCapacity];
+                // 벽에 멈춘 구간과 자유롭게 이동하는 구간을 한 덩어리로 묶지 않는다.
+                if (groupCount > 0 && next.IsBlocked != sample.IsBlocked) break;
+                distance += Vector2.Distance(previous, next.Position);
+                previous = next.Position;
+                _sampleCount--;
+                groupCount++;
+            }
+            sample.Position = Vector2.Lerp(sample.Position, previous, Random.Range(0.25f, 0.75f));
+            if (!sample.IsBlocked) EmitLiquidFragment(sample, _beamWidth * CalculateWidth(sample));
+        }
+        _oldestSample = _renderCount = 0;
+        _currentLength = 0f;
     }
 
-    private void EmitLiquidFragment(LiquidSample sample, float size, int droplets)
+    private void EmitLiquidFragment(LiquidSample sample, float width)
     {
-        var chunk = new ParticleSystem.EmitParams
-        {
-            position = new Vector3(sample.Position.x, sample.Position.y, _mouth.position.z),
-            velocity = sample.Velocity,
-            startLifetime = Random.Range(_residualParticleLifetime * 0.8f, _residualParticleLifetime),
-            startSize = Mathf.Clamp(size, 0.18f, 0.95f)
-        };
-        _headParticles.Emit(chunk, 1);
+        ParticleSystem particles = _residualParticles != null ? _residualParticles : _headParticles;
+        Vector2 tangent = sample.Velocity.sqrMagnitude > 0.001f ? sample.Velocity.normalized : Vector2.right;
+        var normal = new Vector2(-tangent.y, tangent.x);
+        int droplets = Random.Range(Mathf.Max(1, _residualDropletsPerFragment - 2), _residualDropletsPerFragment + 3);
+        bool hasChunk = Random.value < 0.18f;
         for (int i = 0; i < droplets; i++)
         {
-            chunk.position += (Vector3)(Random.insideUnitCircle * 0.09f);
-            chunk.velocity = sample.Velocity * Random.Range(0.7f, 1f) + Random.insideUnitCircle * 3f;
-            chunk.startSize = Random.Range(0.035f, 0.11f);
-            chunk.startLifetime = Random.Range(_residualParticleLifetime * 0.8f, _residualParticleLifetime);
-            _headParticles.Emit(chunk, 1);
+            bool isChunk = hasChunk && i == 0;
+            float sizeVariation = Random.value;
+            float size = isChunk
+                ? Mathf.Clamp(width * Random.Range(0.16f, 0.3f), 0.12f, 0.4f)
+                : Mathf.Lerp(_residualDropletSizeRange.x, _residualDropletSizeRange.y, sizeVariation * sizeVariation);
+            Vector2 offset = normal * Random.Range(-width * 0.25f, width * 0.25f) + tangent * Random.Range(-0.1f, 0.1f);
+            var fragment = new ParticleSystem.EmitParams
+            {
+                position = new Vector3(sample.Position.x + offset.x, sample.Position.y + offset.y, _mouth.position.z),
+                velocity = sample.Velocity + normal * Random.Range(-1.2f, 1.2f),
+                startSize = size,
+                startLifetime = _residualParticleLifetime * (isChunk ? Random.Range(0.15f, 0.3f) : Random.Range(0.35f, 0.7f))
+            };
+            particles.Emit(fragment, 1);
         }
+    }
+
+    private void UpdateResidualDropletDrag(float dt)
+    {
+        if (_residualParticles == null || _residualDrag <= 0f) return;
+        int count = _residualParticles.GetParticles(_residualParticleBuffer);
+        for (int i = 0; i < count; i++)
+        {
+            ParticleSystem.Particle particle = _residualParticleBuffer[i];
+            float extraDrag = _residualDrag * Mathf.Clamp(0.12f / Mathf.Max(0.025f, particle.startSize) - 1f, 0f, 3f);
+            particle.velocity *= Mathf.Exp(-extraDrag * dt);
+            _residualParticleBuffer[i] = particle;
+        }
+        if (count > 0) _residualParticles.SetParticles(_residualParticleBuffer, count);
     }
 
     private void AddSample(LiquidSample sample)
@@ -516,7 +594,7 @@ public sealed class BossPoisonBeam : MonoBehaviour
         if (_isEmitting)
         {
             _positions[_renderCount] = GetLipPosition();
-            _widths[_renderCount++] = _mouthWidthRatio;
+            _widths[_renderCount++] = _mouthWidthRatio * (_isDepressurizing ? Mathf.Sqrt(Mathf.Clamp01(_emissionPressure)) : 1f);
         }
         for (int i = _sampleCount - 1; i >= 0; i--)
         {
@@ -580,8 +658,11 @@ public sealed class BossPoisonBeam : MonoBehaviour
             Vector2 direction = (_positions[_renderCount - 1] - _positions[_renderCount - 2]).normalized;
             _headParticles.transform.SetPositionAndRotation(_positions[_renderCount - 1],
                 Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg));
-            EmitEdgeDroplet();
-            EmitStreamEndSplash(direction);
+            if (!_isDepressurizing)
+            {
+                EmitEdgeDroplet();
+                EmitStreamEndSplash(direction);
+            }
         }
         _textureOffset = Mathf.Repeat(_textureOffset - _textureFlowSpeed * Time.fixedDeltaTime / _textureWorldLength, 1f);
         _runtimeMaterial.SetTextureScale(_textureProperty, new Vector2(_currentLength / _textureWorldLength, 1f));
@@ -728,6 +809,7 @@ public sealed class BossPoisonBeam : MonoBehaviour
         _line.startColor = _line.endColor = Color.white;
         _mouthParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         _headParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        if (_residualParticles != null) _residualParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         ParticleSystem.LimitVelocityOverLifetimeModule resistance = _headParticles.limitVelocityOverLifetime;
         resistance.enabled = false;
         if (_impactCloudParticles != null) _impactCloudParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -746,6 +828,9 @@ public sealed class BossPoisonBeam : MonoBehaviour
         _textureWorldLength = Mathf.Max(0.01f, _textureWorldLength);
         _hitInterval = Mathf.Max(0.02f, _hitInterval);
         _fadeDuration = Mathf.Max(0.01f, _fadeDuration);
+        _residualDropletSizeRange.x = Mathf.Max(0.005f, _residualDropletSizeRange.x);
+        _residualDropletSizeRange.y = Mathf.Max(_residualDropletSizeRange.x, _residualDropletSizeRange.y);
+        _residualDropletsPerFragment = Mathf.Clamp(_residualDropletsPerFragment, 1, 12);
     }
 
     private void OnDestroy()

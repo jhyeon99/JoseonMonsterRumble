@@ -249,6 +249,8 @@ MonoBehaviour:
   _breakupPressure: 0.65
   _residualDrag: 1.8
   _residualParticleLifetime: 2.4
+  _residualDropletSizeRange: {x: 0.02, y: 0.28}
+  _residualDropletsPerFragment: 8
   _widthVariation: 0.035
   _textureWorldLength: 2
   _textureFlowSpeed: 10
