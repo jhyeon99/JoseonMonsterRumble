@@ -88,6 +88,11 @@ public sealed class StageManager : MonoBehaviour
                                        _respawnPhase == RespawnPhase.Loading ||
                                        _respawnPhase == RespawnPhase.Revealing;
 
+    /// <summary>지정한 장승이 현재 씬의 실제 저장된 체크포인트인지 확인한다.</summary>
+    public bool IsCheckpointActive(RespawnPoint point) => point != null &&
+        !string.IsNullOrWhiteSpace(point.CheckpointId) &&
+        point.gameObject.scene.name == _activeSceneName && point.CheckpointId == _activeCheckpointId;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -196,6 +201,7 @@ public sealed class StageManager : MonoBehaviour
             _playerHealth.RefillPotions();
         }
         RefreshCheckpointVisuals(point.gameObject.scene);
+        point.PlayActivation();
         return true;
     }
 
