@@ -141,6 +141,10 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField]
     private string _defeatTrigger = "defeat";
 
+    [Tooltip("처치 직전(완전 그로기, 마무리 공격 대기) 애니메이터 트리거. 비우면 그로기 애니메이션 사용")]
+    [SerializeField]
+    private string _finalGroggyTrigger = "die";
+
     [Header("처치 직전 표시 (마무리 공격 대기 중 머리 위)")]
     [Tooltip("마무리 공격 대기(완전 그로기) 동안 머리 위에 띄울 이펙트 (PF_Boss_Here). 비우면 표시 안 함")]
     [SerializeField]
@@ -264,6 +268,7 @@ public class Boss : MonoBehaviour, IFinishable
     public float GroggyEndDuration => _groggyEndClip != null ? _groggyEndClip.length : _groggyEndFallbackDuration;
     public string HowlTrigger => _howlTrigger;
     public string DefeatTrigger => _defeatTrigger;
+    public string FinalGroggyTrigger => _finalGroggyTrigger;
 
     /// <summary>몸통 접촉 데미지를 줄 수 있는지 (대기 / 패턴 중일 때만, 접촉 데미지를 끄는 패턴 중에는 제외)</summary>
     public bool CanDealContactDamage =>

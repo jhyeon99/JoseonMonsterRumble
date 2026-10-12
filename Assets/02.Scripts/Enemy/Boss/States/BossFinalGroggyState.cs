@@ -15,8 +15,19 @@ public class BossFinalGroggyState : BossState
         _boss.ClearMinions();
         _boss.SnapToGround();
         _boss.ResetTrigger(_boss.GroggyEndTrigger);
-        _boss.SetTrigger(_boss.GroggyTrigger);
-        _boss.SetBool(_boss.GroggyBool, true);
+
+        // 처치 직전 애니메이션: die (비어 있으면 기존 그로기)
+        if (!string.IsNullOrEmpty(_boss.FinalGroggyTrigger))
+        {
+            _boss.ResetTrigger(_boss.GroggyTrigger);
+            _boss.SetBool(_boss.GroggyBool, false);
+            _boss.SetTrigger(_boss.FinalGroggyTrigger);
+        }
+        else
+        {
+            _boss.SetTrigger(_boss.GroggyTrigger);
+            _boss.SetBool(_boss.GroggyBool, true);
+        }
 
         // 머리 위에 마무리 공격 대기 표시
         _boss.ShowFinishMarker();
