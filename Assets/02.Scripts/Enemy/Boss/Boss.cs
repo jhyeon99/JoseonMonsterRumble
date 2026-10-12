@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -139,6 +140,27 @@ public class Boss : MonoBehaviour, IFinishable
 
     [SerializeField]
     private string _defeatTrigger = "defeat";
+
+    [Header("점프 / 착지 먼지 (PF_Boss_JumpDust_VFX, 짧은 점프 / 소환 점프 / 찍기 공통)")]
+    [Tooltip("먼지 크기 배율")]
+    [SerializeField, Min(0f)]
+    private float _jumpDustScale = 1f;
+
+    [Tooltip("0보다 크면 발밑 중심에서 좌우로 이만큼 떨어진 곳에 하나씩 (바깥쪽을 보도록 반전). 0이면 가운데 하나")]
+    [SerializeField, Min(0f)]
+    private float _jumpDustSpread = 0f;
+
+    [Tooltip("먼지 위치 높이 보정 (발밑 기준)")]
+    [SerializeField]
+    private float _jumpDustOffsetY = 0f;
+
+    [Tooltip("이륙 먼지 타이밍 (초). 0 = 땅에서 떨어지는 순간, 양수 = 그만큼 늦게, 음수 = 그만큼 일찍 (짧은 점프만 일찍 가능, 나머지는 시작 순간)")]
+    [SerializeField]
+    private float _takeoffDustTiming = 0f;
+
+    [Tooltip("착지 먼지 타이밍 (초). 0 = 땅에 닿는 순간, 음수 = 그만큼 일찍(착지 직전), 양수 = 그만큼 늦게")]
+    [SerializeField]
+    private float _landingDustTiming = 0f;
 
     [Header("디버그")]
     [SerializeField]
@@ -607,6 +629,47 @@ public class Boss : MonoBehaviour, IFinishable
     public Vector2 Position => _body != null ? _body.position : (Vector2)transform.position;
 
     /// <summary>공중에 떠 있으면 바로 땅으로 (패턴이 중간에 끊겼을 때)</summary>
+    public float TakeoffDustTiming => _takeoffDustTiming;
+    public float LandingDustTiming => _landingDustTiming;
+
+    /// <summary>delay초 뒤에 발밑 먼지 (0 이하면 바로)</summary>
+    public void PlayJumpDust(float x, float footY, float delay)
+    {
+        if (delay <= 0f || !isActiveAndEnabled)
+        {
+            PlayJumpDust(x, footY);
+            return;
+        }
+
+        StartCoroutine(PlayJumpDustAfter(x, footY, delay));
+    }
+
+    private IEnumerator PlayJumpDustAfter(float x, float footY, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        PlayJumpDust(x, footY);
+    }
+
+    /// <summary>발밑 점프 / 착지 먼지 (x, 발밑 높이)</summary>
+    public void PlayJumpDust(float x, float footY)
+    {
+        EffectManager effects = EffectManager.Instance;
+        if (effects == null || _jumpDustScale <= 0f)
+        {
+            return;
+        }
+
+        float y = footY + _jumpDustOffsetY;
+        if (_jumpDustSpread <= 0f)
+        {
+            effects.PlayBossJumpDust(new Vector2(x, y), _jumpDustScale, FacingX < 0f);
+            return;
+        }
+
+        effects.PlayBossJumpDust(new Vector2(x - _jumpDustSpread, y), _jumpDustScale, true);
+        effects.PlayBossJumpDust(new Vector2(x + _jumpDustSpread, y), _jumpDustScale, false);
+    }
+
     public void SnapToGround()
     {
         Vector2 position = Position;
