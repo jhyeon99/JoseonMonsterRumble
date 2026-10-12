@@ -1,4 +1,4 @@
-﻿using GameAudio;
+using GameAudio;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -11,6 +11,8 @@ public sealed class EnemyAudio : ActorAudio
     private ulong _stateExecution;
     private PlayHandle _ambience;
     private bool _dead;
+    private Animator _animator;
+    private readonly FootstepClock _footsteps = new FootstepClock();
     private string Prefix => _enemy != null && _enemy.MoveType is EnemyFlyingMove ? "Air." : "Ground.";
 
     protected override void OnEnable()
@@ -21,6 +23,7 @@ public sealed class EnemyAudio : ActorAudio
         _ranged = GetComponent<EnemyRangedCombat>();
         _flyingAttack = GetComponent<FlyingMeleeAttackController>();
         _dead = false;
+        _animator = GetComponentInChildren<Animator>();
         if (_health != null) { _health.OnHit += OnHit; _health.OnDeath += OnDeath; }
         if (_ranged != null) _ranged.OnProjectileFired += OnProjectileFired;
         if (_flyingAttack != null) _flyingAttack.OnAttackPhaseChanged += OnFlyingAttackPhaseChanged;
@@ -54,6 +57,7 @@ public sealed class EnemyAudio : ActorAudio
 
     private void OnStateChanged(EnemyState previous, EnemyState next)
     {
+        if (next is LaunchedState && Prefix == "Ground.") PlayResult("Ground.FinisherLaunch", transform.position);
         if (_dead) return;
         bool completed = previous is AttackState && next is AttackRecoveryState;
         EndAction(_stateExecution, completed);
@@ -81,6 +85,15 @@ public sealed class EnemyAudio : ActorAudio
                 PlayAction("Buff.Enrage", _stateExecution);
             }
         }
+    }
+
+    private void LateUpdate()
+    {
+        bool walking = !_dead && _enemy != null && _enemy.MoveType is EnemyGroundMove ground &&
+            ground.IsGrounded() && (!_enemy.Data.UseWalkAnimationMotion || !ground.IsWalkStopped) && Mathf.Abs(_enemy.EnemyRb.linearVelocity.x) > 0.05f &&
+            !PauseController.IsGameplayInputBlocked && ground.HasWalkFacingControl;
+        if (_footsteps.Tick(walking, _animator) && _stateExecution != 0)
+            PlayAction("Ground.Footstep", _stateExecution);
     }
 
     private void OnFlyingAttackPhaseChanged(FlyingMeleeAttackPhase phase)

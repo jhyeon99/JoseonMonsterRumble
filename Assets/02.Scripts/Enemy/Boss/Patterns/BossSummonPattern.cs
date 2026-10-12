@@ -356,6 +356,7 @@ public class BossSummonPattern : BossPattern
 
     private void SetJumping(bool jumping)
     {
+        if (jumping) AudioAction("Boss.Jump");
         _isJumping = jumping;
 
         if (_disableCollisionWhileJumping && Boss != null)
@@ -650,6 +651,7 @@ public class BossSummonPattern : BossPattern
             BossPoisonBubble bubble = Instantiate(_bubblePrefab, new Vector3(x, spawnY, 0f), Quaternion.identity);
             bubble.Initialize(Boss, topY);
         }
+        if (placedCount > 0) AudioResult("Boss.BubbleSpawn", Boss.transform.position);
     }
 
     private bool IsTooClose(float x, float[] placed, int count)
