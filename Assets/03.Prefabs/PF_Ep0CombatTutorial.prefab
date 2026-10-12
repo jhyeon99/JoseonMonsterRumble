@@ -56,9 +56,7 @@ MonoBehaviour:
   _snapEnemyToGround: 1
   _noticeDuration: 1.2
   _dialogueDuration: 1.2
-  _parryCameraSize: 5.5
   _zoomDuration: 0.35
-  _parrySuccessDuration: 0.25
   _hintOffset: {x: -220, y: 80}
   _hintTextColor: {r: 0, g: 0, b: 0, a: 1}
   _hintOutlineColor: {r: 1, g: 1, b: 1, a: 1}
@@ -69,15 +67,18 @@ MonoBehaviour:
   _keyLabel: {fileID: 1604}
   _keyImage: {fileID: 1504}
   _attackKeySprite: {fileID: 21300012, guid: 8ce7e7c466d746ed81978a9de9c5f59d, type: 3}
-  _parryKeySprite: {fileID: 21300004, guid: 8ce7e7c466d746ed81978a9de9c5f59d, type: 3}
+  _dodgeKeySprite: {fileID: 21300010, guid: 8ce7e7c466d746ed81978a9de9c5f59d, type: 3}
+  _focusFont: {fileID: 12800000, guid: 21bb382be0384decb2eb04b15aecb846, type: 3}
   _encounterText: "요괴?"
-  _comboInstruction: ""
-  _comboText: "일단 공격해보자."
-  _parryText: "공격을 막아볼까?"
-  _parryTimingText: "공격이 닿기 직전에 막아보자."
-  _retryText: "한 번 더 막아보자."
-  _finisherText: "지금이다!"
-  _completeText: "좋아. 계속 가보자."
+  _attackText: "X를 눌러 일반 공격을 해보자."
+  _dodgeText: "요괴가 공격하려고 한다.\nZ를 누르면 뒤로 물러나며 회피할 수 있다."
+  _fleeText: "도망간다! 쫓아가자."
+  _freezeBeforeHit: 0.08
+  _focusOpacity: 0.7
+  _focusBorderColor: {r: 1, g: 1, b: 1, a: 1}
+  _focusPadding: 24
+  _fleeDistance: 45
+  _fleeSpeedMultiplier: 2
 --- !u!1 &1101
 GameObject:
   m_ObjectHideFlags: 0
@@ -306,7 +307,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 21bb382be0384decb2eb04b15aecb846, type: 3}
+    m_Font: {fileID: 12800000, guid: 0975dedf52304458a79f6f10c64f0682, type: 3}
     m_FontSize: 24
     m_FontStyle: 0
     m_BestFit: 0
@@ -540,7 +541,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 21bb382be0384decb2eb04b15aecb846, type: 3}
+    m_Font: {fileID: 12800000, guid: 0975dedf52304458a79f6f10c64f0682, type: 3}
     m_FontSize: 48
     m_FontStyle: 0
     m_BestFit: 0

@@ -54,8 +54,16 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
                 }
                 else
                 {
-                    var managerObject = new GameObject("AudioManager");
-                    _instance = managerObject.AddComponent<AudioManager>();
+                    GameObject prefab = Resources.Load<GameObject>("Audio/PF_AudioManager");
+                    if (prefab != null)
+                    {
+                        Instantiate(prefab);
+                    }
+                    else
+                    {
+                        var managerObject = new GameObject("AudioManager");
+                        _instance = managerObject.AddComponent<AudioManager>();
+                    }
                 }
             }
 
@@ -205,6 +213,33 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
     public void PlayPanelClose() => PlayUiEvent("UI.PanelClose", _uiAudioData != null ? _uiAudioData.PanelCloseClip : null, _uiAudioData != null ? _uiAudioData.PanelCloseVolume : 1f);
     public void PlaySlider() => PlayUiEvent("UI.Slider", _uiAudioData != null ? _uiAudioData.SliderTickClip : null, _uiAudioData != null ? _uiAudioData.SliderTickVolume : 1f);
 
+    public PlayHandle PlaySceneEvent(string eventId, Component source)
+    {
+        if (source == null || string.IsNullOrWhiteSpace(eventId) || _catalog == null)
+            return PlayHandle.Empty;
+        int separator = eventId.IndexOf('.');
+        if (separator < 1) return PlayHandle.Empty;
+        SoundSetSO set = _catalog.GetSet(eventId.Substring(0, separator));
+        var context = new AudioContext(default, 0, AudioLifetimeRegistry.ForScene(source.gameObject.scene), source.transform.position);
+        return PlayEvent(set, eventId, context);
+    }
+
+    public AudioClip GetEventClip(string eventId)
+    {
+        if (_catalog == null || string.IsNullOrWhiteSpace(eventId)) return null;
+        int separator = eventId.IndexOf('.');
+        SoundSetSO set = separator > 0 ? _catalog.GetSet(eventId.Substring(0, separator)) : null;
+        if (set == null || !set.TryGetEvent(eventId, out EventBinding binding) || !binding.Enabled)
+            return null;
+        if (!_catalog.TryGetSound(binding.SoundId, out SoundData sound) || sound.Clips == null)
+            return null;
+        foreach (AudioClip clip in sound.Clips)
+        {
+            if (clip != null) return clip;
+        }
+        return null;
+    }
+
     public PlayHandle PlayMusicEvent(string eventId, Scene scene)
     {
         if (this == null || _instance != this || !isActiveAndEnabled)
@@ -263,6 +298,11 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         if (sceneName.IndexOf("Title", StringComparison.OrdinalIgnoreCase) >= 0)
         {
             PlayMusicEvent("Music.Title", scene);
+        }
+        else if (sceneName.IndexOf("Ep0", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 sceneName.IndexOf("Prologue", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            PlayMusicEvent("Music.Prologue", scene);
         }
         else if (sceneName.StartsWith("EP", StringComparison.OrdinalIgnoreCase) ||
                          sceneName.StartsWith("Test_Ep", StringComparison.OrdinalIgnoreCase) || sceneName == "Test_StageField")

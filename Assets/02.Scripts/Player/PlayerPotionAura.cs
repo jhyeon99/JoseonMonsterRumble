@@ -314,6 +314,7 @@ public class PlayerPotionAura : MonoBehaviour
         }
 
         ParticleSystem.MainModule main = _auraParticles.main;
+        main.playOnAwake = false;
         main.duration = 1.0f;
         main.loop = true;
         main.startLifetime = new ParticleSystem.MinMaxCurve(0.4f, 0.75f);

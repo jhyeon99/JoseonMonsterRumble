@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -35,16 +35,11 @@ public class PrologueIntroController : MonoBehaviour
     [Tooltip("다음 씬을 불러온 뒤 검은 화면이 밝아지는 시간입니다.")]
     [SerializeField, Min(0.01f)] private float _nextSceneRevealDuration = 0.75f;
 
-    [Header("Opening sounds (assign later)")]
-    [SerializeField] private AudioClip _screamClip;
-    [Tooltip("검은 화면에서 비명 소리와 동시에 재생할 지게 부서지는 소리입니다.")]
-    [SerializeField] private AudioClip _jigeBreakClip;
-    [SerializeField] private AudioClip _doorClip;
-
     [Header("Movement and jump tutorial")]
     [Tooltip("동작 완료까지 표시된 시간의 배율입니다. 2면 완료 후 같은 시간만큼 더 표시합니다.")]
     [SerializeField, Min(1f)] private float _controlHintDurationMultiplier = 2f;
     [SerializeField] private Vector2 _controlHintOffset = new Vector2(0f, 64f);
+    [SerializeField] private Font _controlHintFont;
     [SerializeField] private Sprite _moveLeftKeySprite;
     [SerializeField] private Sprite _moveRightKeySprite;
     [SerializeField] private Sprite _jumpCKeySprite;
@@ -139,7 +134,7 @@ public class PrologueIntroController : MonoBehaviour
     [SerializeField, Min(0.01f)] private float _fadeToBlack = 0.5f;
     [SerializeField, Min(0.01f)] private float _revealLocation2 = 0.75f;
 
-    private readonly List<AudioSource> _openingSoundSources = new List<AudioSource>();
+    private readonly List<GameAudio.PlayHandle> _openingSoundSources = new List<GameAudio.PlayHandle>();
     private PlayerInputHandler _input;
     private Rigidbody2D _body;
     private CanvasGroup _fade;
@@ -173,6 +168,18 @@ public class PrologueIntroController : MonoBehaviour
     private void OnEnable()
     {
         Canvas.preWillRenderCanvases += UpdateHintsBeforeRender;
+        if (!_ready) return;
+        BindCinematicCallbacks();
+        if (IsIntroComplete && Phase != "LeavingPrologue")
+            StartCoroutine(ResumeProgression());
+    }
+
+    private void BindCinematicCallbacks()
+    {
+        _cinematics.OnCinematicFinished.RemoveListener(HandleCinematicFinished);
+        _cinematics.OnCinematicTargetReached.RemoveListener(HandleJigeReached);
+        _cinematics.OnCinematicFinished.AddListener(HandleCinematicFinished);
+        _cinematics.OnCinematicTargetReached.AddListener(HandleJigeReached);
     }
 
     private void Awake()
@@ -229,19 +236,7 @@ public class PrologueIntroController : MonoBehaviour
             return;
         }
 
-        // Capture the authored layout before any parallax LateUpdate can move it.
-        foreach (Transform child in _background2.GetComponentsInChildren<Transform>(true))
-            _background2Layout[child] = child.localPosition;
-        // The two background sprites can share a manager on their parent.
-        foreach (ParallaxManager manager in _background2.GetComponentsInParent<ParallaxManager>(true))
-            _destinationParallax.Add(manager);
-        foreach (ParallaxManager manager in _background2.GetComponentsInChildren<ParallaxManager>(true))
-            _destinationParallax.Add(manager);
-        foreach (ParallaxManager manager in _destinationParallax)
-        {
-            foreach (Transform child in manager.GetComponentsInChildren<Transform>(true))
-                _background2Layout[child] = child.localPosition;
-        }
+        CacheDestinationLayout();
 
         _inputWasEnabled = _input.enabled;
         _playerWasEnabled = _player.enabled;
@@ -250,8 +245,7 @@ public class PrologueIntroController : MonoBehaviour
         _input.enabled = false;
         _locked = true;
         Phase = "Preparing";
-        _cinematics.OnCinematicFinished.AddListener(HandleCinematicFinished);
-        _cinematics.OnCinematicTargetReached.AddListener(HandleJigeReached);
+        BindCinematicCallbacks();
 
         if (_gameplayUi != null)
         {
@@ -278,6 +272,50 @@ public class PrologueIntroController : MonoBehaviour
         _ready = true;
     }
 
+    private void CacheDestinationLayout()
+    {
+        // Capture the authored layout before any parallax LateUpdate can move it.
+        foreach (Transform child in _background2.GetComponentsInChildren<Transform>(true))
+            _background2Layout[child] = child.localPosition;
+        // The two background sprites can share a manager on their parent.
+        foreach (ParallaxManager manager in _background2.GetComponentsInParent<ParallaxManager>(true))
+            _destinationParallax.Add(manager);
+        foreach (ParallaxManager manager in _background2.GetComponentsInChildren<ParallaxManager>(true))
+            _destinationParallax.Add(manager);
+        foreach (ParallaxManager manager in _destinationParallax)
+        {
+            foreach (Transform child in manager.GetComponentsInChildren<Transform>(true))
+                _background2Layout[child] = child.localPosition;
+        }
+    }
+
+    private IEnumerator ResumeProgression()
+    {
+        yield return null;
+        if (IsTransitionComplete)
+        {
+            yield return WaitForNextSceneExit();
+            yield break;
+        }
+
+        // Finish any camera return after rebinding before restarting the interrupted progression.
+        while (_cinematics.IsPlaying) yield return null;
+        if (_background2Layout.Count == 0) CacheDestinationLayout();
+        if (Mathf.Approximately(_transitionDirection, 0f))
+        {
+            Transform origin = _noticeBoard != null ? _noticeBoard : _jige;
+            _transitionDirection = _location2TransitionPoint.position.x >= origin.position.x ? 1f : -1f;
+        }
+        _posterBusy = false;
+        if (_wantedPosterRoot != null) _wantedPosterRoot.SetActive(false);
+        if (_continuePrompt != null) _continuePrompt.SetActive(false);
+        ShowSubtitle("");
+        _fade.alpha = 0f;
+        _fade.blocksRaycasts = false;
+        RestoreGameplayUi();
+        yield return ContinueAfterOpening();
+    }
+
     private IEnumerator Start()
     {
         if (!_ready) yield break;
@@ -293,10 +331,10 @@ public class PrologueIntroController : MonoBehaviour
         _camera.Reset(true, true, true);
         Phase = "Scream";
         ShowSubtitle(_openingSoundText);
-        PlaySound(_screamClip);
-        PlaySound(_jigeBreakClip);
+        PlaySound("Prologue.Scream");
+        PlaySound("Prologue.Break");
         // 비명을 끝까지 들은 뒤부터 새 Enter 입력을 받는다.
-        float screamDuration = _screamClip != null ? _screamClip.length : 0f;
+        float screamDuration = GetSoundDuration("Prologue.Scream");
         if (screamDuration > 0f)
             yield return new WaitForSecondsRealtime(screamDuration);
         yield return WaitForAdvance();
@@ -312,9 +350,9 @@ public class PrologueIntroController : MonoBehaviour
         ShowSubtitle("");
         AudioManager.Instance.PlayButtonClick();
         Phase = "DoorOpening";
-        PlaySound(_doorClip, 1.5f);
+        PlaySound("Prologue.Door");
         // Keep the screen black until the last second of the door sound.
-        float doorRevealDelay = _doorClip != null ? Mathf.Max(0f, _doorClip.length - 1f) : 0f;
+        float doorRevealDelay = Mathf.Max(0f, GetSoundDuration("Prologue.Door") - 1f);
         if (doorRevealDelay > 0f)
             yield return new WaitForSecondsRealtime(doorRevealDelay);
         // Player appears outside the house and can move as soon as the reveal starts.
@@ -331,38 +369,41 @@ public class PrologueIntroController : MonoBehaviour
         _openingSoundSources.Clear();
         Phase = "Gameplay";
         yield return ReadNoticeBoard();
-        float approachDirection = _jige.position.x >= _player.transform.position.x ? 1f : -1f;
-        while (_posterBusy ||
-               (_player.transform.position.x - (_jige.position.x - _jigeTriggerDistance * approachDirection)) * approachDirection < 0f)
+        if (!IsJigeInspected)
         {
-            yield return null;
-        }
+            // Use the route direction even if progression resumes after passing the jige.
+            while (_posterBusy ||
+                   (_player.transform.position.x - (_jige.position.x - _jigeTriggerDistance * _transitionDirection)) * _transitionDirection < 0f)
+            {
+                yield return null;
+            }
 
-        ShowSubtitle("");
-        LockPlayer();
-        Phase = "Inspecting";
-        _cinematicFinished = false;
-        _jigeReached = false;
-        _jigeFocus.position = _jige.position;
-        SpriteRenderer jigeRenderer = _jige.GetComponentInChildren<SpriteRenderer>();
-        if (jigeRenderer != null) _jigeFocus.position = jigeRenderer.bounds.center;
-        _cinematics.CinematicTargets = new List<CinematicTarget> {
-            new CinematicTarget { TargetTransform = _jigeFocus, EaseInDuration = _jigePanDuration,
-                HoldDuration = -1f, Zoom = _jigeZoom, EaseType = EaseType.EaseInOut }
-        };
-        _cinematics.Play();
-        while (!_jigeReached) yield return null;
-        Phase = "JigeDialogue";
-        ShowSubtitle(_jigeStoryText);
-        yield return WaitForAdvance();
-        ShowSubtitle("");
-        _cinematics.Stop();
-        Phase = "ReturningToPlayer";
-        while (!_cinematicFinished) yield return null;
-        UnlockPlayer();
-        IsJigeInspected = true;
-        _fade.blocksRaycasts = false;
-        RestoreGameplayUi();
+            ShowSubtitle("");
+            LockPlayer();
+            Phase = "Inspecting";
+            _cinematicFinished = false;
+            _jigeReached = false;
+            _jigeFocus.position = _jige.position;
+            SpriteRenderer jigeRenderer = _jige.GetComponentInChildren<SpriteRenderer>();
+            if (jigeRenderer != null) _jigeFocus.position = jigeRenderer.bounds.center;
+            _cinematics.CinematicTargets = new List<CinematicTarget> {
+                new CinematicTarget { TargetTransform = _jigeFocus, EaseInDuration = _jigePanDuration,
+                    HoldDuration = -1f, Zoom = _jigeZoom, EaseType = EaseType.EaseInOut }
+            };
+            _cinematics.Play();
+            while (!_jigeReached) yield return null;
+            Phase = "JigeDialogue";
+            ShowSubtitle(_jigeStoryText);
+            yield return WaitForAdvance();
+            ShowSubtitle("");
+            _cinematics.Stop();
+            Phase = "ReturningToPlayer";
+            while (!_cinematicFinished) yield return null;
+            UnlockPlayer();
+            IsJigeInspected = true;
+            _fade.blocksRaycasts = false;
+            RestoreGameplayUi();
+        }
         Phase = "GameplayAfterJige";
         while (_posterBusy ||
                (_player.transform.position.x - _location2TransitionPoint.position.x) * _transitionDirection < 0f)
@@ -558,17 +599,39 @@ public class PrologueIntroController : MonoBehaviour
 
     private void HandleJigeReached(int targetIndex) => _jigeReached = true;
 
-    private void PlaySound(AudioClip clip, float gain = 1f)
+    private float GetSoundDuration(string eventId)
     {
-        if (clip == null) return;
-        AudioSource source = AudioManager.Instance.PlaySfxTracked(clip, gain: gain);
-        if (source != null) _openingSoundSources.Add(source);
+        AudioManager manager = AudioManager.Instance;
+        GameAudio.SoundSetSO set = manager != null ? manager.Catalog?.Prologue : null;
+        if (set == null || !set.TryGetEvent(eventId, out GameAudio.EventBinding binding) || !binding.Enabled ||
+            !set.TryGetSound(binding.SoundId, out GameAudio.SoundData sound) || !sound.HasValidClip)
+        {
+            return 0f;
+        }
+
+        float duration = 0f;
+        foreach (AudioClip clip in sound.Clips)
+        {
+            if (clip != null) duration = Mathf.Max(duration, clip.length / Mathf.Max(0.01f, sound.PitchMin));
+        }
+        return binding.EffectiveDelay + duration;
+    }
+
+    private void PlaySound(string eventId)
+    {
+        var emitter = GameAudio.EventAudio.For(this, "Prologue");
+        GameAudio.PlayHandle handle = emitter.Play(eventId);
+        if (!handle.IsEmpty) _openingSoundSources.Add(handle);
     }
 
     private void StopOpeningSounds()
     {
-        foreach (AudioSource source in _openingSoundSources)
-            if (source != null) source.Stop();
+        AudioManager manager = AudioManager.ExistingInstance;
+        if (manager != null)
+        {
+            foreach (GameAudio.PlayHandle handle in _openingSoundSources) manager.StopHandle(handle);
+        }
+        if (TryGetComponent(out GameAudio.EventAudio emitter)) emitter.Cancel();
         _openingSoundSources.Clear();
     }
 
@@ -680,7 +743,7 @@ public class PrologueIntroController : MonoBehaviour
 
     private IEnumerator ReadNoticeBoard()
     {
-        if (_noticeBoard == null || _noticeBoardTrigger == null) yield break;
+        if (_posterRead || _noticeBoard == null || _noticeBoardTrigger == null) yield break;
         float direction = _noticeBoardTrigger.position.x >= _player.transform.position.x ? 1f : -1f;
         while ((_player.transform.position.x - _noticeBoardTrigger.position.x) * direction < 0f)
             yield return null;
@@ -954,7 +1017,7 @@ public class PrologueIntroController : MonoBehaviour
         rect.sizeDelta = new Vector2(width, 64f);
         Text text = label.GetComponent<Text>();
         text.text = value;
-        text.font = _subtitle.font;
+        text.font = _controlHintFont != null ? _controlHintFont : _subtitle.font;
         text.fontSize = 24;
         text.alignment = TextAnchor.MiddleCenter;
         text.color = Color.black;

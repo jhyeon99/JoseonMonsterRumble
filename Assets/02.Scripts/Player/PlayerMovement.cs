@@ -79,6 +79,10 @@ public class PlayerMovement : MonoBehaviour
     private ContactFilter2D _groundFilter;
     private const float GroundNormalThreshold = 0.7f;
     private const float FootContactTolerance = 0.05f;
+    private const float RespawnGroundContactGrace = 0.1f;
+    private Collider2D _respawnGroundCollider;
+    private Vector2 _respawnPosition;
+    private float _respawnGroundedUntil;
 
     public void OnLanded()
     {
@@ -215,10 +219,37 @@ public class PlayerMovement : MonoBehaviour
             // 물리가 실제로 위로 받쳐준 접촉만
             if (contact.normalImpulse <= 0f) continue;
 
+            _respawnGroundCollider = null;
             return true;
         }
 
-        return false;
+        // 로딩 중에는 물리가 정지해 접촉이 없으므로 확인된 부활 바닥을 잠시 사용한다.
+        // 재개 후 첫 접촉까지 연결하되 점프, 이동, 바닥 제거 또는 짧은 유예 만료 시 해제한다.
+        if (_respawnGroundCollider == null) return false;
+        if (!_respawnGroundCollider.enabled || !_respawnGroundCollider.gameObject.activeInHierarchy
+            || Time.time > _respawnGroundedUntil
+            || _rigidbody2D.linearVelocity.y > 0.1f
+            || Vector2.Distance(_rigidbody2D.position, _respawnPosition) > FootContactTolerance)
+        {
+            _respawnGroundCollider = null;
+            return false;
+        }
+
+        return true;
+    }
+
+    public void PrepareForRespawn(Collider2D groundCollider)
+    {
+        _currentPlatform = null;
+        _hasHorizontalInput = false;
+        _isJumping = false;
+        _lockoutTimer = 0f;
+        _landingJumpTimer = 0f;
+        _coyoteTimer = groundCollider != null ? _coyoteTime : 0f;
+        _respawnGroundCollider = groundCollider;
+        _respawnPosition = _rigidbody2D.position;
+        _respawnGroundedUntil = Time.time + RespawnGroundContactGrace;
+        _rigidbody2D.gravityScale = _baseGravityScale;
     }
 
     public void MoveX(float x)
@@ -236,6 +267,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void Jump()
     {
+        _respawnGroundCollider = null;
         _isJumping = true;
         _jumpHeightDecided = false;
         _jumpHoldTimer = 0f;
