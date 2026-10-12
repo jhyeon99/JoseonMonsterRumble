@@ -20,7 +20,7 @@ public class UI_HealthBar : MonoBehaviour
     [Header("시간 및 보간 설정")]
     [SerializeField] private float _damageDelay = 0.25f;
     [SerializeField] private float _damageCatchupDuration = 0.35f;
-    [SerializeField] private float _healCatchupDuration = 0.2f;
+    [SerializeField] private float _healCatchupDuration = 0.35f;
 
     [SerializeField] private float _currentRatio = 1f;
     [SerializeField] private float _ghostRatio = 1f;
@@ -38,6 +38,10 @@ public class UI_HealthBar : MonoBehaviour
 
     private Coroutine _trailCoroutine;
     private float _maskFullWidth;
+    private Player _player;
+    private PlayerPotionAura _potionAura;
+    private float _pendingHealRatio = -1f;
+    private float _lastActualHealth = -1f;
 
     private void Awake()
     {
@@ -70,6 +74,8 @@ public class UI_HealthBar : MonoBehaviour
 
         StopTrailCoroutine();
         StopPunch();
+        _pendingHealRatio = -1f;
+        _lastActualHealth = -1f;
     }
 
     private void SubscribeToHealthChanged()
@@ -81,10 +87,23 @@ public class UI_HealthBar : MonoBehaviour
 
         _playerHealth.OnHealthChanged -= HandleHealthChanged;
         _playerHealth.OnHealthChanged += HandleHealthChanged;
+        _lastActualHealth = _playerHealth.CurrentHealth;
+        _player = _playerHealth.GetComponent<Player>();
+        _potionAura = _playerHealth.GetComponent<PlayerPotionAura>();
+        if (_potionAura != null)
+        {
+            _potionAura.OnRecoveryPulse -= HandleRecoveryPulse;
+            _potionAura.OnRecoveryPulse += HandleRecoveryPulse;
+        }
     }
 
     private void UnsubscribeFromHealthChanged()
     {
+        if (_potionAura != null)
+        {
+            _potionAura.OnRecoveryPulse -= HandleRecoveryPulse;
+            _potionAura = null;
+        }
         if (_playerHealth == null)
         {
             return;
@@ -118,7 +137,35 @@ public class UI_HealthBar : MonoBehaviour
 
     private void HandleHealthChanged(float currentHealth, float maxHealth)
     {
+        bool isHealing = _lastActualHealth >= 0f && currentHealth > _lastActualHealth;
+        bool isDamage = _lastActualHealth >= 0f && currentHealth < _lastActualHealth;
+        _lastActualHealth = currentHealth;
+        if (isDamage && _pendingHealRatio >= 0f)
+        {
+            // 회복 표시 대기 중 피격되면 오래된 표시 대신 실제 HP에 맞춘다.
+            _pendingHealRatio = -1f;
+            UpdateHealth(currentHealth, maxHealth, true);
+            PlayPunch();
+            return;
+        }
+        if (isHealing && _potionAura != null && _player != null &&
+            _player.StateMachine.CurrentState == _player.PotionState &&
+            (_potionAura.IsWaitingForSip || _playerHealth.PotionCooldownTimer <= 0f))
+        {
+            _pendingHealRatio = maxHealth > 0f ? Mathf.Clamp01(currentHealth / maxHealth) : 0f;
+            return;
+        }
         UpdateHealth(currentHealth, maxHealth, false);
+    }
+
+    private void HandleRecoveryPulse()
+    {
+        float targetRatio = _pendingHealRatio;
+        _pendingHealRatio = -1f;
+        if (targetRatio >= 0f && _playerHealth != null && !_playerHealth.IsDead)
+        {
+            UpdateHealth(_playerHealth.CurrentHealth, _playerHealth.MaxHealth, false);
+        }
     }
 
     public void UpdateHealth(float currentHealth, float maxHealth, bool isInstant)

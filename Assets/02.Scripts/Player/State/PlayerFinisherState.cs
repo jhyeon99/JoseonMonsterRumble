@@ -56,6 +56,7 @@ public class PlayerFinisherState : PlayerBaseState
             _target.TryHoldForFinisher();
         }
 
+        _player.GetComponent<PlayerAudio>()?.BeginFinisher();
         _player.PlayFinisherAnimation();
     }
 

@@ -1,0 +1,163 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 216dd2e5960f4b5c830aa01ce2661746, type: 3}
+  m_Name: SO_MusicSounds
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudio.SoundSetSO
+  _sounds:
+  - SoundId: Music.Title
+    DisplayName: Music.Title
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 1
+    Priority: 50
+    MaxCount: 1
+  - SoundId: Music.Field
+    DisplayName: Music.Field
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 1
+    Priority: 50
+    MaxCount: 1
+  - SoundId: Music.Boss
+    DisplayName: Music.Boss
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 1
+    Priority: 50
+    MaxCount: 1
+  - SoundId: Music.BossPhase2
+    DisplayName: Music.BossPhase2
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 1
+    Priority: 50
+    MaxCount: 1
+  - SoundId: Music.Prologue
+    DisplayName: Music.Prologue
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 1
+    Priority: 50
+    MaxCount: 1
+  - SoundId: Music.Victory
+    DisplayName: Music.Victory
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 1
+    Priority: 50
+    MaxCount: 1
+  - SoundId: Music.Death
+    DisplayName: Music.Death
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 1
+    Priority: 50
+    MaxCount: 1
+  _events:
+  - EventId: Music.Title
+    Enabled: 1
+    SoundId: Music.Title
+    TriggerDescription: Music.Title
+    Delay: 0
+    TimeMode: 1
+    LifetimePolicy: 3
+    Loop: 1
+    MinInterval: 0
+    IntervalScope: 1
+    BgmFadeDuration: -1
+    LoopEndRule: Next music request, StopBgm, or scene unload
+  - EventId: Music.Field
+    Enabled: 1
+    SoundId: Music.Field
+    TriggerDescription: Music.Field
+    Delay: 0
+    TimeMode: 1
+    LifetimePolicy: 3
+    Loop: 1
+    MinInterval: 0
+    IntervalScope: 1
+    BgmFadeDuration: -1
+    LoopEndRule: Next music request, StopBgm, or scene unload
+  - EventId: Music.Boss
+    Enabled: 1
+    SoundId: Music.Boss
+    TriggerDescription: Music.Boss
+    Delay: 0
+    TimeMode: 1
+    LifetimePolicy: 3
+    Loop: 1
+    MinInterval: 0
+    IntervalScope: 1
+    BgmFadeDuration: -1
+    LoopEndRule: Next music request, StopBgm, or scene unload
+  - EventId: Music.BossPhase2
+    Enabled: 0
+    SoundId: Music.BossPhase2
+    TriggerDescription: Music.BossPhase2
+    Delay: 0
+    TimeMode: 1
+    LifetimePolicy: 3
+    Loop: 1
+    MinInterval: 0
+    IntervalScope: 1
+    BgmFadeDuration: -1
+    LoopEndRule: Next music request, StopBgm, or scene unload
+  - EventId: Music.Prologue
+    Enabled: 0
+    SoundId: Music.Prologue
+    TriggerDescription: Music.Prologue
+    Delay: 0
+    TimeMode: 1
+    LifetimePolicy: 3
+    Loop: 1
+    MinInterval: 0
+    IntervalScope: 1
+    BgmFadeDuration: -1
+    LoopEndRule: Next music request, StopBgm, or scene unload
+  - EventId: Music.Victory
+    Enabled: 0
+    SoundId: Music.Victory
+    TriggerDescription: Music.Victory
+    Delay: 0
+    TimeMode: 1
+    LifetimePolicy: 3
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 1
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Music.Death
+    Enabled: 0
+    SoundId: Music.Death
+    TriggerDescription: Music.Death
+    Delay: 0
+    TimeMode: 1
+    LifetimePolicy: 3
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 1
+    BgmFadeDuration: -1
+    LoopEndRule: 

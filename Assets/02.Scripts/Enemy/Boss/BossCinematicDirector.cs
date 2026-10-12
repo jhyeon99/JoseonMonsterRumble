@@ -8,6 +8,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 보스전 연출 감독. 씬에 빈 오브젝트로 하나 두면 보스 이벤트에 맞춰 자동 재생 (보스 자식에 두지 않기: 처치 후 보스가 꺼짐).
 /// - 등장: 플레이어 조작 잠금 + 무적, 레터박스, 카메라가 보스 쪽으로 이동 + 줌, 보스 이름 타이틀 → 원래대로
+///   (첫 조우 때만. 리스폰으로 씬을 다시 불러오면 생략하고 바로 전투)
 /// - 2페이즈(하울링): 조작 잠금 + 무적, 화면 플래시, 보스 분노 색조 + 화면 색조, 음악 전환
 /// - 처치(마무리 공격 적중 후): 조작 잠금 + 무적, 흰 화면 플래시 + 슬로모션, 레터박스, 음악 페이드 아웃
 ///   → 처치 연출이 끝나면 클리어 문구 표시 후 해제 (On Defeat Sequence Finished 이벤트로 스테이지 클리어 연결)
@@ -29,6 +30,44 @@ public class BossCinematicDirector : MonoBehaviour
     [Header("등장")]
     [SerializeField]
     private bool _playIntro = true;
+
+    [Tooltip("켜면 첫 조우 때만 등장 연출(카메라 이동 / 레터박스 / 이름)을 보여주고, 리스폰(씬 다시 불러오기) 후에는 생략. 게임을 다시 실행하면 초기화")]
+    [SerializeField]
+    private bool _playIntroOnlyOnce = true;
+
+    [Tooltip("켜면 리스폰으로 등장 연출을 생략할 때 보스의 등장 하울링도 건너뛰고 바로 전투 시작")]
+    [SerializeField]
+    private bool _skipIntroHowlOnRespawn = true;
+
+    // 이번 실행에서 등장 연출을 이미 본 보스 (씬 이름 + 보스 이름). 씬을 다시 불러와도 유지
+    private static readonly HashSet<string> SeenIntros = new HashSet<string>();
+
+    /// <summary>이번 실행에서 이 씬의 보스 등장 연출을 이미 봤는지 (리스폰 로딩 생략 판단용)</summary>
+    public static bool HasSeenIntroInScene(string sceneName)
+    {
+        if (string.IsNullOrEmpty(sceneName))
+        {
+            return false;
+        }
+
+        string prefix = sceneName + "/";
+        foreach (string key in SeenIntros)
+        {
+            if (key.StartsWith(prefix))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // 에디터에서 도메인 리로드를 끄고 플레이해도 플레이할 때마다 초기화
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetSeenIntros()
+    {
+        SeenIntros.Clear();
+    }
 
     [Tooltip("카메라가 보스 쪽으로 이동하는 부드러움 (작을수록 빠름)")]
     [SerializeField, Min(0f)]
@@ -311,6 +350,20 @@ public class BossCinematicDirector : MonoBehaviour
         if (boss != _boss || !_playIntro)
         {
             return;
+        }
+
+        if (_playIntroOnlyOnce)
+        {
+            string key = $"{gameObject.scene.name}/{_boss.BossName}";
+
+            // 리스폰 등으로 이미 본 등장 연출은 생략하고 음악만 시작
+            if (!SeenIntros.Add(key))
+            {
+                // Boss.StartFight가 이 이벤트 직후 확인해서 하울링 없이 바로 대기 → 패턴으로 넘어감
+                _boss.SkipIntro = _skipIntroHowlOnRespawn;
+                PlayBgm(_phase1Bgm);
+                return;
+            }
         }
 
         // 연출이 끝날 때까지 보스가 패턴을 시작하지 않도록 등장 상태를 붙잡아 둠

@@ -34,6 +34,8 @@ public class Player : MonoBehaviour
     public PlayerGuardState GuardState => _guardState;
     private PlayerFinisherState _finisherState;
     public PlayerFinisherState FinisherState => _finisherState;
+    private PlayerPotionState _potionState;
+    public PlayerPotionState PotionState => _potionState;
 
     [Header("Motion Data")]
     [SerializeField] private ActionMotionData _hitMotion = new ActionMotionData();
@@ -59,6 +61,10 @@ public class Player : MonoBehaviour
     public PlayerGuard Guard => _guard;
     private PlayerFinisher _finisher;
     public PlayerFinisher Finisher => _finisher;
+    private PlayerWeaponBuff _weaponBuff;
+    public PlayerWeaponBuff WeaponBuff => _weaponBuff;
+    private PlayerPotionAura _potionAura;
+    public PlayerPotionAura PotionAura => _potionAura;
 
     [SerializeField] private Animator _animator;
     public Animator Animator => _animator;
@@ -81,6 +87,14 @@ public class Player : MonoBehaviour
     private static readonly int FinisherAnimStateHash = Animator.StringToHash(FinisherAnimState);
     private static readonly int FinisherAnimStateFullHash = Animator.StringToHash("Base Layer." + FinisherAnimState);
 
+    private const string PotionAnimState = "Player_Heal";
+    private static readonly int PotionAnimStateHash = Animator.StringToHash(PotionAnimState);
+    private static readonly int PotionAnimStateFullHash = Animator.StringToHash("Base Layer." + PotionAnimState);
+
+    private const string IdleAnimState = "Player_Idle";
+    private static readonly int IdleAnimStateHash = Animator.StringToHash(IdleAnimState);
+    private static readonly int IdleAnimStateFullHash = Animator.StringToHash("Base Layer." + IdleAnimState);
+
     // 가드/패링 모션이 애니메이터에 추가되기 전에도 경고 없이 동작하도록 파라미터 유무를 저장
     private bool _hasGuardingParam;
     private bool _hasGuardStartParam;
@@ -95,6 +109,7 @@ public class Player : MonoBehaviour
     {
         Health.OnDied += HandleDeath;
         Health.OnHit += HandleHit;
+        Health.OnPotionUsed += HandlePotionUsed;
         Guard.OnParried += HandleParried;
         Guard.OnBlocked += HandleBlocked;
     }
@@ -103,6 +118,7 @@ public class Player : MonoBehaviour
     {
         Health.OnDied -= HandleDeath;
         Health.OnHit -= HandleHit;
+        Health.OnPotionUsed -= HandlePotionUsed;
         Guard.OnParried -= HandleParried;
         Guard.OnBlocked -= HandleBlocked;
     }
@@ -131,6 +147,18 @@ public class Player : MonoBehaviour
             _finisher = gameObject.AddComponent<PlayerFinisher>();
         }
 
+        _weaponBuff = GetComponent<PlayerWeaponBuff>();
+        if (_weaponBuff == null)
+        {
+            _weaponBuff = gameObject.AddComponent<PlayerWeaponBuff>();
+        }
+
+        _potionAura = GetComponent<PlayerPotionAura>();
+        if (_potionAura == null)
+        {
+            _potionAura = gameObject.AddComponent<PlayerPotionAura>();
+        }
+
         if (_animator == null)
         {
             _animator = GetComponentInChildren<Animator>();
@@ -143,6 +171,7 @@ public class Player : MonoBehaviour
 
         InitializeStates();
         InitializeMotionData();
+        if (!TryGetComponent<PlayerAudio>(out _)) gameObject.AddComponent<PlayerAudio>();
     }
 
     private void InitializeMotionData()
@@ -177,17 +206,14 @@ public class Player : MonoBehaviour
     {
         if (PauseController.IsGameplayInputBlocked)
         {
+            // 리스폰 로딩 화면이 걷히는 동안에도 착지 애니메이션은 갱신 (공중 포즈로 멈춰 보이지 않게)
+            SetGrounded(IsGrounded);
             return;
         }
 
         _stateMachine.Update();
         HandleRangedAttack();
         SetGrounded(IsGrounded);
-
-        if (_inputHandler.IsPotionKeyDown)
-        {
-            _health.TryUsePotion();
-        }
     }
 
     private void FixedUpdate()
@@ -215,6 +241,19 @@ public class Player : MonoBehaviour
         _spellState = new PlayerSpellState(this, _stateMachine);
         _guardState = new PlayerGuardState(this, _stateMachine);
         _finisherState = new PlayerFinisherState(this, _stateMachine);
+        _potionState = new PlayerPotionState(this, _stateMachine);
+    }
+
+    /// <summary>물약 사용 가능 시 제자리 복용 상태로 전이. 전이했으면 true</summary>
+    public bool TryEnterPotion()
+    {
+        if (!IsGrounded || !_health.CanUsePotion)
+        {
+            return false;
+        }
+
+        _stateMachine.ChangeState(_potionState);
+        return true;
     }
 
     /// <summary>앞에 그로기 적이 있으면 마무리 공격 시작. 시작했으면 true</summary>
@@ -335,6 +374,35 @@ public class Player : MonoBehaviour
         }
     }
 
+    public void TriggerPotion()
+    {
+        if (_animator == null)
+        {
+            return;
+        }
+
+        if (_animator.HasState(0, PotionAnimStateHash) || _animator.HasState(0, PotionAnimStateFullHash))
+        {
+            _animator.Play(PotionAnimStateHash, 0, 0f);
+            return;
+        }
+
+        Debug.LogWarning($"{name}: 애니메이터에 {PotionAnimState} 상태가 없습니다.", this);
+    }
+
+    public void PlayIdleAnimation()
+    {
+        if (_animator == null)
+        {
+            return;
+        }
+
+        if (_animator.HasState(0, IdleAnimStateHash) || _animator.HasState(0, IdleAnimStateFullHash))
+        {
+            _animator.Play(IdleAnimStateHash, 0, 0f);
+        }
+    }
+
     public void PlayFinisherAnimation()
     {
         if (_animator == null)
@@ -448,5 +516,13 @@ public class Player : MonoBehaviour
     {
         _rangedAttack?.CancelCharge();
         StateMachine.ChangeState(DeadState);
+    }
+
+    private void HandlePotionUsed()
+    {
+        if (_potionAura != null)
+        {
+            _potionAura.PlayAura();
+        }
     }
 }
