@@ -280,6 +280,7 @@ public class PlayerPotionAura : MonoBehaviour
         auraObject.transform.localPosition = new Vector3(0f, 0.45f, 0f);
 
         _auraParticles = auraObject.AddComponent<ParticleSystem>();
+        _auraParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         ParticleSystemRenderer psRenderer = auraObject.GetComponent<ParticleSystemRenderer>();
 
         if (_sourceRenderer != null)
@@ -373,7 +374,5 @@ public class PlayerPotionAura : MonoBehaviour
             new Keyframe(1.0f, 0.0f)
         );
         sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(1.0f, sizeCurve);
-
-        _auraParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 }

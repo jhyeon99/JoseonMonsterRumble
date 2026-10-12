@@ -1,0 +1,767 @@
+fileFormatVersion: 2
+guid: 4234ae057621b6f4aa2ef44387d48d20
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -733720519522874352
+    second: boss_stomp_00022_0
+  - first:
+      213: -8124151515549357788
+    second: boss_stomp_00022_1
+  - first:
+      213: -2372174725432943908
+    second: boss_stomp_00022_2
+  - first:
+      213: 5954557015114254262
+    second: boss_stomp_00022_3
+  - first:
+      213: 9195495530342845475
+    second: boss_stomp_00022_4
+  - first:
+      213: 970959144825902811
+    second: boss_stomp_00022_5
+  - first:
+      213: 4968428692738053370
+    second: boss_stomp_00022_6
+  - first:
+      213: -6799279341396965731
+    second: boss_stomp_00022_7
+  - first:
+      213: -8852876365270467218
+    second: boss_stomp_00022_8
+  - first:
+      213: -9102109940154365203
+    second: boss_stomp_00022_9
+  - first:
+      213: -5979119282623004237
+    second: boss_stomp_00022_10
+  - first:
+      213: -7647439907099938469
+    second: boss_stomp_00022_11
+  - first:
+      213: 5143438491821706690
+    second: boss_stomp_00022_12
+  - first:
+      213: -5795181943063811392
+    second: boss_stomp_00022_13
+  - first:
+      213: -8167638584968668648
+    second: boss_stomp_00022_14
+  - first:
+      213: -926529361680865000
+    second: boss_stomp_00022_15
+  - first:
+      213: 3022505258079788701
+    second: boss_stomp_00022_16
+  - first:
+      213: 542333204559721479
+    second: boss_stomp_00022_17
+  - first:
+      213: 7154257583261106141
+    second: boss_stomp_00022_18
+  - first:
+      213: 6199419560425028963
+    second: boss_stomp_00022_19
+  - first:
+      213: 3598289395863848957
+    second: boss_stomp_00022_20
+  - first:
+      213: -7997643361753283565
+    second: boss_stomp_00022_21
+  - first:
+      213: 7036799401889519721
+    second: boss_stomp_00022_22
+  - first:
+      213: -5979557933115453475
+    second: boss_stomp_00022_23
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: boss_stomp_00022_0
+      rect:
+        serializedVersion: 2
+        x: 478
+        y: 645
+        width: 29
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01c8c6d231d41d5f0800000000000000
+      internalID: -733720519522874352
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_1
+      rect:
+        serializedVersion: 2
+        x: 305
+        y: 574
+        width: 34
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 429aa3e7d37314f80800000000000000
+      internalID: -8124151515549357788
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_2
+      rect:
+        serializedVersion: 2
+        x: 556
+        y: 592
+        width: 35
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cdad861d7a7541fd0800000000000000
+      internalID: -2372174725432943908
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_3
+      rect:
+        serializedVersion: 2
+        x: 702
+        y: 598
+        width: 11
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b702b08e06d2a250800000000000000
+      internalID: 5954557015114254262
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_4
+      rect:
+        serializedVersion: 2
+        x: 183
+        y: 459
+        width: 36
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32c07cb0776fc9f70800000000000000
+      internalID: 9195495530342845475
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_5
+      rect:
+        serializedVersion: 2
+        x: 518
+        y: 468
+        width: 13
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd6d3c6a23a897d00800000000000000
+      internalID: 970959144825902811
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_6
+      rect:
+        serializedVersion: 2
+        x: 601
+        y: 467
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af4928a729763f440800000000000000
+      internalID: 4968428692738053370
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_7
+      rect:
+        serializedVersion: 2
+        x: 704
+        y: 464
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d96c16f867b14a1a0800000000000000
+      internalID: -6799279341396965731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_8
+      rect:
+        serializedVersion: 2
+        x: 580
+        y: 413
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6d3a9fa9d3442580800000000000000
+      internalID: -8852876365270467218
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_9
+      rect:
+        serializedVersion: 2
+        x: 880
+        y: 399
+        width: 15
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dea0c860c3fcea180800000000000000
+      internalID: -9102109940154365203
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_10
+      rect:
+        serializedVersion: 2
+        x: 586
+        y: 319
+        width: 15
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3b14191f0b6e50da0800000000000000
+      internalID: -5979119282623004237
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_11
+      rect:
+        serializedVersion: 2
+        x: 198
+        y: 282
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5179202ce5ded590800000000000000
+      internalID: -7647439907099938469
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_12
+      rect:
+        serializedVersion: 2
+        x: 971
+        y: 266
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2cd8a15ae0a216740800000000000000
+      internalID: 5143438491821706690
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_13
+      rect:
+        serializedVersion: 2
+        x: 298
+        y: 238
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ca6cea1ab0639fa0800000000000000
+      internalID: -5795181943063811392
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_14
+      rect:
+        serializedVersion: 2
+        x: 303
+        y: 234
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81a1b212bf7b6ae80800000000000000
+      internalID: -8167638584968668648
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_15
+      rect:
+        serializedVersion: 2
+        x: 655
+        y: 159
+        width: 13
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 819ea0b547e4423f0800000000000000
+      internalID: -926529361680865000
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_16
+      rect:
+        serializedVersion: 2
+        x: 388
+        y: 103
+        width: 28
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9e989fa48812f920800000000000000
+      internalID: 3022505258079788701
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_17
+      rect:
+        serializedVersion: 2
+        x: 466
+        y: 77
+        width: 42
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7047ea71d21c68700800000000000000
+      internalID: 542333204559721479
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_18
+      rect:
+        serializedVersion: 2
+        x: 623
+        y: 93
+        width: 22
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ddf3ce9fd57094360800000000000000
+      internalID: 7154257583261106141
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_19
+      rect:
+        serializedVersion: 2
+        x: 675
+        y: 102
+        width: 19
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36dfdb88e33c80650800000000000000
+      internalID: 6199419560425028963
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_20
+      rect:
+        serializedVersion: 2
+        x: 838
+        y: 88
+        width: 39
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df705871421bfe130800000000000000
+      internalID: 3598289395863848957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_21
+      rect:
+        serializedVersion: 2
+        x: 1004
+        y: 99
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3144f6e5cb9a20190800000000000000
+      internalID: -7997643361753283565
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_22
+      rect:
+        serializedVersion: 2
+        x: 303
+        y: 59
+        width: 52
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9685e4106cbb7a160800000000000000
+      internalID: 7036799401889519721
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_stomp_00022_23
+      rect:
+        serializedVersion: 2
+        x: 950
+        y: 63
+        width: 27
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ddfc8caadb7540da0800000000000000
+      internalID: -5979557933115453475
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      boss_stomp_00022_0: -733720519522874352
+      boss_stomp_00022_1: -8124151515549357788
+      boss_stomp_00022_10: -5979119282623004237
+      boss_stomp_00022_11: -7647439907099938469
+      boss_stomp_00022_12: 5143438491821706690
+      boss_stomp_00022_13: -5795181943063811392
+      boss_stomp_00022_14: -8167638584968668648
+      boss_stomp_00022_15: -926529361680865000
+      boss_stomp_00022_16: 3022505258079788701
+      boss_stomp_00022_17: 542333204559721479
+      boss_stomp_00022_18: 7154257583261106141
+      boss_stomp_00022_19: 6199419560425028963
+      boss_stomp_00022_2: -2372174725432943908
+      boss_stomp_00022_20: 3598289395863848957
+      boss_stomp_00022_21: -7997643361753283565
+      boss_stomp_00022_22: 7036799401889519721
+      boss_stomp_00022_23: -5979557933115453475
+      boss_stomp_00022_3: 5954557015114254262
+      boss_stomp_00022_4: 9195495530342845475
+      boss_stomp_00022_5: 970959144825902811
+      boss_stomp_00022_6: 4968428692738053370
+      boss_stomp_00022_7: -6799279341396965731
+      boss_stomp_00022_8: -8852876365270467218
+      boss_stomp_00022_9: -9102109940154365203
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
