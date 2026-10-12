@@ -33,6 +33,17 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] private float _fallGravityMultiplier = 2f;
     [SerializeField] private float _lowJumpGravityMultiplier = 2f;
+
+    [Header("낮은 점프 / 높은 점프 (2단계)")]
+    [Tooltip("켜면 점프 키를 Long Jump Hold Time 이상 누르고 있을 때만 높은 점프, 그 전에 떼면 낮은 점프 (슈퍼마리오식 2단계). " +
+             "끄면 기존처럼 떼는 순간에 따라 높이가 연속으로 달라짐 (Low Jump Gravity Multiplier)")]
+    [SerializeField] private bool _useTwoStepJump = true;
+
+    [Tooltip("높은 점프로 판정되는 최소 누름 시간 (초)")]
+    [SerializeField, Min(0f)] private float _longJumpHoldTime = 0.12f;
+
+    [Tooltip("낮은 점프 높이 (Jump Height 대비 비율)")]
+    [SerializeField, Range(0.1f, 1f)] private float _shortJumpRatio = 0.5f;
     [SerializeField] private float _maxFallSpeed = 15f;
     [SerializeField, Range(0f, 1f)] private float _addPlatformVelocityMultiplier = 1f;
 
@@ -56,6 +67,11 @@ public class PlayerMovement : MonoBehaviour
     private float _lockoutTimer;
     private float _landingJumpTimer;
     private bool _isJumping;
+
+    // 2단계 점프: 이번 점프의 높이가 정해졌는지 / 누른 시간 / 시작 높이
+    private bool _jumpHeightDecided = true;
+    private float _jumpHoldTimer;
+    private float _jumpStartY;
 
     public bool CanJump => !_isJumping && _coyoteTimer > 0f && _landingJumpTimer == 0f;
 
@@ -117,11 +133,17 @@ public class PlayerMovement : MonoBehaviour
         bool idleOnGround = !_isJumping && !_hasHorizontalInput && Mathf.Abs(v.x) < 0.1f && IsGrounded();
         _rigidbody2D.sharedMaterial = idleOnGround ? _highFrictionMaterial : _noFrictionMaterial;
 
+        if (_useTwoStepJump)
+        {
+            UpdateTwoStepJump(isJumpHeld);
+            v = _rigidbody2D.linearVelocity;
+        }
+
         float multiplier = 1f;
 
         if (v.y < 0f)
             multiplier = _fallGravityMultiplier;
-        else if (_isJumping && !isJumpHeld)
+        else if (!_useTwoStepJump && _isJumping && !isJumpHeld)
             multiplier = _lowJumpGravityMultiplier;
 
         _rigidbody2D.gravityScale = _baseGravityScale * multiplier;
@@ -129,6 +151,49 @@ public class PlayerMovement : MonoBehaviour
         if (v.y < -_maxFallSpeed)
         {
             v.y = -_maxFallSpeed;
+            _rigidbody2D.linearVelocity = v;
+        }
+    }
+
+    /// <summary>
+    /// 2단계 점프 판정: 높이가 정해지기 전에 키를 떼면 낮은 점프 높이까지만 오르도록 상승 속도를 깎음.
+    /// Long Jump Hold Time 이상 누르면 높은 점프로 확정 (이후 떼도 끝까지 올라감)
+    /// </summary>
+    private void UpdateTwoStepJump(bool isJumpHeld)
+    {
+        if (!_isJumping || _jumpHeightDecided)
+        {
+            return;
+        }
+
+        if (isJumpHeld)
+        {
+            _jumpHoldTimer += Time.fixedDeltaTime;
+            if (_jumpHoldTimer >= _longJumpHoldTime)
+            {
+                _jumpHeightDecided = true;
+            }
+
+            return;
+        }
+
+        _jumpHeightDecided = true;
+
+        Vector2 v = _rigidbody2D.linearVelocity;
+        if (v.y <= 0f)
+        {
+            return;
+        }
+
+        // 남은 높이만큼만 오르는 속도로 제한 (이미 낮은 점프 높이를 넘었으면 바로 정점)
+        float gravity = Mathf.Abs(Physics2D.gravity.y) * _baseGravityScale;
+        float shortHeight = _jumpHeight * _shortJumpRatio;
+        float remaining = shortHeight - (_rigidbody2D.position.y - _jumpStartY);
+        float maxVelocity = remaining > 0f ? Mathf.Sqrt(2f * gravity * remaining) : 0f;
+
+        if (v.y > maxVelocity)
+        {
+            v.y = maxVelocity;
             _rigidbody2D.linearVelocity = v;
         }
     }
@@ -172,6 +237,9 @@ public class PlayerMovement : MonoBehaviour
     public void Jump()
     {
         _isJumping = true;
+        _jumpHeightDecided = false;
+        _jumpHoldTimer = 0f;
+        _jumpStartY = _rigidbody2D.position.y;
 
         float gravity = Mathf.Abs(Physics2D.gravity.y) * _baseGravityScale;
         float jumpVelocity = Mathf.Sqrt(2f * gravity * _jumpHeight);
