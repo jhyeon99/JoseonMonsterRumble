@@ -36,6 +36,18 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField]
     private bool _playIntroHowlVfx = true;
 
+    [Tooltip("전투 시작 위치 (선택, 보스 발밑 기준). 지정하면 씬 시작 시 이 위치에서 대기하고 이 자리에서 등장 하울링")]
+    [SerializeField]
+    private Transform _introPoint;
+
+    [Tooltip("등장 하울링이 끝나면 바로 쓸 첫 패턴 (예: 찍기). 소환 후 복귀처럼 조건 / 대기 시간 무시. 비우면 평소처럼 대기 후 랜덤 패턴")]
+    [SerializeField]
+    private BossPattern _introNextPattern;
+
+    [Tooltip("보스가 착지하는 바닥 높이 기준점 (선택, 보스 발밑 기준). 비우면: Intro Point를 쓸 때는 BossArena의 1층 바닥, 아니면 씬에 배치한 보스 위치")]
+    [SerializeField]
+    private Transform _groundPoint;
+
     [Header("패턴 사이 대기 (초, 최소 ~ 최대)")]
     [SerializeField]
     private Vector2 _phase1IdleRange = new Vector2(0.8f, 1.4f);
@@ -397,10 +409,50 @@ public class Boss : MonoBehaviour, IFinishable
             }
         }
 
+        ResolveGroundY();
+
+        // 전투 시작 위치에서 대기 (등장 연출 카메라가 보스를 비출 때 이미 그 자리에 있도록)
+        MoveToIntroPoint();
+
         if (_startOnAwake)
         {
             StartFight();
         }
+    }
+
+    /// <summary>
+    /// 착지 바닥 높이(GroundY) 결정. 시작 위치가 높은 곳이어도 점프 / 착지는 바닥 기준으로 하도록
+    /// Ground Point → (Intro Point 사용 시) BossArena 1층 바닥 → 씬 배치 위치 순
+    /// </summary>
+    private void ResolveGroundY()
+    {
+        if (_groundPoint != null)
+        {
+            GroundY = _groundPoint.position.y;
+            return;
+        }
+
+        if (_introPoint != null && _arena != null && _arena.TryGetFloorY(1, out float floorY))
+        {
+            GroundY = floorY;
+        }
+    }
+
+    /// <summary>전투 시작 위치(Intro Point)로 즉시 이동. 지정 안 했으면 무시</summary>
+    private void MoveToIntroPoint()
+    {
+        if (_introPoint == null)
+        {
+            return;
+        }
+
+        Vector2 position = _introPoint.position;
+        if (_body != null)
+        {
+            _body.position = position;
+        }
+
+        transform.position = new Vector3(position.x, position.y, transform.position.z);
     }
 
     private void Update()
@@ -440,6 +492,14 @@ public class Boss : MonoBehaviour, IFinishable
 
         _phase = 1;
         _health.BeginFight();
+        MoveToIntroPoint();
+
+        // 하울링이 끝나면 바로 이어서 쓸 첫 패턴 (예: 시작 위치에서 뛰어내리며 찍기)
+        if (_introNextPattern != null)
+        {
+            QueuePattern(_introNextPattern);
+        }
+
         OnFightStarted?.Invoke(this);
 
         // 전투 시작 이벤트에서 연출 쪽이 SkipIntro를 켰다면 하울링 없이 바로 전투
