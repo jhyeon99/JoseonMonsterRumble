@@ -31,6 +31,16 @@ public class ParallaxManager : MonoBehaviour
         private Vector3 _startPosition;
         private float _stripCenterOffset;
 
+        public bool IsMatchingLayer(string layerName)
+        {
+            return _layer != null && _layerName == layerName;
+        }
+
+        public Vector2 GetCameraMovementMultiplier()
+        {
+            return new Vector2(1f - _horizontalStrength, 1f - _verticalStrength);
+        }
+
         public void Initialize()
         {
             if (_layer == null) return;
@@ -171,6 +181,25 @@ public class ParallaxManager : MonoBehaviour
         _startCameraPosition = _targetCamera.position;
         foreach (ParallaxLayerSetting layerSetting in _layers)
             layerSetting.Initialize();
+    }
+
+    public bool TryGetLayerCameraMovement(string layerName, out Transform targetCamera, out Vector2 multiplier)
+    {
+        targetCamera = _targetCamera;
+        multiplier = Vector2.zero;
+        if (targetCamera == null || !isActiveAndEnabled)
+        {
+            return false;
+        }
+        foreach (ParallaxLayerSetting layerSetting in _layers)
+        {
+            if (layerSetting.IsMatchingLayer(layerName))
+            {
+                multiplier = layerSetting.GetCameraMovementMultiplier();
+                return true;
+            }
+        }
+        return false;
     }
 
     private void LateUpdate()
