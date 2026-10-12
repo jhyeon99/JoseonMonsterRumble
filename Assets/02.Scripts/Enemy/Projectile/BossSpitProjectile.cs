@@ -61,6 +61,14 @@ public class BossSpitProjectile : Projectile
     [SerializeField]
     private bool _resetRotationOnEnd = true;
 
+    [Tooltip("터지는 위치를 부딪힌 면 기준으로 밀어냄. 음수 = 면 안쪽(바닥이면 아래로), 양수 = 바깥쪽(위로)")]
+    [SerializeField]
+    private float _endSurfaceOffset = 1.0f;
+
+    [Tooltip("end 그림에서 표면에 닿는 지점 (프리팹 기준 로컬 위치, 회전 전). 이 점이 부딪힌 지점에 붙음. (0, 0)이면 프리팹 중심. 선택하면 노란 점으로 표시")]
+    [SerializeField]
+    private Vector2 _endImpactPoint = Vector2.zero;
+
     private Vector2 _velocity;
     private Animator _animator;
     private Collider2D _collider;
@@ -328,12 +336,14 @@ public class BossSpitProjectile : Projectile
             normal = incoming.sqrMagnitude > 0.0001f ? -incoming : Vector2.up;
         }
 
-        // 표면에 붙여서 터지게
-        transform.position = contact;
+        // 회전한 뒤, 그림의 닿는 지점(End Impact Point)을 표면에 붙이고 End Surface Offset만큼 면 안쪽 / 바깥쪽으로 이동
         if (_resetRotationOnEnd)
         {
             FaceImpactSurface(normal.normalized);
         }
+
+        Vector2 endPosition = contact - GetWorldImpactOffset() + (normal.normalized * _endSurfaceOffset);
+        transform.position = new Vector3(endPosition.x, endPosition.y, transform.position.z);
 
         if (_animator != null && !string.IsNullOrEmpty(_endBool))
         {
@@ -359,6 +369,19 @@ public class BossSpitProjectile : Projectile
         float intoSurfaceAngle = Mathf.Atan2(-surfaceNormal.y, -surfaceNormal.x) * Mathf.Rad2Deg;
         float frontAngle = _spriteFacesLeft ? 180f : 0f;
         transform.rotation = Quaternion.Euler(0f, 0f, intoSurfaceAngle - frontAngle);
+    }
+
+    /// <summary>End Impact Point의 현재 회전 / 크기 기준 월드 오프셋</summary>
+    private Vector2 GetWorldImpactOffset()
+    {
+        var scaled = Vector3.Scale(_endImpactPoint, transform.lossyScale);
+        return transform.rotation * scaled;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position + (Vector3)GetWorldImpactOffset(), 0.15f);
     }
 
     private IEnumerator DisableAfter(float delay)
