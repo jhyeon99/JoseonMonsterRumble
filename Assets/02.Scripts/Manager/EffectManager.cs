@@ -146,6 +146,11 @@ public class EffectManager : MonoBehaviour
         Play(EffectType.LandingDust, position);
     }
 
+    public void PlayParryLaunchDisappear(Vector2 position)
+    {
+        Play(EffectType.ParryLaunchDisappear, position);
+    }
+
     /// <summary>
     /// 상황별 메서드가 아직 없는 이펙트용. 가능하면 상황별 메서드를 추가해서 사용.
     /// </summary>
