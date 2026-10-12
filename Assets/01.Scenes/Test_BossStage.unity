@@ -879,6 +879,110 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0a9cd3e584d94f45888f1fa2246869fa, type: 3}
+--- !u!1 &511982509
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 511982510}
+  - component: {fileID: 511982512}
+  - component: {fileID: 511982511}
+  m_Layer: 7
+  m_Name: BossMeleeCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &511982510
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 511982509}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1847312037}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!61 &511982511
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 511982509}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: -6, y: 1}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 4, y: 2}
+  m_EdgeRadius: 0
+--- !u!114 &511982512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 511982509}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 193d01eade4b2214681b53ed468bafad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossHitbox
+  _attackName: "\uADFC\uC811"
+  _damage: 20
+  _knockbackForce: 8
+  _defense:
+    Parryable: 1
+    Unblockable: 0
+    ParryWindowOverride: 0
+    GuardGaugeCost: 30
+    BlockInvincibleTime: 0
+    FreeBlockOnParryTiming: 0
+  _groggyOnParry: 0
+  _groggyDuration: 1
+  _telegraph: {fileID: 0}
 --- !u!1001 &553459823
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2398,6 +2502,43 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 7894052878302603946}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1847312049
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 730451388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 004a2fac778199743ac8317cc2016d56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossMeleePattern
+  _patternName: "\uC55E\uBC1C \uB54C\uB9AC\uAE30"
+  _phases: -1
+  _floors: 1
+  _weight: 100
+  _cooldown: 0
+  _animationTrigger: melee
+  _animationClip: {fileID: 7400000, guid: 30b24d4182ff0594e9297930cde9d1a3, type: 2}
+  _followingClips: []
+  _durationOverride: 0
+  _fallbackDuration: 1.5
+  _animationSpeed: 1
+  _animationStartTimeout: 1.5
+  _afterDelay: 0
+  _disableContactDamage: 0
+  _hitStartRatio: 0.4
+  _hitEndRatio: 0.6
+  _hitbox: {fileID: 511982512}
+  _showTelegraph: 0
+  _minDistance: 0
+  _maxDistance: 8
+  _stepDistance: 0
+  _edgeMargin: 2
+  _swingShake:
+    Duration: 0.12
+    Magnitude: 0.15
 --- !u!1001 &1919321932
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3616,6 +3757,10 @@ PrefabInstance:
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 3711774888999376504, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
+      insertIndex: 3
+      addedObject: {fileID: 511982510}
+    - targetCorrespondingSourceObject: {fileID: 3711774888999376504, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
       insertIndex: -1
       addedObject: {fileID: 1209447592}
     m_AddedComponents:
@@ -3623,6 +3768,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1847312036}
+    - targetCorrespondingSourceObject: {fileID: 1225062696768127293, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1847312049}
   m_SourcePrefab: {fileID: 100100000, guid: de8d85715d11ee24394c7cfaefda911e, type: 3}
 --- !u!1001 &8179876039420071328
 PrefabInstance:
