@@ -202,6 +202,7 @@ public sealed class StageManager : MonoBehaviour
         }
         RefreshCheckpointVisuals(point.gameObject.scene);
         point.PlayActivation();
+        AudioManager.Instance?.PlaySceneEvent("Environment.Checkpoint", point);
         return true;
     }
 

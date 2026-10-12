@@ -12,17 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d50193ec9c7f422a98e0aeff6c7f1199, type: 3}
   m_Name: SO_AudioCatalog
   m_EditorClassIdentifier: Assembly-CSharp::GameAudio.AudioCatalogSO
-  Player: {fileID: 0}
+  Player: {fileID: 11400000, guid: 4a62ef82a0cb420ea89f649830a29671, type: 2}
   Ground:
-    Melee: {fileID: 0}
-    Ranged: {fileID: 0}
+    Melee: {fileID: 11400000, guid: 25f1b6a7913f4a318a63e0aa1ab0be26, type: 2}
+    Ranged: {fileID: 11400000, guid: b54d984e47114c5ca51497d9feda7ecd, type: 2}
   Air:
-    Melee: {fileID: 0}
-    Ranged: {fileID: 0}
-  Boss: {fileID: 0}
+    Melee: {fileID: 11400000, guid: a559d5313f7e42148bcb79d42728d426, type: 2}
+    Ranged: {fileID: 11400000, guid: 86275e5a3bbd4a81817ec06e6073b485, type: 2}
+  Boss: {fileID: 11400000, guid: 3bda48e52b484b079988934a1c2a22cc, type: 2}
   Music: {fileID: 11400000, guid: 79627dfb955f4f91b27e07675bc2e060, type: 2}
-  Item: {fileID: 0}
-  Environment: {fileID: 0}
+  Item: {fileID: 11400000, guid: 39e417b7b422448c8a093865067d8623, type: 2}
+  Environment: {fileID: 11400000, guid: cace4725aea94b6b800a07b4a821f386, type: 2}
   UI: {fileID: 11400000, guid: 15390d926ed44f908a7a4e802badda87, type: 2}
-  Prologue: {fileID: 0}
-  Buff: {fileID: 0}
+  Prologue: {fileID: 11400000, guid: 11897adbfbb64dee85c8913376083029, type: 2}
+  Buff: {fileID: 11400000, guid: e12bdc8ab58745d7b1bd7b4e6efad343, type: 2}

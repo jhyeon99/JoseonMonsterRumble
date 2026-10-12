@@ -10,7 +10,7 @@ public sealed class AudioManagerEditor : Editor
     private readonly Dictionary<UnityEngine.Object, SerializedObject> _assets = new Dictionary<UnityEngine.Object, SerializedObject>();
     private readonly Dictionary<string, bool> _foldouts = new Dictionary<string, bool>();
     private string _previewError;
-    private bool _showWarnings = true;
+    private bool _showWarnings;
     private AudioCatalogSO _catalog;
 
     private void OnEnable() => Undo.undoRedoPerformed += OnUndoRedo;
@@ -161,7 +161,9 @@ public sealed class AudioManagerEditor : Editor
             {
                 SerializedProperty entry = events.GetArrayElementAtIndex(i);
                 string eventId = entry.FindPropertyRelative("EventId").stringValue;
-                if (!Foldout($"{path}:{set.GetInstanceID()}:event:{i}", string.IsNullOrEmpty(eventId) ? "새 이벤트" : eventId)) continue;
+                string eventLabel = string.IsNullOrEmpty(eventId) ? "새 이벤트" :
+                    AudioEventEditorDefinitions.Description(eventId) + " (" + eventId + ")";
+                if (!Foldout($"{path}:{set.GetInstanceID()}:event:{i}", eventLabel)) continue;
                 EditorGUI.indentLevel++;
                 DrawEvent(data, entry, prefix);
                 if (GUILayout.Button("이벤트 삭제"))
@@ -282,7 +284,17 @@ public sealed class AudioManagerEditor : Editor
         {
             Property(sound, "SoundId", "사운드 ID");
             Property(sound, "DisplayName", "표시 이름");
-            EditorGUILayout.PropertyField(sound.FindPropertyRelative("Clips"), new GUIContent("음원 목록"), true);
+            SerializedProperty clips = sound.FindPropertyRelative("Clips");
+            AudioClip firstClip = clips.arraySize > 0 ? clips.GetArrayElementAtIndex(0).objectReferenceValue as AudioClip : null;
+            EditorGUI.BeginChangeCheck();
+            var selectedClip = EditorGUILayout.ObjectField("음원", firstClip, typeof(AudioClip), false) as AudioClip;
+            if (EditorGUI.EndChangeCheck())
+            {
+                if (clips.arraySize == 0) clips.InsertArrayElementAtIndex(0);
+                clips.GetArrayElementAtIndex(0).objectReferenceValue = selectedClip;
+            }
+            if (Foldout(owner.GetInstanceID() + ":clips:" + index, "랜덤 재생용 음원 목록"))
+                EditorGUILayout.PropertyField(clips, new GUIContent("음원 목록"), true);
             Property(sound, "Volume", "항목 볼륨");
             Property(sound, "PitchMin", "피치 최소");
             Property(sound, "PitchMax", "피치 최대");
