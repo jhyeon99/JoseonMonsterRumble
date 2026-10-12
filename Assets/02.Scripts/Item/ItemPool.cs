@@ -3,6 +3,15 @@ using UnityEngine;
 
 public class ItemPool : MonoBehaviour
 {
+    public static event System.Action<SoulItem[]> OnDeathSoulsSpawned;
+    public static event System.Action<EnemyHealth, SoulItem[]> OnEnemyDeathSoulsSpawned;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetSoulSpawnListeners()
+    {
+        OnDeathSoulsSpawned = null;
+        OnEnemyDeathSoulsSpawned = null;
+    }
     private const float DeathSoulMinimumScatterSpeed = 10f;
     private const float DeathSoulMaximumScatterSpeed = 14f;
     private const float DeathSoulMinimumScatterTime = 0.65f;
@@ -192,18 +201,19 @@ public class ItemPool : MonoBehaviour
         SpawnCustomSoul(hitPosition, amount, color, scale, velocity, waitTime);
     }
 
-    public void SpawnDeathSouls(Vector2 centerPosition, int count = 5)
+    public void SpawnDeathSouls(Vector2 centerPosition, int count = 5, EnemyHealth source = null)
     {
-        SpawnDeathSouls(centerPosition, count, 1f, 1f);
+        SpawnDeathSouls(centerPosition, count, 1f, 1f, source);
     }
 
     /// <summary>
     /// 사망 소울 (개별 무작위 방향으로 퍼짐). totalAmount = 전체 소울 충전량 (1 = 슬롯 1칸),
     /// speedMultiplier = 퍼지는 속도 배율 (보스처럼 많이 뿌릴 때 크게)
     /// </summary>
-    public void SpawnDeathSouls(Vector2 centerPosition, int count, float totalAmount, float speedMultiplier)
+    public void SpawnDeathSouls(Vector2 centerPosition, int count, float totalAmount, float speedMultiplier,
+        EnemyHealth source = null)
     {
-        SpawnDeathSoulScatter(centerPosition, count, totalAmount / Mathf.Max(1, count), speedMultiplier, 0f);
+        SpawnDeathSoulScatter(centerPosition, count, totalAmount / Mathf.Max(1, count), speedMultiplier, 0f, source);
     }
 
     /// <summary>
@@ -258,10 +268,15 @@ public class ItemPool : MonoBehaviour
         int count,
         float amountPerSoul,
         float speedMultiplier,
-        float jitterRadius
+        float jitterRadius,
+        EnemyHealth source = null
     )
     {
         count = Mathf.Max(1, count);
+
+        // Only allocate a snapshot when a tutorial/observer needs the actual death drops.
+        SoulItem[] spawned = OnDeathSoulsSpawned != null || source != null && OnEnemyDeathSoulsSpawned != null
+            ? new SoulItem[count] : null;
 
         for (int i = 0; i < count; i++)
         {
@@ -274,6 +289,12 @@ public class ItemPool : MonoBehaviour
             Vector2 spawnPosition = centerPosition + (Random.insideUnitCircle * jitterRadius);
             SoulItem soulItem = SpawnCustomSoul(spawnPosition, amountPerSoul, color, 1.15f, velocity, waitTime);
             soulItem.EnableDeathMotion();
+            if (spawned != null) spawned[i] = soulItem;
+        }
+        if (spawned != null)
+        {
+            if (source != null) OnEnemyDeathSoulsSpawned?.Invoke(source, spawned);
+            OnDeathSoulsSpawned?.Invoke(spawned);
         }
     }
 

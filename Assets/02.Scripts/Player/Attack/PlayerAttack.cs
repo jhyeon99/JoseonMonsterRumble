@@ -30,6 +30,10 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField, ReadOnly] private bool _isHitboxActive;
 
     public bool IsHitboxActive => _isHitboxActive;
+    public event System.Action<int> OnAttackStepStarted;
+    public event System.Action<bool> OnAttackStepEnded;
+    public event System.Action<HitData> OnMeleeImpact;
+    private bool _stepActive;
 
     // 한 번의 공격 단계에서 같은 적은 한 번만 맞도록
     private readonly HashSet<IDamageable> _hitTargets = new HashSet<IDamageable>();
@@ -59,9 +63,15 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     public void StartAttackStep(int index)
     {
+        CompleteAttackStep();
         EndHitbox();
         _hitTargets.Clear();
         _currentCombo = TryGetAttackData(index, out _) ? index + 1 : 0;
+        if (_currentCombo > 0)
+        {
+            _stepActive = true;
+            OnAttackStepStarted?.Invoke(_currentCombo);
+        }
     }
 
     /// <summary>
@@ -87,8 +97,20 @@ public class PlayerAttack : MonoBehaviour
         _isHitboxActive = false;
     }
 
+    public void CompleteAttackStep()
+    {
+        if (!_stepActive) return;
+        _stepActive = false;
+        OnAttackStepEnded?.Invoke(true);
+    }
+
     public void StopAttack()
     {
+        if (_stepActive)
+        {
+            _stepActive = false;
+            OnAttackStepEnded?.Invoke(false);
+        }
         EndHitbox();
         _hitTargets.Clear();
         _currentCombo = 0;
@@ -138,7 +160,8 @@ public class PlayerAttack : MonoBehaviour
                 comboStep: _currentCombo,
                 isBuffed: isBuffed
             );
-            damageable.TakeDamage(hitData);
+            if (damageable.TakeDamage(hitData) && hitData.Damage > 0f)
+                OnMeleeImpact?.Invoke(hitData);
         }
     }
 
