@@ -3186,11 +3186,11 @@ MonoBehaviour:
   UseBottomBoundary: 1
   BottomBoundary: -10
   TargetBottomBoundary: 0
-  UseLeftBoundary: 0
-  LeftBoundary: -10
+  UseLeftBoundary: 1
+  LeftBoundary: 70
   TargetLeftBoundary: 0
-  UseRightBoundary: 0
-  RightBoundary: 10
+  UseRightBoundary: 1
+  RightBoundary: 285
   TargetRightBoundary: 0
   IsCameraPositionHorizontallyBounded: 0
   IsCameraPositionVerticallyBounded: 0
@@ -10717,7 +10717,7 @@ PrefabInstance:
     - target: {fileID: 202350529642853549, guid: 322a01c30e393914fa7857dfe3381f19,
         type: 3}
       propertyPath: m_Size.x
-      value: 122.97854
+      value: 136.15059
       objectReference: {fileID: 0}
     - target: {fileID: 202350529642853549, guid: 322a01c30e393914fa7857dfe3381f19,
         type: 3}
@@ -10727,7 +10727,7 @@ PrefabInstance:
     - target: {fileID: 202350529642853549, guid: 322a01c30e393914fa7857dfe3381f19,
         type: 3}
       propertyPath: m_Offset.x
-      value: 43.210773
+      value: 36.62475
       objectReference: {fileID: 0}
     - target: {fileID: 202350529642853549, guid: 322a01c30e393914fa7857dfe3381f19,
         type: 3}
@@ -12219,9 +12219,6 @@ MonoBehaviour:
   _nextSceneName: Test_Ep1
   _nextSceneTriggerDistance: 1.5
   _nextSceneRevealDuration: 0.75
-  _screamClip: {fileID: 8300000, guid: a3a7638b7a432d445ac540bff0ece4f5, type: 3}
-  _jigeBreakClip: {fileID: 8300000, guid: 3edceb6a6315b084c908449d237f29a6, type: 3}
-  _doorClip: {fileID: 8300000, guid: 5e51fe6aafe41aa41b3e32db541e2250, type: 3}
   _controlHintDurationMultiplier: 2
   _controlHintOffset: {x: 0, y: 64}
   _controlHintFont: {fileID: 12800000, guid: 0975dedf52304458a79f6f10c64f0682, type: 3}
