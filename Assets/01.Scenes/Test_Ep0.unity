@@ -3054,6 +3054,10 @@ MonoBehaviour:
     Duration: 0.1
     Magnitude: 0.3
   _damageMultiplier: 0.02
+  _playerHitKick:
+    Distance: 0.18
+    Duration: 0.12
+    PushRatio: 0.25
   _enemyLightHitShake:
     Duration: 0.092
     Magnitude: 0.046
@@ -7090,7 +7094,7 @@ Transform:
   m_GameObject: {fileID: 976005690}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 162.63, y: -2.92, z: 0}
+  m_LocalPosition: {x: 162.07, y: -2.67, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12940,7 +12944,7 @@ GameObject:
   - component: {fileID: 1969148100}
   - component: {fileID: 1969148099}
   - component: {fileID: 1969148101}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Tutorial_SmallRock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13055,7 +13059,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.34449437}
+  m_Offset: {x: -0.004337311, y: 0.37051105}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0}
@@ -13065,7 +13069,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.1999999, y: 0.68898875}
+  m_Size: {x: 1.2433548, y: 0.7410221}
   m_EdgeRadius: 0
 --- !u!1 &2001806194
 GameObject:
@@ -14005,6 +14009,15 @@ PrefabInstance:
       propertyPath: _prologue
       value: 
       objectReference: {fileID: 1875812139}
+    - target: {fileID: 1003, guid: 338365823df44498b60c62ebd118d693, type: 3}
+      propertyPath: _dodgeText
+      value: "Z\uB97C \uB204\uB974\uBA74 \uB4A4\uB85C \uBB3C\uB7EC\uB098\uBA70 \uD68C\uD53C\uD560
+        \uC218 \uC788\uB2E4."
+      objectReference: {fileID: 0}
+    - target: {fileID: 1003, guid: 338365823df44498b60c62ebd118d693, type: 3}
+      propertyPath: _attackText
+      value: "X\uB97C \uB20C\uB7EC \uC77C\uBC18 \uACF5\uACA9"
+      objectReference: {fileID: 0}
     - target: {fileID: 1003, guid: 338365823df44498b60c62ebd118d693, type: 3}
       propertyPath: _startPoint
       value: 

@@ -46,6 +46,14 @@ PrefabInstance:
       value: PF_FG_PineBough
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 531bf4eccb84411dbb5e06eb4d351371, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.26115343
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 531bf4eccb84411dbb5e06eb4d351371, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.26115343
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 531bf4eccb84411dbb5e06eb4d351371, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -92,7 +100,8 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: 531bf4eccb84411dbb5e06eb4d351371, type: 3}
 --- !u!4 &3084009997249346094 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 400000, guid: 531bf4eccb84411dbb5e06eb4d351371, type: 3}
+  m_CorrespondingSourceObject: {fileID: 400000, guid: 531bf4eccb84411dbb5e06eb4d351371,
+    type: 3}
   m_PrefabInstance: {fileID: 3084009997249208494}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8246408878932438752
@@ -166,6 +175,7 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: 531bf4eccb84411dbb5e06eb4d351371, type: 3}
 --- !u!4 &8246408878932309088 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 400000, guid: 531bf4eccb84411dbb5e06eb4d351371, type: 3}
+  m_CorrespondingSourceObject: {fileID: 400000, guid: 531bf4eccb84411dbb5e06eb4d351371,
+    type: 3}
   m_PrefabInstance: {fileID: 8246408878932438752}
   m_PrefabAsset: {fileID: 0}
