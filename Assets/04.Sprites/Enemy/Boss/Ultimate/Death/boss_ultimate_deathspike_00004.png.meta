@@ -1,0 +1,611 @@
+fileFormatVersion: 2
+guid: 6c19759a265815f4b97cd78b29bff9fd
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5358593874717191178
+    second: boss_ultimate_deathspike_00004_0
+  - first:
+      213: -5805889583658580986
+    second: boss_ultimate_deathspike_00004_1
+  - first:
+      213: 799802208955387880
+    second: boss_ultimate_deathspike_00004_2
+  - first:
+      213: 62652774940426761
+    second: boss_ultimate_deathspike_00004_3
+  - first:
+      213: -4917201418432461401
+    second: boss_ultimate_deathspike_00004_4
+  - first:
+      213: 573592593158270054
+    second: boss_ultimate_deathspike_00004_5
+  - first:
+      213: 7562144695333457200
+    second: boss_ultimate_deathspike_00004_6
+  - first:
+      213: 8636389045535759406
+    second: boss_ultimate_deathspike_00004_7
+  - first:
+      213: -9069371506111730342
+    second: boss_ultimate_deathspike_00004_8
+  - first:
+      213: -6682441231051640430
+    second: boss_ultimate_deathspike_00004_9
+  - first:
+      213: -7226946480915307120
+    second: boss_ultimate_deathspike_00004_10
+  - first:
+      213: 2347886117434507437
+    second: boss_ultimate_deathspike_00004_11
+  - first:
+      213: -3009930613951216826
+    second: boss_ultimate_deathspike_00004_12
+  - first:
+      213: 4210827708336619558
+    second: boss_ultimate_deathspike_00004_13
+  - first:
+      213: -5962742229557633011
+    second: boss_ultimate_deathspike_00004_14
+  - first:
+      213: 7650164161112482703
+    second: boss_ultimate_deathspike_00004_15
+  - first:
+      213: -849025083650315646
+    second: boss_ultimate_deathspike_00004_16
+  - first:
+      213: -4391243266464119683
+    second: boss_ultimate_deathspike_00004_17
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 50
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 965
+        width: 74
+        height: 95
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f3d5e1134372a5b0800000000000000
+      internalID: -5358593874717191178
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_1
+      rect:
+        serializedVersion: 2
+        x: 538
+        y: 682
+        width: 288
+        height: 371
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 604c3e04f265d6fa0800000000000000
+      internalID: -5805889583658580986
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_2
+      rect:
+        serializedVersion: 2
+        x: 932
+        y: 738
+        width: 82
+        height: 342
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8efcb5b1fd7791b00800000000000000
+      internalID: 799802208955387880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_3
+      rect:
+        serializedVersion: 2
+        x: 1098
+        y: 699
+        width: 356
+        height: 381
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 902448aed569ed000800000000000000
+      internalID: 62652774940426761
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 799
+        width: 185
+        height: 91
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a54945cc5792cbb0800000000000000
+      internalID: -4917201418432461401
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_5
+      rect:
+        serializedVersion: 2
+        x: 444
+        y: 625
+        width: 322
+        height: 202
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 66c6ef8ac6fc5f700800000000000000
+      internalID: 573592593158270054
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_6
+      rect:
+        serializedVersion: 2
+        x: 1468
+        y: 687
+        width: 452
+        height: 153
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 03d8471d88222f860800000000000000
+      internalID: 7562144695333457200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_7
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 535
+        width: 86
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e2cdb31541e9ad770800000000000000
+      internalID: 8636389045535759406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_8
+      rect:
+        serializedVersion: 2
+        x: 1373
+        y: 473
+        width: 497
+        height: 118
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5d2922baae132280800000000000000
+      internalID: -9069371506111730342
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_9
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 23
+        width: 567
+        height: 303
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2913ebefa133343a0800000000000000
+      internalID: -6682441231051640430
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_10
+      rect:
+        serializedVersion: 2
+        x: 137
+        y: 306
+        width: 447
+        height: 144
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 095a842377ab4bb90800000000000000
+      internalID: -7226946480915307120
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_11
+      rect:
+        serializedVersion: 2
+        x: 479
+        y: 0
+        width: 321
+        height: 357
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da041c2fbfd559020800000000000000
+      internalID: 2347886117434507437
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_12
+      rect:
+        serializedVersion: 2
+        x: 1062
+        y: 162
+        width: 351
+        height: 268
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6434ddccd049a36d0800000000000000
+      internalID: -3009930613951216826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_13
+      rect:
+        serializedVersion: 2
+        x: 1386
+        y: 293
+        width: 461
+        height: 123
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 620c6c5ad7ddf6a30800000000000000
+      internalID: 4210827708336619558
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_14
+      rect:
+        serializedVersion: 2
+        x: 1074
+        y: 0
+        width: 148
+        height: 237
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d002fffb885104da0800000000000000
+      internalID: -5962742229557633011
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_15
+      rect:
+        serializedVersion: 2
+        x: 1493
+        y: 0
+        width: 176
+        height: 106
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f83a880b5c7da2a60800000000000000
+      internalID: 7650164161112482703
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_16
+      rect:
+        serializedVersion: 2
+        x: 1592
+        y: 35
+        width: 303
+        height: 159
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28a60ab4f28a734f0800000000000000
+      internalID: -849025083650315646
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: boss_ultimate_deathspike_00004_17
+      rect:
+        serializedVersion: 2
+        x: 1770
+        y: 97
+        width: 150
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d748414d38b2f03c0800000000000000
+      internalID: -4391243266464119683
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      boss_ultimate_deathspike_00004_0: -5358593874717191178
+      boss_ultimate_deathspike_00004_1: -5805889583658580986
+      boss_ultimate_deathspike_00004_10: -7226946480915307120
+      boss_ultimate_deathspike_00004_11: 2347886117434507437
+      boss_ultimate_deathspike_00004_12: -3009930613951216826
+      boss_ultimate_deathspike_00004_13: 4210827708336619558
+      boss_ultimate_deathspike_00004_14: -5962742229557633011
+      boss_ultimate_deathspike_00004_15: 7650164161112482703
+      boss_ultimate_deathspike_00004_16: -849025083650315646
+      boss_ultimate_deathspike_00004_17: -4391243266464119683
+      boss_ultimate_deathspike_00004_2: 799802208955387880
+      boss_ultimate_deathspike_00004_3: 62652774940426761
+      boss_ultimate_deathspike_00004_4: -4917201418432461401
+      boss_ultimate_deathspike_00004_5: 573592593158270054
+      boss_ultimate_deathspike_00004_6: 7562144695333457200
+      boss_ultimate_deathspike_00004_7: 8636389045535759406
+      boss_ultimate_deathspike_00004_8: -9069371506111730342
+      boss_ultimate_deathspike_00004_9: -6682441231051640430
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
