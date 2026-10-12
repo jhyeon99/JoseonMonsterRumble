@@ -56,6 +56,14 @@ public class BossHopPattern : BossPattern
     [SerializeField, Min(0f)]
     private float _edgeMargin = 2f;
 
+    [Tooltip("뛰어오를 때 발밑 먼지 (크기 / 위치는 Boss의 점프 먼지 설정)")]
+    [SerializeField]
+    private bool _takeoffDust = true;
+
+    [Tooltip("착지할 때 발밑 먼지")]
+    [SerializeField]
+    private bool _landingDust = true;
+
     [SerializeField]
     private CameraShakeSettings _landingShake = new CameraShakeSettings(0.12f, 0.12f);
 
@@ -101,6 +109,15 @@ public class BossHopPattern : BossPattern
     /// <summary>이륙 비율까지 대기 → 플레이어 쪽으로 포물선 이동 → 착지</summary>
     private IEnumerator Hop()
     {
+        // 이륙 먼지를 일찍 내는 경우 (Boss의 Takeoff Dust Timing이 음수)
+        float takeoffTiming = Boss.TakeoffDustTiming;
+        if (_takeoffDust && takeoffTiming < 0f)
+        {
+            float earlyRatio = _takeoffRatio + (takeoffTiming / Mathf.Max(0.0001f, Duration));
+            yield return WaitUntilProgress(Mathf.Max(0f, earlyRatio));
+            Boss.PlayJumpDust(Boss.Position.x, Boss.GroundY);
+        }
+
         yield return WaitUntilProgress(_takeoffRatio);
 
         Boss.FacePlayer();
@@ -109,18 +126,39 @@ public class BossHopPattern : BossPattern
         float targetX = GetTargetX(startX);
         float landRatio = Mathf.Max(_landRatio, _takeoffRatio + 0.01f);
 
+        if (_takeoffDust && takeoffTiming >= 0f)
+        {
+            Boss.PlayJumpDust(startX, groundY, takeoffTiming);
+        }
+
+        float landingTiming = Boss.LandingDustTiming;
+        bool landingDustPlayed = !_landingDust;
+
         while (Progress < landRatio)
         {
             float t = Mathf.InverseLerp(_takeoffRatio, landRatio, Progress);
             float x = Mathf.Lerp(startX, targetX, t);
             float y = groundY + (4f * _hopHeight * t * (1f - t));
             Boss.MoveTo(new Vector2(x, y));
+
+            // 착지 직전에 미리 (Landing Dust Timing이 음수)
+            if (!landingDustPlayed && landingTiming < 0f && (landRatio - Progress) * Duration <= -landingTiming)
+            {
+                Boss.PlayJumpDust(targetX, groundY);
+                landingDustPlayed = true;
+            }
+
             yield return new WaitForFixedUpdate();
         }
 
         Boss.MoveTo(new Vector2(targetX, groundY));
         Boss.SnapToGround();
         CameraShake.Shake(_landingShake);
+
+        if (!landingDustPlayed)
+        {
+            Boss.PlayJumpDust(targetX, groundY, landingTiming);
+        }
     }
 
     /// <summary>플레이어를 넘어 Overshoot Distance만큼 반대편까지 (최대 Hop Distance, 맵 안쪽으로 제한)</summary>

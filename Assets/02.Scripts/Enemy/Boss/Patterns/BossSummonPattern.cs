@@ -33,6 +33,14 @@ public class BossSummonPattern : BossPattern
     [SerializeField]
     private string _jumpTrigger = "";
 
+    [Tooltip("뛰어오를 때 발밑 먼지 (크기 / 위치는 Boss의 점프 먼지 설정)")]
+    [SerializeField]
+    private bool _takeoffDust = true;
+
+    [Tooltip("착지할 때 발밑 먼지")]
+    [SerializeField]
+    private bool _landingDust = true;
+
     [Tooltip("소환 위치까지 점프하는 시간 (초)")]
     [SerializeField, Min(0.05f)]
     private float _jumpDuration = 0.8f;
@@ -245,6 +253,15 @@ public class BossSummonPattern : BossPattern
 
         SetJumping(true);
 
+        // 이륙 먼지 (Boss의 Takeoff Dust Timing만큼 늦게. 음수는 시작 순간)
+        if (_takeoffDust)
+        {
+            Boss.PlayJumpDust(start.x, start.y, Boss.TakeoffDustTiming);
+        }
+
+        float landingTiming = Boss.LandingDustTiming;
+        bool landingDustPlayed = !_landingDust;
+
         float apexY = Mathf.Max(start.y, target.y) + _jumpHeight;
         float elapsed = 0f;
         while (elapsed < _jumpDuration)
@@ -254,11 +271,24 @@ public class BossSummonPattern : BossPattern
 
             float x = Mathf.Lerp(start.x, target.x, Mathf.SmoothStep(0f, 1f, t));
             Boss.MoveTo(new Vector2(x, GetJumpY(t, start.y, apexY, target.y)));
+
+            // 착지 직전에 미리 (Landing Dust Timing이 음수)
+            if (!landingDustPlayed && landingTiming < 0f && _jumpDuration - elapsed <= -landingTiming)
+            {
+                Boss.PlayJumpDust(target.x, target.y);
+                landingDustPlayed = true;
+            }
+
             yield return new WaitForFixedUpdate();
         }
 
         Boss.MoveTo(target);
         yield return new WaitForFixedUpdate();
+
+        if (!landingDustPlayed)
+        {
+            Boss.PlayJumpDust(target.x, target.y, landingTiming);
+        }
 
         SetJumping(false);
 

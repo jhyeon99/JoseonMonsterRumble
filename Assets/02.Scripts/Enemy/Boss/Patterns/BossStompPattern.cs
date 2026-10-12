@@ -68,6 +68,14 @@ public class BossStompPattern : BossPattern
     [SerializeField]
     private bool _randomizeStompVfxFlip = true;
 
+    [Tooltip("땅에서 뛰어오를 때 발밑 먼지 (높은 곳에서 뛰어내릴 때는 안 나옴. 크기 / 위치는 Boss의 점프 먼지 설정)")]
+    [SerializeField]
+    private bool _takeoffDust = true;
+
+    [Tooltip("착지할 때 발밑 먼지. 돌 튀는 이펙트(Play Stomp Vfx)가 켜져 있으면 겹치지 않도록 먼지는 안 나옴")]
+    [SerializeField]
+    private bool _landingDust = true;
+
     [Tooltip("착지보다 이 시간(초)만큼 먼저 이펙트를 재생. 이펙트 앞부분이 늘어져 늦게 터져 보이면 올림 (0 = 착지 순간)")]
     [SerializeField, Min(0f)]
     private float _stompVfxLeadTime = 0.05f;
@@ -253,6 +261,17 @@ public class BossStompPattern : BossPattern
         bool hasWarned = false;
         bool vfxPlayed = false;
 
+        // 땅에서 출발할 때만 이륙 먼지 (소환 위치 같은 높은 곳에서 뛰어내릴 때는 제외)
+        // (Boss의 Takeoff Dust Timing만큼 늦게. 음수는 시작 순간)
+        if (_takeoffDust && Mathf.Abs(startY - groundY) < 0.1f)
+        {
+            Boss.PlayJumpDust(startX, groundY, Boss.TakeoffDustTiming);
+        }
+
+        // 돌 튀는 이펙트가 나오면 착지 먼지는 생략
+        float landingTiming = Boss.LandingDustTiming;
+        bool landingDustPlayed = !_landingDust || _playStompVfx;
+
         // 점프 → 착지 (판정 시작 지점에 착지)
         while (Progress < landRatio)
         {
@@ -279,6 +298,13 @@ public class BossStompPattern : BossPattern
                 vfxPlayed = true;
             }
 
+            // 착지 먼지를 착지 직전에 미리 (Landing Dust Timing이 음수)
+            if (!landingDustPlayed && landingTiming < 0f && (landRatio - progress) * Duration <= -landingTiming)
+            {
+                Boss.PlayJumpDust(targetX, groundY);
+                landingDustPlayed = true;
+            }
+
             yield return new WaitForFixedUpdate();
         }
 
@@ -290,6 +316,11 @@ public class BossStompPattern : BossPattern
         if (!vfxPlayed)
         {
             PlayStompVfx(targetX, groundY);
+        }
+
+        if (!landingDustPlayed)
+        {
+            Boss.PlayJumpDust(targetX, groundY, landingTiming);
         }
 
         AudioResult("Boss.Stomp", Boss.transform.position);

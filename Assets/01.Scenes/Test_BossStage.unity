@@ -2356,6 +2356,8 @@ MonoBehaviour:
   _overshootDistance: 5
   _overshootJitter: 0.3
   _edgeMargin: 2
+  _takeoffDust: 1
+  _landingDust: 1
   _landingShake:
     Duration: 0.12
     Magnitude: 0.12
@@ -2945,6 +2947,27 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7810793003393420825, guid: f31de309dc032834584d0642d1348112,
+        type: 3}
+      propertyPath: _effects.Array.size
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7810793003393420825, guid: f31de309dc032834584d0642d1348112,
+        type: 3}
+      propertyPath: _effects.Array.data[9].Type
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7810793003393420825, guid: f31de309dc032834584d0642d1348112,
+        type: 3}
+      propertyPath: _effects.Array.data[9].Prefab
+      value: 
+      objectReference: {fileID: 198387571446659831, guid: a5dc8f2a8eb98644d84b8e99cab96937,
+        type: 3}
+    - target: {fileID: 7810793003393420825, guid: f31de309dc032834584d0642d1348112,
+        type: 3}
+      propertyPath: _effects.Array.data[9].AllowFlip
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3308,6 +3331,21 @@ PrefabInstance:
       propertyPath: _arena
       value: 
       objectReference: {fileID: 1234674639}
+    - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _jumpDustOffsetY
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _landingDustTiming
+      value: -0.125
+      objectReference: {fileID: 0}
+    - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _takeoffDustTiming
+      value: -0.125
+      objectReference: {fileID: 0}
     - target: {fileID: 3711774888999376504, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: m_LocalPosition.x
