@@ -95,6 +95,9 @@ public abstract class BossPattern : MonoBehaviour
     public string PatternName => string.IsNullOrEmpty(_patternName) ? GetType().Name : _patternName;
     public float Weight => _weight;
 
+    /// <summary>패턴 시작 시 보낼 애니메이터 트리거. 상황에 따라 다른 트리거를 쓰는 패턴은 재정의</summary>
+    protected virtual string AnimationTrigger => _animationTrigger;
+
     /// <summary>true면 CanUse일 때 다른 패턴보다 먼저, 대기 시간 없이 바로 사용 (체력 비율 발동 패턴 등)</summary>
     public virtual bool IsForced => false;
 
@@ -209,7 +212,7 @@ public abstract class BossPattern : MonoBehaviour
 
         if (Boss != null)
         {
-            Boss.ResetTrigger(_animationTrigger);
+            Boss.ResetTrigger(AnimationTrigger);
         }
 
         Cleanup();
@@ -227,7 +230,7 @@ public abstract class BossPattern : MonoBehaviour
         }
 
         _startTime = Time.time;
-        Boss.SetTrigger(_animationTrigger);
+        Boss.SetTrigger(AnimationTrigger);
 
         // 애니메이터가 실제로 이 클립을 재생하기 시작한 순간부터 진행도를 셈
         // (이전 애니메이션이 끝나기를 기다리는 동안 판정 / 발사가 먼저 나가지 않도록)
@@ -272,7 +275,7 @@ public abstract class BossPattern : MonoBehaviour
         }
 
         // 소비되지 않고 남은 트리거가 다음에 엉뚱하게 재생되지 않도록 정리
-        Boss.ResetTrigger(_animationTrigger);
+        Boss.ResetTrigger(AnimationTrigger);
 
         if (_afterDelay > 0f)
         {
