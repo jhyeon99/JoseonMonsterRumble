@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -34,12 +34,6 @@ public class PrologueIntroController : MonoBehaviour
     [SerializeField, Min(0.1f)] private float _nextSceneTriggerDistance = 1.5f;
     [Tooltip("다음 씬을 불러온 뒤 검은 화면이 밝아지는 시간입니다.")]
     [SerializeField, Min(0.01f)] private float _nextSceneRevealDuration = 0.75f;
-
-    [Header("Opening sounds (assign later)")]
-    [SerializeField] private AudioClip _screamClip;
-    [Tooltip("검은 화면에서 비명 소리와 동시에 재생할 지게 부서지는 소리입니다.")]
-    [SerializeField] private AudioClip _jigeBreakClip;
-    [SerializeField] private AudioClip _doorClip;
 
     [Header("Movement and jump tutorial")]
     [Tooltip("동작 완료까지 표시된 시간의 배율입니다. 2면 완료 후 같은 시간만큼 더 표시합니다.")]
@@ -140,7 +134,7 @@ public class PrologueIntroController : MonoBehaviour
     [SerializeField, Min(0.01f)] private float _fadeToBlack = 0.5f;
     [SerializeField, Min(0.01f)] private float _revealLocation2 = 0.75f;
 
-    private readonly List<AudioSource> _openingSoundSources = new List<AudioSource>();
+    private readonly List<GameAudio.PlayHandle> _openingSoundSources = new List<GameAudio.PlayHandle>();
     private PlayerInputHandler _input;
     private Rigidbody2D _body;
     private CanvasGroup _fade;
@@ -337,10 +331,10 @@ public class PrologueIntroController : MonoBehaviour
         _camera.Reset(true, true, true);
         Phase = "Scream";
         ShowSubtitle(_openingSoundText);
-        PlaySound(_screamClip);
-        PlaySound(_jigeBreakClip);
+        PlaySound("Prologue.Scream");
+        PlaySound("Prologue.Break");
         // 비명을 끝까지 들은 뒤부터 새 Enter 입력을 받는다.
-        float screamDuration = _screamClip != null ? _screamClip.length : 0f;
+        float screamDuration = GetSoundDuration("Prologue.Scream");
         if (screamDuration > 0f)
             yield return new WaitForSecondsRealtime(screamDuration);
         yield return WaitForAdvance();
@@ -356,9 +350,9 @@ public class PrologueIntroController : MonoBehaviour
         ShowSubtitle("");
         AudioManager.Instance.PlayButtonClick();
         Phase = "DoorOpening";
-        PlaySound(_doorClip, 1.5f);
+        PlaySound("Prologue.Door");
         // Keep the screen black until the last second of the door sound.
-        float doorRevealDelay = _doorClip != null ? Mathf.Max(0f, _doorClip.length - 1f) : 0f;
+        float doorRevealDelay = Mathf.Max(0f, GetSoundDuration("Prologue.Door") - 1f);
         if (doorRevealDelay > 0f)
             yield return new WaitForSecondsRealtime(doorRevealDelay);
         // Player appears outside the house and can move as soon as the reveal starts.
@@ -605,17 +599,39 @@ public class PrologueIntroController : MonoBehaviour
 
     private void HandleJigeReached(int targetIndex) => _jigeReached = true;
 
-    private void PlaySound(AudioClip clip, float gain = 1f)
+    private float GetSoundDuration(string eventId)
     {
-        if (clip == null) return;
-        AudioSource source = AudioManager.Instance.PlaySfxTracked(clip, gain: gain);
-        if (source != null) _openingSoundSources.Add(source);
+        AudioManager manager = AudioManager.Instance;
+        GameAudio.SoundSetSO set = manager != null ? manager.Catalog?.Prologue : null;
+        if (set == null || !set.TryGetEvent(eventId, out GameAudio.EventBinding binding) || !binding.Enabled ||
+            !set.TryGetSound(binding.SoundId, out GameAudio.SoundData sound) || !sound.HasValidClip)
+        {
+            return 0f;
+        }
+
+        float duration = 0f;
+        foreach (AudioClip clip in sound.Clips)
+        {
+            if (clip != null) duration = Mathf.Max(duration, clip.length / Mathf.Max(0.01f, sound.PitchMin));
+        }
+        return binding.EffectiveDelay + duration;
+    }
+
+    private void PlaySound(string eventId)
+    {
+        var emitter = GameAudio.EventAudio.For(this, "Prologue");
+        GameAudio.PlayHandle handle = emitter.Play(eventId);
+        if (!handle.IsEmpty) _openingSoundSources.Add(handle);
     }
 
     private void StopOpeningSounds()
     {
-        foreach (AudioSource source in _openingSoundSources)
-            if (source != null) source.Stop();
+        AudioManager manager = AudioManager.ExistingInstance;
+        if (manager != null)
+        {
+            foreach (GameAudio.PlayHandle handle in _openingSoundSources) manager.StopHandle(handle);
+        }
+        if (TryGetComponent(out GameAudio.EventAudio emitter)) emitter.Cancel();
         _openingSoundSources.Clear();
     }
 

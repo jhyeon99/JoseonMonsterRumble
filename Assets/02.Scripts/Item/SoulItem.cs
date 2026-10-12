@@ -342,6 +342,7 @@ public class SoulItem : Item
         if (_isCollected) return;
         _isCollected = true;
         player.Soul.AddSoul(_soulAmount);
+        AudioManager.Instance?.PlaySceneEvent("Item.SoulPickup", this);
         OnCollected?.Invoke(this);
     }
 }

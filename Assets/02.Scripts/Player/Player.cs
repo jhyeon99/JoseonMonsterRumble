@@ -249,6 +249,7 @@ public class Player : MonoBehaviour
     {
         if (!IsGrounded || !_health.CanUsePotion)
         {
+            if (!_health.CanUsePotion) GetComponent<PlayerAudio>()?.PlayUnavailable();
             return false;
         }
 
