@@ -160,25 +160,6 @@ public class BossCinematicDirector : MonoBehaviour
     [SerializeField]
     private SpriteRenderer[] _bossTintTargets;
 
-    [Header("음악 (비우면 바꾸지 않음)")]
-    [Tooltip("등장 연출 시작 시 재생")]
-    [SerializeField]
-    private AudioClip _phase1Bgm;
-
-    [Tooltip("2페이즈 진입 시 재생")]
-    [SerializeField]
-    private AudioClip _phase2Bgm;
-
-    [SerializeField, Min(0f)]
-    private float _bgmFadeTime = 1f;
-
-    [Tooltip("처치 시 음악을 페이드 아웃")]
-    [SerializeField]
-    private bool _stopBgmOnDefeat = true;
-
-    [SerializeField, Min(0f)]
-    private float _defeatBgmFadeTime = 2f;
-
     [Header("처치")]
     [Tooltip("처치 연출 종료 신호가 오지 않을 때 최대 잠금 시간 (초)")]
     [SerializeField, Min(0.1f)]
@@ -205,10 +186,6 @@ public class BossCinematicDirector : MonoBehaviour
     [Tooltip("평소 속도로 돌아오는 시간 (실제 초)")]
     [SerializeField, Min(0.01f)]
     private float _slowMotionRecover = 0.5f;
-
-    [Tooltip("처치 순간 효과음 (선택)")]
-    [SerializeField]
-    private AudioClip _defeatSfx;
 
     [Header("클리어 문구")]
     [Tooltip("처치 연출이 끝난 뒤 표시 (비우면 표시 안 함)")]
@@ -237,10 +214,6 @@ public class BossCinematicDirector : MonoBehaviour
 
     [SerializeField, Min(0.01f)]
     private float _clearFadeOut = 0.6f;
-
-    [Tooltip("클리어 문구가 나타날 때 효과음 (선택)")]
-    [SerializeField]
-    private AudioClip _clearSfx;
 
     [Tooltip("처치 연출이 모두 끝나고 조작이 풀릴 때 (스테이지 클리어 / 다음 씬 연결용)")]
     [SerializeField]
@@ -356,7 +329,7 @@ public class BossCinematicDirector : MonoBehaviour
             {
                 // Boss.StartFight가 이 이벤트 직후 확인해서 하울링 없이 바로 대기 → 패턴으로 넘어감
                 _boss.SkipIntro = _skipIntroHowlOnRespawn;
-                PlayBgm(_phase1Bgm);
+                // BossAudio requests the catalog music on fight start.
                 return;
             }
         }
@@ -402,7 +375,7 @@ public class BossCinematicDirector : MonoBehaviour
     {
         LockPlayer();
         SetLetterbox(true);
-        PlayBgm(_phase1Bgm);
+        // BossAudio requests the catalog music on fight start.
 
         // 보스 쪽으로 카메라 이동 + 줌
         if (_cameraFollow != null)
@@ -446,7 +419,7 @@ public class BossCinematicDirector : MonoBehaviour
             SetLetterbox(true);
         }
 
-        PlayBgm(_phase2Bgm);
+        // BossAudio requests the catalog music on phase change.
         StartCoroutine(FlashRoutine(_flashColor, _flashPeakAlpha, _flashDuration));
         StartCoroutine(TintRoutine(true));
 
@@ -468,17 +441,14 @@ public class BossCinematicDirector : MonoBehaviour
         // 마무리 공격이 맞는 순간: 흰 화면 플래시 + 슬로모션
         StartCoroutine(FlashRoutine(_defeatFlashColor, _defeatFlashPeakAlpha, _defeatFlashDuration));
         StartCoroutine(SlowMotionRoutine());
-        PlaySfx(_defeatSfx);
+        // BossAudio requests Boss.Defeat once when defeat is confirmed.
 
         if (_letterboxOnDefeat)
         {
             SetLetterbox(true);
         }
 
-        if (_stopBgmOnDefeat && AudioManager.Instance != null)
-        {
-            AudioManager.Instance.StopBgm(_defeatBgmFadeTime);
-        }
+        // BossAudio owns defeat music so this routine cannot cancel Music.Victory.
 
         StartCoroutine(TintRoutine(false));
 
@@ -492,7 +462,7 @@ public class BossCinematicDirector : MonoBehaviour
         // 클리어 문구
         if (_clearGroup != null)
         {
-            PlaySfx(_clearSfx);
+            // BossAudio requests Music.Victory once when defeat is confirmed.
             yield return FadeCanvasGroup(_clearGroup, 0f, 1f, _clearFadeIn);
             yield return Wait(_clearHold);
             yield return FadeCanvasGroup(_clearGroup, 1f, 0f, _clearFadeOut);
@@ -693,22 +663,6 @@ public class BossCinematicDirector : MonoBehaviour
             Color tinted = _tintBaseColors[i] * Color.Lerp(Color.white, _bossAngerTint, amount);
             tinted.a = renderer.color.a;
             renderer.color = tinted;
-        }
-    }
-
-    private static void PlaySfx(AudioClip clip)
-    {
-        if (clip != null && AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlaySfx(clip);
-        }
-    }
-
-    private void PlayBgm(AudioClip clip)
-    {
-        if (clip != null && AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayBgm(clip, _bgmFadeTime);
         }
     }
 

@@ -26,6 +26,22 @@ namespace GameAudio
         [Tooltip("본 스테이지 사용이 확정될 때 연결하는 조건부 데이터입니다.")]
         public SoundSetSO Buff;
 
+        public SoundSetSO GetSet(string category)
+        {
+            switch (category)
+            {
+                case "Player": return Player;
+                case "Boss": return Boss;
+                case "Music": return Music;
+                case "Item": return Item;
+                case "Environment": return Environment;
+                case "UI": return UI;
+                case "Prologue": return Prologue;
+                case "Buff": return Buff;
+                default: return null;
+            }
+        }
+
         public IEnumerable<SoundSetSO> EnumerateSets()
         {
             if (Player != null) yield return Player;

@@ -287,6 +287,7 @@ public class PlayerWeaponBuff : MonoBehaviour
 
         // 파티클 시스템 메인 모듈 구성
         ParticleSystem.MainModule main = _auraParticles.main;
+        main.playOnAwake = false;
         main.duration = 1.0f;
         main.loop = true;
         main.startLifetime = new ParticleSystem.MinMaxCurve(0.35f, 0.65f);

@@ -273,6 +273,7 @@ public class BossStompPattern : BossPattern
     /// <summary>점프 → 착지 → 찍기 판정 (판정 끝까지). 높은 곳(소환 위치 등)에서 시작하면 그 높이에서 뛰어내림</summary>
     private IEnumerator Stomp()
     {
+        AudioAction("Boss.Jump");
         float startX = Boss.Position.x;
         float startY = Boss.Position.y;
         float groundY = Boss.GroundY;
