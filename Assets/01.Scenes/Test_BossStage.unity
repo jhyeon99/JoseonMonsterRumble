@@ -891,7 +891,7 @@ GameObject:
   - component: {fileID: 511982512}
   - component: {fileID: 511982511}
   m_Layer: 7
-  m_Name: BossMeleeCollider
+  m_Name: MeleeCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1775,6 +1775,110 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2077256831}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1303235680
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1303235681}
+  - component: {fileID: 1303235683}
+  - component: {fileID: 1303235682}
+  m_Layer: 7
+  m_Name: TailCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1303235681
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1303235680}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1847312037}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!61 &1303235682
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1303235680}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 6, y: 2}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 2, y: 4}
+  m_EdgeRadius: 0
+--- !u!114 &1303235683
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1303235680}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 193d01eade4b2214681b53ed468bafad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossHitbox
+  _attackName: "\uAF2C\uB9AC"
+  _damage: 20
+  _knockbackForce: 8
+  _defense:
+    Parryable: 1
+    Unblockable: 0
+    ParryWindowOverride: 0
+    GuardGaugeCost: 30
+    BlockInvincibleTime: 0
+    FreeBlockOnParryTiming: 0
+  _groggyOnParry: 0
+  _groggyDuration: 1
+  _telegraph: {fileID: 0}
 --- !u!1 &1427632698
 GameObject:
   m_ObjectHideFlags: 0
@@ -2532,6 +2636,8 @@ MonoBehaviour:
   _hitEndRatio: 0.6
   _hitbox: {fileID: 511982512}
   _showTelegraph: 0
+  _useHitboxAsRange: 1
+  _rangeMargin: {x: 0, y: 0}
   _minDistance: 0
   _maxDistance: 8
   _stepDistance: 0
@@ -2539,6 +2645,47 @@ MonoBehaviour:
   _swingShake:
     Duration: 0.12
     Magnitude: 0.15
+--- !u!114 &1847312050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 730451388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22bc37de260ca5247ac1687a0e98778f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossTailPattern
+  _patternName: "\uAF2C\uB9AC\uCE58\uBA70 \uB4A4\uB3CC\uAE30"
+  _phases: -1
+  _floors: 3
+  _weight: 1
+  _cooldown: 0
+  _animationTrigger: tail
+  _animationClip: {fileID: 7400000, guid: 2390747b213df8a4ab53d329aede370d, type: 2}
+  _followingClips: []
+  _durationOverride: 0
+  _fallbackDuration: 1.5
+  _animationSpeed: 1
+  _animationStartTimeout: 1.5
+  _afterDelay: 0
+  _disableContactDamage: 0
+  _hitStartRatio: 0.4
+  _hitEndRatio: 0.6
+  _hitboxes:
+  - {fileID: 1303235683}
+  _showTelegraph: 0
+  _useHitboxAsRange: 1
+  _rangeMargin: {x: 0, y: 0}
+  _minDistance: 0
+  _maxDistance: 6
+  _useImmediatelyWhenBehind: 1
+  _turnRatio: 1
+  _playerBehindBool: isPlayerBehind
+  _swingShake:
+    Duration: 0.1
+    Magnitude: 0.12
 --- !u!1001 &1919321932
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3761,6 +3908,10 @@ PrefabInstance:
       addedObject: {fileID: 511982510}
     - targetCorrespondingSourceObject: {fileID: 3711774888999376504, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
+      insertIndex: 4
+      addedObject: {fileID: 1303235681}
+    - targetCorrespondingSourceObject: {fileID: 3711774888999376504, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
       insertIndex: -1
       addedObject: {fileID: 1209447592}
     m_AddedComponents:
@@ -3772,6 +3923,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1847312049}
+    - targetCorrespondingSourceObject: {fileID: 1225062696768127293, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1847312050}
   m_SourcePrefab: {fileID: 100100000, guid: de8d85715d11ee24394c7cfaefda911e, type: 3}
 --- !u!1001 &8179876039420071328
 PrefabInstance:

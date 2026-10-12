@@ -17,7 +17,16 @@ public class BossMeleePattern : BossPattern
     [SerializeField]
     private bool _showTelegraph = false;
 
-    [Header("사용 거리 (보스와 플레이어의 가로 거리)")]
+    [Header("사용 조건")]
+    [Tooltip("켜면 플레이어가 앞발 판정(Hitbox) 범위 안에 있을 때만 사용 (혓바닥처럼). 끄면 아래 가로 거리로 판단")]
+    [SerializeField]
+    private bool _useHitboxAsRange = true;
+
+    [Tooltip("판정 범위에 더하는 여유 (x: 가로, y: 세로). 조금 밖에 있어도 쓰게 하려면 양수")]
+    [SerializeField]
+    private Vector2 _rangeMargin = Vector2.zero;
+
+    [Header("사용 거리 (Use Hitbox As Range를 끈 경우, 보스와 플레이어의 가로 거리)")]
     [Tooltip("플레이어가 이 거리보다 가까우면 사용 안 함 (0이면 제한 없음)")]
     [SerializeField, Min(0f)]
     private float _minDistance = 0f;
@@ -51,6 +60,12 @@ public class BossMeleePattern : BossPattern
         if (!base.CanUse() || Boss.Player == null)
         {
             return false;
+        }
+
+        // 판정 범위 기준 (대기 중에는 플레이어를 보고 있으므로 판정이 플레이어 쪽에 있음)
+        if (_useHitboxAsRange && BossHitboxRange.TryGetWorldRect(_hitbox, out _))
+        {
+            return BossHitboxRange.ContainsPlayer(_hitbox, Boss.Player, _rangeMargin);
         }
 
         float distance = Mathf.Abs(Boss.Player.position.x - Boss.Position.x);
@@ -123,6 +138,16 @@ public class BossMeleePattern : BossPattern
 
     private void OnDrawGizmosSelected()
     {
+        if (_useHitboxAsRange && BossHitboxRange.TryGetWorldRect(_hitbox, out Rect rect))
+        {
+            rect.xMin -= _rangeMargin.x;
+            rect.xMax += _rangeMargin.x;
+            rect.yMin -= _rangeMargin.y;
+            rect.yMax += _rangeMargin.y;
+            BossHitboxRange.DrawGizmo(rect, new Color(1f, 0.4f, 0.4f, 0.9f));
+            return;
+        }
+
         Vector3 center = transform.position;
         Gizmos.color = new Color(1f, 0.4f, 0.4f, 0.8f);
         Gizmos.DrawLine(center + (Vector3.left * _maxDistance), center + (Vector3.right * _maxDistance));
