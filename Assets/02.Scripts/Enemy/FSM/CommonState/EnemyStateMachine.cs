@@ -4,6 +4,7 @@ public class EnemyStateMachine
 {
     private EnemyState _currentState;
     public EnemyState CurrentState => _currentState;
+    public event System.Action<EnemyState, EnemyState> OnStateChanged;
 
     public void ChangeState(EnemyState newState)
     {
@@ -12,8 +13,9 @@ public class EnemyStateMachine
             _currentState.Exit();
         }
 
+        EnemyState previous = _currentState;
         _currentState = newState;
-
+        OnStateChanged?.Invoke(previous, newState);
         _currentState.Enter();
     }
 

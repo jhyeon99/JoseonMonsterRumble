@@ -27,4 +27,7 @@ public struct AttackDefense
     [Tooltip("이 공격을 가드 / 패링으로 막은 뒤 이 시간(초) 동안 다른 공격에 맞지 않음 (막은 직후 접촉 / 후속 판정에 바로 맞는 것 방지). 0이면 사용 안 함")]
     [Min(0f)]
     public float BlockInvincibleTime;
+
+    [Tooltip("패링 불가 공격을 패링 타이밍에 막으면 가드 게이지 소모 없이 막기만 함 (패링 가능 공격에는 영향 없음)")]
+    public bool FreeBlockOnParryTiming;
 }

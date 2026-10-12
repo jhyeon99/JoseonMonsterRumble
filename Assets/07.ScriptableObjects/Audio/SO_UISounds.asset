@@ -1,0 +1,122 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 216dd2e5960f4b5c830aa01ce2661746, type: 3}
+  m_Name: SO_UISounds
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudio.SoundSetSO
+  _sounds:
+  - SoundId: UI.Click
+    DisplayName: UI.Click
+    Clips:
+    - {fileID: 8300000, guid: b385562f829672946b59445038d25490, type: 3}
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 70
+    MaxCount: 4
+  - SoundId: UI.Hover
+    DisplayName: UI.Hover
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 70
+    MaxCount: 4
+  - SoundId: UI.PanelOpen
+    DisplayName: UI.PanelOpen
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 70
+    MaxCount: 4
+  - SoundId: UI.PanelClose
+    DisplayName: UI.PanelClose
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 70
+    MaxCount: 4
+  - SoundId: UI.Slider
+    DisplayName: UI.Slider
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 70
+    MaxCount: 4
+  _events:
+  - EventId: UI.Click
+    Enabled: 1
+    SoundId: UI.Click
+    TriggerDescription: UI.Click
+    Delay: 0
+    TimeMode: 1
+    LifetimePolicy: 4
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 1
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: UI.Hover
+    Enabled: 0
+    SoundId: UI.Hover
+    TriggerDescription: UI.Hover
+    Delay: 0
+    TimeMode: 1
+    LifetimePolicy: 4
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 1
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: UI.PanelOpen
+    Enabled: 0
+    SoundId: UI.PanelOpen
+    TriggerDescription: UI.PanelOpen
+    Delay: 0
+    TimeMode: 1
+    LifetimePolicy: 4
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 1
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: UI.PanelClose
+    Enabled: 0
+    SoundId: UI.PanelClose
+    TriggerDescription: UI.PanelClose
+    Delay: 0
+    TimeMode: 1
+    LifetimePolicy: 4
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 1
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: UI.Slider
+    Enabled: 0
+    SoundId: UI.Slider
+    TriggerDescription: UI.Slider
+    Delay: 0
+    TimeMode: 1
+    LifetimePolicy: 4
+    Loop: 0
+    MinInterval: 0.1
+    IntervalScope: 1
+    BgmFadeDuration: -1
+    LoopEndRule: 

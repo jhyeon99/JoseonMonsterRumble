@@ -165,9 +165,13 @@ public class Boss : MonoBehaviour, IFinishable
 
     /// <summary>처치 연출(날려 보내기 / 처치 애니메이션)이 끝남. 보스가 꺼지기 직전</summary>
     public event Action OnDefeatFinished;
+    public event Action<BossState, BossState> OnAudioStateChanged;
 
     /// <summary>true인 동안 등장 상태에서 패턴으로 넘어가지 않음 (등장 연출이 끝날 때까지 대기)</summary>
     public bool HoldIntro { get; set; }
+
+    /// <summary>true면 전투 시작 시 등장 하울링(등장 상태)을 건너뛰고 바로 대기 → 패턴으로 (리스폰 시 연출 생략용)</summary>
+    public bool SkipIntro { get; set; }
 
     private readonly BossStateMachine _stateMachine = new BossStateMachine();
     private readonly List<BossPattern> _patterns = new List<BossPattern>();
@@ -329,6 +333,7 @@ public class Boss : MonoBehaviour, IFinishable
         }
 
         _stateMachine.ChangeState(new BossWaitState(this));
+        if (!TryGetComponent<BossAudio>(out _)) gameObject.AddComponent<BossAudio>();
     }
 
     private void Start()
@@ -395,12 +400,24 @@ public class Boss : MonoBehaviour, IFinishable
         _phase = 1;
         _health.BeginFight();
         OnFightStarted?.Invoke(this);
+
+        // 전투 시작 이벤트에서 연출 쪽이 SkipIntro를 켰다면 하울링 없이 바로 전투
+        if (SkipIntro)
+        {
+            Log("등장 하울링 생략");
+            ForceIdleAnimation();
+            GoIdle();
+            return;
+        }
+
         ChangeState(new BossIntroState(this));
     }
 
     public void ChangeState(BossState nextState)
     {
+        BossState previous = CurrentState;
         _stateMachine.ChangeState(nextState);
+        OnAudioStateChanged?.Invoke(previous, nextState);
     }
 
     /// <summary>패턴 사이 대기로 (페이즈별 대기 시간)</summary>

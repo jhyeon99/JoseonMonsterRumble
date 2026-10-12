@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 using System.Collections.Generic;
 
@@ -8,7 +8,7 @@ public class PlayerInputHandler : MonoBehaviour
     private static readonly KeyCode[] GameplayKeys =
     {
         KeyCode.LeftArrow, KeyCode.RightArrow, KeyCode.DownArrow,
-        KeyCode.C, KeyCode.Space, KeyCode.Z, KeyCode.X, KeyCode.V, KeyCode.B
+        KeyCode.C, KeyCode.Space, KeyCode.Z, KeyCode.X, KeyCode.V, KeyCode.Alpha1, KeyCode.Keypad1
     };
     private readonly HashSet<KeyCode> _suppressedKeys = new HashSet<KeyCode>(GameplayKeys.Length);
     private bool _wasRangedAttackHeld;
@@ -36,6 +36,7 @@ public class PlayerInputHandler : MonoBehaviour
     [SerializeField] private InputBuffer _dodgeBuffer = new InputBuffer(0.1f);
     [SerializeField] private InputBuffer _attackBuffer = new InputBuffer(0.1f);
     [SerializeField] private InputBuffer _rangedAttackBuffer = new InputBuffer(0.1f);
+    [SerializeField] private InputBuffer _potionBuffer = new InputBuffer(0.1f);
 
     [Tooltip("아래 방향키를 누른 뒤 이 시간 안에 가드가 시작돼야 패링 판정이 열림")]
     [SerializeField]
@@ -45,6 +46,7 @@ public class PlayerInputHandler : MonoBehaviour
     public bool TryUseDodgeInput() => _dodgeBuffer.TryUse();
     public bool TryUseAttackInput() => _attackBuffer.TryUse();
     public bool TryUseRangedAttackInput() => _rangedAttackBuffer.TryUse();
+    public bool TryUsePotionInput() => _potionBuffer.TryUse();
     public bool TryUseGuardInput() => _guardBuffer.TryUse();
 
     public void ClearInputState()
@@ -64,6 +66,7 @@ public class PlayerInputHandler : MonoBehaviour
         _dodgeBuffer.Clear();
         _attackBuffer.Clear();
         _rangedAttackBuffer.Clear();
+        _potionBuffer.Clear();
     }
     private void Update()
     {
@@ -117,7 +120,7 @@ public class PlayerInputHandler : MonoBehaviour
         bool isRangedAttackHeld = Input.GetKey(KeyCode.V);
         _isRangedAttackKeyUp = Input.GetKeyUp(KeyCode.V) || (_wasRangedAttackHeld && !isRangedAttackHeld);
         _wasRangedAttackHeld = isRangedAttackHeld;
-        _isPotionKeyDown = IsKeyPressed(KeyCode.B);
+        _isPotionKeyDown = IsKeyPressed(KeyCode.Alpha1) || IsKeyPressed(KeyCode.Keypad1);
         _isGuardKeyDown = IsKeyPressed(KeyCode.DownArrow);
         _isGuardKey = IsKeyHeld(KeyCode.DownArrow);
 
@@ -140,6 +143,11 @@ public class PlayerInputHandler : MonoBehaviour
         if (_isRangedAttackKeyDown)
         {
             _rangedAttackBuffer.Press();
+        }
+
+        if (_isPotionKeyDown)
+        {
+            _potionBuffer.Press();
         }
 
         if (_isGuardKeyDown)

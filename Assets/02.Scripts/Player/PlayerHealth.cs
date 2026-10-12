@@ -11,8 +11,15 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     public float CurrentHealth => _currentHealth;
     [SerializeField, ReadOnly] private int _potionCount;
     public int PotionCount => _potionCount;
-    [SerializeField] private int _maxPotionCount = 10;
-    [SerializeField] private float _potionHealAmount = 10f;
+    [SerializeField] private int _maxPotionCount = 3;
+    [SerializeField, Range(0.1f, 1.0f)] private float _potionHealRatio = 0.7f;
+    [SerializeField, Min(0.1f)] private float _potionCooldown = 0.48f;
+
+    private float _potionCooldownTimer;
+    public float PotionCooldown => _potionCooldown;
+    public float PotionCooldownTimer => _potionCooldownTimer;
+    public float PotionCooldownRatio => _potionCooldown > 0f ? Mathf.Clamp01(_potionCooldownTimer / _potionCooldown) : 0f;
+    public bool CanUsePotion => !_isDead && _potionCount > 0 && _potionCooldownTimer <= 0f && !Mathf.Approximately(_currentHealth, _maxHealth);
 
     [SerializeField] private float _invincibleTime = 1.0f;
 
@@ -23,10 +30,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     // 보스 등장 / 하울링 / 처치 등 연출 중 무적 (피격 후 무적과 별개로 유지)
     private bool _isCinematicInvincible;
+    [SerializeField, ReadOnly] private bool _isRespawnProtected;
 
     // 가드 / 패링으로 막은 직후 잠깐 무적 (공격의 AttackDefense.BlockInvincibleTime)
     private float _blockInvincibleUntil = float.NegativeInfinity;
-    public bool IsInvincible => _isInvincible || _isCinematicInvincible;
+    public bool IsInvincible => _isInvincible || _isCinematicInvincible || _isRespawnProtected;
 
     public HitData LastFatalHitData { get; private set; }
 
@@ -39,14 +47,18 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     public event Action<float, float> OnHealthChanged;
     public event Action OnDied;
+    public event Action OnPotionUsed;
     public event Action<HitData> OnHit;
     public event Action<int> OnPotionChanged;
+    public event Action<HitData> OnDodgeSuccess;
 
 
     private void Awake()
     {
         _currentHealth = _maxHealth;
+        _potionCount = _maxPotionCount;
         _isDead = false;
+        _isRespawnProtected = false;
         LastFatalHitData = default;
         _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
@@ -64,7 +76,22 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         // 가드, 피격 이벤트보다 먼저 차단해야 넉백과 피격 연출도 발생하지 않는다.
         if (MapTestMode.IsEnabled) return false;
 
-        if (IsDead || _isInvincible || _isCinematicInvincible) return false;
+        if (IsDead) return false;
+
+        if (_isRespawnProtected)
+        {
+            return false;
+        }
+
+        if (_isInvincible || _isCinematicInvincible)
+        {
+            if (_isInvincible && _player != null && _player.StateMachine != null && _player.StateMachine.CurrentState is PlayerDodgeState)
+            {
+                OnDodgeSuccess?.Invoke(hitdata);
+            }
+
+            return false;
+        }
 
         // 가드 / 패링으로 막은 직후 잠깐은 후속 공격에 맞지 않음 (가드 게이지도 깎이지 않음)
         if (Time.time < _blockInvincibleUntil) return false;
@@ -131,14 +158,37 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         OnPotionChanged?.Invoke(_potionCount);
     }
 
+    private void Update()
+    {
+        if (_potionCooldownTimer > 0f)
+        {
+            _potionCooldownTimer -= Time.deltaTime;
+            if (_potionCooldownTimer < 0f)
+            {
+                _potionCooldownTimer = 0f;
+            }
+        }
+    }
+
+    public void RefillPotions()
+    {
+        _potionCount = _maxPotionCount;
+        _potionCooldownTimer = 0f;
+        OnPotionChanged?.Invoke(_potionCount);
+    }
+
     public bool TryUsePotion()
     {
         if (_isDead || _potionCount <= 0) return false;
+        if (_potionCooldownTimer > 0f) return false;
         if (Mathf.Approximately(_currentHealth, _maxHealth)) return false;
 
-        Heal(_potionHealAmount);
+        float healAmount = _maxHealth * _potionHealRatio;
+        Heal(healAmount);
         _potionCount--;
+        _potionCooldownTimer = _potionCooldown;
         OnPotionChanged?.Invoke(_potionCount);
+        OnPotionUsed?.Invoke();
         return true;
     }
 
@@ -197,6 +247,11 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         _isCinematicInvincible = isInvincible;
     }
 
+    public void SetRespawnProtected(bool isProtected)
+    {
+        _isRespawnProtected = isProtected;
+    }
+
     /// <param name="showVisual">false면 반투명 표시 없이 무적만 적용 (해제할 때는 항상 원래대로)</param>
     public void SetInvincible(bool isInvincible, bool showVisual = true)
     {
@@ -220,6 +275,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     private void OnDisable()
     {
+        _isRespawnProtected = false;
         int playerLayer = gameObject.layer;
         int enemyAttackLayer = Constants.Layers.EnemyAttack;
 

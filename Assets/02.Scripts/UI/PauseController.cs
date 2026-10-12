@@ -18,10 +18,32 @@ public class PauseController : MonoBehaviour
     [SerializeField] private string _titleSceneName = "Test_TitleScene";
     [SerializeField, ReadOnly] private bool _isPaused;
 
-    private static bool _menuPaused;
+    private static bool _isMenuPaused;
+    private static bool _isItemModalPaused;
     private static Object _tutorialPauseOwner;
-    public static bool IsPaused => _menuPaused || _tutorialPauseOwner != null;
+    public static bool IsPaused => _isMenuPaused || _isItemModalPaused || _tutorialPauseOwner != null ||
+                                   (StageManager.Instance != null && StageManager.Instance.IsRespawnWorldFrozen);
     private static int _pauseTransitionFrame = -1;
+
+    public static bool TryStartItemModal()
+    {
+        if (IsGameplayInputBlocked)
+        {
+            return false;
+        }
+        HitStop.Stop();
+        _isItemModalPaused = true;
+        _pauseTransitionFrame = Time.frameCount;
+        Time.timeScale = 0f;
+        return true;
+    }
+
+    public static void StopItemModal()
+    {
+        _isItemModalPaused = false;
+        _pauseTransitionFrame = Time.frameCount;
+        Time.timeScale = IsPaused ? 0f : 1f;
+    }
     public static bool IsGameplayInputBlocked => IsPaused || Time.frameCount == _pauseTransitionFrame ||
                                                  (StageManager.Instance != null && StageManager.Instance.IsRespawning);
 
@@ -37,7 +59,7 @@ public class PauseController : MonoBehaviour
         }
 
         _isPaused = false;
-        _menuPaused = false;
+        _isMenuPaused = false;
         _pauseTransitionFrame = -1;
         if (_pauseMenuPanel != null)
         {
@@ -77,7 +99,14 @@ public class PauseController : MonoBehaviour
 
     private void Update()
     {
-        if (_tutorialPauseOwner != null) return;
+        if (_tutorialPauseOwner != null || _isItemModalPaused)
+        {
+            return;
+        }
+        if (StageManager.Instance != null && StageManager.Instance.IsRespawning)
+        {
+            return;
+        }
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (_isPaused && _isSettingsAvailable && _settingsPanel.activeSelf)
@@ -192,7 +221,7 @@ public class PauseController : MonoBehaviour
         }
 
         _isPaused = false;
-        _menuPaused = false;
+        _isMenuPaused = false;
         RestoreTimeScale();
         SceneManager.LoadScene(_titleSceneName);
     }
@@ -200,13 +229,21 @@ public class PauseController : MonoBehaviour
     private void SetPaused(bool isPaused)
     {
         if (_tutorialPauseOwner != null) return;
+        if (isPaused && _isItemModalPaused)
+        {
+            return;
+        }
+        if (isPaused && StageManager.Instance != null && StageManager.Instance.IsRespawning)
+        {
+            return;
+        }
         if (_isPaused == isPaused)
         {
             return;
         }
 
         _isPaused = isPaused;
-        _menuPaused = isPaused;
+        _isMenuPaused = isPaused;
         _pauseTransitionFrame = Time.frameCount;
         GameCursorController.SetPauseVisible(isPaused);
 
@@ -314,7 +351,8 @@ public class PauseController : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetPauseState()
     {
-        _menuPaused = false;
+        _isMenuPaused = false;
+        _isItemModalPaused = false;
         _tutorialPauseOwner = null;
         _pauseTransitionFrame = -1;
     }
@@ -323,7 +361,7 @@ public class PauseController : MonoBehaviour
     // checks use IsPaused too, so they cannot resume time or accept attacks behind the card.
     public static bool TryPauseForTutorial(Object owner)
     {
-        if (owner == null || IsPaused) return false;
+        if (owner == null || IsGameplayInputBlocked) return false;
         HitStop.Stop();
         _tutorialPauseOwner = owner;
         _pauseTransitionFrame = Time.frameCount;
@@ -336,7 +374,7 @@ public class PauseController : MonoBehaviour
         if (_tutorialPauseOwner != owner || owner == null) return;
         _tutorialPauseOwner = null;
         _pauseTransitionFrame = Time.frameCount;
-        Time.timeScale = _menuPaused ? 0f : 1f;
+        Time.timeScale = IsPaused ? 0f : 1f;
     }
 
     private void Select(Selectable selectable)

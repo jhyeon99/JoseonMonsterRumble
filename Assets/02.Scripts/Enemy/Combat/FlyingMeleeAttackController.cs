@@ -58,6 +58,7 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
     private bool _hasWarned;
 
     public FlyingMeleeAttackData Data => _data;
+    public event System.Action<FlyingMeleeAttackPhase> OnAttackPhaseChanged;
 
     private void Awake()
     {
@@ -302,6 +303,7 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
 
     public void PlayPhase(FlyingMeleeAttackPhase phase)
     {
+        OnAttackPhaseChanged?.Invoke(phase);
         if (phase != FlyingMeleeAttackPhase.Preparing && phase != FlyingMeleeAttackPhase.Striking)
         {
             StopParryWarning();

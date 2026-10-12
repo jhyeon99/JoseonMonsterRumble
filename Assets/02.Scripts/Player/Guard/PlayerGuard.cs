@@ -236,6 +236,14 @@ public class PlayerGuard : MonoBehaviour
             return GuardResult.Parried;
         }
 
+        // 패링 불가 공격이라도 패링 타이밍에 막으면 게이지 소모 없이 막기만 (공격에서 켠 경우)
+        if (!defense.Parryable && defense.FreeBlockOnParryTiming && IsInParryWindow(defense))
+        {
+            OnBlocked?.Invoke(hitData);
+            Log("패링 타이밍 가드 (패링 불가 공격, 게이지 소모 없음)");
+            return GuardResult.Blocked;
+        }
+
         // 남은 게이지가 소모량보다 적으면 가드 브레이크 → 막지 못하고 그대로 피격
         if (defense.GuardGaugeCost > _currentGauge)
         {

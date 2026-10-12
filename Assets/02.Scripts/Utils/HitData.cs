@@ -24,6 +24,8 @@ public struct HitData
 
     public bool IsTalisman;
 
+    public bool IsBuffed;
+
     /// <summary>공격한 대상 (적 / 보스 등). 사망 원인 표시용. 모르면 null</summary>
     public GameObject Attacker;
 
@@ -42,7 +44,8 @@ public struct HitData
         int comboStep = 0,
         string attackName = "",
         bool isReflectedProjectile = false,
-        bool isTalisman = false
+        bool isTalisman = false,
+        bool isBuffed = false
     )
     {
         Damage = damage;
@@ -54,6 +57,7 @@ public struct HitData
         ComboStep = comboStep;
         IsReflectedProjectile = isReflectedProjectile;
         IsTalisman = isTalisman;
+        IsBuffed = isBuffed;
         AttackName = attackName;
         Attacker = null;
     }
