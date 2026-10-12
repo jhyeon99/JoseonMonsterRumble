@@ -121,6 +121,27 @@ public class BossStompPattern : BossPattern
     [SerializeField, Min(0.01f)]
     private float _spikeSinkTime = 0.3f;
 
+    [Header("가시 파도 (착지 지점에서 양옆으로 퍼짐)")]
+    [Tooltip("가시가 퍼지는 속도 (월드 / 초). 0이면 바닥 전체가 동시에 솟음")]
+    [SerializeField, Min(0f)]
+    private float _spikeWaveSpeed = 18f;
+
+    [Tooltip("1페이즈에 퍼지는 횟수")]
+    [SerializeField, Min(1)]
+    private int _phase1WaveCount = 1;
+
+    [Tooltip("2페이즈에 퍼지는 횟수")]
+    [SerializeField, Min(1)]
+    private int _phase2WaveCount = 2;
+
+    [Tooltip("파도 사이 간격 (초, 이전 파도가 시작된 뒤 다음 파도가 시작되기까지)")]
+    [SerializeField, Min(0f)]
+    private float _spikeWaveInterval = 0.8f;
+
+    [Tooltip("두 번째 파도부터 시작 전에 바닥 예고를 다시 보여줌 (Needle Warning Lead와 파도 간격 중 짧은 시간)")]
+    [SerializeField]
+    private bool _warnBeforeNextWave = true;
+
     [Header("가시 예고 (마지막 찍기, 바닥 전체가 빨갛게 빛남)")]
     [Tooltip("가시가 솟기 몇 초 전에 예고할지 (0이면 예고 없음)")]
     [SerializeField, Min(0f)]
@@ -377,11 +398,42 @@ public class BossStompPattern : BossPattern
         }
 
         yield return WaitUntilProgress(_needleRatio);
-        SpawnFloorSpikes();
+
+        // 착지 지점(보스 위치)에서 양옆으로 퍼지는 파도. 2페이즈는 여러 번
+        float originX = Boss.Position.x;
+        int waveCount = Mathf.Max(1, Boss.Phase >= 2 ? _phase2WaveCount : _phase1WaveCount);
+
+        for (int wave = 0; wave < waveCount; wave++)
+        {
+            if (wave > 0)
+            {
+                float warnTime = _warnBeforeNextWave ? Mathf.Min(_needleWarningLead, _spikeWaveInterval) : 0f;
+                float quietTime = _spikeWaveInterval - warnTime;
+                if (quietTime > 0f)
+                {
+                    yield return new WaitForSeconds(quietTime);
+                }
+
+                if (warnTime > 0f)
+                {
+                    ShowNeedleWarning();
+                    float warnStart = Time.time;
+                    while (Time.time - warnStart < warnTime)
+                    {
+                        UpdateNeedleWarning(Time.time - warnStart);
+                        yield return null;
+                    }
+
+                    HideNeedleWarning();
+                }
+            }
+
+            SpawnFloorSpikes(originX);
+        }
     }
 
     /// <summary>바닥 범위 전체에 간격대로 가시를 깔고 동시에 솟게 함</summary>
-    private void SpawnFloorSpikes()
+    private void SpawnFloorSpikes(float originX)
     {
         GetSpikeRange(out float left, out float right);
         float upY = GetSpikeFloorY() + _spikeUpOffset;
@@ -393,7 +445,9 @@ public class BossStompPattern : BossPattern
         {
             var upPosition = new Vector2(count > 1 ? left + (step * i) : (left + right) * 0.5f, upY);
             BossFloorSpike spike = Instantiate(_floorSpikePrefab, upPosition, Quaternion.identity);
-            spike.Begin(Boss, upPosition, _spikeRiseHeight, _spikeRiseTime, _spikeHoldTime, _spikeSinkTime);
+            // 착지 지점에서 멀수록 늦게 솟음 (속도 0이면 동시에)
+            float delay = _spikeWaveSpeed > 0f ? Mathf.Abs(upPosition.x - originX) / _spikeWaveSpeed : 0f;
+            spike.Begin(Boss, upPosition, _spikeRiseHeight, _spikeRiseTime, _spikeHoldTime, _spikeSinkTime, delay);
         }
 
         AudioResult("Boss.NeedleFire", new Vector3((left + right) * 0.5f, upY, Boss.transform.position.z));
