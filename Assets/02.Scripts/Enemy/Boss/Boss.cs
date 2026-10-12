@@ -224,6 +224,12 @@ public class Boss : MonoBehaviour, IFinishable
     /// <summary>true면 전투 시작 시 등장 하울링(등장 상태)을 건너뛰고 바로 대기 → 패턴으로 (리스폰 시 연출 생략용)</summary>
     public bool SkipIntro { get; set; }
 
+    /// <summary>
+    /// 대기(Idle)에 들어오기 직전에 보던 방향 (1 / -1). 대기 중에는 계속 플레이어를 보므로,
+    /// 꼬리치기처럼 "플레이어가 등 뒤에 있었는지"는 이 값으로 판단
+    /// </summary>
+    public float IdleEnterFacingX { get; set; } = 1f;
+
     private readonly BossStateMachine _stateMachine = new BossStateMachine();
     private readonly List<BossPattern> _patterns = new List<BossPattern>();
     private readonly List<BossPattern> _candidates = new List<BossPattern>();
