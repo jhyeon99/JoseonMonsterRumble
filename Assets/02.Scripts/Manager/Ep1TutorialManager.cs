@@ -171,10 +171,10 @@ public sealed partial class Ep1TutorialManager : MonoBehaviour
             case Ep1TutorialHintType.Respawn: return _respawnMessage;
             case Ep1TutorialHintType.Parry:
                 return _requirePracticeInput ?
-                    "반짝이는 공격이 올 때까지\n아래 방향키를 누르고 있어보세요." : _parryMessage;
+                    "반짝이는 공격이 닿기 직전에\n아래 방향키를 누르세요. 계속 누르면 가드만 됩니다." : _parryMessage;
             case Ep1TutorialHintType.Guard:
                 return _requirePracticeInput ?
-                    "아래 방향키를 계속 눌러\n요괴의 공격을 막아보세요." : _guardHoldMessage;
+                    "아래 방향키를 눌러\n가드를 해보세요." : _guardHoldMessage;
             case Ep1TutorialHintType.TalismanTap: return _talismanTapMessage;
             case Ep1TutorialHintType.TalismanCharge: return _talismanChargeMessage;
             case Ep1TutorialHintType.Finisher: return "노랗게 반짝이는 적에게 다가가\nX를 누르고 있어보세요.";
@@ -206,7 +206,6 @@ public sealed partial class Ep1TutorialManager : MonoBehaviour
         _guardEncounterDistance = Mathf.Max(0.1f, _guardEncounterDistance);
         _displayDuration = Mathf.Max(0.1f, _displayDuration);
         _holdDuration = Mathf.Max(0.1f, _holdDuration);
-        _guardPracticeHoldDuration = Mathf.Max(0.1f, _guardPracticeHoldDuration);
         ValidateCombatSettings();
         ValidateCheckpointSettings();
         ValidateTalismanSettings();

@@ -15,7 +15,8 @@ public sealed partial class Ep1TutorialManager
         WaitingForCollection,
         SoulGauge,
         Complete,
-        WaitingForFirstEnemy
+        WaitingForFirstEnemy,
+        GuardExplanation
     }
 
     private static bool _guardGaugeExplained;
@@ -130,7 +131,8 @@ public sealed partial class Ep1TutorialManager
 
         if (type == Ep1TutorialHintType.TalismanTap) return IsTalismanTapPractice;
         if (type == Ep1TutorialHintType.TalismanCharge) return IsTalismanChargePractice;
-        if (type == Ep1TutorialHintType.Guard) return !_guardGaugeExplained && !IsHighJumpPracticePending;
+        if (type == Ep1TutorialHintType.Guard)
+            return !_guardGaugeExplained && !IsHighJumpPracticePending && !IsGuardDemonstrationActive;
         if (type == Ep1TutorialHintType.Parry)
         {
             if (_parryFinisherExplained) return false;
@@ -190,15 +192,16 @@ public sealed partial class Ep1TutorialManager
 
             return;
         }
+        if (_combatStep == CombatStep.WaitingForRegularGuard && _regularGuardSucceeded)
+        {
+            // Explain the demonstrated block first, then focus the gauge on the next page.
+            OpenCombatPage(CombatStep.GuardExplanation);
+            return;
+        }
         if (PauseController.IsGameplayInputBlocked || SceneArrivalFade.IsTransitioning || !_combatInput.enabled)
             return;
 
-        if (_combatStep == CombatStep.WaitingForRegularGuard && _regularGuardSucceeded)
-        {
-            // Explain the gauge, then let the player defeat the first enemy before teaching parry.
-            OpenCombatPage(CombatStep.GuardGauge);
-        }
-        else if (_combatStep == CombatStep.WaitingForDeathSouls && _pendingDeathSouls != null)
+        if (_combatStep == CombatStep.WaitingForDeathSouls && _pendingDeathSouls != null)
         {
             _soulFocusElapsed += Time.deltaTime;
             if (_tutorialSouls.Count == 0)
@@ -219,7 +222,7 @@ public sealed partial class Ep1TutorialManager
         }
     }
 
-    private bool IsCombatPageOpen => _combatStep == CombatStep.GuardGauge ||
+    private bool IsCombatPageOpen => _combatStep == CombatStep.GuardExplanation || _combatStep == CombatStep.GuardGauge ||
         _combatStep == CombatStep.DeathSoulsFocus || _combatStep == CombatStep.SoulGauge;
 
     private void LateUpdate()
@@ -240,6 +243,11 @@ public sealed partial class Ep1TutorialManager
             return;
         }
         RefreshTalismanPage();
+        if (IsGuardDemonstrationActive && !IsCombatPageOpen)
+        {
+            RefreshGuardDemonstration();
+            return;
+        }
         if (!IsCombatPageOpen || _focusOverlay == null) return;
         RefreshCombatPage();
     }
@@ -249,7 +257,7 @@ public sealed partial class Ep1TutorialManager
         if (_combatStep != CombatStep.WaitingForRegularGuard || _soulsExplained) return;
         if (_requirePracticeInput)
         {
-            if (!_guardPracticeAttackStarted || !_guard.IsGuarding || !_combatInput.IsGuardKey) return;
+            if (!_guardPracticeAttackStarted || !IsGuardDemonstrationActive || !_guard.IsGuarding) return;
             var source = hit.Source as Component;
             if (_guardPracticeEnemy != null &&
                 (source == null || source.GetComponentInParent<Enemy>() != _guardPracticeEnemy))
@@ -380,7 +388,7 @@ public sealed partial class Ep1TutorialManager
     {
         ResolveFocusReferences();
         RectTransform focus = page == CombatStep.GuardGauge ? _guardGaugeFocus : _soulGaugeFocus;
-        if (page != CombatStep.DeathSoulsFocus && focus == null)
+        if (page != CombatStep.DeathSoulsFocus && page != CombatStep.GuardExplanation && focus == null)
         {
             Debug.LogWarning($"{name}: 튜토리얼 강조 UI 연결이 없어 안내를 화면 중앙에 표시합니다.", this);
         }
@@ -393,6 +401,11 @@ public sealed partial class Ep1TutorialManager
 
     private void RefreshCombatPage()
     {
+        if (_combatStep == CombatStep.GuardExplanation)
+        {
+            RefreshGuardDemonstration(true);
+            return;
+        }
         string message = _combatStep == CombatStep.GuardGauge ? _guardGaugeMessage :
             _combatStep == CombatStep.DeathSoulsFocus ? _soulDropMessage : _soulGaugeMessage;
         RectTransform focus = _combatStep == CombatStep.GuardGauge ? _guardGaugeFocus : _soulGaugeFocus;
@@ -407,11 +420,19 @@ public sealed partial class Ep1TutorialManager
     private void AdvanceCombatPage()
     {
         CombatStep previous = _combatStep;
+        if (previous == CombatStep.GuardExplanation)
+        {
+            _combatStep = CombatStep.GuardGauge;
+            _pageOpenedAt = Time.unscaledTime;
+            RefreshCombatPage();
+            return;
+        }
         _focusOverlay.Hide();
         PauseController.ResumeFromTutorial(this);
         if (previous == CombatStep.GuardGauge)
         {
             _guardGaugeExplained = true;
+            ReleaseGuardDemonstration();
             TryMarkHintShown(Ep1TutorialHintType.Guard);
             _combatStep = GetPostGuardStep();
             _startParryHint = _combatStep == CombatStep.WaitingForParryHint;
@@ -432,7 +453,9 @@ public sealed partial class Ep1TutorialManager
 
     private void CancelCombatPage()
     {
-        bool guardHintWasActive = _combatStep == CombatStep.WaitingForRegularGuard || _combatStep == CombatStep.GuardGauge;
+        bool guardHintWasActive = _combatStep == CombatStep.WaitingForRegularGuard ||
+            _combatStep == CombatStep.GuardExplanation || _combatStep == CombatStep.GuardGauge;
+        ReleaseGuardDemonstration();
         if (_focusOverlay != null) _focusOverlay.Hide();
         PauseController.ResumeFromTutorial(this);
         _pendingDeathSouls = null;
