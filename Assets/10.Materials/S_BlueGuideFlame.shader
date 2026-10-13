@@ -16,6 +16,7 @@
         _HoverAmplitude ("Hover Height", Range(0, 0.15)) = 0.04
         _HoverSpeed ("Hover Speed", Range(0, 5)) = 1.6
         _Phase ("Animation Phase", Float) = 0
+        [HideInInspector] _AnimationTime ("Animation Time Override", Float) = -1
     }
     SubShader
     {
@@ -49,6 +50,7 @@
                 float _Intensity, _Opacity, _Glow, _Speed, _Sway;
                 float _HoverAmplitude, _HoverSpeed, _Phase;
                 float _WispCurl, _Swirl;
+                float _AnimationTime;
             CBUFFER_END
 
             float Hash(float2 p)
@@ -99,7 +101,8 @@
                 float2 anchor = TransformObjectToWorld(float3(0, 0, 0)).xy;
                 float phase = dot(anchor, float2(2.31, 4.17)) + _Phase;
                 input.positionOS = UnityFlipSprite(input.positionOS, unity_SpriteProps.xy);
-                input.positionOS.y += sin(_Time.y * _HoverSpeed + phase) * _HoverAmplitude;
+                float clock = _AnimationTime >= 0.0 ? _AnimationTime : _Time.y;
+                input.positionOS.y += sin(clock * _HoverSpeed + phase) * _HoverAmplitude;
                 Varyings output = CommonUnlitVertex(input);
                 output.color = input.color * unity_SpriteColor;
                 output.phase = phase;
@@ -109,7 +112,8 @@
             half4 FlameFragment(Varyings input) : SV_Target
             {
                 float2 uv = input.uv;
-                float time = _Time.y * _Speed + input.phase;
+                float clock = _AnimationTime >= 0.0 ? _AnimationTime : _Time.y;
+                float time = clock * _Speed + input.phase;
                 float2 p = float2((uv.x - 0.5) * 2.0, uv.y);
                 float flow = Noise(float2(p.x * 9.0, p.y * 10.0 - time * 1.8));
                 float distance = SpiritDistance(p, time, flow);
