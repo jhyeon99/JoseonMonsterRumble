@@ -237,12 +237,18 @@ public abstract class Projectile : MonoBehaviour, IParryable
         var hitData = new HitData(_projectileDamage, _data.KnockbackForce, hitPoint,
             HitDirection, CurrentDefense, this, 0, AttackName);
         hitData.Attacker = _shooter;
+        ModifyHitData(ref hitData);
         damageable.TakeDamage(hitData);
         // 무적과 가드에는 소멸하고, 피해 처리 중 패링됐을 때만 반사를 유지한다.
         if (!_isReflected)
         {
             gameObject.SetActive(false);
         }
+    }
+
+    /// <summary>플레이어에게 맞히기 직전 공격 정보 수정 (독 등 투사체별 추가 효과)</summary>
+    protected virtual void ModifyHitData(ref HitData hitData)
+    {
     }
 
     public void IncreaseDamage(float percentage)

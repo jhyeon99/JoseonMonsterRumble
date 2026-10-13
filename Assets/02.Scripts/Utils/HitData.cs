@@ -26,6 +26,9 @@ public struct HitData
 
     public bool IsBuffed;
 
+    /// <summary>맞으면 걸리는 독 지속 시간 (초). 0이면 독 없음. 실제로 피해를 입었을 때만 걸림 (가드 / 회피 / 무적이면 안 걸림)</summary>
+    public float PoisonDuration;
+
     /// <summary>공격한 대상 (적 / 보스 등). 사망 원인 표시용. 모르면 null</summary>
     public GameObject Attacker;
 
@@ -60,6 +63,7 @@ public struct HitData
         IsBuffed = isBuffed;
         AttackName = attackName;
         Attacker = null;
+        PoisonDuration = 0f;
     }
 
     /// <summary>오브젝트의 표시 이름. 보스면 보스 이름, 그 외는 (Clone) / PF_ 를 뗀 오브젝트 이름</summary>
