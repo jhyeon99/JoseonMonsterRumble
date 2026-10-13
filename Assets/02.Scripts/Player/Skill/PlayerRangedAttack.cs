@@ -19,6 +19,10 @@ public class PlayerRangedAttack : MonoBehaviour
     [Header("부적 배치")]
     [SerializeField] private Transform _slotRoot;
 
+    [Header("발사 범위 미리보기")]
+    [SerializeField] private PlayerProjectile _rangePreviewProjectile;
+    [SerializeField] private bool _showFireRange = true;
+
     [Header("충전")]
     [SerializeField, Min(0.01f)] private float _chargeInterval = 0.22f; // 누르고 있을 때 부적이 하나씩 추가되는 간격
 
@@ -387,4 +391,26 @@ public class PlayerRangedAttack : MonoBehaviour
 
     // scale.x가 음수면 왼쪽, 아니면 오른쪽
     private int GetFacing() => _flipTarget.localScale.x < 0f ? -1 : 1;
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        if (!_showFireRange || _rangePreviewProjectile == null)
+        {
+            return;
+        }
+        GameObject selected = UnityEditor.Selection.activeGameObject;
+        if (selected == null || (selected != gameObject && !selected.transform.IsChildOf(transform)))
+        {
+            return;
+        }
+
+        // 실제 투사체의 탐색 설정을 읽어 표시와 발사 범위가 따로 바뀌지 않게 한다.
+        Vector3 center = transform.position + (Vector3)_rangePreviewProjectile.SightOffset;
+        Color previousColor = UnityEditor.Handles.color;
+        UnityEditor.Handles.color = Color.cyan;
+        UnityEditor.Handles.DrawWireDisc(center, Vector3.forward, _rangePreviewProjectile.SearchRadius);
+        UnityEditor.Handles.color = previousColor;
+    }
+#endif
 }

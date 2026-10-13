@@ -13,7 +13,7 @@ public class PlayerProjectile : Projectile
     private static readonly Collider2D[] Hits = new Collider2D[16];
 
     [Header("탐색")]
-    [SerializeField] private float _searchRadius = 8f;
+    [SerializeField] private float _searchRadius = 9f;
     [SerializeField] private LayerMask _enemyLayer;
     [SerializeField] private LayerMask _obstacleLayer;
     [SerializeField] private Vector2 _sightOffset = new Vector2(0f, 0.5f);
@@ -50,6 +50,9 @@ public class PlayerProjectile : Projectile
     private Coroutine _explodeRoutine;
     private Transform _explosionTarget;
     private Vector3 _explosionLocalPosition;
+
+    public float SearchRadius => _searchRadius;
+    public Vector2 SightOffset => _sightOffset;
 
     public void SetFacing(int facing) => _facing = facing >= 0 ? 1 : -1;
 
@@ -471,4 +474,5 @@ public class PlayerProjectile : Projectile
         }
 
     }
+
 }
