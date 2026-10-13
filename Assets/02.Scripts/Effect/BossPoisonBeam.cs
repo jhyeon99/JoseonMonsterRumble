@@ -69,6 +69,8 @@ public sealed class BossPoisonBeam : MonoBehaviour
     [SerializeField] private LayerMask _targetMask = Constants.Layers.PlayerMask;
     [SerializeField, Min(0.001f)] private float _collisionSkin = 0.02f;
     [SerializeField, Min(0f)] private float _damage = 20f;
+    [Tooltip("맞으면 걸리는 독 지속 시간 (초). 0이면 독 없음")]
+    [SerializeField, Min(0f)] private float _poisonDuration = 10f;
     [SerializeField, Min(0f)] private float _knockbackForce = 2f;
     [SerializeField, Min(0.02f)] private float _hitInterval = 0.35f;
     [SerializeField] private AttackDefense _defense = new AttackDefense { Parryable = false, GuardGaugeCost = 30f };
@@ -782,6 +784,7 @@ public sealed class BossPoisonBeam : MonoBehaviour
                 var hit = new HitData(_damage, _knockbackForce, collider.ClosestPoint(center), displacement.normalized,
                     _defense, attackName: _attackName);
                 hit.Attacker = _attacker != null ? _attacker : gameObject;
+                hit.PoisonDuration = _poisonDuration;
                 receiver.TakeDamage(hit);
             }
         }

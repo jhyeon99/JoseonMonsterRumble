@@ -17,6 +17,9 @@ public class BossFloorSpike : MonoBehaviour
     [SerializeField, Min(0f)] private float _damage = 15f;
     [SerializeField, Min(0f)] private float _knockbackForce = 6f;
 
+    [Tooltip("맞으면 걸리는 독 지속 시간 (초). 0이면 독 없음")]
+    [SerializeField, Min(0f)] private float _poisonDuration = 10f;
+
     [SerializeField]
     private AttackDefense _defense = new AttackDefense { Parryable = false, GuardGaugeCost = 30f };
 
@@ -181,6 +184,7 @@ public class BossFloorSpike : MonoBehaviour
                 attackName: _attackName
             );
             hitData.Attacker = _boss != null ? _boss.gameObject : gameObject;
+            hitData.PoisonDuration = _poisonDuration;
 
             damageable.TakeDamage(hitData);
             _hasHit = true;
