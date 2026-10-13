@@ -53,6 +53,8 @@ public class BossPhaseTransitionState : BossState
         _timer -= Time.deltaTime;
         if (_timer <= 0f)
         {
+            // 2페이즈 첫 패턴(소환 등)을 예약한 뒤 대기로 → 대기에서 바로 실행
+            _boss.NotifyPhaseTransitionFinished();
             _boss.GoIdle();
         }
     }

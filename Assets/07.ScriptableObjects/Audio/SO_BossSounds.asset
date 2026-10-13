@@ -1,0 +1,541 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 216dd2e5960f4b5c830aa01ce2661746, type: 3}
+  m_Name: SO_BossSounds
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudio.SoundSetSO
+  _sounds:
+  - SoundId: Boss.Intro
+    DisplayName: "등장 연출 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.Hurt
+    DisplayName: "직접 공격 피해 적용"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.Tongue
+    DisplayName: "각 높이의 혀 뻗기 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.Stomp
+    DisplayName: "각 찍기의 실제 착지"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.NeedleFire
+    DisplayName: "좌우 바늘 발사 묶음 생성"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.Spit
+    DisplayName: "각 침뱉기 발사 묶음 생성"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.ChargeStart
+    DisplayName: "실제 돌진 이동·판정 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.PhaseHowl
+    DisplayName: "1 → 2페이즈 전환 연출 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.SummonStart
+    DisplayName: "독 방울 소환 패턴 진입"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.BubblePop
+    DisplayName: "공격에 의한 방울 파열 성공"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.BabyLaunch
+    DisplayName: "3타로 올챙이 날려 보내기 성공"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.BabyHitBoss
+    DisplayName: "올챙이 기믹 피해 적용 성공"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.Groggy
+    DisplayName: "찍기 패링 후 짧은 그로기 진입"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.FinalGroggy
+    DisplayName: "2페이즈 체력 소진 후 마무리 대기 진입"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.Defeat
+    DisplayName: "마무리에 의한 최종 처치 확정"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.AttackReady
+    DisplayName: "패턴 예고 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.Jump
+    DisplayName: "각 찍기의 도약 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.TongueRetract
+    DisplayName: "패링 후 혀 회수 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.ChargeLoop
+    DisplayName: "실제 돌진 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 1
+  - SoundId: Boss.ChargeEnd
+    DisplayName: "돌진 정상 종료"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.BubbleSpawn
+    DisplayName: "독 방울 웨이브 생성 성공"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.BabySpawn
+    DisplayName: "방울 파열에 의한 올챙이 생성 성공"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.BabyHurt
+    DisplayName: "올챙이 비치명 피해 적용"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.BabyDeath
+    DisplayName: "올챙이 일반 사망 확정"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.GroggyRecover
+    DisplayName: "짧은 그로기 정상 회복"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  _events:
+  - EventId: Boss.Intro
+    Enabled: 1
+    SoundId: Boss.Intro
+    TriggerDescription: "등장 연출 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.Hurt
+    Enabled: 1
+    SoundId: Boss.Hurt
+    TriggerDescription: "직접 공격 피해 적용"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.Tongue
+    Enabled: 1
+    SoundId: Boss.Tongue
+    TriggerDescription: "각 높이의 혀 뻗기 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.Stomp
+    Enabled: 1
+    SoundId: Boss.Stomp
+    TriggerDescription: "각 찍기의 실제 착지"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.NeedleFire
+    Enabled: 1
+    SoundId: Boss.NeedleFire
+    TriggerDescription: "좌우 바늘 발사 묶음 생성"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.Spit
+    Enabled: 1
+    SoundId: Boss.Spit
+    TriggerDescription: "각 침뱉기 발사 묶음 생성"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.ChargeStart
+    Enabled: 1
+    SoundId: Boss.ChargeStart
+    TriggerDescription: "실제 돌진 이동·판정 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.PhaseHowl
+    Enabled: 1
+    SoundId: Boss.PhaseHowl
+    TriggerDescription: "1 → 2페이즈 전환 연출 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.SummonStart
+    Enabled: 1
+    SoundId: Boss.SummonStart
+    TriggerDescription: "독 방울 소환 패턴 진입"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.BubblePop
+    Enabled: 1
+    SoundId: Boss.BubblePop
+    TriggerDescription: "공격에 의한 방울 파열 성공"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.BabyLaunch
+    Enabled: 1
+    SoundId: Boss.BabyLaunch
+    TriggerDescription: "3타로 올챙이 날려 보내기 성공"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.BabyHitBoss
+    Enabled: 1
+    SoundId: Boss.BabyHitBoss
+    TriggerDescription: "올챙이 기믹 피해 적용 성공"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.Groggy
+    Enabled: 1
+    SoundId: Boss.Groggy
+    TriggerDescription: "찍기 패링 후 짧은 그로기 진입"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.FinalGroggy
+    Enabled: 1
+    SoundId: Boss.FinalGroggy
+    TriggerDescription: "2페이즈 체력 소진 후 마무리 대기 진입"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.Defeat
+    Enabled: 1
+    SoundId: Boss.Defeat
+    TriggerDescription: "마무리에 의한 최종 처치 확정"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.AttackReady
+    Enabled: 1
+    SoundId: Boss.AttackReady
+    TriggerDescription: "패턴 예고 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.Jump
+    Enabled: 1
+    SoundId: Boss.Jump
+    TriggerDescription: "각 찍기의 도약 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.TongueRetract
+    Enabled: 1
+    SoundId: Boss.TongueRetract
+    TriggerDescription: "패링 후 혀 회수 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.ChargeLoop
+    Enabled: 1
+    SoundId: Boss.ChargeLoop
+    TriggerDescription: "실제 돌진 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 1
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: "행동 종료·취소, 비활성화 또는 씬 종료"
+  - EventId: Boss.ChargeEnd
+    Enabled: 1
+    SoundId: Boss.ChargeEnd
+    TriggerDescription: "돌진 정상 종료"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.BubbleSpawn
+    Enabled: 1
+    SoundId: Boss.BubbleSpawn
+    TriggerDescription: "독 방울 웨이브 생성 성공"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.BabySpawn
+    Enabled: 1
+    SoundId: Boss.BabySpawn
+    TriggerDescription: "방울 파열에 의한 올챙이 생성 성공"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.BabyHurt
+    Enabled: 1
+    SoundId: Boss.BabyHurt
+    TriggerDescription: "올챙이 비치명 피해 적용"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.BabyDeath
+    Enabled: 1
+    SoundId: Boss.BabyDeath
+    TriggerDescription: "올챙이 일반 사망 확정"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.GroggyRecover
+    Enabled: 1
+    SoundId: Boss.GroggyRecover
+    TriggerDescription: "짧은 그로기 정상 회복"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
