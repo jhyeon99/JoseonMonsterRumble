@@ -1,0 +1,478 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 216dd2e5960f4b5c830aa01ce2661746, type: 3}
+  m_Name: SO_PlayerSounds
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudio.SoundSetSO
+  _sounds:
+  - SoundId: Player.Attack1
+    DisplayName: "해당 1타 공격 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Attack2
+    DisplayName: "해당 2타 공격 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Attack3
+    DisplayName: "해당 3타 공격 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.MeleeImpact
+    DisplayName: "실제 피해가 적용된 근접 명중"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Footstep
+    DisplayName: "접지·이동 중 발 디딤 마커"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Jump
+    DisplayName: "점프 실행 성공"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Land
+    DisplayName: "실제 공중 → 접지 전환"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Dodge
+    DisplayName: "백스텝 실행 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Hurt
+    DisplayName: "방어되지 않은 비치명 피해 적용"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Death
+    DisplayName: "사망 확정"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Block
+    DisplayName: "실제 가드 방어 성공"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Parry
+    DisplayName: "실제 패링 성공"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.GuardBreak
+    DisplayName: "가드 브레이크 확정"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Finisher
+    DisplayName: "마무리 타격 실행당 1회"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.ChargeStep
+    DisplayName: "부적 슬롯 활성화 성공"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.TalismanFire
+    DisplayName: "실제 부적 발사 묶음당 1회"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.TalismanExplosion
+    DisplayName: "유효 명중으로 부적 폭발 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.PotionUse
+    DisplayName: "물약 회복·소모 성공"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.GuardEnter
+    DisplayName: "가드 자세 진입 성공"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.ChargeLoop
+    DisplayName: "부적 충전 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 1
+  - SoundId: Player.ChargeFull
+    DisplayName: "최대 충전 단계 최초 도달"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Unavailable
+    DisplayName: "자원 부족 등으로 사용 실패"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  _events:
+  - EventId: Player.Attack1
+    Enabled: 1
+    SoundId: Player.Attack1
+    TriggerDescription: "해당 1타 공격 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Attack2
+    Enabled: 1
+    SoundId: Player.Attack2
+    TriggerDescription: "해당 2타 공격 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Attack3
+    Enabled: 1
+    SoundId: Player.Attack3
+    TriggerDescription: "해당 3타 공격 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.MeleeImpact
+    Enabled: 1
+    SoundId: Player.MeleeImpact
+    TriggerDescription: "실제 피해가 적용된 근접 명중"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Footstep
+    Enabled: 1
+    SoundId: Player.Footstep
+    TriggerDescription: "접지·이동 중 발 디딤 마커"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0.15
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Jump
+    Enabled: 1
+    SoundId: Player.Jump
+    TriggerDescription: "점프 실행 성공"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Land
+    Enabled: 1
+    SoundId: Player.Land
+    TriggerDescription: "실제 공중 → 접지 전환"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Dodge
+    Enabled: 1
+    SoundId: Player.Dodge
+    TriggerDescription: "백스텝 실행 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Hurt
+    Enabled: 1
+    SoundId: Player.Hurt
+    TriggerDescription: "방어되지 않은 비치명 피해 적용"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Death
+    Enabled: 1
+    SoundId: Player.Death
+    TriggerDescription: "사망 확정"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Block
+    Enabled: 1
+    SoundId: Player.Block
+    TriggerDescription: "실제 가드 방어 성공"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Parry
+    Enabled: 1
+    SoundId: Player.Parry
+    TriggerDescription: "실제 패링 성공"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.GuardBreak
+    Enabled: 1
+    SoundId: Player.GuardBreak
+    TriggerDescription: "가드 브레이크 확정"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Finisher
+    Enabled: 1
+    SoundId: Player.Finisher
+    TriggerDescription: "마무리 타격 실행당 1회"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.ChargeStep
+    Enabled: 1
+    SoundId: Player.ChargeStep
+    TriggerDescription: "부적 슬롯 활성화 성공"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.TalismanFire
+    Enabled: 1
+    SoundId: Player.TalismanFire
+    TriggerDescription: "실제 부적 발사 묶음당 1회"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.TalismanExplosion
+    Enabled: 1
+    SoundId: Player.TalismanExplosion
+    TriggerDescription: "유효 명중으로 부적 폭발 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.PotionUse
+    Enabled: 1
+    SoundId: Player.PotionUse
+    TriggerDescription: "물약 회복·소모 성공"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.GuardEnter
+    Enabled: 1
+    SoundId: Player.GuardEnter
+    TriggerDescription: "가드 자세 진입 성공"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.ChargeLoop
+    Enabled: 1
+    SoundId: Player.ChargeLoop
+    TriggerDescription: "부적 충전 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 1
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: "행동 종료·취소, 비활성화 또는 씬 종료"
+  - EventId: Player.ChargeFull
+    Enabled: 1
+    SoundId: Player.ChargeFull
+    TriggerDescription: "최대 충전 단계 최초 도달"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Unavailable
+    Enabled: 1
+    SoundId: Player.Unavailable
+    TriggerDescription: "자원 부족 등으로 사용 실패"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0.1
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 

@@ -44,6 +44,10 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField]
     private BossPattern _introNextPattern;
 
+    [Tooltip("2페이즈 전환 하울링이 끝나면 바로 쓸 첫 패턴 (예: 소환 궁극기). 조건 / 대기 시간 무시. 비우면 평소처럼 대기 후 랜덤 패턴")]
+    [SerializeField]
+    private BossPattern _phase2FirstPattern;
+
     [Tooltip("보스가 착지하는 바닥 높이 기준점 (선택, 보스 발밑 기준). 비우면: Intro Point를 쓸 때는 BossArena의 1층 바닥, 아니면 씬에 배치한 보스 위치")]
     [SerializeField]
     private Transform _groundPoint;
@@ -656,6 +660,15 @@ public class Boss : MonoBehaviour, IFinishable
     }
 
     /// <summary>다음 패턴을 지정 (대기 시간 없이 바로, 사용 조건 무시). 페이즈가 바뀌면 취소</summary>
+    /// <summary>2페이즈 전환이 끝났을 때 (BossPhaseTransitionState에서 호출). 지정한 첫 패턴 예약</summary>
+    public void NotifyPhaseTransitionFinished()
+    {
+        if (_phase2FirstPattern != null)
+        {
+            QueuePattern(_phase2FirstPattern);
+        }
+    }
+
     public void QueuePattern(BossPattern pattern)
     {
         _queuedPattern = pattern;

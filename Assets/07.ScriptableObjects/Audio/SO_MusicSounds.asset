@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameAudio.SoundSetSO
   _sounds:
   - SoundId: Music.Title
-    DisplayName: Music.Title
+    DisplayName: "타이틀 씬 진입"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -23,7 +23,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 1
   - SoundId: Music.Field
-    DisplayName: Music.Field
+    DisplayName: "일반 플레이 씬 진입"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -32,7 +32,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 1
   - SoundId: Music.Boss
-    DisplayName: Music.Boss
+    DisplayName: "실제 보스 전투 시작"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -41,7 +41,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 1
   - SoundId: Music.BossPhase2
-    DisplayName: Music.BossPhase2
+    DisplayName: "2페이즈 진입 확정"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -50,7 +50,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 1
   - SoundId: Music.Prologue
-    DisplayName: Music.Prologue
+    DisplayName: "프롤로그 연출 시작"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -59,7 +59,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 1
   - SoundId: Music.Victory
-    DisplayName: Music.Victory
+    DisplayName: "보스 최종 처치 확정"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -68,7 +68,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 1
   - SoundId: Music.Death
-    DisplayName: Music.Death
+    DisplayName: "사망 화면 진입"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -80,7 +80,7 @@ MonoBehaviour:
   - EventId: Music.Title
     Enabled: 1
     SoundId: Music.Title
-    TriggerDescription: Music.Title
+    TriggerDescription: "타이틀 씬 진입"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 3
@@ -88,11 +88,11 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 1
     BgmFadeDuration: -1
-    LoopEndRule: Next music request, StopBgm, or scene unload
+    LoopEndRule: "다음 음악 요청, 음악 정지 또는 씬 종료"
   - EventId: Music.Field
     Enabled: 1
     SoundId: Music.Field
-    TriggerDescription: Music.Field
+    TriggerDescription: "일반 플레이 씬 진입"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 3
@@ -100,11 +100,11 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 1
     BgmFadeDuration: -1
-    LoopEndRule: Next music request, StopBgm, or scene unload
+    LoopEndRule: "다음 음악 요청, 음악 정지 또는 씬 종료"
   - EventId: Music.Boss
     Enabled: 1
     SoundId: Music.Boss
-    TriggerDescription: Music.Boss
+    TriggerDescription: "실제 보스 전투 시작"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 3
@@ -112,11 +112,11 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 1
     BgmFadeDuration: -1
-    LoopEndRule: Next music request, StopBgm, or scene unload
+    LoopEndRule: "다음 음악 요청, 음악 정지 또는 씬 종료"
   - EventId: Music.BossPhase2
-    Enabled: 0
+    Enabled: 1
     SoundId: Music.BossPhase2
-    TriggerDescription: Music.BossPhase2
+    TriggerDescription: "2페이즈 진입 확정"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 3
@@ -124,11 +124,11 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 1
     BgmFadeDuration: -1
-    LoopEndRule: Next music request, StopBgm, or scene unload
+    LoopEndRule: "다음 음악 요청, 음악 정지 또는 씬 종료"
   - EventId: Music.Prologue
-    Enabled: 0
+    Enabled: 1
     SoundId: Music.Prologue
-    TriggerDescription: Music.Prologue
+    TriggerDescription: "프롤로그 연출 시작"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 3
@@ -136,11 +136,11 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 1
     BgmFadeDuration: -1
-    LoopEndRule: Next music request, StopBgm, or scene unload
+    LoopEndRule: "다음 음악 요청, 음악 정지 또는 씬 종료"
   - EventId: Music.Victory
-    Enabled: 0
+    Enabled: 1
     SoundId: Music.Victory
-    TriggerDescription: Music.Victory
+    TriggerDescription: "보스 최종 처치 확정"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 3
@@ -150,9 +150,9 @@ MonoBehaviour:
     BgmFadeDuration: -1
     LoopEndRule: 
   - EventId: Music.Death
-    Enabled: 0
+    Enabled: 1
     SoundId: Music.Death
-    TriggerDescription: Music.Death
+    TriggerDescription: "사망 화면 진입"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 3

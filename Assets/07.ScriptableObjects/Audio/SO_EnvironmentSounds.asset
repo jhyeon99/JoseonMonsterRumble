@@ -1,0 +1,163 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 216dd2e5960f4b5c830aa01ce2661746, type: 3}
+  m_Name: SO_EnvironmentSounds
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudio.SoundSetSO
+  _sounds:
+  - SoundId: Environment.Checkpoint
+    DisplayName: "새 체크포인트 저장 성공"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Environment.FallingWarning
+    DisplayName: "발판 파괴 예고 애니메이션 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Environment.FallingBreak
+    DisplayName: "발판 실제 낙하 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Environment.PlatformStart
+    DisplayName: "발판 이동 실행 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Environment.PlatformLoop
+    DisplayName: "발판 이동 실행 시작"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 1
+  - SoundId: Environment.PlatformStop
+    DisplayName: "목적지 도착으로 정상 정지"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Environment.Switch
+    DisplayName: "발판 이동 요청 성공"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  _events:
+  - EventId: Environment.Checkpoint
+    Enabled: 1
+    SoundId: Environment.Checkpoint
+    TriggerDescription: "새 체크포인트 저장 성공"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Environment.FallingWarning
+    Enabled: 1
+    SoundId: Environment.FallingWarning
+    TriggerDescription: "발판 파괴 예고 애니메이션 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Environment.FallingBreak
+    Enabled: 1
+    SoundId: Environment.FallingBreak
+    TriggerDescription: "발판 실제 낙하 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Environment.PlatformStart
+    Enabled: 1
+    SoundId: Environment.PlatformStart
+    TriggerDescription: "발판 이동 실행 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Environment.PlatformLoop
+    Enabled: 1
+    SoundId: Environment.PlatformLoop
+    TriggerDescription: "발판 이동 실행 시작"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 1
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: "행동 종료·취소, 비활성화 또는 씬 종료"
+  - EventId: Environment.PlatformStop
+    Enabled: 1
+    SoundId: Environment.PlatformStop
+    TriggerDescription: "목적지 도착으로 정상 정지"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Environment.Switch
+    Enabled: 1
+    SoundId: Environment.Switch
+    TriggerDescription: "발판 이동 요청 성공"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
