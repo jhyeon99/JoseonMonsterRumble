@@ -217,7 +217,7 @@ public class BossStompPattern : BossPattern
                 ReplayAnimation();
             }
 
-            yield return Stomp();
+            yield return Stomp(i == count - 1);
 
             if (i < count - 1)
             {
@@ -271,7 +271,7 @@ public class BossStompPattern : BossPattern
     }
 
     /// <summary>점프 → 착지 → 찍기 판정 (판정 끝까지). 높은 곳(소환 위치 등)에서 시작하면 그 높이에서 뛰어내림</summary>
-    private IEnumerator Stomp()
+    private IEnumerator Stomp(bool isLast)
     {
         AudioAction("Boss.Jump");
         float startX = Boss.Position.x;
@@ -337,6 +337,12 @@ public class BossStompPattern : BossPattern
         _airborne = false;
         ShowLandingMarker(false, targetX, groundY);
         CameraShake.Shake(_landingShake);
+
+        // 마지막 찍기가 땅에 닿는 순간 찍기 플랫폼이 자라남
+        if (isLast && Boss.Platforms != null)
+        {
+            Boss.Platforms.NotifyStompLanded();
+        }
         if (!vfxPlayed)
         {
             PlayStompVfx(targetX, groundY);

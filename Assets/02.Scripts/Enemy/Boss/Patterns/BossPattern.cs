@@ -229,6 +229,17 @@ public abstract class BossPattern : MonoBehaviour
         _startTime = Time.time;
         OnPatternStart();
 
+        // 보스전 플랫폼이 이 패턴용 배치(찍기 / 소환 / 기본)로 다 바뀔 때까지 대기
+        BossPlatformDirector platforms = Boss.Platforms;
+        if (platforms != null)
+        {
+            float waitUntil = Time.time + platforms.MaxPatternWait;
+            while (!platforms.PrepareFor(this) && Time.time < waitUntil)
+            {
+                yield return null;
+            }
+        }
+
         // 애니메이션 전에 할 일 (소환 위치로 점프 등)
         foreach (object step in Flatten(BeforeAnimation()))
         {
