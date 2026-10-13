@@ -50,6 +50,7 @@ public sealed class EnemyAudio : ActorAudio
         if (_soundSet != null) return _soundSet;
         AudioCatalogSO catalog = Manager?.Catalog;
         if (catalog == null || _enemy == null) return null;
+        if (catalog.TryGetMonsterSet(_enemy.Data, out SoundSetSO monsterSounds)) return monsterSounds;
         if (_enemy is BuffEnemy) return catalog.Buff;
         EnemySoundSets sets = _enemy.MoveType is EnemyFlyingMove ? catalog.Air : catalog.Ground;
         return _ranged != null ? sets?.Ranged : sets?.Melee;

@@ -11,10 +11,20 @@ namespace GameAudio
         public SoundSetSO Ranged;
     }
 
+    [Serializable]
+    public sealed class MonsterSoundProfile
+    {
+        public EnemyData Monster;
+        public string DisplayName;
+        public string EventPrefix = "Ground";
+        public SoundSetSO Sounds;
+    }
+
     [CreateAssetMenu(menuName = "Audio/Audio Catalog", fileName = "SO_AudioCatalog")]
     public sealed class AudioCatalogSO : ScriptableObject
     {
         public SoundSetSO Player;
+        public List<MonsterSoundProfile> Monsters = new List<MonsterSoundProfile>();
         public EnemySoundSets Ground = new EnemySoundSets();
         public EnemySoundSets Air = new EnemySoundSets();
         public SoundSetSO Boss;
@@ -25,6 +35,23 @@ namespace GameAudio
         public SoundSetSO Prologue;
         [Tooltip("본 스테이지 사용이 확정될 때 연결하는 조건부 데이터입니다.")]
         public SoundSetSO Buff;
+
+        public bool TryGetMonsterSet(EnemyData monster, out SoundSetSO set)
+        {
+            if (monster != null && Monsters != null)
+            {
+                foreach (MonsterSoundProfile profile in Monsters)
+                {
+                    if (profile != null && profile.Monster == monster)
+                    {
+                        set = profile.Sounds;
+                        return true;
+                    }
+                }
+            }
+            set = null;
+            return false;
+        }
 
         public SoundSetSO GetSet(string category)
         {
@@ -45,6 +72,13 @@ namespace GameAudio
         public IEnumerable<SoundSetSO> EnumerateSets()
         {
             if (Player != null) yield return Player;
+            if (Monsters != null)
+            {
+                foreach (MonsterSoundProfile profile in Monsters)
+                {
+                    if (profile?.Sounds != null) yield return profile.Sounds;
+                }
+            }
             if (Ground?.Melee != null) yield return Ground.Melee;
             if (Ground?.Ranged != null) yield return Ground.Ranged;
             if (Air?.Melee != null) yield return Air.Melee;

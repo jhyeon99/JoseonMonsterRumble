@@ -120,6 +120,12 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
 
     private void Start()
     {
+        if (Ep1TutorialManager.IsSkippedForTesting)
+        {
+            FinishHint();
+            return;
+        }
+
         if (!IsTalismanHint && _hintType != Ep1TutorialHintType.Parry && Ep1TutorialManager.HasCompletedHint(_hintType))
         {
             FinishHint();
@@ -160,6 +166,12 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
 
     private void Update()
     {
+        if (Ep1TutorialManager.IsSkippedForTesting)
+        {
+            FinishHint();
+            return;
+        }
+
         if (_hint == null || _player == null || _input == null) return;
         bool respawning = StageManager.Instance != null && StageManager.Instance.IsRespawning;
         if (_shown && (_player.Health.IsDead || respawning))

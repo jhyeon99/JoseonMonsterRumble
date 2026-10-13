@@ -16,6 +16,8 @@ public enum Ep1TutorialHintType
 [DisallowMultipleComponent]
 public sealed partial class Ep1TutorialManager : MonoBehaviour
 {
+    internal static bool IsSkippedForTesting { get; private set; }
+
     // Keep first-display history when death reloads the EP1 scene.
     private static readonly HashSet<Ep1TutorialHintType> ShownHints = new HashSet<Ep1TutorialHintType>();
     private static readonly HashSet<Ep1TutorialHintType> CompletedHints = new HashSet<Ep1TutorialHintType>();
@@ -23,6 +25,7 @@ public sealed partial class Ep1TutorialManager : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     public static void ResetShownHints()
     {
+        IsSkippedForTesting = false;
         ShownHints.Clear();
         CompletedHints.Clear();
         ResetCombatProgress();
@@ -37,6 +40,32 @@ public sealed partial class Ep1TutorialManager : MonoBehaviour
         CompletedHints.Add(hintType);
         if (hintType == Ep1TutorialHintType.HighJump) _highJumpPracticeActive = false;
     }
+
+#if UNITY_EDITOR
+    private void SkipForTesting()
+    {
+        IsSkippedForTesting = true;
+        foreach (Ep1TutorialHintType hintType in System.Enum.GetValues(typeof(Ep1TutorialHintType)))
+        {
+            ShownHints.Add(hintType);
+            CompletedHints.Add(hintType);
+        }
+        _guardGaugeExplained = true;
+        _regularGuardSucceeded = true;
+        _soulsExplained = true;
+        _secondFinisherSucceeded = true;
+        _parryFinisherExplained = true;
+        _talismanExplained = true;
+
+        // OnDisable releases practice restrictions, camera focus, pause ownership and hidden enemies.
+        enabled = false;
+        _combatStep = CombatStep.Complete;
+        _checkpointStep = CheckpointStep.Complete;
+        _parryFocusStep = ParryFocusStep.Complete;
+        _talismanStep = TalismanStep.Complete;
+        _startParryHint = false;
+    }
+#endif
 
     [SerializeField] private Transform _highJumpHintPoint;
     [SerializeField] private Transform _respawnHintPoint;
