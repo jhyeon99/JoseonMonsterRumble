@@ -136,6 +136,12 @@ public sealed class BossPoisonBeam : MonoBehaviour
     public bool IsFiring => _isFiring;
     public bool IsReady => _isInitialized && isActiveAndEnabled;
 
+    public bool TryGetTerrainImpact(out Vector2 point)
+    {
+        point = _impactPoint;
+        return _isFiring && _hasHitTerrain && _line != null && _line.enabled;
+    }
+
     /// <summary>프리팹 활성화 전에 실제 입과 보스 참조를 연결한다.</summary>
     public bool SetEmitter(Transform mouth, SpriteRenderer bossRenderer, GameObject attacker)
     {
