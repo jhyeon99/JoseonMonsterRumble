@@ -3,17 +3,18 @@ using UnityEngine;
 /// <summary>프리뷰와 실제 패턴에서 같은 독분사 파티클 설정을 사용한다.</summary>
 public static class BossPoisonParticleFactory
 {
-    public static bool InitializeParticles(BossPoisonBeam beam, Material particleMaterial, Material impactCloudMaterial)
+    public static bool InitializeParticles(BossPoisonBeam beam, Material particleMaterial, Material impactCloudMaterial,
+        Material mouthMaterial = null, Material residualMaterial = null)
     {
         if (beam == null || particleMaterial == null)
         {
             Debug.LogWarning("독분사: Beam 또는 파티클 Material 참조가 없습니다.", beam);
             return false;
         }
-        beam.SetParticles(CreateBeamParticles(beam, particleMaterial, "MouthParticles", false),
+        beam.SetParticles(CreateBeamParticles(beam, mouthMaterial != null ? mouthMaterial : particleMaterial, "MouthParticles", false),
             CreateBeamParticles(beam, particleMaterial, "HeadParticles", true),
             CreateImpactCloudParticles(beam, particleMaterial, impactCloudMaterial),
-            CreateResidualParticles(beam, particleMaterial));
+            CreateResidualParticles(beam, residualMaterial != null ? residualMaterial : particleMaterial));
         return true;
     }
 
