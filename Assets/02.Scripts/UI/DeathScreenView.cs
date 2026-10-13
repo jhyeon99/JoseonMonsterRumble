@@ -170,6 +170,15 @@ public sealed class DeathScreenView : MonoBehaviour
             "폭발 공격" => "도깨비불과 함께 장렬히 폭발.",
             "접촉 피해" => "너무 가까이 다가갔다가 사망.\n거리 두기에 실패했다.",
             "추락" => "발을 헛디뎌 추락사.",
+            "앞발 때리기" => "절불가시의 앞발 후려치기에 맞아 사망.\n보고도 못 피했다.",
+            "혓바닥 공격" or "Tongue Low Collider" or "Tongue High Collider" => "절불가시의 혓바닥에 휘감겨 사망.\n온몸에서 냄새가 난다.",
+            "거대 돌진" or "Charge Collider" => "절불가시의 육탄 돌진에 치여 사망.\n두꺼비에게 뺑소니를 당했다.",
+            "내리찍기" or "Stomp Collider" => "절불가시의 가시 찍기에 깔려 사망.\n온몸에 구멍이 났다.",
+            "바닥 가시" => "절불가시의 바닥 가시에 찔려 사망.\n발 디딜 곳을 못 찾았다.",
+            "산성 침" or "보스 침뱉기" => "절불가시의 산성 침에 녹아 사망.\n형체를 알아볼 수 없다.",
+            "독 분사" => "절불가시의 독물 줄기에 휩쓸려 사망.\n엄폐물이 없었다.",
+            "궁극기 (가시 즉사)" or "궁극기" => "절불가시의 가시 폭발에 꿰여 사망.\n두꺼비를 화나게 해선 안 돼.",
+            "몸통 박치기" => "절불가시의 새끼들에게 물려 사망.\n이런 거에 죽다니..",
             _ => causeOfDeath
         };
     }
@@ -290,13 +299,12 @@ public sealed class DeathScreenView : MonoBehaviour
         {
             _loadingCanvasGroup.alpha = 1f;
             _loadingCanvasGroup.blocksRaycasts = true;
-            int frameIndex = 0;
-            while (true)
+            // 한 번만 재생하고, 씬 준비와 페이드아웃이 끝날 때까지 마지막 프레임을 유지한다.
+            for (int frameIndex = 0; _loadingSprites != null && frameIndex < _loadingSprites.Length; frameIndex++)
             {
-                if (_loadingSprites != null && _loadingSprites.Length > 0 && _loadingImage != null)
+                if (_loadingImage != null)
                 {
-                    _loadingImage.sprite = _loadingSprites[frameIndex % _loadingSprites.Length];
-                    frameIndex++;
+                    _loadingImage.sprite = _loadingSprites[frameIndex];
                 }
                 yield return new WaitForSecondsRealtime(_loadingFrameInterval);
             }

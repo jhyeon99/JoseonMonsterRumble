@@ -37,7 +37,7 @@ public class PlayerJumpState : PlayerBaseState
 
         float relativeVelocityY = _rigidbody2D.linearVelocity.y - platformVelocityY;
 
-        if (!_player.IsGrounded && _inputHandler.TryUseAttackInput() && _player.TryEnterAirAttack())
+        if (_player.CanEnterAirAttack() && _inputHandler.TryUseAttackInput() && _player.TryEnterAirAttack())
         {
             return;
         }
