@@ -69,6 +69,8 @@ public sealed class BossPoisonBeam : MonoBehaviour
     [SerializeField] private LayerMask _targetMask = Constants.Layers.PlayerMask;
     [SerializeField, Min(0.001f)] private float _collisionSkin = 0.02f;
     [SerializeField, Min(0f)] private float _damage = 20f;
+    [Tooltip("맞으면 걸리는 독 지속 시간 (초). 0이면 독 없음")]
+    [SerializeField, Min(0f)] private float _poisonDuration = 10f;
     [SerializeField, Min(0f)] private float _knockbackForce = 2f;
     [SerializeField, Min(0.02f)] private float _hitInterval = 0.35f;
     [SerializeField] private AttackDefense _defense = new AttackDefense { Parryable = false, GuardGaugeCost = 30f };
@@ -277,6 +279,16 @@ public sealed class BossPoisonBeam : MonoBehaviour
     }
 
     public void StopEmission() => _shouldStopEmission = true;
+
+    /// <summary>
+    /// 입 방향 / 입술 위치 보정을 외부(패턴)에서 갱신. 실제 보스에서는 VFX가 Animator 밖에 생성돼
+    /// 프리뷰 클립의 보정 키(_mouthAngleOffset / _lipOffset)가 적용되지 않으므로 패턴이 대신 넣어 줌
+    /// </summary>
+    public void SetEmitterOffsets(float mouthAngleOffset, Vector2 lipOffset)
+    {
+        _mouthAngleOffset = mouthAngleOffset;
+        _lipOffset = lipOffset;
+    }
 
     public void StartFollowThrough()
     {
@@ -782,6 +794,7 @@ public sealed class BossPoisonBeam : MonoBehaviour
                 var hit = new HitData(_damage, _knockbackForce, collider.ClosestPoint(center), displacement.normalized,
                     _defense, attackName: _attackName);
                 hit.Attacker = _attacker != null ? _attacker : gameObject;
+                hit.PoisonDuration = _poisonDuration;
                 receiver.TakeDamage(hit);
             }
         }

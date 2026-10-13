@@ -214,6 +214,14 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
     public void PlayPanelClose() => PlayUiEvent("UI.PanelClose", _uiAudioData != null ? _uiAudioData.PanelCloseClip : null, _uiAudioData != null ? _uiAudioData.PanelCloseVolume : 1f);
     public void PlaySlider() => PlayUiEvent("UI.Slider", _uiAudioData != null ? _uiAudioData.SliderTickClip : null, _uiAudioData != null ? _uiAudioData.SliderTickVolume : 1f);
 
+    public PlayHandle PlayEntityEvent(SoundSetSO set, string eventId, Component source, AudioOwnerKey owner)
+    {
+        if (source == null || owner.IsEmpty) return PlayHandle.Empty;
+        var context = new AudioContext(owner, 0, AudioLifetimeRegistry.ForScene(source.gameObject.scene), source.transform.position);
+        return PlayEventCore(set, eventId, context, requiredLifetime: LifetimePolicy.Entity,
+            requiredOutput: AudioOutputGroup.Sfx);
+    }
+
     public PlayHandle PlaySceneEvent(string eventId, Component source)
     {
         if (source == null || string.IsNullOrWhiteSpace(eventId) || _catalog == null)

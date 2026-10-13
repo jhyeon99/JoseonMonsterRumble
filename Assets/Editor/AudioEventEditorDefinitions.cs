@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 internal static class AudioEventEditorDefinitions
@@ -24,7 +24,7 @@ Player.Parry|실제 패링 성공
 Player.GuardBreak|가드 브레이크 확정
 Player.Finisher|마무리 타격 실행당 1회
 Player.ChargeStep|부적 슬롯 활성화 성공
-Player.TalismanFire|실제 부적 발사 묶음당 1회
+Player.TalismanFire|각 부적 발사부터 명중 또는 소멸까지
 Player.TalismanExplosion|유효 명중으로 부적 폭발 시작
 Player.PotionUse|물약 회복·소모 성공
 Player.GuardEnter|가드 자세 진입 성공

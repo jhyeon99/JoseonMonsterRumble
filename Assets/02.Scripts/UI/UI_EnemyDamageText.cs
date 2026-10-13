@@ -47,6 +47,13 @@ public class UI_EnemyDamageText : MonoBehaviour
     [SerializeField] private Color _textColor = new Color(1f, 0.96f, 0.86f);
     [SerializeField] private Color _playerDamageColor = new Color(1f, 0.22f, 0.18f, 1f);
     [SerializeField] private Color _playerHealColor = new Color(0.18f, 0.88f, 0.38f, 1f);
+    [Header("독 데미지 표시")]
+    [Tooltip("독으로 깎인 숫자 색 (회복 초록과 구분되는 탁한 연두)")]
+    [SerializeField] private Color _poisonDamageColor = new Color(0.62f, 0.86f, 0.18f, 1f);
+    [Tooltip("독 숫자 크기 배율 (일반 피격보다 작게)")]
+    [SerializeField, Range(0.3f, 1.5f)] private float _poisonSizeMultiplier = 0.8f;
+    [Tooltip("플레이어 몸 중심 기준 표시 위치 보정 (월드)")]
+    [SerializeField] private Vector2 _poisonWorldOffset = new Vector2(0f, 0.3f);
     [SerializeField, Min(1f)] private float _strongPlayerHitMotionMultiplier = 1.45f;
     [SerializeField] private Color _finisherColor = new Color(1f, 0.75f, 0.18f);
     [SerializeField] private Color _buffedColor = new Color(0.35f, 0.85f, 1.0f, 1.0f);
@@ -144,6 +151,8 @@ public class UI_EnemyDamageText : MonoBehaviour
         {
             _playerHealth.OnHealthChanged -= HandlePlayerHealthChanged;
             _playerHealth.OnHealthChanged += HandlePlayerHealthChanged;
+            _playerHealth.OnPoisonDamaged -= HandlePoisonDamaged;
+            _playerHealth.OnPoisonDamaged += HandlePoisonDamaged;
             _lastPlayerHealth = _playerHealth.CurrentHealth;
             _potionAura = _playerHealth.GetComponent<PlayerPotionAura>();
             _player = _playerHealth.GetComponent<Player>();
@@ -167,6 +176,7 @@ public class UI_EnemyDamageText : MonoBehaviour
         if (_playerHealth != null)
         {
             _playerHealth.OnHealthChanged -= HandlePlayerHealthChanged;
+            _playerHealth.OnPoisonDamaged -= HandlePoisonDamaged;
             _playerHealth = null;
         }
 
@@ -237,6 +247,24 @@ public class UI_EnemyDamageText : MonoBehaviour
             isPlayerDamage: true);
     }
 
+    /// <summary>독 데미지: 플레이어 몸 위에 작은 연두색 숫자</summary>
+    private void HandlePoisonDamaged(float damage)
+    {
+        if (_playerHealth == null || damage <= 0f)
+        {
+            return;
+        }
+
+        Vector3 position = _playerHealth.transform.position;
+        if (_playerHealth.TryGetComponent(out Collider2D body) && body.enabled)
+        {
+            position = body.bounds.center;
+        }
+
+        position += (Vector3)_poisonWorldOffset;
+        ShowDamage(damage, position, false, Vector2.zero, 1f, isPoison: true);
+    }
+
     private void HandleFinisherAnticipation(Transform attacker, Transform target, float progress)
     {
         if (target == null)
@@ -297,7 +325,7 @@ public class UI_EnemyDamageText : MonoBehaviour
 
     private void ShowDamage(float damage, Vector3 position, bool isFinisher,
         Vector2 attackDirection, float motionMultiplier, bool isTalisman = false, bool isBuffed = false,
-        bool isPlayerDamage = false, bool isPlayerHeal = false)
+        bool isPlayerDamage = false, bool isPlayerHeal = false, bool isPoison = false)
     {
         if (_canvas == null || damage <= 0f)
         {
@@ -337,7 +365,11 @@ public class UI_EnemyDamageText : MonoBehaviour
         text.enableAutoSizing = false;
 
         Color targetColor;
-        if (isPlayerHeal)
+        if (isPoison)
+        {
+            targetColor = _poisonDamageColor;
+        }
+        else if (isPlayerHeal)
         {
             targetColor = _playerHealColor;
         }
@@ -370,7 +402,8 @@ public class UI_EnemyDamageText : MonoBehaviour
             : Mathf.Lerp(1f, Mathf.Max(1f, _maxSizeMultiplier),
                 Mathf.InverseLerp(baseDamage, maxDamage, damage));
         float finisherSize = isFinisher ? Mathf.Max(1f, _finisherSizeMultiplier) : 1f;
-        Vector3 baseScale = Vector3.one * (sizeMultiplier * finisherSize);
+        float poisonSize = isPoison ? _poisonSizeMultiplier : 1f;
+        Vector3 baseScale = Vector3.one * (sizeMultiplier * finisherSize * poisonSize);
         text.text = damage.ToString(isPlayerHeal ? HealFormat : DamageFormat);
         text.raycastTarget = false;
         text.gameObject.SetActive(true);
