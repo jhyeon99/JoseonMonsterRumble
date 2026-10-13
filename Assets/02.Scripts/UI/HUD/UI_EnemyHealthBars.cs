@@ -31,7 +31,7 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
     [SerializeField] private Vector4 _artUvRegion = new Vector4(0.1f, 0.37f, 0.8f, 0.26f);
     [Header("모든 몬스터 공통 배치")]
     [SerializeField] private Camera _worldCamera;
-    [SerializeField] private Vector2 _barSize = new Vector2(234f, 38f);
+    [SerializeField] private Vector2 _barSize = new Vector2(187.2f, 30.4f);
     [SerializeField] private Vector2 _screenOffset = new Vector2(0f, -28f);
     [Header("HP 잔상")]
     [SerializeField, Min(0f)] private float _damageDelay = 0.25f;
