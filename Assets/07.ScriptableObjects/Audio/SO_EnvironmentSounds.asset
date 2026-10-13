@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameAudio.SoundSetSO
   _sounds:
   - SoundId: Environment.Checkpoint
-    DisplayName: "새 체크포인트 저장 성공"
-    Clips: []
+    DisplayName: "\uC0C8 \uCCB4\uD06C\uD3EC\uC778\uD2B8 \uC800\uC7A5 \uC131\uACF5"
+    Clips:
+    - {fileID: 8300000, guid: 563ec2dd25195e143b3783efca256986, type: 3}
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -23,7 +24,8 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Environment.FallingWarning
-    DisplayName: "발판 파괴 예고 애니메이션 시작"
+    DisplayName: "\uBC1C\uD310 \uD30C\uAD34 \uC608\uACE0 \uC560\uB2C8\uBA54\uC774\uC158
+      \uC2DC\uC791"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -32,7 +34,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Environment.FallingBreak
-    DisplayName: "발판 실제 낙하 시작"
+    DisplayName: "\uBC1C\uD310 \uC2E4\uC81C \uB099\uD558 \uC2DC\uC791"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -41,7 +43,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Environment.PlatformStart
-    DisplayName: "발판 이동 실행 시작"
+    DisplayName: "\uBC1C\uD310 \uC774\uB3D9 \uC2E4\uD589 \uC2DC\uC791"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -50,7 +52,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Environment.PlatformLoop
-    DisplayName: "발판 이동 실행 시작"
+    DisplayName: "\uBC1C\uD310 \uC774\uB3D9 \uC2E4\uD589 \uC2DC\uC791"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -59,7 +61,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 1
   - SoundId: Environment.PlatformStop
-    DisplayName: "목적지 도착으로 정상 정지"
+    DisplayName: "\uBAA9\uC801\uC9C0 \uB3C4\uCC29\uC73C\uB85C \uC815\uC0C1 \uC815\uC9C0"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -68,7 +70,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Environment.Switch
-    DisplayName: "발판 이동 요청 성공"
+    DisplayName: "\uBC1C\uD310 \uC774\uB3D9 \uC694\uCCAD \uC131\uACF5"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -80,7 +82,7 @@ MonoBehaviour:
   - EventId: Environment.Checkpoint
     Enabled: 1
     SoundId: Environment.Checkpoint
-    TriggerDescription: "새 체크포인트 저장 성공"
+    TriggerDescription: "\uC0C8 \uCCB4\uD06C\uD3EC\uC778\uD2B8 \uC800\uC7A5 \uC131\uACF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -92,7 +94,8 @@ MonoBehaviour:
   - EventId: Environment.FallingWarning
     Enabled: 1
     SoundId: Environment.FallingWarning
-    TriggerDescription: "발판 파괴 예고 애니메이션 시작"
+    TriggerDescription: "\uBC1C\uD310 \uD30C\uAD34 \uC608\uACE0 \uC560\uB2C8\uBA54\uC774\uC158
+      \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -104,7 +107,7 @@ MonoBehaviour:
   - EventId: Environment.FallingBreak
     Enabled: 1
     SoundId: Environment.FallingBreak
-    TriggerDescription: "발판 실제 낙하 시작"
+    TriggerDescription: "\uBC1C\uD310 \uC2E4\uC81C \uB099\uD558 \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -116,7 +119,7 @@ MonoBehaviour:
   - EventId: Environment.PlatformStart
     Enabled: 1
     SoundId: Environment.PlatformStart
-    TriggerDescription: "발판 이동 실행 시작"
+    TriggerDescription: "\uBC1C\uD310 \uC774\uB3D9 \uC2E4\uD589 \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -128,7 +131,7 @@ MonoBehaviour:
   - EventId: Environment.PlatformLoop
     Enabled: 1
     SoundId: Environment.PlatformLoop
-    TriggerDescription: "발판 이동 실행 시작"
+    TriggerDescription: "\uBC1C\uD310 \uC774\uB3D9 \uC2E4\uD589 \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -136,11 +139,13 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 0
     BgmFadeDuration: -1
-    LoopEndRule: "행동 종료·취소, 비활성화 또는 씬 종료"
+    LoopEndRule: "\uD589\uB3D9 \uC885\uB8CC\xB7\uCDE8\uC18C, \uBE44\uD65C\uC131\uD654
+      \uB610\uB294 \uC52C \uC885\uB8CC"
   - EventId: Environment.PlatformStop
     Enabled: 1
     SoundId: Environment.PlatformStop
-    TriggerDescription: "목적지 도착으로 정상 정지"
+    TriggerDescription: "\uBAA9\uC801\uC9C0 \uB3C4\uCC29\uC73C\uB85C \uC815\uC0C1
+      \uC815\uC9C0"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -152,7 +157,7 @@ MonoBehaviour:
   - EventId: Environment.Switch
     Enabled: 1
     SoundId: Environment.Switch
-    TriggerDescription: "발판 이동 요청 성공"
+    TriggerDescription: "\uBC1C\uD310 \uC774\uB3D9 \uC694\uCCAD \uC131\uACF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
