@@ -33,6 +33,9 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
     private float _displayElapsed;
     private bool IsTalismanHint => _hintType == Ep1TutorialHintType.TalismanTap ||
         _hintType == Ep1TutorialHintType.TalismanCharge;
+    private bool IsRequiredPracticeHint => _hintType == Ep1TutorialHintType.HighJump ||
+        _hintType == Ep1TutorialHintType.Parry || _hintType == Ep1TutorialHintType.Guard ||
+        _hintType == Ep1TutorialHintType.Finisher || IsTalismanHint;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Register()
@@ -117,7 +120,7 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
 
     private void Start()
     {
-        if (!IsTalismanHint && Ep1TutorialManager.HasShownHint(_hintType))
+        if (!IsTalismanHint && _hintType != Ep1TutorialHintType.Parry && Ep1TutorialManager.HasCompletedHint(_hintType))
         {
             FinishHint();
             return;
@@ -161,10 +164,13 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
         bool respawning = StageManager.Instance != null && StageManager.Instance.IsRespawning;
         if (_shown && (_player.Health.IsDead || respawning))
         {
-            if (_hintType == Ep1TutorialHintType.Guard || IsTalismanHint)
+            if (IsRequiredPracticeHint)
             {
                 _hint.gameObject.SetActive(false);
                 _shown = false;
+                _jumpStarted = false;
+                _heldLongEnough = false;
+                _heldTime = 0f;
                 return;
             }
             FinishHint();
@@ -182,6 +188,11 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
             _hint.gameObject.SetActive(false);
             return;
         }
+        if (!IsTalismanHint && _hintType != Ep1TutorialHintType.Parry && Ep1TutorialManager.HasCompletedHint(_hintType))
+        {
+            FinishHint();
+            return;
+        }
         if (!_shown)
         {
             float distance = _tutorialManager != null ? _tutorialManager.TriggerDistance : _triggerDistance;
@@ -190,23 +201,20 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
             bool withinRange = _tutorialManager != null ?
                 _tutorialManager.IsWithinHintRange(_hintType, _player.transform.position, transform.position) :
                 Vector2.Distance(_player.transform.position, transform.position) <= distance;
-            if (!IsTalismanHint && !(_hintType == Ep1TutorialHintType.Parry && forceParry) &&
+            if (!IsTalismanHint && _hintType != Ep1TutorialHintType.Finisher &&
+                !(_hintType == Ep1TutorialHintType.Parry && forceParry) &&
                 !(_hintType == Ep1TutorialHintType.HighJump && forceHighJump) &&
                 !withinRange)
             {
                 return;
             }
-            // Record the first display, even if the player dies before finishing the hint.
-            if (_hintType != Ep1TutorialHintType.Guard && !IsTalismanHint && !Ep1TutorialManager.TryMarkHintShown(_hintType))
-            {
-                FinishHint();
-                return;
-            }
+            // Display history must not stand in for successfully practicing the action.
+            Ep1TutorialManager.TryMarkHintShown(_hintType);
             _shown = true;
             if (_tutorialManager != null) _tutorialManager.NotifyHintDisplayed(_hintType);
         }
         _hint.gameObject.SetActive(true);
-        if (_hintType == Ep1TutorialHintType.Guard || IsTalismanHint) return;
+        if (IsRequiredPracticeHint && !_showJumpKeys) return;
         if (!_showJumpKeys)
         {
             _displayElapsed += Time.deltaTime;
@@ -221,6 +229,7 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
         if (jumping && !_jumpStarted)
         {
             _jumpStarted = true;
+            _heldLongEnough = false;
             _heldTime = 0f;
         }
         if (_jumpStarted && jumping && !_player.IsGrounded && StageJumpInput.IsHeld)
@@ -237,6 +246,7 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
         {
             if (_heldLongEnough)
             {
+                if (_tutorialManager != null) _tutorialManager.CompleteHint(_hintType);
                 FinishHint();
             }
             _jumpStarted = false;

@@ -9,7 +9,8 @@ public enum Ep1TutorialHintType
     Parry,
     Guard,
     TalismanTap,
-    TalismanCharge
+    TalismanCharge,
+    Finisher
 }
 
 [DisallowMultipleComponent]
@@ -17,16 +18,25 @@ public sealed partial class Ep1TutorialManager : MonoBehaviour
 {
     // Keep first-display history when death reloads the EP1 scene.
     private static readonly HashSet<Ep1TutorialHintType> ShownHints = new HashSet<Ep1TutorialHintType>();
+    private static readonly HashSet<Ep1TutorialHintType> CompletedHints = new HashSet<Ep1TutorialHintType>();
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     public static void ResetShownHints()
     {
         ShownHints.Clear();
+        CompletedHints.Clear();
         ResetCombatProgress();
     }
 
     internal static bool HasShownHint(Ep1TutorialHintType hintType) => ShownHints.Contains(hintType);
     internal static bool TryMarkHintShown(Ep1TutorialHintType hintType) => ShownHints.Add(hintType);
+    internal static bool HasCompletedHint(Ep1TutorialHintType hintType) => CompletedHints.Contains(hintType);
+
+    internal void CompleteHint(Ep1TutorialHintType hintType)
+    {
+        CompletedHints.Add(hintType);
+        if (hintType == Ep1TutorialHintType.HighJump) _highJumpPracticeActive = false;
+    }
 
     [SerializeField] private Transform _highJumpHintPoint;
     [SerializeField] private Transform _respawnHintPoint;
@@ -159,10 +169,15 @@ public sealed partial class Ep1TutorialManager : MonoBehaviour
         switch (hintType)
         {
             case Ep1TutorialHintType.Respawn: return _respawnMessage;
-            case Ep1TutorialHintType.Parry: return _parryMessage;
-            case Ep1TutorialHintType.Guard: return _guardHoldMessage;
+            case Ep1TutorialHintType.Parry:
+                return _requirePracticeInput ?
+                    "반짝이는 공격이 올 때까지\n아래 방향키를 누르고 있어보세요." : _parryMessage;
+            case Ep1TutorialHintType.Guard:
+                return _requirePracticeInput ?
+                    "아래 방향키를 계속 눌러\n요괴의 공격을 막아보세요." : _guardHoldMessage;
             case Ep1TutorialHintType.TalismanTap: return _talismanTapMessage;
             case Ep1TutorialHintType.TalismanCharge: return _talismanChargeMessage;
+            case Ep1TutorialHintType.Finisher: return "노랗게 반짝이는 적에게 다가가\nX를 누르고 있어보세요.";
             default: return _highJumpMessage;
         }
     }
@@ -191,6 +206,7 @@ public sealed partial class Ep1TutorialManager : MonoBehaviour
         _guardEncounterDistance = Mathf.Max(0.1f, _guardEncounterDistance);
         _displayDuration = Mathf.Max(0.1f, _displayDuration);
         _holdDuration = Mathf.Max(0.1f, _holdDuration);
+        _guardPracticeHoldDuration = Mathf.Max(0.1f, _guardPracticeHoldDuration);
         ValidateCombatSettings();
         ValidateCheckpointSettings();
         ValidateTalismanSettings();
