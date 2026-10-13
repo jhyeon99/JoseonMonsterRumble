@@ -45,9 +45,11 @@ internal sealed class Ep1TutorialFocusOverlay : IDisposable
     internal void Show(RectTransform target, SoulItem[] worldSouls, Camera worldCamera, string message, string continueMessage,
         Sprite enterSprite, Font font, int fontSize, FontStyle fontStyle, Color textColor,
         Color outlineColor, float outlineSize, float opacity, Color borderColor, float padding,
-        Vector2 textSize, float soulPadding, Vector2 soulMinimumSize, SpriteRenderer worldTarget = null)
+        Vector2 textSize, float soulPadding, Vector2 soulMinimumSize, SpriteRenderer worldTarget = null,
+        bool showExplanation = true)
     {
         _canvas.gameObject.SetActive(true);
+        _card.gameObject.SetActive(showExplanation);
         Canvas.ForceUpdateCanvases();
         Vector2 screen = _canvas.rect.size;
         Rect focus = GetFocusRect(target, screen, padding);
