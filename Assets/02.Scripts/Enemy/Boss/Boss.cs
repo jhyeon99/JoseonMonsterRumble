@@ -20,6 +20,10 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField]
     private BossArena _arena;
 
+    [Tooltip("보스전 플랫폼 배치 전환 (찍기 / 소환 / 기본). 비어 있으면 씬에서 자동으로 찾고, 없으면 플랫폼 전환 없이 진행")]
+    [SerializeField]
+    private BossPlatformDirector _platformDirector;
+
     [Tooltip("스프라이트 원본이 오른쪽을 보고 있으면 체크")]
     [SerializeField]
     private bool _spriteFacesRight = false;
@@ -283,6 +287,7 @@ public class Boss : MonoBehaviour, IFinishable
 
     public string BossName => _bossName;
     public BossArena Arena => _arena;
+    public BossPlatformDirector Platforms => _platformDirector;
     public BossHealth Health => _health;
 
     /// <summary>패링 그로기 공격 직전 반짝임 (없으면 null)</summary>
@@ -434,6 +439,11 @@ public class Boss : MonoBehaviour, IFinishable
         else
         {
             Debug.LogWarning($"{name}: Player 태그 오브젝트를 찾지 못했습니다.", this);
+        }
+
+        if (_platformDirector == null)
+        {
+            _platformDirector = FindFirstObjectByType<BossPlatformDirector>();
         }
 
         if (_arena == null)
