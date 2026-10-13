@@ -126,9 +126,13 @@ public class BossSummonPattern : BossPattern
     [SerializeField]
     private string _chargeProgressParameter = "ultimateProgress";
 
-    [Tooltip("실패(즉사) 시 보낼 트리거 (차지 → 해방 애니메이션)")]
+    [Tooltip("해방 상태를 직접 재생하지 못했을 때만 보내는 예비 트리거 (차지 → 해방 전이)")]
     [SerializeField]
     private string _releaseTrigger = "ultimateRelease";
+
+    [Tooltip("해방 애니메이터 상태 이름. 실패 시 이 상태를 직접 재생 (트리거 전이에 의존하지 않음)")]
+    [SerializeField]
+    private string _releaseStateName = "boss_Charge_Release";
 
     [Tooltip("파훼 시 재생할 피격 애니메이터 상태 이름")]
     [SerializeField]
@@ -142,6 +146,16 @@ public class BossSummonPattern : BossPattern
     private float _hitFallbackDuration = 1f;
 
     [Header("궁극기 실패 (즉사)")]
+    [Tooltip("해방 애니메이션 최대 대기 시간 (초). 보통은 애니메이터가 해방 상태를 벗어나는 순간 끝남")]
+    [SerializeField, Min(0f)]
+    private float _releaseFallbackDuration = 4f;
+
+    [Tooltip("해방 애니메이션 시작부터 즉사 연출(가시 VFX / 붉은 화면 / 흔들림)까지 (초, 실제 시간). 부풀었던 몸이 터지며 줄어드는 순간에 맞추기. " +
+             "해방 상태 Speed가 1이면 약 1.5초, 2.5면 약 0.6초. " +
+             "플레이어가 죽고 Death Delay(StageManager, 기본 1초) 뒤 화면이 멈추므로, 너무 이르면 해방 애니메이션이 끝까지 안 보임")]
+    [SerializeField, Min(0f)]
+    private float _deathVfxDelay = 0.6f;
+
     [Tooltip("즉사 연출 프리팹 (PF_BossDeathSpike). Attach To Camera면 카메라 자식, 아니면 플레이어 위치에 생성")]
     [SerializeField]
     private GameObject _deathVfxPrefab;
@@ -200,6 +214,7 @@ public class BossSummonPattern : BossPattern
     private bool _pending;
     private bool _isRunning;
     private bool _isJumping;
+    private bool _ultimateFailed;
 
     public override bool IsForced => true;
     public override bool BlocksDirectDamage => _blockDirectDamage && _isRunning;
@@ -303,6 +318,7 @@ public class BossSummonPattern : BossPattern
         base.OnPatternStart();
         _pending = false;
         _isRunning = true;
+        _ultimateFailed = false;
     }
 
     /// <summary>궁극기 전에 소환 위치로 점프. 끝나면 대기 상태로 돌려 ultimate 트리거가 바로 전이되게 함</summary>
@@ -516,8 +532,32 @@ public class BossSummonPattern : BossPattern
     private IEnumerator UltimateFail()
     {
         Boss.Log($"{PatternName}: 파훼 실패 → 즉사");
+        _ultimateFailed = true;
         SetChargeProgress(1f);
-        Boss.SetTrigger(_releaseTrigger);
+
+        // 해방 애니메이션은 트리거(전이)에 맡기지 않고 직접 재생.
+        // 차지 상태는 Motion Time(ultimateProgress)으로 시간이 고정돼 있어, 전이 설정(Exit Time 등)에 따라 트리거로 넘어가지 않는 경우가 있음
+        PlayReleaseState();
+        yield return null;
+
+        if (!IsInState(_releaseStateName))
+        {
+            // 직접 재생이 안 되면(상태 이름이 다른 경우 등) 트리거로 한 번 더 시도
+            Debug.LogWarning($"{name}: {PatternName} 해방 상태({_releaseStateName})를 직접 재생하지 못해 트리거({_releaseTrigger})로 시도합니다. " +
+                             $"지금 클립: {CurrentStateDebugName()}. Release State Name을 애니메이터 상태 이름과 맞춰 주세요.", this);
+            Boss.SetTrigger(_releaseTrigger);
+        }
+        else
+        {
+            Boss.Log($"{PatternName}: 해방 애니메이션 시작");
+        }
+
+        // 해방 애니메이션이 터지는 순간까지 기다렸다가 즉사 연출
+        // (바로 죽이면 사망 화면이 해방 애니메이션 초반에 화면을 멈춰서 해방이 안 보임)
+        if (_deathVfxDelay > 0f)
+        {
+            yield return new WaitForSeconds(_deathVfxDelay);
+        }
 
         Transform player = Boss.Player;
         SpawnDeathVfx(player);
@@ -539,12 +579,67 @@ public class BossSummonPattern : BossPattern
             playerHealth.Kill(_killReason);
         }
 
-        // 해방 애니메이션이 끝날 때까지 (이후 애니메이터 전이로 대기)
-        yield return new WaitForSeconds(1f);
+        // 해방 애니메이션이 끝날 때까지 패턴 유지 (중간에 다음 패턴이 시작되지 않도록. 이후 애니메이터 전이로 대기)
+        // 상태 속도(Speed)가 바뀌어도 맞도록 시간 대신 애니메이터가 해방 상태를 벗어날 때까지 기다림 (최대 Release Fallback Duration)
+        float waitUntil = Time.time + _releaseFallbackDuration;
+        while (IsInState(_releaseStateName) && Time.time < waitUntil)
+        {
+            yield return null;
+        }
+
         Boss.ResetTrigger(_releaseTrigger);
     }
 
     /// <summary>애니메이터가 차지 상태인지 (상태 이름 → 클립 순으로 확인, 둘 다 없으면 바로 true)</summary>
+    /// <summary>해방 상태를 처음부터 바로 재생 (하위 상태 머신 안에 있어도 이름으로 재생)</summary>
+    private void PlayReleaseState()
+    {
+        Animator animator = Boss != null ? Boss.GetComponentInChildren<Animator>() : null;
+        if (animator == null || string.IsNullOrEmpty(_releaseStateName))
+        {
+            return;
+        }
+
+        Boss.ResumeAnimator();
+        Boss.ResetTrigger(_releaseTrigger);
+        animator.Play(Animator.StringToHash(_releaseStateName), 0, 0f);
+    }
+
+    /// <summary>애니메이터가 지금 해당 이름의 상태인지 (전이 중이면 다음 상태도 확인)</summary>
+    private bool IsInState(string stateName)
+    {
+        if (string.IsNullOrEmpty(stateName) || Boss == null)
+        {
+            return false;
+        }
+
+        Animator animator = Boss.GetComponentInChildren<Animator>();
+        if (animator == null)
+        {
+            return false;
+        }
+
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName(stateName))
+        {
+            return true;
+        }
+
+        return animator.IsInTransition(0) && animator.GetNextAnimatorStateInfo(0).IsName(stateName);
+    }
+
+    /// <summary>경고 로그용: 지금 재생 중인 클립 이름</summary>
+    private string CurrentStateDebugName()
+    {
+        Animator animator = Boss != null ? Boss.GetComponentInChildren<Animator>() : null;
+        if (animator == null)
+        {
+            return "(애니메이터 없음)";
+        }
+
+        AnimatorClipInfo[] clips = animator.GetCurrentAnimatorClipInfo(0);
+        return clips.Length > 0 && clips[0].clip != null ? clips[0].clip.name : "(클립 없음)";
+    }
+
     private bool IsInChargeState()
     {
         Animator animator = Boss.GetComponentInChildren<Animator>();
@@ -739,7 +834,8 @@ public class BossSummonPattern : BossPattern
         {
             Boss.ClearMinions();
 
-            if (_returnPattern != null)
+            // 즉사(실패)했으면 복귀 패턴 없음 (해방 애니메이션 도중 찍기가 시작되지 않도록)
+            if (_returnPattern != null && !_ultimateFailed)
             {
                 Boss.QueuePattern(_returnPattern);
             }
