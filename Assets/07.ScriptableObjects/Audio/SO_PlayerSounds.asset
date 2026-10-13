@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameAudio.SoundSetSO
   _sounds:
   - SoundId: Player.Attack1
-    DisplayName: "해당 1타 공격 시작"
-    Clips: []
+    DisplayName: "\uD574\uB2F9 1\uD0C0 \uACF5\uACA9 \uC2DC\uC791"
+    Clips:
+    - {fileID: 8300000, guid: de2a60563399c324791ed2f9795bf26b, type: 3}
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -23,8 +24,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.Attack2
-    DisplayName: "해당 2타 공격 시작"
-    Clips: []
+    DisplayName: "\uD574\uB2F9 2\uD0C0 \uACF5\uACA9 \uC2DC\uC791"
+    Clips:
+    - {fileID: 8300000, guid: 14a25cd5db294e648b4f7c9be6420d23, type: 3}
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -32,8 +34,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.Attack3
-    DisplayName: "해당 3타 공격 시작"
-    Clips: []
+    DisplayName: "\uD574\uB2F9 3\uD0C0 \uACF5\uACA9 \uC2DC\uC791"
+    Clips:
+    - {fileID: 8300000, guid: 83b263246196beb429dd974455a46587, type: 3}
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -41,8 +44,10 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.MeleeImpact
-    DisplayName: "실제 피해가 적용된 근접 명중"
-    Clips: []
+    DisplayName: "\uC2E4\uC81C \uD53C\uD574\uAC00 \uC801\uC6A9\uB41C \uADFC\uC811
+      \uBA85\uC911"
+    Clips:
+    - {fileID: 8300000, guid: 210c1e3a1abc6314b860e293c5addf95, type: 3}
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -50,16 +55,17 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.Footstep
-    DisplayName: "접지·이동 중 발 디딤 마커"
-    Clips: []
-    Volume: 1
+    DisplayName: "\uC811\uC9C0\xB7\uC774\uB3D9 \uC911 \uBC1C \uB514\uB524 \uB9C8\uCEE4"
+    Clips:
+    - {fileID: 8300000, guid: 89d8d551d08c1fa41b3159747ffd5f69, type: 3}
+    Volume: 0.546
     PitchMin: 1
     PitchMax: 1
     OutputGroup: 0
     Priority: 50
     MaxCount: 4
   - SoundId: Player.Jump
-    DisplayName: "점프 실행 성공"
+    DisplayName: "\uC810\uD504 \uC2E4\uD589 \uC131\uACF5"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -68,17 +74,19 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.Land
-    DisplayName: "실제 공중 → 접지 전환"
-    Clips: []
-    Volume: 1
+    DisplayName: "\uC2E4\uC81C \uACF5\uC911 \u2192 \uC811\uC9C0 \uC804\uD658"
+    Clips:
+    - {fileID: 8300000, guid: b4d37775a04d6634dac931608f5608f9, type: 3}
+    Volume: 0.375
     PitchMin: 1
     PitchMax: 1
     OutputGroup: 0
     Priority: 50
     MaxCount: 4
   - SoundId: Player.Dodge
-    DisplayName: "백스텝 실행 시작"
-    Clips: []
+    DisplayName: "\uBC31\uC2A4\uD15D \uC2E4\uD589 \uC2DC\uC791"
+    Clips:
+    - {fileID: 8300000, guid: e38425275bbd7f145bad5daccce44d20, type: 3}
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -86,7 +94,8 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.Hurt
-    DisplayName: "방어되지 않은 비치명 피해 적용"
+    DisplayName: "\uBC29\uC5B4\uB418\uC9C0 \uC54A\uC740 \uBE44\uCE58\uBA85 \uD53C\uD574
+      \uC801\uC6A9"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -95,8 +104,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.Death
-    DisplayName: "사망 확정"
-    Clips: []
+    DisplayName: "\uC0AC\uB9DD \uD655\uC815"
+    Clips:
+    - {fileID: 0}
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -104,7 +114,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.Block
-    DisplayName: "실제 가드 방어 성공"
+    DisplayName: "\uC2E4\uC81C \uAC00\uB4DC \uBC29\uC5B4 \uC131\uACF5"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -113,7 +123,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.Parry
-    DisplayName: "실제 패링 성공"
+    DisplayName: "\uC2E4\uC81C \uD328\uB9C1 \uC131\uACF5"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -122,7 +132,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.GuardBreak
-    DisplayName: "가드 브레이크 확정"
+    DisplayName: "\uAC00\uB4DC \uBE0C\uB808\uC774\uD06C \uD655\uC815"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -131,7 +141,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.Finisher
-    DisplayName: "마무리 타격 실행당 1회"
+    DisplayName: "\uB9C8\uBB34\uB9AC \uD0C0\uACA9 \uC2E4\uD589\uB2F9 1\uD68C"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -140,16 +150,17 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.ChargeStep
-    DisplayName: "부적 슬롯 활성화 성공"
-    Clips: []
-    Volume: 1
+    DisplayName: "\uBD80\uC801 \uC2AC\uB86F \uD65C\uC131\uD654 \uC131\uACF5"
+    Clips:
+    - {fileID: 8300000, guid: e27e05bcd0a3c2e4992fba227dc4bb4b, type: 3}
+    Volume: 0.102
     PitchMin: 1
     PitchMax: 1
     OutputGroup: 0
     Priority: 50
     MaxCount: 4
   - SoundId: Player.TalismanFire
-    DisplayName: "실제 부적 발사 묶음당 1회"
+    DisplayName: "\uC2E4\uC81C \uBD80\uC801 \uBC1C\uC0AC \uBB36\uC74C\uB2F9 1\uD68C"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -158,7 +169,8 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.TalismanExplosion
-    DisplayName: "유효 명중으로 부적 폭발 시작"
+    DisplayName: "\uC720\uD6A8 \uBA85\uC911\uC73C\uB85C \uBD80\uC801 \uD3ED\uBC1C
+      \uC2DC\uC791"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -167,7 +179,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.PotionUse
-    DisplayName: "물약 회복·소모 성공"
+    DisplayName: "\uBB3C\uC57D \uD68C\uBCF5\xB7\uC18C\uBAA8 \uC131\uACF5"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -176,7 +188,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.GuardEnter
-    DisplayName: "가드 자세 진입 성공"
+    DisplayName: "\uAC00\uB4DC \uC790\uC138 \uC9C4\uC785 \uC131\uACF5"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -185,16 +197,17 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.ChargeLoop
-    DisplayName: "부적 충전 시작"
-    Clips: []
-    Volume: 1
+    DisplayName: "\uBD80\uC801 \uCDA9\uC804 \uC2DC\uC791"
+    Clips:
+    - {fileID: 8300000, guid: 4be4ee3b74de5b44885ce87beddf2d94, type: 3}
+    Volume: 0.297
     PitchMin: 1
     PitchMax: 1
     OutputGroup: 0
     Priority: 50
     MaxCount: 1
   - SoundId: Player.ChargeFull
-    DisplayName: "최대 충전 단계 최초 도달"
+    DisplayName: "\uCD5C\uB300 \uCDA9\uC804 \uB2E8\uACC4 \uCD5C\uCD08 \uB3C4\uB2EC"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -203,7 +216,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.Unavailable
-    DisplayName: "자원 부족 등으로 사용 실패"
+    DisplayName: "\uC790\uC6D0 \uBD80\uC871 \uB4F1\uC73C\uB85C \uC0AC\uC6A9 \uC2E4\uD328"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -215,7 +228,7 @@ MonoBehaviour:
   - EventId: Player.Attack1
     Enabled: 1
     SoundId: Player.Attack1
-    TriggerDescription: "해당 1타 공격 시작"
+    TriggerDescription: "\uD574\uB2F9 1\uD0C0 \uACF5\uACA9 \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -227,7 +240,7 @@ MonoBehaviour:
   - EventId: Player.Attack2
     Enabled: 1
     SoundId: Player.Attack2
-    TriggerDescription: "해당 2타 공격 시작"
+    TriggerDescription: "\uD574\uB2F9 2\uD0C0 \uACF5\uACA9 \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -239,8 +252,8 @@ MonoBehaviour:
   - EventId: Player.Attack3
     Enabled: 1
     SoundId: Player.Attack3
-    TriggerDescription: "해당 3타 공격 시작"
-    Delay: 0
+    TriggerDescription: "\uD574\uB2F9 3\uD0C0 \uACF5\uACA9 \uC2DC\uC791"
+    Delay: 0.28
     TimeMode: 0
     LifetimePolicy: 0
     Loop: 0
@@ -251,7 +264,8 @@ MonoBehaviour:
   - EventId: Player.MeleeImpact
     Enabled: 1
     SoundId: Player.MeleeImpact
-    TriggerDescription: "실제 피해가 적용된 근접 명중"
+    TriggerDescription: "\uC2E4\uC81C \uD53C\uD574\uAC00 \uC801\uC6A9\uB41C \uADFC\uC811
+      \uBA85\uC911"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -263,7 +277,8 @@ MonoBehaviour:
   - EventId: Player.Footstep
     Enabled: 1
     SoundId: Player.Footstep
-    TriggerDescription: "접지·이동 중 발 디딤 마커"
+    TriggerDescription: "\uC811\uC9C0\xB7\uC774\uB3D9 \uC911 \uBC1C \uB514\uB524
+      \uB9C8\uCEE4"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -275,7 +290,7 @@ MonoBehaviour:
   - EventId: Player.Jump
     Enabled: 1
     SoundId: Player.Jump
-    TriggerDescription: "점프 실행 성공"
+    TriggerDescription: "\uC810\uD504 \uC2E4\uD589 \uC131\uACF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -287,7 +302,7 @@ MonoBehaviour:
   - EventId: Player.Land
     Enabled: 1
     SoundId: Player.Land
-    TriggerDescription: "실제 공중 → 접지 전환"
+    TriggerDescription: "\uC2E4\uC81C \uACF5\uC911 \u2192 \uC811\uC9C0 \uC804\uD658"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -299,7 +314,7 @@ MonoBehaviour:
   - EventId: Player.Dodge
     Enabled: 1
     SoundId: Player.Dodge
-    TriggerDescription: "백스텝 실행 시작"
+    TriggerDescription: "\uBC31\uC2A4\uD15D \uC2E4\uD589 \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -311,7 +326,8 @@ MonoBehaviour:
   - EventId: Player.Hurt
     Enabled: 1
     SoundId: Player.Hurt
-    TriggerDescription: "방어되지 않은 비치명 피해 적용"
+    TriggerDescription: "\uBC29\uC5B4\uB418\uC9C0 \uC54A\uC740 \uBE44\uCE58\uBA85
+      \uD53C\uD574 \uC801\uC6A9"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -323,7 +339,7 @@ MonoBehaviour:
   - EventId: Player.Death
     Enabled: 1
     SoundId: Player.Death
-    TriggerDescription: "사망 확정"
+    TriggerDescription: "\uC0AC\uB9DD \uD655\uC815"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -335,7 +351,7 @@ MonoBehaviour:
   - EventId: Player.Block
     Enabled: 1
     SoundId: Player.Block
-    TriggerDescription: "실제 가드 방어 성공"
+    TriggerDescription: "\uC2E4\uC81C \uAC00\uB4DC \uBC29\uC5B4 \uC131\uACF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -347,7 +363,7 @@ MonoBehaviour:
   - EventId: Player.Parry
     Enabled: 1
     SoundId: Player.Parry
-    TriggerDescription: "실제 패링 성공"
+    TriggerDescription: "\uC2E4\uC81C \uD328\uB9C1 \uC131\uACF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -359,7 +375,7 @@ MonoBehaviour:
   - EventId: Player.GuardBreak
     Enabled: 1
     SoundId: Player.GuardBreak
-    TriggerDescription: "가드 브레이크 확정"
+    TriggerDescription: "\uAC00\uB4DC \uBE0C\uB808\uC774\uD06C \uD655\uC815"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -371,7 +387,7 @@ MonoBehaviour:
   - EventId: Player.Finisher
     Enabled: 1
     SoundId: Player.Finisher
-    TriggerDescription: "마무리 타격 실행당 1회"
+    TriggerDescription: "\uB9C8\uBB34\uB9AC \uD0C0\uACA9 \uC2E4\uD589\uB2F9 1\uD68C"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -383,7 +399,7 @@ MonoBehaviour:
   - EventId: Player.ChargeStep
     Enabled: 1
     SoundId: Player.ChargeStep
-    TriggerDescription: "부적 슬롯 활성화 성공"
+    TriggerDescription: "\uBD80\uC801 \uC2AC\uB86F \uD65C\uC131\uD654 \uC131\uACF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -395,7 +411,8 @@ MonoBehaviour:
   - EventId: Player.TalismanFire
     Enabled: 1
     SoundId: Player.TalismanFire
-    TriggerDescription: "실제 부적 발사 묶음당 1회"
+    TriggerDescription: "\uC2E4\uC81C \uBD80\uC801 \uBC1C\uC0AC \uBB36\uC74C\uB2F9
+      1\uD68C"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -407,7 +424,8 @@ MonoBehaviour:
   - EventId: Player.TalismanExplosion
     Enabled: 1
     SoundId: Player.TalismanExplosion
-    TriggerDescription: "유효 명중으로 부적 폭발 시작"
+    TriggerDescription: "\uC720\uD6A8 \uBA85\uC911\uC73C\uB85C \uBD80\uC801 \uD3ED\uBC1C
+      \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -419,7 +437,7 @@ MonoBehaviour:
   - EventId: Player.PotionUse
     Enabled: 1
     SoundId: Player.PotionUse
-    TriggerDescription: "물약 회복·소모 성공"
+    TriggerDescription: "\uBB3C\uC57D \uD68C\uBCF5\xB7\uC18C\uBAA8 \uC131\uACF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -431,7 +449,7 @@ MonoBehaviour:
   - EventId: Player.GuardEnter
     Enabled: 1
     SoundId: Player.GuardEnter
-    TriggerDescription: "가드 자세 진입 성공"
+    TriggerDescription: "\uAC00\uB4DC \uC790\uC138 \uC9C4\uC785 \uC131\uACF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -443,7 +461,7 @@ MonoBehaviour:
   - EventId: Player.ChargeLoop
     Enabled: 1
     SoundId: Player.ChargeLoop
-    TriggerDescription: "부적 충전 시작"
+    TriggerDescription: "\uBD80\uC801 \uCDA9\uC804 \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -451,11 +469,12 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 0
     BgmFadeDuration: -1
-    LoopEndRule: "행동 종료·취소, 비활성화 또는 씬 종료"
+    LoopEndRule: "\uD589\uB3D9 \uC885\uB8CC\xB7\uCDE8\uC18C, \uBE44\uD65C\uC131\uD654
+      \uB610\uB294 \uC52C \uC885\uB8CC"
   - EventId: Player.ChargeFull
     Enabled: 1
     SoundId: Player.ChargeFull
-    TriggerDescription: "최대 충전 단계 최초 도달"
+    TriggerDescription: "\uCD5C\uB300 \uCDA9\uC804 \uB2E8\uACC4 \uCD5C\uCD08 \uB3C4\uB2EC"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -467,7 +486,8 @@ MonoBehaviour:
   - EventId: Player.Unavailable
     Enabled: 1
     SoundId: Player.Unavailable
-    TriggerDescription: "자원 부족 등으로 사용 실패"
+    TriggerDescription: "\uC790\uC6D0 \uBD80\uC871 \uB4F1\uC73C\uB85C \uC0AC\uC6A9
+      \uC2E4\uD328"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2

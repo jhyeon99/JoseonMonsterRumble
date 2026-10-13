@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameAudio.SoundSetSO
   _sounds:
   - SoundId: Music.Title
-    DisplayName: "타이틀 씬 진입"
-    Clips: []
+    DisplayName: "\uD0C0\uC774\uD2C0 \uC52C \uC9C4\uC785"
+    Clips:
+    - {fileID: 8300000, guid: bed421544c357f440bcac3c9964a6fed, type: 3}
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -23,7 +24,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 1
   - SoundId: Music.Field
-    DisplayName: "일반 플레이 씬 진입"
+    DisplayName: "\uC77C\uBC18 \uD50C\uB808\uC774 \uC52C \uC9C4\uC785"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -32,7 +33,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 1
   - SoundId: Music.Boss
-    DisplayName: "실제 보스 전투 시작"
+    DisplayName: "\uC2E4\uC81C \uBCF4\uC2A4 \uC804\uD22C \uC2DC\uC791"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -41,7 +42,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 1
   - SoundId: Music.BossPhase2
-    DisplayName: "2페이즈 진입 확정"
+    DisplayName: "2\uD398\uC774\uC988 \uC9C4\uC785 \uD655\uC815"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -50,7 +51,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 1
   - SoundId: Music.Prologue
-    DisplayName: "프롤로그 연출 시작"
+    DisplayName: "\uD504\uB864\uB85C\uADF8 \uC5F0\uCD9C \uC2DC\uC791"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -59,7 +60,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 1
   - SoundId: Music.Victory
-    DisplayName: "보스 최종 처치 확정"
+    DisplayName: "\uBCF4\uC2A4 \uCD5C\uC885 \uCC98\uCE58 \uD655\uC815"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -68,8 +69,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 1
   - SoundId: Music.Death
-    DisplayName: "사망 화면 진입"
-    Clips: []
+    DisplayName: "\uC0AC\uB9DD \uD654\uBA74 \uC9C4\uC785"
+    Clips:
+    - {fileID: 8300000, guid: 1289cd4c988675541b31b962ed3f68fb, type: 3}
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -80,7 +82,7 @@ MonoBehaviour:
   - EventId: Music.Title
     Enabled: 1
     SoundId: Music.Title
-    TriggerDescription: "타이틀 씬 진입"
+    TriggerDescription: "\uD0C0\uC774\uD2C0 \uC52C \uC9C4\uC785"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 3
@@ -88,11 +90,12 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 1
     BgmFadeDuration: -1
-    LoopEndRule: "다음 음악 요청, 음악 정지 또는 씬 종료"
+    LoopEndRule: "\uB2E4\uC74C \uC74C\uC545 \uC694\uCCAD, \uC74C\uC545 \uC815\uC9C0
+      \uB610\uB294 \uC52C \uC885\uB8CC"
   - EventId: Music.Field
     Enabled: 1
     SoundId: Music.Field
-    TriggerDescription: "일반 플레이 씬 진입"
+    TriggerDescription: "\uC77C\uBC18 \uD50C\uB808\uC774 \uC52C \uC9C4\uC785"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 3
@@ -100,11 +103,12 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 1
     BgmFadeDuration: -1
-    LoopEndRule: "다음 음악 요청, 음악 정지 또는 씬 종료"
+    LoopEndRule: "\uB2E4\uC74C \uC74C\uC545 \uC694\uCCAD, \uC74C\uC545 \uC815\uC9C0
+      \uB610\uB294 \uC52C \uC885\uB8CC"
   - EventId: Music.Boss
     Enabled: 1
     SoundId: Music.Boss
-    TriggerDescription: "실제 보스 전투 시작"
+    TriggerDescription: "\uC2E4\uC81C \uBCF4\uC2A4 \uC804\uD22C \uC2DC\uC791"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 3
@@ -112,11 +116,12 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 1
     BgmFadeDuration: -1
-    LoopEndRule: "다음 음악 요청, 음악 정지 또는 씬 종료"
+    LoopEndRule: "\uB2E4\uC74C \uC74C\uC545 \uC694\uCCAD, \uC74C\uC545 \uC815\uC9C0
+      \uB610\uB294 \uC52C \uC885\uB8CC"
   - EventId: Music.BossPhase2
     Enabled: 1
     SoundId: Music.BossPhase2
-    TriggerDescription: "2페이즈 진입 확정"
+    TriggerDescription: "2\uD398\uC774\uC988 \uC9C4\uC785 \uD655\uC815"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 3
@@ -124,11 +129,12 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 1
     BgmFadeDuration: -1
-    LoopEndRule: "다음 음악 요청, 음악 정지 또는 씬 종료"
+    LoopEndRule: "\uB2E4\uC74C \uC74C\uC545 \uC694\uCCAD, \uC74C\uC545 \uC815\uC9C0
+      \uB610\uB294 \uC52C \uC885\uB8CC"
   - EventId: Music.Prologue
     Enabled: 1
     SoundId: Music.Prologue
-    TriggerDescription: "프롤로그 연출 시작"
+    TriggerDescription: "\uD504\uB864\uB85C\uADF8 \uC5F0\uCD9C \uC2DC\uC791"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 3
@@ -136,11 +142,12 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 1
     BgmFadeDuration: -1
-    LoopEndRule: "다음 음악 요청, 음악 정지 또는 씬 종료"
+    LoopEndRule: "\uB2E4\uC74C \uC74C\uC545 \uC694\uCCAD, \uC74C\uC545 \uC815\uC9C0
+      \uB610\uB294 \uC52C \uC885\uB8CC"
   - EventId: Music.Victory
     Enabled: 1
     SoundId: Music.Victory
-    TriggerDescription: "보스 최종 처치 확정"
+    TriggerDescription: "\uBCF4\uC2A4 \uCD5C\uC885 \uCC98\uCE58 \uD655\uC815"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 3
@@ -152,7 +159,7 @@ MonoBehaviour:
   - EventId: Music.Death
     Enabled: 1
     SoundId: Music.Death
-    TriggerDescription: "사망 화면 진입"
+    TriggerDescription: "\uC0AC\uB9DD \uD654\uBA74 \uC9C4\uC785"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 3
