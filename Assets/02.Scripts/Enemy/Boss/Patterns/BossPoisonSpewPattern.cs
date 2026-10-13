@@ -26,6 +26,8 @@ public sealed class BossPoisonSpewPattern : BossPattern
     [SerializeField, Min(0.01f)] private float _offsetBlendEndTime = 2.3125f;
     private GameObject _vfxInstance;
     private BossPoisonBeam _beam;
+    // 정상 종료면 남은 방울 / 파편은 VFX가 혼자 마무리하도록 끄지 않음 (끊겼을 때만 즉시 끔)
+    private bool _completedNormally;
 
     private void Reset() => SetDefaults("독분사", BossPhaseMask.Both, BossFloorMask.Any);
 
@@ -54,6 +56,7 @@ public sealed class BossPoisonSpewPattern : BossPattern
 
     protected override IEnumerator Execute()
     {
+        _completedNormally = false;
         if (_beam == null || !_beam.IsReady || GetPlayingPatternClip() == null)
         {
             Debug.LogWarning("독분사 패턴: 연결한 패턴 클립이 실제 Animator에서 재생되는지 확인하세요.", this);
@@ -73,8 +76,10 @@ public sealed class BossPoisonSpewPattern : BossPattern
             yield return null;
         }
         _beam.StopEmission();
-        // 정상 종료에서는 입에 연결된 감압과 낙하 파편이 끝날 때까지 기다린다.
-        while (_beam.IsFiring)
+        // 패턴은 애니메이션 길이까지만 기다리고, 감압 / 떨어지는 방울은 VFX가 이어서 처리
+        // (방울 수명(Residual Particle Lifetime)이 길면 그동안 보스가 패턴에 묶여 멈춰 있던 문제)
+        _completedNormally = true;
+        while (_beam.IsFiring && Progress < 1f)
         {
             ApplyEmitterOffsets();
             yield return null;
@@ -95,7 +100,8 @@ public sealed class BossPoisonSpewPattern : BossPattern
 
     protected override void Cleanup()
     {
-        if (_beam != null) _beam.StopFire();
+        if (_beam != null && !_completedNormally) _beam.StopFire();
+        _completedNormally = false;
     }
 
     private void OnDisable() => Stop();
