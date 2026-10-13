@@ -99,7 +99,6 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
             0,
             _attackName
         );
-        hitData.Attacker = Enemy.gameObject;
 
         // 가드 / 패링으로 막히면 false
         if (damageable.TakeDamage(hitData))

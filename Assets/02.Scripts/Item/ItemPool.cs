@@ -3,22 +3,6 @@ using UnityEngine;
 
 public class ItemPool : MonoBehaviour
 {
-    public static event System.Action<SoulItem[]> OnDeathSoulsSpawned;
-    public static event System.Action<EnemyHealth, SoulItem[]> OnEnemyDeathSoulsSpawned;
-
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetSoulSpawnListeners()
-    {
-        OnDeathSoulsSpawned = null;
-        OnEnemyDeathSoulsSpawned = null;
-    }
-    private const float DeathSoulMinimumScatterSpeed = 10f;
-    private const float DeathSoulMaximumScatterSpeed = 14f;
-    private const float DeathSoulMinimumScatterTime = 0.65f;
-    private const float DeathSoulMaximumScatterTime = 1f;
-    private const float FullCircleRadians = Mathf.PI * 2f;
-    private const float DeathSoulPositionJitterMultiplier = 0.3f;
-
     private static ItemPool _instance = null;
     public static ItemPool Instance
     {
@@ -53,13 +37,14 @@ public class ItemPool : MonoBehaviour
     [SerializeField] private int _potionPoolSize = 10;
     [SerializeField] private int _soulPoolSize = 50;
 
-    // 소울의 네 가지 외형색: 적, 청, 녹, 황. 색은 획득량에 영향을 주지 않는다.
+    // 동양풍 영기 톤 (청백, 벽청, 연금빛, 비취, 연자주)
     private static readonly Color[] SoulColors = new Color[]
     {
-        new Color(0.78f, 0.16f, 0.08f, 1f), // 주홍 계열
-        new Color(0.12f, 0.3f, 0.65f, 1f),  // 짙은 청색 계열
-        new Color(0.1f, 0.52f, 0.28f, 1f),  // 깊은 녹색 계열
-        new Color(0.95f, 0.63f, 0.07f, 1f), // 황토빛 황색 계열
+        new Color(0.65f, 0.88f, 1f, 1f),    // 청백색 (은은한 영혼 불빛)
+        new Color(0.25f, 0.65f, 0.95f, 1f), // 벽청색 (깊은 푸른 영기)
+        new Color(1f, 0.88f, 0.45f, 1f),    // 연금빛 (신비로운 황금빛)
+        new Color(0.45f, 0.95f, 0.75f, 1f), // 비취색 (옥빛 영혼)
+        new Color(0.95f, 0.55f, 0.65f, 1f)  // 연홍색 (부드러운 영기)
     };
 
     private PotionItem[] _potionPool;
@@ -201,19 +186,18 @@ public class ItemPool : MonoBehaviour
         SpawnCustomSoul(hitPosition, amount, color, scale, velocity, waitTime);
     }
 
-    public void SpawnDeathSouls(Vector2 centerPosition, int count = 5, EnemyHealth source = null)
+    public void SpawnDeathSouls(Vector2 centerPosition, int count = 5)
     {
-        SpawnDeathSouls(centerPosition, count, 1f, 1f, source);
+        SpawnDeathSouls(centerPosition, count, 1f, 1f);
     }
 
     /// <summary>
-    /// 사망 소울 (개별 무작위 방향으로 퍼짐). totalAmount = 전체 소울 충전량 (1 = 슬롯 1칸),
+    /// 사망 소울 (원형으로 퍼짐). totalAmount = 전체 소울 충전량 (1 = 슬롯 1칸),
     /// speedMultiplier = 퍼지는 속도 배율 (보스처럼 많이 뿌릴 때 크게)
     /// </summary>
-    public void SpawnDeathSouls(Vector2 centerPosition, int count, float totalAmount, float speedMultiplier,
-        EnemyHealth source = null)
+    public void SpawnDeathSouls(Vector2 centerPosition, int count, float totalAmount, float speedMultiplier)
     {
-        SpawnDeathSoulScatter(centerPosition, count, totalAmount / Mathf.Max(1, count), speedMultiplier, 0f, source);
+        SpawnDeathSoulRing(centerPosition, count, totalAmount / Mathf.Max(1, count), speedMultiplier, 0f, 0f);
     }
 
     /// <summary>
@@ -247,13 +231,15 @@ public class ItemPool : MonoBehaviour
     )
     {
         float amountPerSoul = totalAmount / (perBurst * bursts);
+        float step = 360f / perBurst;
 
         for (int burst = 0; burst < bursts; burst++)
         {
+            // 매번 각도를 조금씩 돌려서 같은 방향으로 겹치지 않게
+            float angleOffset = (step * 0.5f * burst) + Random.Range(0f, step * 0.3f);
             // 회차마다 터지는 중심을 반경 안에서 무작위로
             Vector2 burstCenter = centerPosition + (Random.insideUnitCircle * spawnRadius);
-            SpawnDeathSoulScatter(burstCenter, perBurst, amountPerSoul, speedMultiplier,
-                spawnRadius * DeathSoulPositionJitterMultiplier);
+            SpawnDeathSoulRing(burstCenter, perBurst, amountPerSoul, speedMultiplier, angleOffset, spawnRadius * 0.3f);
 
             if (burst < bursts - 1 && interval > 0f)
             {
@@ -263,38 +249,28 @@ public class ItemPool : MonoBehaviour
     }
 
     /// <param name="jitterRadius">소울마다 생성 위치를 이 반경 안에서 살짝 흩뜨림</param>
-    private void SpawnDeathSoulScatter(
+    private void SpawnDeathSoulRing(
         Vector2 centerPosition,
         int count,
         float amountPerSoul,
         float speedMultiplier,
-        float jitterRadius,
-        EnemyHealth source = null
+        float angleOffset,
+        float jitterRadius
     )
     {
         count = Mathf.Max(1, count);
 
-        // Only allocate a snapshot when a tutorial/observer needs the actual death drops.
-        SoulItem[] spawned = OnDeathSoulsSpawned != null || source != null && OnEnemyDeathSoulsSpawned != null
-            ? new SoulItem[count] : null;
-
         for (int i = 0; i < count; i++)
         {
             Color color = SoulColors[i % SoulColors.Length];
-            float rad = Random.Range(0f, FullCircleRadians);
+            float angle = angleOffset + ((360f / count) * i) + Random.Range(-20f, 20f);
+            float rad = angle * Mathf.Deg2Rad;
             var direction = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
-            Vector2 velocity = direction * (Random.Range(DeathSoulMinimumScatterSpeed, DeathSoulMaximumScatterSpeed) * speedMultiplier);
+            Vector2 velocity = direction * (Random.Range(3.5f, 5.5f) * speedMultiplier);
 
-            float waitTime = Random.Range(DeathSoulMinimumScatterTime, DeathSoulMaximumScatterTime);
+            float waitTime = Random.Range(0.12f, 0.22f);
             Vector2 spawnPosition = centerPosition + (Random.insideUnitCircle * jitterRadius);
-            SoulItem soulItem = SpawnCustomSoul(spawnPosition, amountPerSoul, color, 1.15f, velocity, waitTime);
-            soulItem.EnableDeathMotion();
-            if (spawned != null) spawned[i] = soulItem;
-        }
-        if (spawned != null)
-        {
-            if (source != null) OnEnemyDeathSoulsSpawned?.Invoke(source, spawned);
-            OnDeathSoulsSpawned?.Invoke(spawned);
+            SpawnCustomSoul(spawnPosition, amountPerSoul, color, 1.15f, velocity, waitTime);
         }
     }
 

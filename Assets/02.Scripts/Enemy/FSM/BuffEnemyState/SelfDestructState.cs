@@ -136,7 +136,6 @@ public class SelfDestructState : EnemyState
             _currentPhase = Phase.Exploded;
             _approachVelocity = Vector2.zero;
             _enemy.EnemyRb.linearVelocity = Vector2.zero;
-            AudioManager.Instance?.PlaySceneEvent("Buff.Explosion", _enemy);
             _enemy.Combat.Attack();
             _enemy.Health.Kill();
             return;

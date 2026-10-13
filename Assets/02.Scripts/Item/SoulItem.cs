@@ -3,35 +3,6 @@ using UnityEngine;
 
 public class SoulItem : Item
 {
-    public static event System.Action<SoulItem> OnCollected;
-
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetCollectionListeners()
-    {
-        OnCollected = null;
-    }
-    private const float HeadFlameIntensity = 1f;
-    private const float HeadCoreThreshold = 0.93f;
-    private const float HeadCoreSoftness = 0.025f;
-    private const float ScatterDrag = 5f;
-    private const float DeathScatterDrag = 3f;
-    private const float MinimumScatterSpeedSquared = 0.01f;
-    private const float MotionSeedRange = 1000f;
-    private const float MinimumMotionFrequency = 2f;
-    private const float MaximumMotionFrequency = 4f;
-    private const float MinimumTurnStrength = 6f;
-    private const float MaximumTurnStrength = 10f;
-    private const float MinimumDriftAmplitude = 0.15f;
-    private const float MaximumDriftAmplitude = 0.35f;
-    private const float MinimumAbsorbDurationMultiplier = 0.8f;
-    private const float MaximumAbsorbDurationMultiplier = 1.2f;
-    private const float NoiseSignedRange = 2f;
-    private static readonly int FlameColorId = Shader.PropertyToID("_FlameColor");
-    private static readonly int FlameInnerColorId = Shader.PropertyToID("_FlameInnerColor");
-    private static readonly int FlameIntensityId = Shader.PropertyToID("_FlameIntensity");
-    private static readonly int CoreThresholdId = Shader.PropertyToID("_CoreThreshold");
-    private static readonly int CoreSoftnessId = Shader.PropertyToID("_CoreSoftness");
-
     [SerializeField] private float _soulAmount = 0.2f;
 
     [SerializeField] private float _waitTime = 0.2f;
@@ -43,8 +14,6 @@ public class SoulItem : Item
     [Header("시각 연출 컴포넌트")]
     [SerializeField] private TrailRenderer _trailRenderer;
     [SerializeField] private ParticleSystem _headParticle;
-    [SerializeField] private SpriteRenderer _headSprite;
-    private MaterialPropertyBlock _headProperties;
 
     private Transform _playerTransform;
     private bool _isWaiting;
@@ -57,13 +26,6 @@ public class SoulItem : Item
     private Vector2 _scatterVelocity;
     private float _scatterTimer;
     private float _currentWaitTime;
-    private float _currentAbsorbDuration;
-    private bool _hasDeathMotion;
-    private float _motionSeed;
-    private float _motionFrequency;
-    private float _turnStrength;
-    private float _driftAmplitude;
-    private Vector2 _absorbDriftDirection;
     private Vector3 _baseScale = Vector3.one;
     private float _baseTrailTime;
     private float _baseParticleSize = 1f;
@@ -72,10 +34,6 @@ public class SoulItem : Item
     {
         InitializeRenderers();
         _baseScale = transform.localScale;
-        if (_headSprite != null)
-        {
-            _headProperties = new MaterialPropertyBlock();
-        }
     }
 
     private void InitializeRenderers()
@@ -109,30 +67,26 @@ public class SoulItem : Item
 
     private void Update()
     {
-        if (_playerTransform == null || PauseController.IsPaused)
+        if (_playerTransform == null)
         {
             return;
         }
 
         if (_isWaiting)
         {
-            UpdateScatterMotion();
+            if (_scatterVelocity.sqrMagnitude > 0.01f)
+            {
+                transform.position += (Vector3)(_scatterVelocity * Time.deltaTime);
+                _scatterVelocity = Vector2.Lerp(_scatterVelocity, Vector2.zero, Time.deltaTime * 5f);
+            }
             return;
         }
 
         _absorbTimer += Time.deltaTime;
-        float bezierTime = Mathf.Clamp01(_absorbTimer / _currentAbsorbDuration);
+        float bezierTime = Mathf.Clamp01(_absorbTimer / _absorbDuration);
 
         Vector3 targetPosition = _playerTransform.position + _targetOffset;
         transform.position = CalculateBezier(_originPosition, _controlPoint, targetPosition, bezierTime);
-        if (_hasDeathMotion)
-        {
-            // The squared envelope keeps both ends of the return path free of lateral jolts.
-            float envelope = Mathf.Sin(bezierTime * Mathf.PI);
-            float drift = CalculateMotionNoise(_scatterTimer + _absorbTimer) *
-                          _driftAmplitude * envelope * envelope;
-            transform.position += (Vector3)(_absorbDriftDirection * drift);
-        }
 
         if (bezierTime >= 1f)
         {
@@ -144,59 +98,6 @@ public class SoulItem : Item
         }
     }
 
-    private void UpdateScatterMotion()
-    {
-        _scatterTimer += Time.deltaTime;
-        if (_scatterVelocity.sqrMagnitude <= MinimumScatterSpeedSquared)
-        {
-            return;
-        }
-
-        if (_hasDeathMotion)
-        {
-            float progress = Mathf.Clamp01(_scatterTimer / _currentWaitTime);
-            float angle = CalculateMotionNoise(_scatterTimer) * _turnStrength *
-                          Mathf.Sin(progress * Mathf.PI) * Time.deltaTime;
-            float sine = Mathf.Sin(angle);
-            float cosine = Mathf.Cos(angle);
-            _scatterVelocity = new Vector2(
-                _scatterVelocity.x * cosine - _scatterVelocity.y * sine,
-                _scatterVelocity.x * sine + _scatterVelocity.y * cosine);
-        }
-
-        transform.position += (Vector3)(_scatterVelocity * Time.deltaTime);
-        float drag = _hasDeathMotion ? DeathScatterDrag : ScatterDrag;
-        _scatterVelocity = Vector2.Lerp(_scatterVelocity, Vector2.zero, Time.deltaTime * drag);
-    }
-
-    private float CalculateMotionNoise(float elapsedTime)
-    {
-        return Mathf.PerlinNoise(_motionSeed, elapsedTime * _motionFrequency) * NoiseSignedRange - 1f;
-    }
-
-    public void EnableDeathMotion()
-    {
-        _hasDeathMotion = true;
-        _motionSeed = Random.Range(0f, MotionSeedRange);
-        _motionFrequency = Random.Range(MinimumMotionFrequency, MaximumMotionFrequency);
-        _turnStrength = Random.Range(MinimumTurnStrength, MaximumTurnStrength);
-        _driftAmplitude = Random.Range(MinimumDriftAmplitude, MaximumDriftAmplitude);
-        _currentAbsorbDuration = _absorbDuration *
-                                 Random.Range(MinimumAbsorbDurationMultiplier, MaximumAbsorbDurationMultiplier);
-    }
-
-    private void ResetMotion()
-    {
-        _hasDeathMotion = false;
-        _scatterTimer = 0f;
-        _currentAbsorbDuration = _absorbDuration;
-        _motionSeed = 0f;
-        _motionFrequency = 0f;
-        _turnStrength = 0f;
-        _driftAmplitude = 0f;
-        _absorbDriftDirection = Vector2.zero;
-    }
-
     private IEnumerator WaitRoutine(float duration)
     {
         _isWaiting = true;
@@ -206,11 +107,6 @@ public class SoulItem : Item
         _originPosition = transform.position;
         _controlPoint = (Vector2)transform.position + Vector2.up * _arcHeight +
                         (Vector2)Random.insideUnitSphere * _randomRange;
-        if (_hasDeathMotion && _playerTransform != null)
-        {
-            Vector2 returnDirection = ((Vector2)(_playerTransform.position + _targetOffset) - _originPosition).normalized;
-            _absorbDriftDirection = new Vector2(-returnDirection.y, returnDirection.x);
-        }
     }
 
     private Vector3 CalculateBezier(Vector3 p0, Vector3 p1, Vector3 p2, float t)
@@ -226,7 +122,6 @@ public class SoulItem : Item
         _absorbTimer = 0f;
         _currentWaitTime = _waitTime;
         _scatterVelocity = Vector2.zero;
-        ResetMotion();
 
         transform.localScale = _baseScale;
         if (_trailRenderer != null)
@@ -259,8 +154,6 @@ public class SoulItem : Item
         _absorbTimer = 0f;
         _isWaiting = true;
         _isCollected = false;
-
-        ResetMotion();
 
         transform.localScale = _baseScale * scaleMultiplier;
         if (_trailRenderer != null)
@@ -308,18 +201,6 @@ public class SoulItem : Item
 
     private void ApplyColor(Color color)
     {
-        if (_headSprite != null)
-        {
-            // Keep the bright core intact; pass the hue to the flame ramp instead of multiplying the sprite.
-            _headSprite.color = Color.white;
-            _headSprite.GetPropertyBlock(_headProperties);
-            _headProperties.SetColor(FlameColorId, color);
-            _headProperties.SetColor(FlameInnerColorId, color);
-            _headProperties.SetFloat(FlameIntensityId, HeadFlameIntensity);
-            _headProperties.SetFloat(CoreThresholdId, HeadCoreThreshold);
-            _headProperties.SetFloat(CoreSoftnessId, HeadCoreSoftness);
-            _headSprite.SetPropertyBlock(_headProperties);
-        }
         if (_trailRenderer != null)
         {
             var gradient = new Gradient();
@@ -342,7 +223,5 @@ public class SoulItem : Item
         if (_isCollected) return;
         _isCollected = true;
         player.Soul.AddSoul(_soulAmount);
-        AudioManager.Instance?.PlaySceneEvent("Item.SoulPickup", this);
-        OnCollected?.Invoke(this);
     }
 }

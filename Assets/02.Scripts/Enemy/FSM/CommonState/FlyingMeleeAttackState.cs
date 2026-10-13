@@ -16,7 +16,6 @@ public sealed class FlyingMeleeAttackState : EnemyState
     private Vector2 _lastRequestedPosition;
     private float _entrySide;
     private float _prepareRetreatDistance;
-    private bool _skipHover;
 
     public FlyingMeleeAttackState(Enemy enemy, FlyingMeleeAttackController attack)
     {
@@ -31,8 +30,6 @@ public sealed class FlyingMeleeAttackState : EnemyState
         _enemy.DirectionLock.LockDirection();
         _flight.ResetMeleeFlight();
         _combat.StopAttack();
-        _attack.ResetNavigationProgress();
-        _skipHover = _attack.ConsumeImmediateAttack();
         _pattern = _attack.Data.SelectPattern(Random.value);
         _timeline = new FlyingMeleeAttackTimeline(_attack.Data, _pattern);
         _aim = _attack.GetTargetPosition();
@@ -105,7 +102,6 @@ public sealed class FlyingMeleeAttackState : EnemyState
                     break;
                 }
                 _timeline.Advance(Time.fixedDeltaTime);
-                UpdateParryWarning();
                 if (!MoveAlongPath(_timeline.TravelProgress))
                 {
                     StartRecovery();
@@ -130,17 +126,9 @@ public sealed class FlyingMeleeAttackState : EnemyState
     private void UpdatePositioning()
     {
         _timeline.Advance(Time.fixedDeltaTime);
-        if (!_attack.IsAvoidingObstacle && _attack.IsAtPosition(_positioningTarget))
+        if (_attack.IsAtPosition(_positioningTarget))
         {
-            bool canAttackImmediately = _attack.ConsumeImmediateAttack();
-            if (_pattern == FlyingMeleeAttackPattern.Horizontal || _skipHover || canAttackImmediately)
-            {
-                StartApproach();
-            }
-            else
-            {
-                SetPhase(FlyingMeleeAttackPhase.Hovering);
-            }
+            SetPhase(FlyingMeleeAttackPhase.Hovering);
         }
         else if (_timeline.HasPositioningTimedOut || !_attack.TryMoveToPosition(_positioningTarget))
         {
@@ -167,7 +155,6 @@ public sealed class FlyingMeleeAttackState : EnemyState
             end.y = start.y;
             if (!_attack.CanTravelStraight(start, end))
             {
-                _attack.RequestObstacleAvoidance(end - start);
                 StartRecovery();
                 return;
             }
@@ -177,7 +164,6 @@ public sealed class FlyingMeleeAttackState : EnemyState
         if ((_aim.x - start.x) * strikeDirection < MinimumTravelDistance ||
             (end.x - _aim.x) * strikeDirection < MinimumTravelDistance)
         {
-            _attack.RequestObstacleAvoidance(_aim - start);
             StartRecovery();
             return;
         }
@@ -186,13 +172,6 @@ public sealed class FlyingMeleeAttackState : EnemyState
         _lastRequestedPosition = start;
         _pathDisplacement = Vector2.zero;
         SetPhase(FlyingMeleeAttackPhase.Preparing);
-        UpdateParryWarning();
-    }
-
-    private void UpdateParryWarning()
-    {
-        float remaining = _attack.Data.GetTiming(_pattern).PrepareTime * (1f - _timeline.PrepareProgress);
-        _attack.UpdateParryWarning(remaining);
     }
 
     private void UpdateStrike()
@@ -219,10 +198,6 @@ public sealed class FlyingMeleeAttackState : EnemyState
             nextPosition += _path.CalculatePrepareRetreatOffset(_timeline.PrepareProgress, _prepareRetreatDistance);
         }
         bool canMove = _attack.TryMove(nextPosition, _path.CalculateDirection(progress));
-        if (!canMove)
-        {
-            _attack.RequestObstacleAvoidance(nextPosition - _enemy.EnemyRb.position);
-        }
         _lastRequestedPosition = nextPosition;
         return canMove;
     }

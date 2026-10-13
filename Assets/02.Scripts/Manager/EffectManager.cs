@@ -18,16 +18,6 @@ public class EffectManager : MonoBehaviour
     [SerializeField] private bool _bossMouthVfxFacesRight = false;
     [SerializeField, Min(0f)] private float _bossSpitScale = 1f;
     [SerializeField, Min(0f)] private float _bossHowlScale = 1f;
-    [Header("데미지에 따른 추가 크기 배율")]
-    [Tooltip("X: 적에게 준 데미지, Y: 기존 적 피격 이펙트 크기에 곱할 배율. 양 끝 범위 밖은 끝값으로 고정됩니다.")]
-    [SerializeField]
-    private AnimationCurve _enemyHitDamageScaleCurve = new AnimationCurve(
-        new Keyframe(0f, 0.75f), new Keyframe(15f, 1f), new Keyframe(50f, 1.35f));
-
-    [Tooltip("X: 플레이어가 받은 데미지, Y: 플레이어 피격 이펙트 크기에 곱할 배율. 양 끝 범위 밖은 끝값으로 고정됩니다.")]
-    [SerializeField]
-    private AnimationCurve _playerHitDamageScaleCurve = new AnimationCurve(
-        new Keyframe(0f, 0.75f), new Keyframe(20f, 1f), new Keyframe(30f, 1.2f));
 
     private static EffectManager _instance = null;
     public static EffectManager Instance
@@ -100,8 +90,7 @@ public class EffectManager : MonoBehaviour
     public void PlayPlayerHit(HitData hitData)
     {
         // AttackDirection.x < 0 → 왼쪽으로 밀리는 공격 = 오른쪽에서 맞음 → 좌우 반전
-        float scale = CalculateDamageScale(_playerHitDamageScaleCurve, hitData.Damage);
-        Play(EffectType.PlayerHit, hitData.HitPoint, hitData.AttackDirection.x < 0f, scale);
+        Play(EffectType.PlayerHit, hitData.HitPoint, hitData.AttackDirection.x < 0f);
     }
 
     public void PlayEnemyHit(HitData hitData)
@@ -109,7 +98,6 @@ public class EffectManager : MonoBehaviour
         float scale = hitData.IsTalisman
             ? _talismanHitScale
             : hitData.IsHeavyImpact ? _heavyEnemyHitScale : _lightEnemyHitScale;
-        scale *= CalculateDamageScale(_enemyHitDamageScaleCurve, hitData.Damage);
         Play(EffectType.EnemyHit, hitData.HitPoint, hitData.AttackDirection.x < 0f, scale);
     }
 
@@ -125,47 +113,9 @@ public class EffectManager : MonoBehaviour
         Play(EffectType.BossHowl, mouthPosition, bossFacingRight != _bossMouthVfxFacesRight, _bossHowlScale);
     }
 
-    private static float CalculateDamageScale(AnimationCurve curve, float damage)
-    {
-        if (curve == null || curve.length == 0)
-        {
-            return 1f;
-        }
-
-        float clampedDamage = Mathf.Clamp(damage, curve[0].time, curve[curve.length - 1].time);
-        return Mathf.Max(0f, curve.Evaluate(clampedDamage));
-    }
-
-    public void PlayWalkDust(Vector2 position, bool flipX)
-    {
-        Play(EffectType.WalkDust, position, flipX);
-    }
-
-    public void PlayLandingDust(Vector2 position)
-    {
-        Play(EffectType.LandingDust, position);
-    }
-
-    public void PlayParryLaunchDisappear(Vector2 position)
-    {
-        Play(EffectType.ParryLaunchDisappear, position);
-    }
-
-    /// <summary>보스 찍기 착지 때 발밑에서 돌이 튀는 이펙트</summary>
-    public void PlayBossStompExplosion(Vector2 position, float scale = 1f, bool flipX = false)
-    {
-        Play(EffectType.BossStompExplosion, position, flipX, scale);
-    }
-
     /// <summary>
     /// 상황별 메서드가 아직 없는 이펙트용. 가능하면 상황별 메서드를 추가해서 사용.
     /// </summary>
-    /// <summary>보스 점프 / 착지 때 발밑 먼지</summary>
-    public void PlayBossJumpDust(Vector2 position, float scale = 1f, bool flipX = false)
-    {
-        Play(EffectType.BossJumpDust, position, flipX, scale);
-    }
-
     public void Play(EffectType type, Vector2 position, bool flipX = false, float scale = 1f)
     {
         if (_pool == null) return;

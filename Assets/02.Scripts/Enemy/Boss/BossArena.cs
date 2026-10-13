@@ -53,20 +53,6 @@ public class BossArena : MonoBehaviour
         return 0f;
     }
 
-    /// <summary>층 바닥 높이. 기준점이 지정돼 있을 때만 true</summary>
-    public bool TryGetFloorY(int floor, out float y)
-    {
-        int index = floor - 1;
-        if (index >= 0 && index < _floors.Length && _floors[index] != null)
-        {
-            y = _floors[index].position.y;
-            return true;
-        }
-
-        y = 0f;
-        return false;
-    }
-
     /// <summary>x를 맵 안으로 제한 (양 끝에서 margin만큼 안쪽)</summary>
     public float ClampX(float x, float margin = 0f)
     {
