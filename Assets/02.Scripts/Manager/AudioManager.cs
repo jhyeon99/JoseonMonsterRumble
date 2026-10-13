@@ -54,7 +54,8 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
                 }
                 else
                 {
-                    GameObject prefab = Resources.Load<GameObject>("Audio/PF_AudioManager");
+                    AudioManagerPrefabSO reference = Resources.Load<AudioManagerPrefabSO>("Audio/SO_AudioManagerPrefab");
+                    GameObject prefab = reference != null ? reference.Prefab : null;
                     if (prefab != null)
                     {
                         Instantiate(prefab);

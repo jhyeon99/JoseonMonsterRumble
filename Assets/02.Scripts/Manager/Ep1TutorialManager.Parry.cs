@@ -39,6 +39,12 @@ public sealed partial class Ep1TutorialManager
         if (enemy == null || !enemy.IsGroggy || enemy.IsDefeated || enemy.Health == null || !enemy.Health.IsAlive) return;
         if (_hasCombatEnemySequence && enemy.Health != _boundPrerequisites[1]) return;
         _parriedTutorialEnemy = enemy;
+        CompleteHint(Ep1TutorialHintType.Parry);
+        if (_requirePracticeInput)
+        {
+            _heldPracticeGroggy = enemy.StateMachine.CurrentState as GroggyState;
+            _heldPracticeGroggy?.Hold();
+        }
         // Let the successful parry callback finish before taking ownership of pause and camera.
         _parryFocusStep = ParryFocusStep.Pending;
     }

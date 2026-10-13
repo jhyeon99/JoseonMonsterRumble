@@ -374,9 +374,20 @@ public sealed class StageManager : MonoBehaviour
                 yield break;
             }
             loadOperation.allowSceneActivation = false;
+            bool skipLoadingWait = false;
+            bool waitingForEnterRelease = Input.GetKey(KeyCode.Return) || Input.GetKey(KeyCode.KeypadEnter);
             while (loadOperation.progress < SceneReadyProgress ||
-                   Time.realtimeSinceStartup - loadingStartTime < minLoadingTime)
+                   (!skipLoadingWait && Time.realtimeSinceStartup - loadingStartTime < minLoadingTime))
             {
+                // 도망가기 선택에 사용한 Enter는 소비하고 새 입력으로만 연출을 건너뛴다.
+                if (waitingForEnterRelease)
+                {
+                    waitingForEnterRelease = Input.GetKey(KeyCode.Return) || Input.GetKey(KeyCode.KeypadEnter);
+                }
+                else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+                {
+                    skipLoadingWait = true;
+                }
                 yield return null;
             }
             loadOperation.allowSceneActivation = true;
