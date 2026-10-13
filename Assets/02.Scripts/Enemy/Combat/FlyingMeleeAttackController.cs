@@ -29,6 +29,23 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
     [SerializeField, Range(0f, 30f)] private float _maxVisualTilt = 15f;
     [SerializeField, Range(0f, 15f)] private float _maxFlightVisualTilt = 7f;
 
+    [Header("막힘 우회")]
+    [SerializeField, Min(0.02f)] private float _blockedMoveTime = 0.2f;
+    [SerializeField, Range(0.01f, 1f)] private float _minimumProgressRatio = 0.15f;
+    [SerializeField, Min(0.1f)] private float _avoidanceCheckDistance = 2f;
+    [SerializeField, Min(0.02f)] private float _avoidanceMinDuration = 0.25f;
+    [SerializeField, Min(0.02f)] private float _avoidanceMaxDuration = 1.5f;
+    [SerializeField, Min(0.02f)] private float _avoidanceRecheckInterval = 0.2f;
+    [SerializeField, ReadOnly] private bool _isAvoidingObstacle;
+    [SerializeField, ReadOnly] private Vector2 _avoidanceDirection;
+    private Vector2 _blockedDirection;
+    private Vector2 _previousNavigationPosition;
+    private Vector2 _requestedNavigationMovement;
+    private float _blockedElapsed;
+    private float _avoidanceElapsed;
+    private float _avoidanceRecheckRemaining;
+    private bool _canAttackImmediately;
+
     [Header("애니메이션 표현 상태")]
     [SerializeField] private string _idleState = "Base Layer.inmyunjo_Idle";
     [SerializeField] private string _prepareState = "Base Layer.inmyunjo_AtkReady";
@@ -58,6 +75,7 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
     private bool _hasWarned;
 
     public FlyingMeleeAttackData Data => _data;
+    public bool IsAvoidingObstacle => _isAvoidingObstacle;
     public event System.Action<FlyingMeleeAttackPhase> OnAttackPhaseChanged;
 
     private void Awake()
@@ -92,6 +110,10 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (_isConfigured && (_enemy.Target == null || _enemy.StateMachine.CurrentState is DeadState))
+        {
+            ResetObstacleAvoidance();
+        }
         if (!_isConfigured || _visualRoot == null || Time.deltaTime <= 0f)
         {
             return;
@@ -109,6 +131,7 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
             // 돌진은 기존 경로 기울기를 유지하고, 피격·사망 외형에는 비행 기울기를 남기지 않는다.
             if (isReaction)
             {
+                ResetNavigationProgress();
                 _visualRoot.localRotation = Quaternion.identity;
             }
             return;
@@ -130,7 +153,7 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
 
     public bool CanStartAttack()
     {
-        if (!isActiveAndEnabled || !_isConfigured || _enemy.Target == null || _enemy.MoveArea == null ||
+        if (!isActiveAndEnabled || !_isConfigured || _isAvoidingObstacle || _enemy.Target == null || _enemy.MoveArea == null ||
             _enemy.GetDistanceToPlayer() > _enemy.Data.AttackDetectRange)
         {
             return false;
@@ -145,6 +168,7 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
     {
         if (_target != _enemy.Target)
         {
+            ResetObstacleAvoidance();
             _target = _enemy.Target;
             _targetCollider = _target != null ? _target.GetComponent<Collider2D>() : null;
         }
@@ -206,6 +230,173 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
         _flight.UpdateMeleeChaseFlight();
     }
 
+    public bool ShouldChaseTarget()
+    {
+        Vector2 targetPosition = GetTargetPosition();
+        return _isAvoidingObstacle || !_airSensor.HasLineOfSight(targetPosition);
+    }
+
+    public bool ConsumeImmediateAttack()
+    {
+        bool canAttackImmediately = _canAttackImmediately;
+        _canAttackImmediately = false;
+        return canAttackImmediately;
+    }
+
+    public void RequestObstacleAvoidance(Vector2 blockedDirection)
+    {
+        if (_isAvoidingObstacle)
+        {
+            return;
+        }
+        _isAvoidingObstacle = true;
+        _blockedDirection = blockedDirection.sqrMagnitude > DirectionTolerance
+            ? blockedDirection.normalized : Vector2.right * Mathf.Sign(transform.localScale.x);
+        _avoidanceDirection = Vector2.zero;
+        _avoidanceElapsed = 0f;
+        _avoidanceRecheckRemaining = 0f;
+        _canAttackImmediately = false;
+        ResetNavigationProgress();
+    }
+
+    public Vector2 CalculateNavigationVelocity(Vector2 targetPosition, float speed, bool requireTargetSight = false)
+    {
+        targetPosition = ClampPosition(targetPosition);
+        Vector2 offset = targetPosition - _rigidbody.position;
+        UpdateNavigationProgress();
+        if (!_isAvoidingObstacle && offset.sqrMagnitude <= PositionTolerance * PositionTolerance)
+        {
+            ResetNavigationProgress();
+            return Vector2.zero;
+        }
+        Vector2 direction = offset.normalized;
+        float checkDistance = Mathf.Min(offset.magnitude, _avoidanceCheckDistance);
+        if (!_isAvoidingObstacle && CalculateAvailableNavigationDistance(direction, checkDistance) < checkDistance - CollisionSkin)
+        {
+            RequestObstacleAvoidance(direction);
+        }
+        if (_isAvoidingObstacle)
+        {
+            UpdateObstacleAvoidance(targetPosition, requireTargetSight);
+            if (_isAvoidingObstacle)
+            {
+                return _avoidanceDirection * speed;
+            }
+        }
+        return direction * Mathf.Min(speed, offset.magnitude / Time.fixedDeltaTime);
+    }
+
+    private void UpdateObstacleAvoidance(Vector2 targetPosition, bool requireTargetSight)
+    {
+        _avoidanceElapsed += Time.fixedDeltaTime;
+        _avoidanceRecheckRemaining -= Time.fixedDeltaTime;
+        if (_avoidanceRecheckRemaining > 0f)
+        {
+            return;
+        }
+        _avoidanceRecheckRemaining = _avoidanceRecheckInterval;
+        if (_avoidanceElapsed >= _avoidanceMinDuration &&
+            CanTravelStraight(_rigidbody.position, targetPosition) &&
+            (!requireTargetSight || _airSensor.HasLineOfSight(GetTargetPosition())))
+        {
+            ResetObstacleAvoidance();
+            _canAttackImmediately = true;
+            return;
+        }
+        if (_avoidanceDirection != Vector2.zero && _avoidanceElapsed < _avoidanceMaxDuration &&
+            CalculateAvailableNavigationDistance(_avoidanceDirection, _avoidanceCheckDistance) > PositionTolerance)
+        {
+            return;
+        }
+        var side = new Vector2(-_blockedDirection.y, _blockedDirection.x);
+        float positiveDistance = CalculateAvailableNavigationDistance(side, _avoidanceCheckDistance);
+        float negativeDistance = CalculateAvailableNavigationDistance(-side, _avoidanceCheckDistance);
+        // 공간이 비슷하면 이전 방향을 유지하여 모서리에서 방향이 뒤집히지 않게 한다.
+        bool keepNegative = negativeDistance > PositionTolerance && Vector2.Dot(_avoidanceDirection, side) < 0f &&
+            negativeDistance >= positiveDistance - PositionTolerance;
+        Vector2 previousDirection = _avoidanceDirection;
+        _avoidanceDirection = keepNegative || negativeDistance > positiveDistance ? -side : side;
+        if (Mathf.Max(positiveDistance, negativeDistance) <= PositionTolerance)
+        {
+            _avoidanceDirection = Vector2.zero;
+        }
+        if (_avoidanceDirection != Vector2.zero || previousDirection != Vector2.zero)
+        {
+            _avoidanceElapsed = 0f;
+        }
+        ResetNavigationProgress();
+    }
+
+    private float CalculateAvailableNavigationDistance(Vector2 direction, float distance)
+    {
+        if (distance <= 0f || direction.sqrMagnitude <= DirectionTolerance)
+        {
+            return 0f;
+        }
+        Vector2 allowedOffset = ClampPosition(_rigidbody.position + direction * distance) - _rigidbody.position;
+        // 성분별 경계까지의 거리를 구해 대각선 이동에서도 영역 밖으로 나가지 않는다.
+        if (Mathf.Abs(direction.x) > DirectionTolerance)
+        {
+            distance = Mathf.Min(distance, Mathf.Max(0f, allowedOffset.x / direction.x));
+        }
+        if (Mathf.Abs(direction.y) > DirectionTolerance)
+        {
+            distance = Mathf.Min(distance, Mathf.Max(0f, allowedOffset.y / direction.y));
+        }
+        return _airSensor.CalculateAllowedTravelDistance(direction, distance, CollisionSkin);
+    }
+
+    public void RecordNavigationMovement(Vector2 movement)
+    {
+        _previousNavigationPosition = _rigidbody.position;
+        _requestedNavigationMovement = movement;
+    }
+
+    public void ResetNavigationProgress()
+    {
+        _requestedNavigationMovement = Vector2.zero;
+        _blockedElapsed = 0f;
+    }
+
+    private void UpdateNavigationProgress()
+    {
+        float requestedDistance = _requestedNavigationMovement.magnitude;
+        if (requestedDistance <= DirectionTolerance || _enemy.IsGroggy ||
+            _enemy.StateMachine.CurrentState is KnockbackState || _enemy.Animation.IsPlayingHit())
+        {
+            ResetNavigationProgress();
+            return;
+        }
+        float progress = Vector2.Dot(_rigidbody.position - _previousNavigationPosition,
+            _requestedNavigationMovement / requestedDistance);
+        _blockedElapsed = progress < requestedDistance * _minimumProgressRatio
+            ? _blockedElapsed + Time.fixedDeltaTime : 0f;
+        if (_blockedElapsed >= _blockedMoveTime)
+        {
+            if (_isAvoidingObstacle)
+            {
+                _avoidanceElapsed = _avoidanceMaxDuration;
+                _avoidanceRecheckRemaining = 0f;
+            }
+            else
+            {
+                RequestObstacleAvoidance(_requestedNavigationMovement);
+            }
+        }
+        _requestedNavigationMovement = Vector2.zero;
+    }
+
+    private void ResetObstacleAvoidance()
+    {
+        _isAvoidingObstacle = false;
+        _avoidanceDirection = Vector2.zero;
+        _blockedDirection = Vector2.zero;
+        _avoidanceElapsed = 0f;
+        _avoidanceRecheckRemaining = 0f;
+        _canAttackImmediately = false;
+        ResetNavigationProgress();
+    }
+
     public bool CanTravelStraight(Vector2 start, Vector2 end)
     {
         return (ClampPosition(end) - end).sqrMagnitude <= DirectionTolerance &&
@@ -219,11 +410,17 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
 
     public bool TryMoveToPosition(Vector2 position, float speed)
     {
-        position = ClampPosition(position);
-        position = Vector2.MoveTowards(_rigidbody.position, position, speed * Time.fixedDeltaTime);
+        Vector2 movement = CalculateNavigationVelocity(position, speed) * Time.fixedDeltaTime;
+        position = _rigidbody.position + movement;
         // 공격 진입 공간을 확보하는 동안에도 표적을 주시한다. 추적 직후 뒤돌았다 다시 도는 것을 막는다.
         Vector2 facingDirection = _enemy.Target != null ? GetTargetPosition() - _rigidbody.position : position - _rigidbody.position;
-        return TryMove(position, facingDirection);
+        bool canMove = TryMove(position, facingDirection);
+        RecordNavigationMovement(movement);
+        if (!canMove)
+        {
+            RequestObstacleAvoidance(movement);
+        }
+        return canMove || _isAvoidingObstacle;
     }
 
     public bool TryMove(Vector2 position, Vector2 facingDirection)
@@ -303,6 +500,7 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
 
     public void PlayPhase(FlyingMeleeAttackPhase phase)
     {
+        ResetNavigationProgress();
         OnAttackPhaseChanged?.Invoke(phase);
         if (phase != FlyingMeleeAttackPhase.Preparing && phase != FlyingMeleeAttackPhase.Striking)
         {
@@ -397,5 +595,6 @@ public sealed class FlyingMeleeAttackController : MonoBehaviour
             RestoreContactDamage();
         }
         StopAttackPresentation();
+        ResetObstacleAvoidance();
     }
 }
