@@ -9697,6 +9697,9 @@ MonoBehaviour:
   _soulFocusDelay: 0.25
   _soulFocusPadding: 32
   _soulFocusMinimumSize: {x: 240, y: 180}
+  _guardExplanationMessage: "\uC544\uB798 \uBC29\uD5A5\uD0A4\uB97C \uB204\uB974\uACE0
+    \uC788\uC73C\uBA74 \uAC00\uB4DC\uD569\uB2C8\uB2E4.\n\uAC00\uB4DC\uB85C \uC694\uAD34\uC758
+    \uACF5\uACA9\uC744 \uB9C9\uC744 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
   _parryFinisherMessage: "\uD328\uB9C1\uC5D0 \uC131\uACF5\uD55C \uBAAC\uC2A4\uD130\uB294
     \uB178\uB797\uAC8C \uBC18\uC9DD\uC785\uB2C8\uB2E4.\nX\uB97C \uB20C\uB7EC \uB9C8\uBB34\uB9AC
     \uACF5\uACA9\uC774 \uAC00\uB2A5\uD569\uB2C8\uB2E4."
@@ -9704,6 +9707,7 @@ MonoBehaviour:
   _parryZoomDuration: 0.5
   _parryReturnDuration: 0.4
   _parryLetterboxAmount: 0.08
+  _requirePracticeInput: 1
   _enableTalismanTutorial: 1
   _talismanPrerequisiteEnemies:
   - {fileID: 0}
@@ -26827,6 +26831,74 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1001 &1958220435
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 705691955094039973, guid: f5a6724e687448f4985d0fd38b389228,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -29.58388
+      objectReference: {fileID: 0}
+    - target: {fileID: 705691955094039973, guid: f5a6724e687448f4985d0fd38b389228,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.4334
+      objectReference: {fileID: 0}
+    - target: {fileID: 705691955094039973, guid: f5a6724e687448f4985d0fd38b389228,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 705691955094039973, guid: f5a6724e687448f4985d0fd38b389228,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 705691955094039973, guid: f5a6724e687448f4985d0fd38b389228,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 705691955094039973, guid: f5a6724e687448f4985d0fd38b389228,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 705691955094039973, guid: f5a6724e687448f4985d0fd38b389228,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 705691955094039973, guid: f5a6724e687448f4985d0fd38b389228,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 705691955094039973, guid: f5a6724e687448f4985d0fd38b389228,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 705691955094039973, guid: f5a6724e687448f4985d0fd38b389228,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3804184276984275149, guid: f5a6724e687448f4985d0fd38b389228,
+        type: 3}
+      propertyPath: m_Name
+      value: PF_AudioManager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f5a6724e687448f4985d0fd38b389228, type: 3}
 --- !u!1 &1978923787
 GameObject:
   m_ObjectHideFlags: 0
@@ -57203,3 +57275,4 @@ SceneRoots:
   - {fileID: 77995179}
   - {fileID: 332331485}
   - {fileID: 327285518}
+  - {fileID: 1958220435}

@@ -13,6 +13,27 @@ MonoBehaviour:
   m_Name: SO_AudioCatalog
   m_EditorClassIdentifier: Assembly-CSharp::GameAudio.AudioCatalogSO
   Player: {fileID: 11400000, guid: 4a62ef82a0cb420ea89f649830a29671, type: 2}
+  Monsters:
+  - Monster: {fileID: 11400000, guid: f4217fc77f1358841b50a1d8c7548fd4, type: 2}
+    DisplayName: 지상 근접 몬스터
+    EventPrefix: Ground
+    Sounds: {fileID: 11400000, guid: 25f1b6a7913f4a318a63e0aa1ab0be26, type: 2}
+  - Monster: {fileID: 11400000, guid: 96783a2229c6e2542b8f9e15db95f4ef, type: 2}
+    DisplayName: 지상 원거리 몬스터
+    EventPrefix: Ground
+    Sounds: {fileID: 11400000, guid: b54d984e47114c5ca51497d9feda7ecd, type: 2}
+  - Monster: {fileID: 11400000, guid: be312a2b163f26e41a8bfcf4f1c01ef4, type: 2}
+    DisplayName: 공중 근접 몬스터
+    EventPrefix: Air
+    Sounds: {fileID: 11400000, guid: a559d5313f7e42148bcb79d42728d426, type: 2}
+  - Monster: {fileID: 11400000, guid: aff7ebcefb6489249b9ebd1eb94baae2, type: 2}
+    DisplayName: 공중 원거리 몬스터
+    EventPrefix: Air
+    Sounds: {fileID: 11400000, guid: 86275e5a3bbd4a81817ec06e6073b485, type: 2}
+  - Monster: {fileID: 11400000, guid: 2fad875db8129d84e982006d0afedb46, type: 2}
+    DisplayName: 버프 몬스터
+    EventPrefix: Buff
+    Sounds: {fileID: 11400000, guid: e12bdc8ab58745d7b1bd7b4e6efad343, type: 2}
   Ground:
     Melee: {fileID: 11400000, guid: 25f1b6a7913f4a318a63e0aa1ab0be26, type: 2}
     Ranged: {fileID: 11400000, guid: b54d984e47114c5ca51497d9feda7ecd, type: 2}
