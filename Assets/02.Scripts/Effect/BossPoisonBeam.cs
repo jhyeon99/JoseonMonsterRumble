@@ -280,6 +280,16 @@ public sealed class BossPoisonBeam : MonoBehaviour
 
     public void StopEmission() => _shouldStopEmission = true;
 
+    /// <summary>
+    /// 입 방향 / 입술 위치 보정을 외부(패턴)에서 갱신. 실제 보스에서는 VFX가 Animator 밖에 생성돼
+    /// 프리뷰 클립의 보정 키(_mouthAngleOffset / _lipOffset)가 적용되지 않으므로 패턴이 대신 넣어 줌
+    /// </summary>
+    public void SetEmitterOffsets(float mouthAngleOffset, Vector2 lipOffset)
+    {
+        _mouthAngleOffset = mouthAngleOffset;
+        _lipOffset = lipOffset;
+    }
+
     public void StartFollowThrough()
     {
         if (!_enableFollowThrough || !_isEmitting || _isFollowingThrough) return;
