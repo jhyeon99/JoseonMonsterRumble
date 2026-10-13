@@ -33,6 +33,8 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
     [SerializeField] private Camera _worldCamera;
     [SerializeField] private Vector2 _barSize = new Vector2(187.2f, 30.4f);
     [SerializeField] private Vector2 _screenOffset = new Vector2(0f, -28f);
+    [Header("도깨비 발판 분노게이지")]
+    [SerializeField] private DokkaebiPlatformRage[] _ragePlatforms = System.Array.Empty<DokkaebiPlatformRage>();
     [Header("HP 잔상")]
     [SerializeField, Min(0f)] private float _damageDelay = 0.25f;
     [SerializeField, Min(MinimumDuration)] private float _damageCatchupDuration = 0.35f;
@@ -78,6 +80,34 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
     private Material _overlayMaterial;
     private readonly List<UI_HealthBar> _bars = new List<UI_HealthBar>();
     private readonly Dictionary<Enemy, UI_HealthBar> _barsByEnemy = new Dictionary<Enemy, UI_HealthBar>();
+    private readonly List<UI_RageBar> _rageBars = new List<UI_RageBar>();
+
+    private sealed class UI_RageBar
+    {
+        public DokkaebiPlatformRage Platform;
+        public RectTransform Root;
+        public RectTransform FillMask;
+    }
+
+    private void OnEnable()
+    {
+        if (_overlayMaterial == null || _ragePlatforms == null) return;
+        foreach (DokkaebiPlatformRage platform in _ragePlatforms)
+        {
+            if (platform == null)
+            {
+                Debug.LogWarning("UI_EnemyHealthBars: 도깨비 발판 분노게이지 대상이 없습니다.", this);
+                continue;
+            }
+            var bar = new UI_RageBar { Platform = platform };
+            bar.Root = CreateRect("DokkaebiRageBar", _container, _barSize, Center);
+            CreateArtwork(BackgroundName, bar.Root, _backgroundTexture, Color.white, Center);
+            bar.FillMask = CreateMask(MainMaskName, bar.Root, _fillMaterial);
+            CreateArtwork(FrameName, bar.Root, _frameTexture, Color.white, Center);
+            bar.FillMask.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 0f);
+            _rageBars.Add(bar);
+        }
+    }
 
     private void Awake()
     {
@@ -122,12 +152,18 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
         }
         _bars.Clear();
         _barsByEnemy.Clear();
+        foreach (UI_RageBar bar in _rageBars)
+        {
+            if (bar.Root != null) Destroy(bar.Root.gameObject);
+        }
+        _rageBars.Clear();
     }
 
     private void LateUpdate()
     {
         EnemyManager manager = EnemyManager.Instance;
         Camera worldCamera = _worldCamera != null ? _worldCamera : Camera.main;
+        UpdateRageBars(worldCamera);
         if (manager == null || worldCamera == null)
         {
             SetBarsVisible(false);
@@ -161,6 +197,31 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
             UpdateHealth(bar, deltaTime);
             UpdateBuffOverlays(bar, deltaTime);
             UpdatePosition(bar, worldCamera, uiCamera);
+        }
+    }
+
+    private void UpdateRageBars(Camera worldCamera)
+    {
+        if (_rageBars.Count == 0) return;
+        Canvas rootCanvas = _canvas.rootCanvas;
+        Camera uiCamera = rootCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : rootCanvas.worldCamera;
+        foreach (UI_RageBar bar in _rageBars)
+        {
+            if (worldCamera == null || bar.Platform == null || !bar.Platform.gameObject.activeInHierarchy || bar.Platform.IsStunned)
+            {
+                bar.Root.gameObject.SetActive(false);
+                continue;
+            }
+            Vector3 screenPosition = worldCamera.WorldToScreenPoint(bar.Platform.GaugeWorldPosition);
+            bool isVisible = screenPosition.z > 0f && worldCamera.pixelRect.Contains(screenPosition);
+            bar.Root.gameObject.SetActive(isVisible);
+            if (!isVisible) continue;
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                _container, screenPosition, uiCamera, out Vector2 localPosition))
+            {
+                bar.Root.localPosition = localPosition;
+            }
+            bar.FillMask.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, _barSize.x * bar.Platform.GaugeRatio);
         }
     }
 
