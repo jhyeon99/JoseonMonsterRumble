@@ -24,6 +24,14 @@ public struct HitData
 
     public bool IsTalisman;
 
+    public bool IsBuffed;
+
+    /// <summary>공격한 대상 (적 / 보스 등). 사망 원인 표시용. 모르면 null</summary>
+    public GameObject Attacker;
+
+    /// <summary>공격한 대상의 표시 이름 (보스는 보스 이름, 그 외는 오브젝트 이름). 모르면 빈 문자열</summary>
+    public string AttackerName => GetDisplayName(Attacker);
+
     public bool IsHeavyImpact => ComboStep == HeavyComboStep || IsReflectedProjectile;
 
     public HitData(
@@ -36,7 +44,8 @@ public struct HitData
         int comboStep = 0,
         string attackName = "",
         bool isReflectedProjectile = false,
-        bool isTalisman = false
+        bool isTalisman = false,
+        bool isBuffed = false
     )
     {
         Damage = damage;
@@ -48,6 +57,26 @@ public struct HitData
         ComboStep = comboStep;
         IsReflectedProjectile = isReflectedProjectile;
         IsTalisman = isTalisman;
+        IsBuffed = isBuffed;
         AttackName = attackName;
+        Attacker = null;
+    }
+
+    /// <summary>오브젝트의 표시 이름. 보스면 보스 이름, 그 외는 (Clone) / PF_ 를 뗀 오브젝트 이름</summary>
+    public static string GetDisplayName(GameObject target)
+    {
+        if (target == null)
+        {
+            return string.Empty;
+        }
+
+        Boss boss = target.GetComponentInParent<Boss>();
+        if (boss != null && !string.IsNullOrWhiteSpace(boss.BossName))
+        {
+            return boss.BossName;
+        }
+
+        string name = target.name.Replace("(Clone)", string.Empty).Trim();
+        return name.StartsWith("PF_") ? name.Substring(3) : name;
     }
 }

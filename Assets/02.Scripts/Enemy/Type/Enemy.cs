@@ -138,6 +138,7 @@ public abstract class Enemy : MonoBehaviour, IFinishable
         _enemyCollider = GetComponent<Collider2D>();
         _rightAngle = Data.AttackAngle;
         _leftAngle = 180f - Data.AttackAngle;
+        if (!TryGetComponent<EnemyAudio>(out _)) gameObject.AddComponent<EnemyAudio>();
         if (EnemyManager.Instance != null)
         {
             EnemyManager.Instance.RegisterEnemy(this);

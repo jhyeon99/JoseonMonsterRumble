@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -34,6 +35,22 @@ public class Boss : MonoBehaviour, IFinishable
     [Tooltip("등장 연출(하울링)에서도 입 이펙트(BossHowl) 재생. 타이밍은 Howl Vfx Delay를 같이 사용")]
     [SerializeField]
     private bool _playIntroHowlVfx = true;
+
+    [Tooltip("전투 시작 위치 (선택, 보스 발밑 기준). 지정하면 씬 시작 시 이 위치에서 대기하고 이 자리에서 등장 하울링")]
+    [SerializeField]
+    private Transform _introPoint;
+
+    [Tooltip("등장 하울링이 끝나면 바로 쓸 첫 패턴 (예: 찍기). 소환 후 복귀처럼 조건 / 대기 시간 무시. 비우면 평소처럼 대기 후 랜덤 패턴")]
+    [SerializeField]
+    private BossPattern _introNextPattern;
+
+    [Tooltip("2페이즈 전환 하울링이 끝나면 바로 쓸 첫 패턴 (예: 소환 궁극기). 조건 / 대기 시간 무시. 비우면 평소처럼 대기 후 랜덤 패턴")]
+    [SerializeField]
+    private BossPattern _phase2FirstPattern;
+
+    [Tooltip("보스가 착지하는 바닥 높이 기준점 (선택, 보스 발밑 기준). 비우면: Intro Point를 쓸 때는 BossArena의 1층 바닥, 아니면 씬에 배치한 보스 위치")]
+    [SerializeField]
+    private Transform _groundPoint;
 
     [Header("패턴 사이 대기 (초, 최소 ~ 최대)")]
     [SerializeField]
@@ -133,8 +150,50 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField]
     private string _howlTrigger = "howl";
 
+    [Tooltip("대기 애니메이터 상태 이름. 하울링(페이즈 전환) 시 진행 중인 애니메이션을 끊고 이 상태로 돌린 뒤 하울링 트리거를 보냄")]
+    [SerializeField]
+    private string _idleStateName = "Boss_Idle";
+
     [SerializeField]
     private string _defeatTrigger = "defeat";
+
+    [Tooltip("처치 직전(완전 그로기, 마무리 공격 대기) 애니메이터 트리거. 비우면 그로기 애니메이션 사용")]
+    [SerializeField]
+    private string _finalGroggyTrigger = "die";
+
+    [Header("처치 직전 표시 (마무리 공격 대기 중 머리 위)")]
+    [Tooltip("마무리 공격 대기(완전 그로기) 동안 머리 위에 띄울 이펙트 (PF_Boss_Here). 비우면 표시 안 함")]
+    [SerializeField]
+    private GameObject _finishMarkerPrefab;
+
+    [Tooltip("표시 위치 기준점 (선택). 비우면 몸통 콜라이더 맨 위(머리)")]
+    [SerializeField]
+    private Transform _finishMarkerPoint;
+
+    [Tooltip("기준점에서 추가로 옮길 위치 (y가 클수록 더 위)")]
+    [SerializeField]
+    private Vector2 _finishMarkerOffset = new Vector2(0f, 0.5f);
+
+    [Header("점프 / 착지 먼지 (PF_Boss_JumpDust_VFX, 짧은 점프 / 소환 점프 / 찍기 공통)")]
+    [Tooltip("먼지 크기 배율")]
+    [SerializeField, Min(0f)]
+    private float _jumpDustScale = 1f;
+
+    [Tooltip("0보다 크면 발밑 중심에서 좌우로 이만큼 떨어진 곳에 하나씩 (바깥쪽을 보도록 반전). 0이면 가운데 하나")]
+    [SerializeField, Min(0f)]
+    private float _jumpDustSpread = 0f;
+
+    [Tooltip("먼지 위치 높이 보정 (발밑 기준)")]
+    [SerializeField]
+    private float _jumpDustOffsetY = 0f;
+
+    [Tooltip("이륙 먼지 타이밍 (초). 0 = 땅에서 떨어지는 순간, 양수 = 그만큼 늦게, 음수 = 그만큼 일찍 (짧은 점프만 일찍 가능, 나머지는 시작 순간)")]
+    [SerializeField]
+    private float _takeoffDustTiming = 0f;
+
+    [Tooltip("착지 먼지 타이밍 (초). 0 = 땅에 닿는 순간, 음수 = 그만큼 일찍(착지 직전), 양수 = 그만큼 늦게")]
+    [SerializeField]
+    private float _landingDustTiming = 0f;
 
     [Header("디버그")]
     [SerializeField]
@@ -161,9 +220,19 @@ public class Boss : MonoBehaviour, IFinishable
 
     /// <summary>처치 연출(날려 보내기 / 처치 애니메이션)이 끝남. 보스가 꺼지기 직전</summary>
     public event Action OnDefeatFinished;
+    public event Action<BossState, BossState> OnAudioStateChanged;
 
     /// <summary>true인 동안 등장 상태에서 패턴으로 넘어가지 않음 (등장 연출이 끝날 때까지 대기)</summary>
     public bool HoldIntro { get; set; }
+
+    /// <summary>true면 전투 시작 시 등장 하울링(등장 상태)을 건너뛰고 바로 대기 → 패턴으로 (리스폰 시 연출 생략용)</summary>
+    public bool SkipIntro { get; set; }
+
+    /// <summary>
+    /// 대기(Idle)에 들어오기 직전에 보던 방향 (1 / -1). 대기 중에는 계속 플레이어를 보므로,
+    /// 꼬리치기처럼 "플레이어가 등 뒤에 있었는지"는 이 값으로 판단
+    /// </summary>
+    public float IdleEnterFacingX { get; set; } = 1f;
 
     private readonly BossStateMachine _stateMachine = new BossStateMachine();
     private readonly List<BossPattern> _patterns = new List<BossPattern>();
@@ -176,8 +245,11 @@ public class Boss : MonoBehaviour, IFinishable
     private Animator _animator;
     private Rigidbody2D _body;
     private Collider2D _bodyCollider;
+    private bool _isBodyCollisionOff;
+    private bool _bodyWasTrigger;
     private Transform _player;
     private BossPattern _lastPattern;
+    private BossPattern _queuedPattern;
     private bool _isAnimatorPaused;
     private float _animatorSpeedBeforePause = 1f;
 
@@ -218,6 +290,7 @@ public class Boss : MonoBehaviour, IFinishable
     public float GroggyEndDuration => _groggyEndClip != null ? _groggyEndClip.length : _groggyEndFallbackDuration;
     public string HowlTrigger => _howlTrigger;
     public string DefeatTrigger => _defeatTrigger;
+    public string FinalGroggyTrigger => _finalGroggyTrigger;
 
     /// <summary>몸통 접촉 데미지를 줄 수 있는지 (대기 / 패턴 중일 때만, 접촉 데미지를 끄는 패턴 중에는 제외)</summary>
     public bool CanDealContactDamage =>
@@ -236,6 +309,11 @@ public class Boss : MonoBehaviour, IFinishable
     {
         get
         {
+            if (_queuedPattern != null)
+            {
+                return true;
+            }
+
             foreach (BossPattern pattern in _patterns)
             {
                 if (pattern != null && pattern.IsForced && pattern.CanUse())
@@ -317,6 +395,7 @@ public class Boss : MonoBehaviour, IFinishable
         }
 
         _stateMachine.ChangeState(new BossWaitState(this));
+        if (!TryGetComponent<BossAudio>(out _)) gameObject.AddComponent<BossAudio>();
     }
 
     private void Start()
@@ -340,10 +419,50 @@ public class Boss : MonoBehaviour, IFinishable
             }
         }
 
+        ResolveGroundY();
+
+        // 전투 시작 위치에서 대기 (등장 연출 카메라가 보스를 비출 때 이미 그 자리에 있도록)
+        MoveToIntroPoint();
+
         if (_startOnAwake)
         {
             StartFight();
         }
+    }
+
+    /// <summary>
+    /// 착지 바닥 높이(GroundY) 결정. 시작 위치가 높은 곳이어도 점프 / 착지는 바닥 기준으로 하도록
+    /// Ground Point → (Intro Point 사용 시) BossArena 1층 바닥 → 씬 배치 위치 순
+    /// </summary>
+    private void ResolveGroundY()
+    {
+        if (_groundPoint != null)
+        {
+            GroundY = _groundPoint.position.y;
+            return;
+        }
+
+        if (_introPoint != null && _arena != null && _arena.TryGetFloorY(1, out float floorY))
+        {
+            GroundY = floorY;
+        }
+    }
+
+    /// <summary>전투 시작 위치(Intro Point)로 즉시 이동. 지정 안 했으면 무시</summary>
+    private void MoveToIntroPoint()
+    {
+        if (_introPoint == null)
+        {
+            return;
+        }
+
+        Vector2 position = _introPoint.position;
+        if (_body != null)
+        {
+            _body.position = position;
+        }
+
+        transform.position = new Vector3(position.x, position.y, transform.position.z);
     }
 
     private void Update()
@@ -361,6 +480,7 @@ public class Boss : MonoBehaviour, IFinishable
     {
         StageBossFightGate.Cancel(this);
         ClearMinions();
+        HideFinishMarker();
     }
 
     #endregion
@@ -382,13 +502,33 @@ public class Boss : MonoBehaviour, IFinishable
 
         _phase = 1;
         _health.BeginFight();
+        MoveToIntroPoint();
+
+        // 하울링이 끝나면 바로 이어서 쓸 첫 패턴 (예: 시작 위치에서 뛰어내리며 찍기)
+        if (_introNextPattern != null)
+        {
+            QueuePattern(_introNextPattern);
+        }
+
         OnFightStarted?.Invoke(this);
+
+        // 전투 시작 이벤트에서 연출 쪽이 SkipIntro를 켰다면 하울링 없이 바로 전투
+        if (SkipIntro)
+        {
+            Log("등장 하울링 생략");
+            ForceIdleAnimation();
+            GoIdle();
+            return;
+        }
+
         ChangeState(new BossIntroState(this));
     }
 
     public void ChangeState(BossState nextState)
     {
+        BossState previous = CurrentState;
         _stateMachine.ChangeState(nextState);
+        OnAudioStateChanged?.Invoke(previous, nextState);
     }
 
     /// <summary>패턴 사이 대기로 (페이즈별 대기 시간)</summary>
@@ -426,6 +566,7 @@ public class Boss : MonoBehaviour, IFinishable
     {
         _phase = phase;
         _lastPattern = null;
+        _queuedPattern = null;
         OnPhaseChanged?.Invoke(phase);
     }
 
@@ -448,6 +589,20 @@ public class Boss : MonoBehaviour, IFinishable
     {
         selected = null;
         _candidates.Clear();
+
+        // 예약된 패턴(소환 후 찍기로 복귀 등)이 가장 먼저. 조건(층 / 쿨타임 등) 무시
+        if (_queuedPattern != null)
+        {
+            BossPattern queued = _queuedPattern;
+            _queuedPattern = null;
+
+            if (queued.isActiveAndEnabled)
+            {
+                selected = queued;
+                _lastPattern = selected;
+                return true;
+            }
+        }
 
         // 체력 비율 발동 등 무조건 써야 하는 패턴이 먼저
         foreach (BossPattern pattern in _patterns)
@@ -504,6 +659,21 @@ public class Boss : MonoBehaviour, IFinishable
         return true;
     }
 
+    /// <summary>다음 패턴을 지정 (대기 시간 없이 바로, 사용 조건 무시). 페이즈가 바뀌면 취소</summary>
+    /// <summary>2페이즈 전환이 끝났을 때 (BossPhaseTransitionState에서 호출). 지정한 첫 패턴 예약</summary>
+    public void NotifyPhaseTransitionFinished()
+    {
+        if (_phase2FirstPattern != null)
+        {
+            QueuePattern(_phase2FirstPattern);
+        }
+    }
+
+    public void QueuePattern(BossPattern pattern)
+    {
+        _queuedPattern = pattern;
+    }
+
     /// <summary>플레이어가 있는 층 (1 ~ 3)</summary>
     public int GetPlayerFloor()
     {
@@ -557,6 +727,47 @@ public class Boss : MonoBehaviour, IFinishable
     public Vector2 Position => _body != null ? _body.position : (Vector2)transform.position;
 
     /// <summary>공중에 떠 있으면 바로 땅으로 (패턴이 중간에 끊겼을 때)</summary>
+    public float TakeoffDustTiming => _takeoffDustTiming;
+    public float LandingDustTiming => _landingDustTiming;
+
+    /// <summary>delay초 뒤에 발밑 먼지 (0 이하면 바로)</summary>
+    public void PlayJumpDust(float x, float footY, float delay)
+    {
+        if (delay <= 0f || !isActiveAndEnabled)
+        {
+            PlayJumpDust(x, footY);
+            return;
+        }
+
+        StartCoroutine(PlayJumpDustAfter(x, footY, delay));
+    }
+
+    private IEnumerator PlayJumpDustAfter(float x, float footY, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        PlayJumpDust(x, footY);
+    }
+
+    /// <summary>발밑 점프 / 착지 먼지 (x, 발밑 높이)</summary>
+    public void PlayJumpDust(float x, float footY)
+    {
+        EffectManager effects = EffectManager.Instance;
+        if (effects == null || _jumpDustScale <= 0f)
+        {
+            return;
+        }
+
+        float y = footY + _jumpDustOffsetY;
+        if (_jumpDustSpread <= 0f)
+        {
+            effects.PlayBossJumpDust(new Vector2(x, y), _jumpDustScale, FacingX < 0f);
+            return;
+        }
+
+        effects.PlayBossJumpDust(new Vector2(x - _jumpDustSpread, y), _jumpDustScale, true);
+        effects.PlayBossJumpDust(new Vector2(x + _jumpDustSpread, y), _jumpDustScale, false);
+    }
+
     public void SnapToGround()
     {
         Vector2 position = Position;
@@ -592,6 +803,59 @@ public class Boss : MonoBehaviour, IFinishable
     }
 
     /// <summary>남은 독 방울 / 아기 모두 제거 (페이즈 전환, 완전 그로기 시)</summary>
+    private GameObject _finishMarker;
+
+    /// <summary>머리 위 처치 직전 표시 위치</summary>
+    public Vector2 FinishMarkerPosition
+    {
+        get
+        {
+            Vector2 basePosition;
+            if (_finishMarkerPoint != null)
+            {
+                basePosition = _finishMarkerPoint.position;
+            }
+            else if (_bodyCollider != null)
+            {
+                Bounds bounds = _bodyCollider.bounds;
+                basePosition = new Vector2(bounds.center.x, bounds.max.y);
+            }
+            else
+            {
+                basePosition = transform.position;
+            }
+
+            return basePosition + _finishMarkerOffset;
+        }
+    }
+
+    /// <summary>마무리 공격 대기 표시를 머리 위에 띄움 (BossFinalGroggyState에서 호출)</summary>
+    public void ShowFinishMarker()
+    {
+        if (_finishMarkerPrefab == null)
+        {
+            return;
+        }
+
+        if (_finishMarker == null)
+        {
+            // 보스 자식으로 두면 좌우 반전(스케일)을 같이 받으므로 따로 생성
+            _finishMarker = Instantiate(_finishMarkerPrefab);
+        }
+
+        _finishMarker.transform.position = FinishMarkerPosition;
+        _finishMarker.SetActive(true);
+    }
+
+    public void HideFinishMarker()
+    {
+        if (_finishMarker != null)
+        {
+            Destroy(_finishMarker);
+            _finishMarker = null;
+        }
+    }
+
     public void ClearMinions()
     {
         for (int i = _minions.Count - 1; i >= 0; i--)
@@ -759,6 +1023,74 @@ public class Boss : MonoBehaviour, IFinishable
     }
 
     /// <summary>예약된 트리거 취소 (패턴이 끊겼을 때 공격 애니메이션이 뒤늦게 재생되지 않도록)</summary>
+    /// <summary>
+    /// 몸통 콜라이더의 물리 충돌을 켜고 끔 (점프 중 플레이어를 밀어내지 않도록 등).
+    /// 끌 때는 트리거로 바꿔서 위치 / 크기(CenterPosition 등)는 그대로 유지
+    /// </summary>
+    public void SetBodyCollision(bool enabled)
+    {
+        if (_bodyCollider == null)
+        {
+            return;
+        }
+
+        if (!enabled)
+        {
+            if (_isBodyCollisionOff)
+            {
+                return;
+            }
+
+            _isBodyCollisionOff = true;
+            _bodyWasTrigger = _bodyCollider.isTrigger;
+            _bodyCollider.isTrigger = true;
+            return;
+        }
+
+        if (!_isBodyCollisionOff)
+        {
+            return;
+        }
+
+        _isBodyCollisionOff = false;
+        _bodyCollider.isTrigger = _bodyWasTrigger;
+    }
+
+    /// <summary>
+    /// 진행 중인 애니메이션을 모두 끊고 대기 상태로 즉시 전환.
+    /// 남은 트리거 / Bool을 초기화하고, 멈춰 둔 애니메이터는 다시 재생. 바로 이어서 보낸 트리거가 대기 상태에서 평가됨
+    /// </summary>
+    public void ForceIdleAnimation()
+    {
+        if (_animator == null || !_animator.isActiveAndEnabled)
+        {
+            return;
+        }
+
+        ResumeAnimator();
+
+        foreach (AnimatorControllerParameter parameter in _animator.parameters)
+        {
+            if (parameter.type == AnimatorControllerParameterType.Trigger)
+            {
+                _animator.ResetTrigger(parameter.nameHash);
+            }
+            else if (parameter.type == AnimatorControllerParameterType.Bool)
+            {
+                _animator.SetBool(parameter.nameHash, false);
+            }
+        }
+
+        if (!PlayState(_idleStateName))
+        {
+            Debug.LogWarning($"{name}: 대기 상태({_idleStateName})가 애니메이터에 없습니다. Idle State Name을 확인하세요.", this);
+            return;
+        }
+
+        // Play는 다음 애니메이터 업데이트에 적용되므로 바로 적용 (이어서 보낸 트리거가 이전 상태에서 평가되지 않도록)
+        _animator.Update(0f);
+    }
+
     public void ResetTrigger(string parameter)
     {
         if (TryGetParameter(parameter, out int hash))

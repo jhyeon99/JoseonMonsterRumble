@@ -109,6 +109,8 @@ public class BossChargePattern : BossPattern
 
         // 돌진: 일정 속도로 맵 끝까지
         _hitbox.SetTelegraph(false);
+        AudioAction("Boss.ChargeStart");
+        AudioAction("Boss.ChargeLoop");
         _hitbox.Activate();
 
         float x = startX;
@@ -126,6 +128,7 @@ public class BossChargePattern : BossPattern
         // 정지: 판정 끄고 반복 상태 종료
         _hitbox.Deactivate();
         Boss.SetTrigger(_loopEndTrigger);
+        AudioResult("Boss.ChargeEnd", Boss.transform.position);
         CameraShake.Shake(_stopShake);
 
         // 끝 / 회복 애니메이션이 끝날 때까지 그 자리에 고정
@@ -154,6 +157,8 @@ public class BossChargePattern : BossPattern
 
         // 돌진: 판정 구간 동안 맵 끝까지
         _hitbox.SetTelegraph(false);
+        AudioAction("Boss.ChargeStart");
+        AudioAction("Boss.ChargeLoop");
         _hitbox.Activate();
 
         float span = Mathf.Max(0.0001f, HitEndRatio - HitStartRatio);
@@ -165,6 +170,7 @@ public class BossChargePattern : BossPattern
         }
 
         _hitbox.Deactivate();
+        AudioResult("Boss.ChargeEnd", Boss.transform.position);
         CameraShake.Shake(_stopShake);
 
         // 정지 후 애니메이션이 끝날 때까지 그 자리에 고정

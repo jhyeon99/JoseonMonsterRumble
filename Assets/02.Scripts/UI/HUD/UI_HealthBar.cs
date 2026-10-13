@@ -20,17 +20,33 @@ public class UI_HealthBar : MonoBehaviour
     [Header("시간 및 보간 설정")]
     [SerializeField] private float _damageDelay = 0.25f;
     [SerializeField] private float _damageCatchupDuration = 0.35f;
-    [SerializeField] private float _healCatchupDuration = 0.2f;
+    [SerializeField] private float _healCatchupDuration = 0.35f;
 
     [SerializeField] private float _currentRatio = 1f;
     [SerializeField] private float _ghostRatio = 1f;
 
+    [Header("피격 펀치 및 셰이크 설정")]
+    [SerializeField] private RectTransform _punchTarget;
+    [SerializeField, Range(1f, 1.3f)] private float _punchScale = 1.08f;
+    [SerializeField, Range(0f, 15f)] private float _punchShakeAmount = 5f;
+    [SerializeField, Min(0.05f)] private float _punchDuration = 0.15f;
+
+    private Coroutine _punchCoroutine;
+    private Vector3 _originalScale = Vector3.one;
+    private Vector2 _originalAnchoredPosition;
+    private bool _hasOriginalPunchState;
+
     private Coroutine _trailCoroutine;
     private float _maskFullWidth;
+    private Player _player;
+    private PlayerPotionAura _potionAura;
+    private float _pendingHealRatio = -1f;
+    private float _lastActualHealth = -1f;
 
     private void Awake()
     {
         InitializeComponents();
+        InitializePunchTarget();
     }
 
     private void Start()
@@ -57,6 +73,9 @@ public class UI_HealthBar : MonoBehaviour
         UnsubscribeFromHealthChanged();
 
         StopTrailCoroutine();
+        StopPunch();
+        _pendingHealRatio = -1f;
+        _lastActualHealth = -1f;
     }
 
     private void SubscribeToHealthChanged()
@@ -68,10 +87,23 @@ public class UI_HealthBar : MonoBehaviour
 
         _playerHealth.OnHealthChanged -= HandleHealthChanged;
         _playerHealth.OnHealthChanged += HandleHealthChanged;
+        _lastActualHealth = _playerHealth.CurrentHealth;
+        _player = _playerHealth.GetComponent<Player>();
+        _potionAura = _playerHealth.GetComponent<PlayerPotionAura>();
+        if (_potionAura != null)
+        {
+            _potionAura.OnRecoveryPulse -= HandleRecoveryPulse;
+            _potionAura.OnRecoveryPulse += HandleRecoveryPulse;
+        }
     }
 
     private void UnsubscribeFromHealthChanged()
     {
+        if (_potionAura != null)
+        {
+            _potionAura.OnRecoveryPulse -= HandleRecoveryPulse;
+            _potionAura = null;
+        }
         if (_playerHealth == null)
         {
             return;
@@ -105,7 +137,35 @@ public class UI_HealthBar : MonoBehaviour
 
     private void HandleHealthChanged(float currentHealth, float maxHealth)
     {
+        bool isHealing = _lastActualHealth >= 0f && currentHealth > _lastActualHealth;
+        bool isDamage = _lastActualHealth >= 0f && currentHealth < _lastActualHealth;
+        _lastActualHealth = currentHealth;
+        if (isDamage && _pendingHealRatio >= 0f)
+        {
+            // 회복 표시 대기 중 피격되면 오래된 표시 대신 실제 HP에 맞춘다.
+            _pendingHealRatio = -1f;
+            UpdateHealth(currentHealth, maxHealth, true);
+            PlayPunch();
+            return;
+        }
+        if (isHealing && _potionAura != null && _player != null &&
+            _player.StateMachine.CurrentState == _player.PotionState &&
+            (_potionAura.IsWaitingForSip || _playerHealth.PotionCooldownTimer <= 0f))
+        {
+            _pendingHealRatio = maxHealth > 0f ? Mathf.Clamp01(currentHealth / maxHealth) : 0f;
+            return;
+        }
         UpdateHealth(currentHealth, maxHealth, false);
+    }
+
+    private void HandleRecoveryPulse()
+    {
+        float targetRatio = _pendingHealRatio;
+        _pendingHealRatio = -1f;
+        if (targetRatio >= 0f && _playerHealth != null && !_playerHealth.IsDead)
+        {
+            UpdateHealth(_playerHealth.CurrentHealth, _playerHealth.MaxHealth, false);
+        }
     }
 
     public void UpdateHealth(float currentHealth, float maxHealth, bool isInstant)
@@ -133,6 +193,7 @@ public class UI_HealthBar : MonoBehaviour
             // 데미지 피격
             UpdateMainMask(targetRatio);
             StartTrailCoroutine(ApplyDamageTrail(targetRatio));
+            PlayPunch();
         }
         else
         {
@@ -262,5 +323,79 @@ public class UI_HealthBar : MonoBehaviour
 
         float targetWidth = _maskFullWidth * ratio;
         mask.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, targetWidth);
+    }
+
+    private void InitializePunchTarget()
+    {
+        if (_punchTarget == null)
+        {
+            _punchTarget = GetComponent<RectTransform>();
+        }
+
+        if (_punchTarget != null)
+        {
+            _originalScale = _punchTarget.localScale;
+            _originalAnchoredPosition = _punchTarget.anchoredPosition;
+            _hasOriginalPunchState = true;
+        }
+    }
+
+    public void PlayPunch()
+    {
+        if (_punchTarget == null)
+        {
+            return;
+        }
+
+        if (_punchCoroutine != null)
+        {
+            StopCoroutine(_punchCoroutine);
+            RestorePunchState();
+        }
+
+        _punchCoroutine = StartCoroutine(AnimatePunch());
+    }
+
+    public void StopPunch()
+    {
+        if (_punchCoroutine != null)
+        {
+            StopCoroutine(_punchCoroutine);
+            _punchCoroutine = null;
+        }
+
+        RestorePunchState();
+    }
+
+    private void RestorePunchState()
+    {
+        if (_punchTarget != null && _hasOriginalPunchState)
+        {
+            _punchTarget.localScale = _originalScale;
+            _punchTarget.anchoredPosition = _originalAnchoredPosition;
+        }
+    }
+
+    private IEnumerator AnimatePunch()
+    {
+        float elapsed = 0f;
+
+        while (elapsed < _punchDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / _punchDuration);
+            float decay = 1f - t;
+
+            float currentScale = Mathf.Lerp(_punchScale, 1f, t);
+            _punchTarget.localScale = _originalScale * currentScale;
+
+            Vector2 shakeOffset = Random.insideUnitCircle * (_punchShakeAmount * decay);
+            _punchTarget.anchoredPosition = _originalAnchoredPosition + shakeOffset;
+
+            yield return null;
+        }
+
+        RestorePunchState();
+        _punchCoroutine = null;
     }
 }

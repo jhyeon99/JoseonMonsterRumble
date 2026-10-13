@@ -3,8 +3,8 @@ guid: f7857881180d390498fe6864ea96c754
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4083422476458692781
-    second: boss_move_00021_0
+      213: -1595349719976738531
+    second: Boss_Move_00021_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: boss_move_00021_0
+      name: Boss_Move_00021_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 1280
-        height: 584
+        height: 603
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 35f65de74e4c457c0800000000000000
-      internalID: -4083422476458692781
+      spriteID: 
+      internalID: 0
       vertices: []
       indices: 
       edges: []
@@ -160,8 +160,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      boss_move_00021_0: -4083422476458692781
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

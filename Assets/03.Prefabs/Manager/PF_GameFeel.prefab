@@ -47,7 +47,9 @@ MonoBehaviour:
   _baseDuration: 0.05
   _hitStopTimeScale: 0.02
   _parryDuration: 0.12
-  _finisherDuration: 0.25
+  _finisher:
+    Duration: 0.32
+    TimeScale: 0.02
   _enemyLightHit:
     Duration: 0.086
     TimeScale: 0.02
