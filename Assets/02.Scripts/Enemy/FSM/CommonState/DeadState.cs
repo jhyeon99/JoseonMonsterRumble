@@ -32,7 +32,7 @@ public class DeadState : EnemyState
 
         if (ItemPool.Instance != null)
         {
-            ItemPool.Instance.SpawnDeathSouls(_enemy.GetEnemyCenterPosition(), 5, _enemy.Health);
+            ItemPool.Instance.SpawnDeathSouls(_enemy.GetEnemyCenterPosition(), 5);
         }
     }
 

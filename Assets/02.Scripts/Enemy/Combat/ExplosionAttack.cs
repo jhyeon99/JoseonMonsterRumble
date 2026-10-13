@@ -44,7 +44,6 @@ public class ExplosionAttack : MonoBehaviour
                 0,
                 _attackName
             );
-            hitData.Attacker = _enemy.gameObject;
             damageable.TakeDamage(hitData);
             // 단일 플레이어의 여러 콜라이더에 중복 피해를 주지 않는다.
             break;

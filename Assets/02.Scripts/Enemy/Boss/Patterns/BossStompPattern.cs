@@ -2,17 +2,16 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 플레이어 연속 찍기 → 마지막 찍기 후 바닥 전체에서 가시가 솟음. (1층 공격) 애니메이션 하나에 점프 / 찍기 / 가시가 모두 들어 있는 기준.
+/// 플레이어 연속 찍기 → 마지막 찍기 후 좌우 바늘. (1층 공격) 애니메이션 하나에 점프 / 찍기 / 바늘이 모두 들어 있는 기준.
 /// - 0 ~ 판정 시작: 점프해서 플레이어 위로 이동 (최고점 비율까지 올라가고, 판정 시작에 착지)
 /// - 판정 시작 ~ 끝: 찍기 판정 (패링 시 그로기를 켜 두면 타이밍 가드로 보스 그로기)
 /// - 마지막이 아닌 찍기: 다음 찍기 비율에서 애니메이션을 처음부터 다시 재생해 다시 점프
-/// - 마지막 찍기: 바닥 전체에 빨간 경고 → 가시 비율에서 바닥 전체의 가시가 아래에서 위로 솟았다가 다시 내려감
+/// - 마지막 찍기: 바늘 비율에서 좌우로 바늘 발사
 /// </summary>
 public class BossStompPattern : BossPattern
 {
     [Header("점프 (비율은 애니메이션 길이 대비)")]
-    [SerializeField, Min(0f)]
-    private float _jumpHeight = 6f;
+    [SerializeField, Min(0f)] private float _jumpHeight = 6f;
 
     [Tooltip("최고점에 도달하는 지점. 이후 판정 시작 지점까지 떨어짐")]
     [SerializeField, Range(0f, 1f)]
@@ -27,8 +26,7 @@ public class BossStompPattern : BossPattern
     private float _edgeMargin = 2f;
 
     [Header("찍기")]
-    [Tooltip(
-        "찍는 횟수별 가중치. 원소 순서 = 1번, 2번, 3번... 찍을 확률 (예: 0.3, 0.3, 0.4면 30% 1번 / 30% 2번 / 40% 3번). 최대 횟수 = 배열 크기. 가시는 마지막 찍기 후에만 솟음")]
+    [Tooltip("찍는 횟수별 가중치. 원소 순서 = 1번, 2번, 3번... 찍을 확률 (예: 0.3, 0.3, 0.4면 30% 1번 / 30% 2번 / 40% 3번). 최대 횟수 = 배열 크기. 바늘은 마지막 찍기 후에만 발사")]
     [SerializeField]
     private float[] _stompCountWeights = { 0.3f, 0.3f, 0.4f };
 
@@ -48,102 +46,29 @@ public class BossStompPattern : BossPattern
     [SerializeField]
     private GameObject _landingMarker;
 
+    [SerializeField] private CameraShakeSettings _landingShake = new CameraShakeSettings(0.25f, 0.25f);
+
+    [Header("좌우 바늘")]
+    [SerializeField] private BossProjectile _needlePrefab;
+
+    [Tooltip("바늘 발사 위치 (비우면 보스 발밑)")]
     [SerializeField]
-    private CameraShakeSettings _landingShake = new CameraShakeSettings(0.25f, 0.25f);
+    private Transform _needleSpawnPoint;
 
-    [Header("착지 돌 튀는 이펙트 (PF_Boss_StompExplosion_VFX)")]
-    [Tooltip("찍기 착지 때마다 발밑에서 돌이 튀는 이펙트 재생")]
-    [SerializeField]
-    private bool _playStompVfx = true;
-
-    [Tooltip("이펙트 크기 배율")]
-    [SerializeField, Min(0f)]
-    private float _stompVfxScale = 1f;
-
-    [Tooltip("이펙트 위치 보정 (발밑 기준. x는 보스가 보는 방향 기준)")]
-    [SerializeField]
-    private Vector2 _stompVfxOffset = Vector2.zero;
-
-    [Tooltip("켜면 매번 좌우를 랜덤으로 뒤집어 같은 모양이 반복돼 보이지 않게 함. 끄면 보스가 보는 방향 기준")]
-    [SerializeField]
-    private bool _randomizeStompVfxFlip = true;
-
-    [Tooltip("땅에서 뛰어오를 때 발밑 먼지 (높은 곳에서 뛰어내릴 때는 안 나옴. 크기 / 위치는 Boss의 점프 먼지 설정)")]
-    [SerializeField]
-    private bool _takeoffDust = true;
-
-    [Tooltip("착지할 때 발밑 먼지. 돌 튀는 이펙트(Play Stomp Vfx)가 켜져 있으면 겹치지 않도록 먼지는 안 나옴")]
-    [SerializeField]
-    private bool _landingDust = true;
-
-    [Tooltip("착지보다 이 시간(초)만큼 먼저 이펙트를 재생. 이펙트 앞부분이 늘어져 늦게 터져 보이면 올림 (0 = 착지 순간)")]
-    [SerializeField, Min(0f)]
-    private float _stompVfxLeadTime = 0.05f;
-
-    [Header("바닥 가시 (마지막 찍기 후 바닥 전체에서 솟음)")]
-    [Tooltip("솟아오를 가시 프리팹 (BossFloorSpike). 비우면 가시 없이 찍기만")]
-    [SerializeField]
-    private BossFloorSpike _floorSpikePrefab;
-
-    [Tooltip("가시가 솟는 지점 (애니메이션 길이 대비 비율)")]
+    [Tooltip("바늘 발사 지점 (애니메이션 길이 대비 비율)")]
     [SerializeField, Range(0f, 1f)]
     private float _needleRatio = 0.75f;
 
-    [Tooltip("가시가 솟는 바닥 높이 기준. 비우면 보스 바닥 높이(1층)")]
-    [SerializeField]
-    private Transform _spikeFloor;
+    [Tooltip("한쪽에 쏘는 바늘 수")]
+    [SerializeField, Min(0)]
+    private int _needleCountPerSide = 1;
 
-    [Tooltip("가시 사이 간격 (월드)")]
-    [SerializeField, Min(0.1f)]
-    private float _spikeSpacing = 0.5f;
-
-    [Tooltip("맵 양 끝에서 이만큼 안쪽부터 가시를 깔기")]
+    [Tooltip("바늘이 여러 개일 때 간격 (초)")]
     [SerializeField, Min(0f)]
-    private float _spikeEdgeMargin = 0f;
+    private float _needleInterval = 0.2f;
 
-    [Tooltip("다 솟았을 때 가시 위치가 바닥보다 얼마나 위인지 (가시 프리팹의 기준점 기준)")]
-    [SerializeField]
-    private float _spikeUpOffset = 0.5f;
-
-    [Tooltip("바닥 아래에서 솟아오르는 거리")]
-    [SerializeField, Min(0f)]
-    private float _spikeRiseHeight = 1.5f;
-
-    [Tooltip("솟아오르는 시간 (초)")]
-    [SerializeField, Min(0.01f)]
-    private float _spikeRiseTime = 0.12f;
-
-    [Tooltip("솟은 채로 유지하는 시간 (초)")]
-    [SerializeField, Min(0f)]
-    private float _spikeHoldTime = 0.5f;
-
-    [Tooltip("다시 내려가는 시간 (초)")]
-    [SerializeField, Min(0.01f)]
-    private float _spikeSinkTime = 0.3f;
-
-    [Header("가시 파도 (착지 지점에서 양옆으로 퍼짐)")]
-    [Tooltip("가시가 퍼지는 속도 (월드 / 초). 0이면 바닥 전체가 동시에 솟음")]
-    [SerializeField, Min(0f)]
-    private float _spikeWaveSpeed = 18f;
-
-    [Tooltip("1페이즈에 퍼지는 횟수")]
-    [SerializeField, Min(1)]
-    private int _phase1WaveCount = 1;
-
-    [Tooltip("2페이즈에 퍼지는 횟수")]
-    [SerializeField, Min(1)]
-    private int _phase2WaveCount = 2;
-
-    [Tooltip("파도 사이 간격 (초, 이전 파도가 시작된 뒤 다음 파도가 시작되기까지)")]
-    [SerializeField, Min(0f)]
-    private float _spikeWaveInterval = 0.8f;
-
-    [Tooltip("두 번째 파도부터 시작 전에 바닥 예고를 다시 보여줌 (Needle Warning Lead와 파도 간격 중 짧은 시간)")]
-    [SerializeField]
-    private bool _warnBeforeNextWave = true;
-
-    [Header("가시 예고 (마지막 찍기, 바닥 전체가 빨갛게 빛남)")]
-    [Tooltip("가시가 솟기 몇 초 전에 예고할지 (0이면 예고 없음)")]
+    [Header("가시 예고 (마지막 찍기, 가시가 지나갈 가로줄이 빨갛게 빛남)")]
+    [Tooltip("가시 발사 몇 초 전에 예고할지 (0이면 예고 없음)")]
     [SerializeField, Min(0f)]
     private float _needleWarningLead = 0.5f;
 
@@ -151,11 +76,11 @@ public class BossStompPattern : BossPattern
     [SerializeField]
     private Color _needleWarningColor = new Color(1f, 0.1f, 0.1f, 0.55f);
 
-    [Tooltip("예고 띠 높이 (월드). 바닥에서 위로 이만큼. 가시가 솟는 높이 정도로")]
+    [Tooltip("예고 줄 두께 (월드). 가시 높이 정도로")]
     [SerializeField, Min(0.01f)]
     private float _needleWarningThickness = 0.4f;
 
-    [Tooltip("예고 / 가시 범위 (보스 위치에서 좌 / 우 각각, 월드). 0이면 맵 끝까지 (BossArena 기준)")]
+    [Tooltip("예고 줄 길이 (발사 위치에서 좌 / 우 각각, 월드). 0이면 맵 끝까지 (BossArena 기준)")]
     [SerializeField, Min(0f)]
     private float _needleWarningLength = 0f;
 
@@ -225,8 +150,8 @@ public class BossStompPattern : BossPattern
             }
         }
 
-        // 마지막 찍기 후에만 바닥 가시 (패링당했으면 그로기로 넘어가 여기까지 오지 않음)
-        yield return EruptFloorSpikes();
+        // 마지막 찍기 후에만 좌우 바늘 (패링당했으면 그로기로 넘어가 여기까지 오지 않음)
+        yield return FireNeedles();
     }
 
     /// <summary>가중치 배열로 이번에 찍을 횟수 결정 (1 ~ 배열 크기). 배열이 비었거나 합이 0이면 1번</summary>
@@ -270,32 +195,17 @@ public class BossStompPattern : BossPattern
         return 1;
     }
 
-    /// <summary>점프 → 착지 → 찍기 판정 (판정 끝까지). 높은 곳(소환 위치 등)에서 시작하면 그 높이에서 뛰어내림</summary>
+    /// <summary>점프 → 착지 → 찍기 판정 (판정 끝까지)</summary>
     private IEnumerator Stomp()
     {
-        AudioAction("Boss.Jump");
         float startX = Boss.Position.x;
-        float startY = Boss.Position.y;
         float groundY = Boss.GroundY;
         float landRatio = Mathf.Max(HitStartRatio, 0.01f);
         float apexRatio = Mathf.Min(_apexRatio, landRatio * 0.95f);
         float targetX = GetTargetX();
         bool hasWarned = false;
-        bool vfxPlayed = false;
-
-        // 땅에서 출발할 때만 이륙 먼지 (소환 위치 같은 높은 곳에서 뛰어내릴 때는 제외)
-        // (Boss의 Takeoff Dust Timing만큼 늦게. 음수는 시작 순간)
-        if (_takeoffDust && Mathf.Abs(startY - groundY) < 0.1f)
-        {
-            Boss.PlayJumpDust(startX, groundY, Boss.TakeoffDustTiming);
-        }
-
-        // 돌 튀는 이펙트가 나오면 착지 먼지는 생략
-        float landingTiming = Boss.LandingDustTiming;
-        bool landingDustPlayed = !_landingDust || _playStompVfx;
 
         // 점프 → 착지 (판정 시작 지점에 착지)
-        _airborne = true;
         while (Progress < landRatio)
         {
             float progress = Progress;
@@ -309,78 +219,32 @@ public class BossStompPattern : BossPattern
             }
 
             float x = Mathf.Lerp(startX, targetX, Mathf.SmoothStep(0f, 1f, progress / landRatio));
-            float y = GetJumpY(progress, apexRatio, landRatio, startY, groundY);
+            float y = GetJumpY(progress, apexRatio, landRatio, groundY);
             Boss.MoveTo(new Vector2(x, y));
 
             ShowLandingMarker(progress >= apexRatio, targetX, groundY);
-
-            // 착지 직전에 미리 재생 (Stomp Vfx Lead Time)
-            if (!vfxPlayed && (landRatio - progress) * Duration <= _stompVfxLeadTime)
-            {
-                PlayStompVfx(targetX, groundY);
-                vfxPlayed = true;
-            }
-
-            // 착지 먼지를 착지 직전에 미리 (Landing Dust Timing이 음수)
-            if (!landingDustPlayed && landingTiming < 0f && (landRatio - progress) * Duration <= -landingTiming)
-            {
-                Boss.PlayJumpDust(targetX, groundY);
-                landingDustPlayed = true;
-            }
-
             yield return new WaitForFixedUpdate();
         }
 
         // 착지 + 찍기 판정
         Boss.MoveTo(new Vector2(targetX, groundY));
         Boss.SnapToGround();
-        _airborne = false;
         ShowLandingMarker(false, targetX, groundY);
         CameraShake.Shake(_landingShake);
-        if (!vfxPlayed)
-        {
-            PlayStompVfx(targetX, groundY);
-        }
 
-        if (!landingDustPlayed)
-        {
-            Boss.PlayJumpDust(targetX, groundY, landingTiming);
-        }
-
-        AudioResult("Boss.Stomp", Boss.transform.position);
         _stompHitbox.Activate();
         yield return WaitUntilProgress(HitEndRatio);
         _stompHitbox.Deactivate();
     }
 
-    /// <summary>착지 지점 발밑에서 돌 튀는 이펙트</summary>
-    private void PlayStompVfx(float x, float groundY)
+    private IEnumerator FireNeedles()
     {
-        if (!_playStompVfx || _stompVfxScale <= 0f)
-        {
-            return;
-        }
-
-        EffectManager effects = EffectManager.Instance;
-        if (effects == null)
-        {
-            return;
-        }
-
-        float facing = Boss.FacingX;
-        var position = new Vector2(x + (_stompVfxOffset.x * facing), groundY + _stompVfxOffset.y);
-        bool flip = _randomizeStompVfxFlip ? Random.value < 0.5f : facing < 0f;
-        effects.PlayBossStompExplosion(position, _stompVfxScale, flip);
-    }
-
-    private IEnumerator EruptFloorSpikes()
-    {
-        if (_floorSpikePrefab == null)
+        if (_needlePrefab == null || _needleCountPerSide <= 0)
         {
             yield break;
         }
 
-        // 가시 예고: 솟기 Lead초 전부터 바닥 전체가 빨갛게 깜빡임
+        // 가시 예고: 발사 Lead초 전부터 가시가 지나갈 가로줄이 빨갛게 깜빡임
         if (_needleWarningLead > 0f)
         {
             float leadRatio = Duration > 0f ? _needleWarningLead / Duration : 0f;
@@ -400,88 +264,15 @@ public class BossStompPattern : BossPattern
 
         yield return WaitUntilProgress(_needleRatio);
 
-        // 착지 지점(보스 위치)에서 양옆으로 퍼지는 파도. 2페이즈는 여러 번
-        float originX = Boss.Position.x;
-        int waveCount = Mathf.Max(1, Boss.Phase >= 2 ? _phase2WaveCount : _phase1WaveCount);
-
-        for (int wave = 0; wave < waveCount; wave++)
+        for (int i = 0; i < _needleCountPerSide; i++)
         {
-            if (wave > 0)
+            FireNeedle(Vector2.left);
+            FireNeedle(Vector2.right);
+
+            if (i < _needleCountPerSide - 1)
             {
-                float warnTime = _warnBeforeNextWave ? Mathf.Min(_needleWarningLead, _spikeWaveInterval) : 0f;
-                float quietTime = _spikeWaveInterval - warnTime;
-                if (quietTime > 0f)
-                {
-                    yield return new WaitForSeconds(quietTime);
-                }
-
-                if (warnTime > 0f)
-                {
-                    ShowNeedleWarning();
-                    float warnStart = Time.time;
-                    while (Time.time - warnStart < warnTime)
-                    {
-                        UpdateNeedleWarning(Time.time - warnStart);
-                        yield return null;
-                    }
-
-                    HideNeedleWarning();
-                }
+                yield return new WaitForSeconds(_needleInterval);
             }
-
-            SpawnFloorSpikes(originX);
-        }
-    }
-
-    /// <summary>바닥 범위 전체에 간격대로 가시를 깔고 동시에 솟게 함</summary>
-    private void SpawnFloorSpikes(float originX)
-    {
-        GetSpikeRange(out float left, out float right);
-        float upY = GetSpikeFloorY() + _spikeUpOffset;
-
-        int count = Mathf.Max(1, Mathf.FloorToInt((right - left) / _spikeSpacing) + 1);
-        float step = count > 1 ? (right - left) / (count - 1) : 0f;
-
-        for (int i = 0; i < count; i++)
-        {
-            var upPosition = new Vector2(count > 1 ? left + (step * i) : (left + right) * 0.5f, upY);
-            BossFloorSpike spike = Instantiate(_floorSpikePrefab, upPosition, Quaternion.identity);
-            // 착지 지점에서 멀수록 늦게 솟음 (속도 0이면 동시에)
-            float delay = _spikeWaveSpeed > 0f ? Mathf.Abs(upPosition.x - originX) / _spikeWaveSpeed : 0f;
-            spike.Begin(Boss, upPosition, _spikeRiseHeight, _spikeRiseTime, _spikeHoldTime, _spikeSinkTime, delay);
-        }
-
-        AudioResult("Boss.NeedleFire", new Vector3((left + right) * 0.5f, upY, Boss.transform.position.z));
-    }
-
-    private float GetSpikeFloorY()
-    {
-        return _spikeFloor != null ? _spikeFloor.position.y : Boss.GroundY;
-    }
-
-    /// <summary>가시 / 예고 범위. Length가 0이면 맵 끝까지 (양 끝 여백 제외)</summary>
-    private void GetSpikeRange(out float left, out float right)
-    {
-        float centerX = Boss.Position.x;
-
-        if (_needleWarningLength > 0f)
-        {
-            left = centerX - _needleWarningLength;
-            right = centerX + _needleWarningLength;
-        }
-        else
-        {
-            BossArena arena = Boss.Arena;
-            bool hasBounds = arena != null && !float.IsInfinity(arena.LeftX) && !float.IsInfinity(arena.RightX);
-            left = hasBounds ? arena.LeftX : centerX - 20f;
-            right = hasBounds ? arena.RightX : centerX + 20f;
-        }
-
-        left += _spikeEdgeMargin;
-        right -= _spikeEdgeMargin;
-        if (left > right)
-        {
-            left = right = (left + right) * 0.5f;
         }
     }
 
@@ -500,27 +291,22 @@ public class BossStompPattern : BossPattern
 
         HideNeedleWarning();
 
-        // 점프 도중(공중)에 끊겼을 때만 땅으로.
-        // (패턴 시작 시에도 정리가 한 번 불리므로, 항상 붙이면 높은 곳에서 시작하는 찍기가 바닥으로 순간이동함)
-        if (_airborne && Boss != null)
+        // 공중에서 끊겼으면 땅으로
+        if (Boss != null)
         {
             Boss.SnapToGround();
         }
-
-        _airborne = false;
     }
 
-    private bool _airborne;
-
-    private float GetJumpY(float progress, float apexRatio, float landRatio, float startY, float groundY)
+    private float GetJumpY(float progress, float apexRatio, float landRatio, float groundY)
     {
-        float apexY = Mathf.Max(startY, groundY) + _jumpHeight;
+        float apexY = groundY + _jumpHeight;
 
         if (progress < apexRatio)
         {
             // 올라갈 때는 점점 느려짐
             float t = apexRatio > 0f ? progress / apexRatio : 1f;
-            return Mathf.Lerp(startY, apexY, 1f - ((1f - t) * (1f - t)));
+            return Mathf.Lerp(groundY, apexY, 1f - ((1f - t) * (1f - t)));
         }
 
         // 떨어질 때는 점점 빨라짐
@@ -557,16 +343,25 @@ public class BossStompPattern : BossPattern
             CreateNeedleWarningLine();
         }
 
-        GetSpikeRange(out float left, out float right);
+        Vector3 origin = _needleSpawnPoint != null ? _needleSpawnPoint.position : (Vector3)Boss.Position;
+        float left;
+        float right;
 
-        // 바닥에서 위로 Thickness만큼 덮는 띠 (가시 간격 반만큼 양옆을 더 덮음)
-        float halfSpacing = _spikeSpacing * 0.5f;
-        left -= halfSpacing;
-        right += halfSpacing;
-        float floorY = GetSpikeFloorY();
+        if (_needleWarningLength > 0f)
+        {
+            left = origin.x - _needleWarningLength;
+            right = origin.x + _needleWarningLength;
+        }
+        else
+        {
+            BossArena arena = Boss.Arena;
+            bool hasBounds = arena != null && !float.IsInfinity(arena.LeftX) && !float.IsInfinity(arena.RightX);
+            left = hasBounds ? arena.LeftX : origin.x - 20f;
+            right = hasBounds ? arena.RightX : origin.x + 20f;
+        }
 
         Transform line = _needleWarningLine.transform;
-        line.position = new Vector3((left + right) * 0.5f, floorY + (_needleWarningThickness * 0.5f), 0f);
+        line.position = new Vector3((left + right) * 0.5f, origin.y, origin.z);
         line.localScale = new Vector3(Mathf.Max(0.01f, right - left), _needleWarningThickness, 1f);
 
         // 보스 스프라이트와 같은 정렬 레이어에서 조금 앞에
@@ -581,7 +376,7 @@ public class BossStompPattern : BossPattern
         UpdateNeedleWarning(0f);
     }
 
-    /// <summary>깜빡이면서 점점 진해지고 높아짐 (솟을 때가 가까울수록)</summary>
+    /// <summary>깜빡이면서 점점 굵어짐 (발사가 가까울수록 진하게)</summary>
     private void UpdateNeedleWarning(float elapsed)
     {
         if (_needleWarningLine == null)
@@ -596,16 +391,9 @@ public class BossStompPattern : BossPattern
         color.a = _needleWarningColor.a * Mathf.Lerp(0.5f, 1f, progress) * blink;
         _needleWarningLine.color = color;
 
-        // 바닥에 붙은 채로 높이만 커지도록 위치도 같이 맞춤
-        float height = _needleWarningThickness * Mathf.Lerp(0.4f, 1f, progress);
-        Transform line = _needleWarningLine.transform;
-        Vector3 scale = line.localScale;
-        scale.y = height;
-        line.localScale = scale;
-
-        Vector3 position = line.position;
-        position.y = GetSpikeFloorY() + (height * 0.5f);
-        line.position = position;
+        Vector3 scale = _needleWarningLine.transform.localScale;
+        scale.y = _needleWarningThickness * Mathf.Lerp(0.4f, 1f, progress);
+        _needleWarningLine.transform.localScale = scale;
     }
 
     private void HideNeedleWarning()
@@ -642,4 +430,11 @@ public class BossStompPattern : BossPattern
     }
 
     #endregion
+
+    private void FireNeedle(Vector2 direction)
+    {
+        Vector3 position = _needleSpawnPoint != null ? _needleSpawnPoint.position : (Vector3)Boss.Position;
+        BossProjectile needle = Instantiate(_needlePrefab, position, Quaternion.identity);
+        needle.Launch(direction);
+    }
 }

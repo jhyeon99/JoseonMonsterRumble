@@ -18,27 +18,11 @@ public class BossIdleState : BossState
 
     public override void Enter()
     {
-        // 돌아보기 전 방향 기억 (꼬리치기 등 등 뒤 판정용)
-        _boss.IdleEnterFacingX = _boss.FacingX;
-
-        // 바로 써야 하는 패턴(등 뒤 꼬리치기 등)이 있으면 돌아보지 않고 Update에서 바로 사용
-        if (_boss.HasForcedPattern)
-        {
-            return;
-        }
-
         _boss.FacePlayer();
     }
 
     public override void Update()
     {
-        // 바로 써야 하는 패턴은 돌아보기 전에 먼저 사용 (꼬리치기가 등을 보인 채 시작하도록)
-        if (_boss.HasForcedPattern && _boss.TrySelectPattern(out BossPattern forced))
-        {
-            _boss.ChangeState(new BossPatternState(_boss, forced));
-            return;
-        }
-
         _boss.FacePlayer();
 
         _timer -= Time.deltaTime;

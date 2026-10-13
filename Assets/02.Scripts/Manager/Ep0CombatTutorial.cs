@@ -7,8 +7,6 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public sealed class Ep0CombatTutorial : MonoBehaviour
 {
-    private const int RequiredAttackHits = 3;
-
     [Header("Scene references")]
     [SerializeField] private Player _player;
     [SerializeField] private Enemy _enemy;
@@ -45,25 +43,27 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     [SerializeField] private Text _keyLabel;
     [SerializeField] private Image _keyImage;
     [SerializeField] private Sprite _attackKeySprite;
-    [SerializeField] private Sprite _dodgeKeySprite;
-    [SerializeField] private Font _focusFont;
+    [SerializeField] private Sprite _parryKeySprite;
 
     [Header("Dialogue")]
     [SerializeField, TextArea] private string _encounterText = "요괴?";
-    [SerializeField, TextArea] private string _attackText = "X를 눌러 일반 공격을 해보자.";
-    [SerializeField, TextArea] private string _dodgeText = "요괴가 공격하려고 한다.\nZ를 누르면 뒤로 물러나며 회피할 수 있다.";
-    [SerializeField, TextArea] private string _fleeText = "도망간다! 쫓아가자.";
+    [SerializeField, TextArea] private string _comboText = "일단 공격해보자.";
+    [SerializeField, TextArea] private string _parryText = "공격을 막아볼까?";
+    [SerializeField, TextArea] private string _parryTimingText = "공격이 닿기 직전에 막아보자.";
+    [SerializeField, TextArea] private string _retryText = "한 번 더 막아보자.";
+    [SerializeField, TextArea] private string _finisherText = "지금이다!";
+    [SerializeField, TextArea] private string _completeText = "좋아. 계속 가보자.";
 
-    [Header("Dodge focus and escape")]
-    [SerializeField, Min(0.01f)] private float _freezeBeforeHit = 0.08f;
-    [SerializeField, Range(0f, 1f)] private float _focusOpacity = 0.7f;
-    [SerializeField] private Color _focusBorderColor = Color.white;
-    [SerializeField, Min(0f)] private float _focusPadding = 24f;
-    [SerializeField, Min(1f)] private float _fleeDistance = 45f;
-    [SerializeField, Min(1f)] private float _fleeSpeedMultiplier = 2f;
+    [Header("Editable instructions")]
+    [Tooltip("{count}는 현재 타격 수, {total}은 목표 타격 수로 표시됩니다.")]
+    [SerializeField, TextArea] private string _comboInstruction = "";
+    [SerializeField, TextArea] private string _parryInstruction = "공격이 닿기 직전에 막기";
+    [SerializeField, TextArea] private string _parryTimingInstruction = "↓ 가드 / 패링";
+    [SerializeField, TextArea] private string _retryInstruction = "닿기 직전에 ↓";
+    [SerializeField, TextArea] private string _finisherInstruction = "가까이 가서 X로 마무리 공격";
 
     private PlayerInputHandler _input;
-    private EnemyCombat _combat;
+    private EnemyMeleeCombat _combat;
     private bool _initialized;
     private bool _enemyReady;
     private bool _enemyBodyWasSimulated;
@@ -72,12 +72,8 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     private Transform _monsterFocus;
     private float _normalCameraSize;
     private bool _hasCameraSize;
-    private int _attackHitCount;
-    private bool _tutorialPaused;
-    private bool _dodgeKeyReleased;
-    private bool _dodgeTriggered;
-    private Ep1TutorialFocusOverlay _focusOverlay;
-    private SpriteRenderer _enemySprite;
+    private int _comboStep;
+    private bool _parried;
     private bool _running;
     private bool _complete;
 
@@ -106,44 +102,6 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         }
     }
 
-    // ChaseState ancestry lets the existing ground movement apply its walk animation
-    // curves. Override every AI callback so this enemy only escapes to the right.
-    private sealed class FleeState : ChaseState
-    {
-        private readonly Enemy _enemy;
-        private readonly float _speedMultiplier;
-
-        public FleeState(Enemy enemy, float speedMultiplier) : base(enemy)
-        {
-            _enemy = enemy;
-            _speedMultiplier = speedMultiplier;
-        }
-
-        public override void Enter()
-        {
-            _enemy.Combat.StopAttack();
-            _enemy.MoveType.ResetLightKnockback();
-            _enemy.MoveType.StopMove();
-            _enemy.DirectionLock?.LockDirection();
-            Vector3 scale = _enemy.transform.localScale;
-            scale.x = Mathf.Abs(scale.x);
-            _enemy.transform.localScale = scale;
-            _enemy.Animation.SetAnimationSpeed(_speedMultiplier);
-            _enemy.Animation.SetRunning(true);
-        }
-
-        public override void Update() { }
-
-        public override void FixedUpdate() => _enemy.MoveType.Move(Vector2.right * _speedMultiplier);
-
-        public override void Exit()
-        {
-            _enemy.MoveType.StopMove();
-            _enemy.Animation.SetRunning(false);
-            _enemy.Animation.ResetAnimationSpeed();
-        }
-    }
-
     private void Awake()
     {
         // Direct scene play bypasses the bootstrap scene. Enemy.Start needs this manager
@@ -160,7 +118,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     private void OnEnable()
     {
-        Canvas.preWillRenderCanvases += UpdateHintPosition;
+        GameEvents.OnParry += HandleParry;
         if (_initialized && _enemy != null) _enemy.Health.OnHit += HandleEnemyHit;
     }
 
@@ -204,8 +162,6 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         _monsterFocus = new GameObject("TutorialMonsterFocus").transform;
         _monsterFocus.SetParent(transform, false);
         _input = _player.GetComponent<PlayerInputHandler>();
-        _enemySprite = _enemy.GetComponentInChildren<SpriteRenderer>();
-        _focusOverlay = new Ep1TutorialFocusOverlay(transform);
         _dialogue.alignment = TextAnchor.MiddleCenter;
         _instruction.alignment = TextAnchor.MiddleCenter;
         _keyLabel.alignment = TextAnchor.MiddleCenter;
@@ -228,7 +184,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         foreach (Enemy candidate in children)
         {
             if (candidate.GetComponent<Ep0TutorialEnemyHealth>() == null ||
-                candidate.GetComponent<EnemyCombat>() == null)
+                candidate.GetComponent<EnemyMeleeCombat>() == null)
             {
                 continue;
             }
@@ -244,7 +200,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         {
             if (health.gameObject.scene != gameObject.scene) continue;
             Enemy candidate = health.GetComponent<Enemy>();
-            if (candidate == null || candidate.GetComponent<EnemyCombat>() == null) continue;
+            if (candidate == null || candidate.GetComponent<EnemyMeleeCombat>() == null) continue;
             if (match != null) return;
             match = candidate;
         }
@@ -253,12 +209,6 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     private void Update()
     {
-        if (_tutorialPaused && Phase == "DodgeFocus")
-        {
-            if (!Input.GetKey(KeyCode.Z)) _dodgeKeyReleased = true;
-            if (_dodgeKeyReleased && Input.GetKeyDown(KeyCode.Z)) ResumeWithDodge();
-            return;
-        }
         if (!_initialized || _running || _complete || PauseController.IsPaused || _player.Health.IsDead) return;
         // The second location must be visible and player control restored before an encounter.
         if (_prologue != null && _prologue.Phase != "Complete") return;
@@ -302,8 +252,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     {
         _normalCameraSize = _camera.ScreenSizeInWorldCoordinates.y * 0.5f;
         _hasCameraSize = true;
-        _attackHitCount = 0;
-        _dodgeTriggered = false;
+        _parried = false;
         _normalInputWasEnabled = _input.enabled;
         Phase = "FirstMonsterFocus";
         _panel.SetActive(false);
@@ -312,96 +261,78 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         Phase = "Encounter";
         Show(_encounterText, "", "");
         yield return WaitRealtime(_noticeDuration);
-        Phase = "Attack";
+        _panel.SetActive(false);
         SetPlayerControl(true);
-        _input.SetTutorialInputRestriction(this, GameplayInputActions.Movement | GameplayInputActions.Attack);
-        ShowAttackProgress();
-        while (_attackHitCount < RequiredAttackHits) yield return null;
-        _input.SetTutorialInputRestriction(this, GameplayInputActions.Movement);
+
+        Phase = "Combo";
+        _comboStep = 0;
+        SetPlayerControl(true);
+        ShowComboProgress();
+        while (_comboStep < 3) yield return null;
         SetPlayerControl(false);
         while (_player.StateMachine.CurrentState == _player.AttackState) yield return null;
-        yield return WaitForNeutralPlayer();
-        _input.ClearTutorialInputRestriction(this);
 
-        SetPlayerControl(false);
-        FaceEachOther();
-        _enemy.StateMachine.ChangeState(new WaitingState(_enemy));
-        _combat.StopAttack();
-        _panel.SetActive(false);
-        Phase = "Windup";
-        _enemy.Animation.PlayAttack();
-        // Freeze just before the hit, so resuming the native backstep avoids this attack.
-        float remainingWindup = Mathf.Min(_freezeBeforeHit,
-            _player.Movement.DodgeInvincibleDuration * 0.5f);
-        yield return new WaitForSeconds(Mathf.Max(0.05f, _enemy.Data.AttackPrepareTime - remainingWindup));
-        while (!PauseController.TryPauseForTutorial(this)) yield return null;
-        _tutorialPaused = true;
-        _dodgeKeyReleased = !Input.GetKey(KeyCode.Z);
-        Phase = "DodgeFocus";
-        ShowDodgeFocus();
-        while (!_dodgeTriggered) yield return null;
+        _player.StateMachine.ChangeState(_player.IdleState);
+        while (!_parried)
+        {
+            yield return WaitForNeutralPlayer();
+            FaceEachOther();
+            _enemy.StateMachine.ChangeState(new WaitingState(_enemy));
+            _combat.StopAttack();
+            SetPlayerControl(true);
+            Phase = "Windup";
+            Show(_parryText, _parryInstruction, "↓");
+            _enemy.Animation.PlayAttack();
+            // The guide stays beside the player; movement, guard and game time remain active.
+            yield return new WaitForSeconds(Mathf.Max(0.05f, _enemy.Data.AttackPrepareTime));
+            Phase = "ParryAttempt";
+            Show(_parryTimingText, _parryTimingInstruction, "↓");
+            // Use the original attack/guard/parry path. Zero damage keeps practice safe.
+            _combat.IncreaseDamage(-100f);
+            _combat.Attack();
+            float attackTime = 0f;
+            while (!_parried && attackTime < _enemy.Data.AttackDurationTime)
+            {
+                // The original combat enters GroggyState before broadcasting the parry event.
+                // Also observe that state so a successful native parry cannot become a retry.
+                if (_enemy.IsGroggy)
+                {
+                    _parried = true;
+                    _enemy.TryHoldGroggy();
+                    break;
+                }
 
-        // The Z press changes state explicitly: ordinary buffered inputs are cleared during pause.
-        yield return new WaitForSeconds(remainingWindup);
-        _combat.IncreaseDamage(-_enemy.Data.MeleeAttackDamage);
-        _combat.Attack();
-        yield return new WaitForSeconds(_enemy.Data.AttackDurationTime);
-        _combat.StopAttack();
-        _combat.NormalDamage();
-        while (_player.StateMachine.CurrentState == _player.DodgeState) yield return null;
+                attackTime += Time.deltaTime;
+                yield return null;
+            }
+            _combat.StopAttack();
+            if (!_parried)
+            {
+                Show(_retryText, _retryInstruction, "↓");
+                yield return new WaitForSeconds(_dialogueDuration);
+            }
+        }
 
-        BeginEscape();
+        _enemy.TryHoldGroggy();
+
+        Phase = "Finisher";
+        SetPlayerControl(true);
+        Show(_finisherText, _finisherInstruction, "X");
+        // Keep movement and attack input active. The player's normal states find a target
+        // on each attack press, so an out-of-range attempt never locks the tutorial.
+        while (_enemy != null && !_enemy.IsDefeated) yield return null;
         _complete = true;
-        Phase = "Chase";
-        Show(_fleeText, "", "");
-        yield return new WaitForSeconds(_dialogueDuration);
+        Show(_completeText, "", "");
+        yield return new WaitForSeconds(0.8f);
         ReleaseControl();
         _running = false;
         Phase = "Complete";
     }
 
-    private void ShowDodgeFocus()
-    {
-        _focusOverlay.Show(null, null, _camera.GameCamera, _dodgeText, "Z를 눌러 회피", _dodgeKeySprite,
-            _focusFont != null ? _focusFont : _dialogue.font,
-            Mathf.Max(24, _hintFontSize), _dialogue.fontStyle, Color.white,
-            Color.black, 0f, _focusOpacity, _focusBorderColor, 0f,
-            new Vector2(440f, 100f), _focusPadding, new Vector2(120f, 120f), _enemySprite);
-    }
-
-    private void ResumeWithDodge()
-    {
-        if (!_tutorialPaused || Phase != "DodgeFocus" || _player.Health.IsDead) return;
-        PauseController.ResumeFromTutorial(this);
-        _tutorialPaused = false;
-        _focusOverlay.Hide();
-        SetPlayerControl(true);
-        _player.StateMachine.ChangeState(_player.DodgeState);
-        _dodgeTriggered = true;
-        Phase = "Dodge";
-    }
-
-    private void BeginEscape()
-    {
-        _enemy.ReleaseGroggy();
-        EnemyMoveArea area = _enemy.MoveArea;
-        if (area != null)
-        {
-            float left = area.StartPosition.x + area.CenterOffset.x - area.AreaSize.x * 0.5f;
-            float right = Mathf.Max(area.StartPosition.x + area.CenterOffset.x + area.AreaSize.x * 0.5f,
-                _enemy.transform.position.x + _fleeDistance);
-            area.CenterOffset = new Vector2((left + right) * 0.5f - area.StartPosition.x, area.CenterOffset.y);
-            area.AreaSize = new Vector2(right - left, area.AreaSize.y);
-        }
-        _enemy.StateMachine.ChangeState(new FleeState(_enemy, _fleeSpeedMultiplier));
-    }
-
     private IEnumerator WaitForNeutralPlayer()
     {
         SetPlayerControl(true);
-        while (!_player.IsGrounded || !_player.Movement.CanDodge ||
-               _player.StateMachine.CurrentState == _player.DodgeState ||
-               _player.StateMachine.CurrentState == _player.AttackState ||
+        while (!_player.IsGrounded || _player.StateMachine.CurrentState == _player.AttackState ||
                _player.StateMachine.CurrentState == _player.HitState)
         {
             yield return null;
@@ -429,13 +360,13 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     private void ClearPlayerInput()
     {
         _input.ClearInputState();
+        // The original ClearInputState does not clear the guard buffer.
+        _input.TryUseGuardInput();
     }
 
     private void ConfigurePlayerHint()
     {
         Canvas canvas = _panel.GetComponentInParent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.pixelPerfect = true;
         RectTransform canvasRect = canvas.GetComponent<RectTransform>();
         // The scene currently overrides this canvas to scale zero and non-stretch anchors.
         canvasRect.localScale = Vector3.one;
@@ -487,8 +418,20 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     {
         if (!_initialized || !_panel.activeSelf || _player == null || _camera == null) return;
         RectTransform panelRect = _panel.GetComponent<RectTransform>();
-        TutorialHintPositioning.Position(panelRect, _camera.GetComponent<Camera>(),
-            TutorialHintPositioning.GetRenderedPlayerAnchor(_player, false), _hintOffset, true);
+        var parent = panelRect.parent as RectTransform;
+        if (parent == null) return;
+        Camera view = _camera.GetComponent<Camera>();
+        Collider2D body = _player.GetComponent<Collider2D>();
+        Vector3 worldPosition = body != null ? body.bounds.center : _player.transform.position;
+        Vector3 screenPosition = view.WorldToScreenPoint(worldPosition);
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, screenPosition, null, out Vector2 localPosition))
+        {
+            Vector2 position = localPosition + _hintOffset;
+            Vector2 halfSize = panelRect.sizeDelta * 0.5f;
+            position.x = Mathf.Clamp(position.x, parent.rect.xMin + halfSize.x, parent.rect.xMax - halfSize.x);
+            position.y = Mathf.Clamp(position.y, parent.rect.yMin + halfSize.y, parent.rect.yMax - halfSize.y);
+            panelRect.anchoredPosition = position;
+        }
     }
 
     private IEnumerator ShowMonsterCinematic()
@@ -501,6 +444,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         if (body != null) body.linearVelocity = Vector2.zero;
         // Start from the grounded player instead of an in-flight follow position.
         _camera.CenterOnTargets();
+        yield return new WaitForEndOfFrame();
         yield return null;
         _monsterFocus.position = _enemy.GetEnemyCenterPosition();
         _cinematics.UseLetterbox = true;
@@ -549,16 +493,24 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     private void HandleEnemyHit(HitData hitData)
     {
-        if (Phase != "Attack" || hitData.ComboStep < 1 || hitData.ComboStep > 3 ||
-            _attackHitCount >= RequiredAttackHits)
-        {
-            return;
-        }
-        _attackHitCount++;
-        ShowAttackProgress();
+        if (Phase != "Combo" || hitData.ComboStep < 1 || hitData.ComboStep > 3) return;
+        _comboStep++;
+        ShowComboProgress();
     }
 
-    private void ShowAttackProgress() => Show(_attackText, $"일반 공격 {_attackHitCount}/{RequiredAttackHits}", "X");
+    private void ShowComboProgress()
+    {
+        string instruction = (_comboInstruction ?? "").Replace("{count}", _comboStep.ToString())
+            .Replace("{total}", "3");
+        Show(_comboText, instruction, "X");
+    }
+
+    private void HandleParry(HitData hitData)
+    {
+        if (Phase != "ParryAttempt" || !ReferenceEquals(hitData.Source, _combat)) return;
+        _parried = true;
+        _enemy.TryHoldGroggy();
+    }
 
     private void Show(string dialogue, string instruction, string key)
     {
@@ -568,7 +520,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
             string.IsNullOrEmpty(instruction) ? dialogue : dialogue + "\n" + instruction;
         _instruction.text = "";
         _keyPrompt.SetActive(!string.IsNullOrEmpty(key));
-        Sprite sprite = key == "X" ? _attackKeySprite : key == "Z" ? _dodgeKeySprite : null;
+        Sprite sprite = key == "X" ? _attackKeySprite : key == "↓" ? _parryKeySprite : null;
         if (_keyImage != null)
         {
             _keyImage.sprite = sprite;
@@ -581,9 +533,6 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     private void ReleaseControl()
     {
-        PauseController.ResumeFromTutorial(this);
-        _tutorialPaused = false;
-        _focusOverlay?.Hide();
         if (_running && _cinematics != null && _cinematics.IsPlaying) _cinematics.Stop();
         if (_combat != null)
         {
@@ -592,7 +541,6 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         }
         if (_input != null)
         {
-            _input.ClearTutorialInputRestriction(this);
             if (_running) SetPlayerControl(_normalInputWasEnabled);
             ClearPlayerInput();
         }
@@ -611,21 +559,17 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     private void OnDisable()
     {
-        Canvas.preWillRenderCanvases -= UpdateHintPosition;
         StopAllCoroutines();
+        GameEvents.OnParry -= HandleParry;
         if (_initialized && _enemy != null) _enemy.Health.OnHit -= HandleEnemyHit;
         ReleaseControl();
-        _running = false;
-        if (_initialized && _enemy != null && !_enemy.IsDefeated && !_complete)
+        if (_initialized && _enemy != null && !_enemy.IsDefeated)
         {
             _enemy.EnemyRb.simulated = _enemyBodyWasSimulated;
             _enemy.DirectionLock?.UnlockDirection();
             _enemy.StateMachine.ChangeState(new WaitingState(_enemy));
-            Phase = "Waiting";
         }
     }
-
-    private void OnDestroy() => _focusOverlay?.Dispose();
 
     private void OnDrawGizmosSelected()
     {

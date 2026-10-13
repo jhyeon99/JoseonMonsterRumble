@@ -337,7 +337,6 @@ public class PlayerAttackState : PlayerBaseState
 
         if (_elapsedTime >= AttackSafetyTimeout)
         {
-            _player.Attack.StopAttack();
             EndAttack();
             return;
         }
@@ -454,7 +453,6 @@ public class PlayerAttackState : PlayerBaseState
 
     private void EndAttack()
     {
-        _player.Attack.CompleteAttackStep();
         _stateMachine.ChangeState(_player.IdleState);
     }
 

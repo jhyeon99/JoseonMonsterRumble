@@ -22,8 +22,7 @@ public class MovingPlatformSwitch : MonoBehaviour, IDamageable
 
     public bool TakeDamage(HitData hitData)
     {
-        bool moved = _platform != null && _platform.TryMoveToEndpoint(_targetEndpoint);
-        if (moved) AudioManager.Instance?.PlaySceneEvent("Environment.Switch", this);
-        return moved;
+        return _platform != null &&
+            _platform.TryMoveToEndpoint(_targetEndpoint);
     }
 }

@@ -1,7 +1,6 @@
 using Com.LuisPedroFonseca.ProCamera2D;
 using UnityEngine;
 
-[DefaultExecutionOrder(100)]
 [DisallowMultipleComponent]
 [RequireComponent(typeof(ProCamera2D))]
 public sealed class MovingPlatformCameraZoom : BasePC2D, ISizeDeltaChanger
@@ -18,7 +17,6 @@ public sealed class MovingPlatformCameraZoom : BasePC2D, ISizeDeltaChanger
 
     private PlayerHealth _playerHealth;
     private Rigidbody2D _playerBody;
-    private ProCamera2DNumericBoundaries _boundaries;
     private readonly ContactPoint2D[] _platformContacts = new ContactPoint2D[32];
     private float _normalSize;
     private float _zoomVelocity;
@@ -38,7 +36,6 @@ public sealed class MovingPlatformCameraZoom : BasePC2D, ISizeDeltaChanger
     protected override void Awake()
     {
         base.Awake();
-        _boundaries = ProCamera2D.GetComponent<ProCamera2DNumericBoundaries>();
         ProCamera2D.AddSizeDeltaChanger(this);
     }
 
@@ -73,14 +70,11 @@ public sealed class MovingPlatformCameraZoom : BasePC2D, ISizeDeltaChanger
         if (!_ownsZoom)
             return originalDelta;
 
-        float desiredSize = isRiding ? Mathf.Max(_normalSize, _zoomOutSize) : _normalSize;
-        float maximumSize = GetMaximumVerticalSize();
-        float targetSize = Mathf.Min(desiredSize, maximumSize);
+        float targetSize = isRiding ? Mathf.Max(_normalSize, _zoomOutSize) : _normalSize;
         if (Mathf.Abs(currentSize - targetSize) <= 0.001f)
         {
             _zoomVelocity = 0f;
-            // Keep the original size until a smaller boundary zone is left.
-            if (!isRiding && Mathf.Abs(currentSize - _normalSize) <= 0.001f)
+            if (!isRiding)
                 _ownsZoom = false;
 
             return originalDelta + targetSize - currentSize;
@@ -88,63 +82,7 @@ public sealed class MovingPlatformCameraZoom : BasePC2D, ISizeDeltaChanger
 
         float nextSize = Mathf.SmoothDamp(currentSize, targetSize, ref _zoomVelocity,
             Mathf.Max(0.01f, _zoomSmoothness), Mathf.Infinity, deltaTime);
-        nextSize = Mathf.Min(nextSize, maximumSize);
         return originalDelta + nextSize - currentSize;
-    }
-
-    private void LateUpdate()
-    {
-        // Camera effects can change size/position after ProCamera2D checks its bounds.
-        // Clamp the final visible screen, including camera rotation, before rendering.
-        Camera camera = ProCamera2D.GameCamera;
-        if (!ProCamera2D.isActiveAndEnabled || !HasVerticalBoundaries() || camera == null || !camera.orthographic ||
-            ProCamera2D.Axis != MovementAxis.XY)
-        {
-            return;
-        }
-
-        float extentPerSize = GetVerticalExtentPerSize(camera);
-        if (extentPerSize <= Mathf.Epsilon)
-            return;
-
-        float maximumSize = GetMaximumVerticalSize();
-        if (camera.orthographicSize > maximumSize)
-            ProCamera2D.UpdateScreenSize(maximumSize);
-
-        float halfHeight = camera.orthographicSize * extentPerSize;
-        float parentY = ProCamera2D.transform.parent != null ? ProCamera2D.transform.parent.position.y : 0f;
-        float minimumCenterY = _boundaries.BottomBoundary + parentY + halfHeight;
-        float maximumCenterY = _boundaries.TopBoundary + parentY - halfHeight;
-        Vector3 position = ProCamera2D.transform.position;
-        if (_boundaries.UseBottomBoundary) position.y = Mathf.Max(position.y, minimumCenterY);
-        if (_boundaries.UseTopBoundary) position.y = Mathf.Min(position.y, maximumCenterY);
-        ProCamera2D.transform.position = position;
-    }
-
-    private bool HasVerticalBoundaries()
-    {
-        if (_boundaries == null) _boundaries = ProCamera2D.GetComponent<ProCamera2DNumericBoundaries>();
-        return _boundaries != null && _boundaries.isActiveAndEnabled && _boundaries.UseNumericBoundaries &&
-            (_boundaries.UseTopBoundary || _boundaries.UseBottomBoundary);
-    }
-
-    private float GetMaximumVerticalSize()
-    {
-        Camera camera = ProCamera2D.GameCamera;
-        if (!HasVerticalBoundaries() || !_boundaries.UseTopBoundary || !_boundaries.UseBottomBoundary ||
-            camera == null || !camera.orthographic || ProCamera2D.Axis != MovementAxis.XY)
-        {
-            return float.PositiveInfinity;
-        }
-
-        float extentPerSize = GetVerticalExtentPerSize(camera);
-        if (extentPerSize <= Mathf.Epsilon) return float.PositiveInfinity;
-        return Mathf.Max(0.01f, (_boundaries.TopBoundary - _boundaries.BottomBoundary) * 0.5f / extentPerSize);
-    }
-
-    private static float GetVerticalExtentPerSize(Camera camera)
-    {
-        return Mathf.Abs(camera.transform.right.y) * camera.aspect + Mathf.Abs(camera.transform.up.y);
     }
 
     public override void OnReset()

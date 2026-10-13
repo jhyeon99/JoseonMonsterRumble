@@ -29,25 +29,14 @@ public class PlayerFinisher : MonoBehaviour
     [SerializeField, Min(0.1f)]
     private float _duration = 1.2f;
 
-    [Tooltip("Attack 클립의 타격 프레임 인덱스. 첫 프레임은 0입니다.")]
-    [SerializeField, Min(1)] private int _impactFrameIndex = 3;
-
     [Header("날려 보내기 연출")]
     [SerializeField]
     private LaunchSettings _launch = LaunchSettings.Default;
-
-    [Header("패리어택 VFX")]
-    [Tooltip("플레이어 자식 VFX. 편집 화면에서 Transform으로 위치와 크기를 조절합니다.")]
-    [SerializeField] private Animator _parryAttackEffect;
-
-    private SpriteRenderer _parryEffectRenderer;
 
     private static readonly Collider2D[] Hits = new Collider2D[16];
 
     // 마무리는 3타 모션 사용 (Player.PlayFinisherAnimation과 같은 기준)
     private const int ComboIndex = 2;
-    // 첫 프레임은 0이므로 두 번째 프레임의 인덱스는 1.
-    private const int ParryEffectFrameIndex = 1;
     private const string ReadyClipName = "Player_Attack_3rd_Ready";
     private const string AttackClipName = "Player_Attack_3rd";
     private const string RecoverClipName = "Player_Attack_3rd_Recover";
@@ -55,95 +44,8 @@ public class PlayerFinisher : MonoBehaviour
     private bool _hasCachedTiming;
     private float _cachedImpactDelay;
     private float _cachedDuration;
-    private float _parryEffectNormalizedTime = float.PositiveInfinity;
-    private float _impactNormalizedTime = float.PositiveInfinity;
-    private bool _hasCachedParryEffectTiming;
 
     public LaunchSettings Launch => _launch;
-
-    private void Awake()
-    {
-        if (_parryAttackEffect == null)
-        {
-            Debug.LogWarning("[PlayerFinisher] 패리어택 VFX 참조가 없습니다.", this);
-            return;
-        }
-
-        _parryEffectRenderer = _parryAttackEffect.GetComponent<SpriteRenderer>();
-        if (_parryEffectRenderer == null)
-        {
-            Debug.LogWarning("[PlayerFinisher] 패리어택 VFX에 SpriteRenderer가 없습니다.", this);
-        }
-        StopParryAttackEffect();
-    }
-
-    private void LateUpdate()
-    {
-        if (_parryAttackEffect != null && _parryAttackEffect.enabled &&
-            _parryAttackEffect.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
-        {
-            StopParryAttackEffect();
-        }
-    }
-
-    private void OnDisable()
-    {
-        StopParryAttackEffect();
-    }
-
-    private void StopParryAttackEffect()
-    {
-        if (_parryEffectRenderer != null)
-        {
-            _parryEffectRenderer.enabled = false;
-        }
-        if (_parryAttackEffect != null)
-        {
-            _parryAttackEffect.enabled = false;
-        }
-    }
-
-    public float GetParryEffectNormalizedTime(Animator animator)
-    {
-        if (_hasCachedParryEffectTiming || animator == null || animator.runtimeAnimatorController == null)
-        {
-            return _parryEffectNormalizedTime;
-        }
-
-        _hasCachedParryEffectTiming = true;
-        foreach (AnimationClip clip in animator.runtimeAnimatorController.animationClips)
-        {
-            if (clip != null && clip.name == AttackClipName && clip.frameRate > 0f && clip.length > 0f)
-            {
-                _parryEffectNormalizedTime = ParryEffectFrameIndex / (clip.frameRate * clip.length);
-                _impactNormalizedTime = Mathf.Clamp01(_impactFrameIndex / (clip.frameRate * clip.length));
-                return _parryEffectNormalizedTime;
-            }
-        }
-
-        Debug.LogWarning("[PlayerFinisher] 3타 클립을 찾지 못해 패리어택 VFX 타이밍을 계산할 수 없습니다.", this);
-        return _parryEffectNormalizedTime;
-    }
-
-    public void PlayParryAttackEffect()
-    {
-        if (_parryAttackEffect == null || _parryEffectRenderer == null)
-        {
-            return;
-        }
-
-        _parryAttackEffect.enabled = true;
-        _parryAttackEffect.Rebind();
-        _parryAttackEffect.Play(0, 0, 0f);
-        _parryAttackEffect.Update(0f);
-        _parryEffectRenderer.enabled = true;
-    }
-
-    public float GetImpactNormalizedTime(Animator animator)
-    {
-        GetParryEffectNormalizedTime(animator);
-        return _impactNormalizedTime;
-    }
 
     /// <summary>
     /// 타격 시점과 전체 길이 (초).
@@ -223,9 +125,6 @@ public class PlayerFinisher : MonoBehaviour
     {
         // 인스펙터에서 값을 바꾸면 다시 계산
         _hasCachedTiming = false;
-        _hasCachedParryEffectTiming = false;
-        _parryEffectNormalizedTime = float.PositiveInfinity;
-        _impactNormalizedTime = float.PositiveInfinity;
     }
 #endif
 

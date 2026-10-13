@@ -6,7 +6,6 @@ public class StateMachine
     /// 현재 활성화된 상태
     /// </summary>
     public IState CurrentState { get; private set; }
-    public event System.Action<IState, IState> OnStateChanged;
 
     /// <summary>
     /// 상태 머신을 초기화하고 시작 상태를 설정합니다.
@@ -22,7 +21,6 @@ public class StateMachine
 
         CurrentState = startingState;
         CurrentState.Enter();
-        OnStateChanged?.Invoke(null, CurrentState);
     }
 
     /// <summary>
@@ -41,7 +39,6 @@ public class StateMachine
         if (CurrentState == newState)
             return;
 
-        IState previous = CurrentState;
         // 기존 상태 정리
         CurrentState?.Exit();
 
@@ -50,7 +47,6 @@ public class StateMachine
 
         // 새 상태 진입
         CurrentState.Enter();
-        OnStateChanged?.Invoke(previous, CurrentState);
     }
 
     /// <summary>

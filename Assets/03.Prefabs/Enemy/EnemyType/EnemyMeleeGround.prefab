@@ -525,8 +525,6 @@ MonoBehaviour:
     Unblockable: 0
     ParryWindowOverride: 0
     GuardGaugeCost: 10
-    BlockInvincibleTime: 0
-    FreeBlockOnParryTiming: 0
 --- !u!1 &4754600020612061745
 GameObject:
   m_ObjectHideFlags: 0
@@ -627,7 +625,6 @@ GameObject:
   - component: {fileID: 721203627900600272}
   - component: {fileID: 1900000006}
   - component: {fileID: -1521960397172271471}
-  - component: {fileID: 8441103873197707212}
   m_Layer: 7
   m_Name: EnemyMeleeGround
   m_TagString: Enemy
@@ -792,8 +789,6 @@ MonoBehaviour:
     Unblockable: 0
     ParryWindowOverride: 0
     GuardGaugeCost: 35
-    BlockInvincibleTime: 0
-    FreeBlockOnParryTiming: 0
   _groggyDuration: 2
 --- !u!114 &7165762390576756721
 MonoBehaviour:
@@ -832,7 +827,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 728a422b81f2dc84abbffee7b8ef4ec0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  _damageVarianceRatio: 0.1
 --- !u!114 &1892738677565765542
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -878,7 +872,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHitFeedback
   _health: {fileID: -3618497924999448453}
-  _bossHealth: {fileID: 0}
   _sourceRenderer: {fileID: 5565495850182204207}
   _flashRenderer: {fileID: 1900000005}
   _lightHit:
@@ -912,16 +905,3 @@ MonoBehaviour:
   _peakOpacity: 0.9
   _glintEffectPrefab: {fileID: 0}
   _glintPoint: {fileID: 0}
---- !u!114 &8441103873197707212
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9071619103714574906}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d47f898a35324391bdc05e4fe6b4f0b6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyAudio
-  _soundSet: {fileID: 0}

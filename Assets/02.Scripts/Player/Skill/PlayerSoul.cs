@@ -13,11 +13,6 @@ public class PlayerSoul : MonoBehaviour, ISoulSource
 
     private void Update()
     {
-        if (PauseController.IsGameplayInputBlocked)
-        {
-            return;
-        }
-
         if (Input.GetKeyDown(KeyCode.F1))
         {
             AddSoul(1f);

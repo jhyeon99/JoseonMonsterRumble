@@ -8,7 +8,6 @@ using UnityEngine.UI;
 /// <summary>
 /// 보스전 연출 감독. 씬에 빈 오브젝트로 하나 두면 보스 이벤트에 맞춰 자동 재생 (보스 자식에 두지 않기: 처치 후 보스가 꺼짐).
 /// - 등장: 플레이어 조작 잠금 + 무적, 레터박스, 카메라가 보스 쪽으로 이동 + 줌, 보스 이름 타이틀 → 원래대로
-///   (첫 조우 때만. 리스폰으로 씬을 다시 불러오면 생략하고 바로 전투)
 /// - 2페이즈(하울링): 조작 잠금 + 무적, 화면 플래시, 보스 분노 색조 + 화면 색조, 음악 전환
 /// - 처치(마무리 공격 적중 후): 조작 잠금 + 무적, 흰 화면 플래시 + 슬로모션, 레터박스, 음악 페이드 아웃
 ///   → 처치 연출이 끝나면 클리어 문구 표시 후 해제 (On Defeat Sequence Finished 이벤트로 스테이지 클리어 연결)
@@ -30,44 +29,6 @@ public class BossCinematicDirector : MonoBehaviour
     [Header("등장")]
     [SerializeField]
     private bool _playIntro = true;
-
-    [Tooltip("켜면 첫 조우 때만 등장 연출(카메라 이동 / 레터박스 / 이름)을 보여주고, 리스폰(씬 다시 불러오기) 후에는 생략. 게임을 다시 실행하면 초기화")]
-    [SerializeField]
-    private bool _playIntroOnlyOnce = true;
-
-    [Tooltip("켜면 리스폰으로 등장 연출을 생략할 때 보스의 등장 하울링도 건너뛰고 바로 전투 시작")]
-    [SerializeField]
-    private bool _skipIntroHowlOnRespawn = true;
-
-    // 이번 실행에서 등장 연출을 이미 본 보스 (씬 이름 + 보스 이름). 씬을 다시 불러와도 유지
-    private static readonly HashSet<string> SeenIntros = new HashSet<string>();
-
-    /// <summary>이번 실행에서 이 씬의 보스 등장 연출을 이미 봤는지 (리스폰 로딩 생략 판단용)</summary>
-    public static bool HasSeenIntroInScene(string sceneName)
-    {
-        if (string.IsNullOrEmpty(sceneName))
-        {
-            return false;
-        }
-
-        string prefix = sceneName + "/";
-        foreach (string key in SeenIntros)
-        {
-            if (key.StartsWith(prefix))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    // 에디터에서 도메인 리로드를 끄고 플레이해도 플레이할 때마다 초기화
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetSeenIntros()
-    {
-        SeenIntros.Clear();
-    }
 
     [Tooltip("카메라가 보스 쪽으로 이동하는 부드러움 (작을수록 빠름)")]
     [SerializeField, Min(0f)]
@@ -152,6 +113,10 @@ public class BossCinematicDirector : MonoBehaviour
     [SerializeField]
     private Color _bossAngerTint = new Color(1f, 0.72f, 0.72f, 1f);
 
+    [Tooltip("화면 전체에 깔리는 색조 (알파 = 세기, 0이면 사용 안 함)")]
+    [SerializeField]
+    private Color _screenAngerTint = new Color(0.55f, 0f, 0f, 0.12f);
+
     [Tooltip("색조가 바뀌는 시간 (초)")]
     [SerializeField, Min(0.01f)]
     private float _tintTransitionTime = 1.2f;
@@ -159,6 +124,25 @@ public class BossCinematicDirector : MonoBehaviour
     [Tooltip("색조를 입힐 보스 스프라이트들. 비우면 시작할 때 켜져 있는 보스의 모든 SpriteRenderer")]
     [SerializeField]
     private SpriteRenderer[] _bossTintTargets;
+
+    [Header("음악 (비우면 바꾸지 않음)")]
+    [Tooltip("등장 연출 시작 시 재생")]
+    [SerializeField]
+    private AudioClip _phase1Bgm;
+
+    [Tooltip("2페이즈 진입 시 재생")]
+    [SerializeField]
+    private AudioClip _phase2Bgm;
+
+    [SerializeField, Min(0f)]
+    private float _bgmFadeTime = 1f;
+
+    [Tooltip("처치 시 음악을 페이드 아웃")]
+    [SerializeField]
+    private bool _stopBgmOnDefeat = true;
+
+    [SerializeField, Min(0f)]
+    private float _defeatBgmFadeTime = 2f;
 
     [Header("처치")]
     [Tooltip("처치 연출 종료 신호가 오지 않을 때 최대 잠금 시간 (초)")]
@@ -186,6 +170,10 @@ public class BossCinematicDirector : MonoBehaviour
     [Tooltip("평소 속도로 돌아오는 시간 (실제 초)")]
     [SerializeField, Min(0.01f)]
     private float _slowMotionRecover = 0.5f;
+
+    [Tooltip("처치 순간 효과음 (선택)")]
+    [SerializeField]
+    private AudioClip _defeatSfx;
 
     [Header("클리어 문구")]
     [Tooltip("처치 연출이 끝난 뒤 표시 (비우면 표시 안 함)")]
@@ -215,6 +203,10 @@ public class BossCinematicDirector : MonoBehaviour
     [SerializeField, Min(0.01f)]
     private float _clearFadeOut = 0.6f;
 
+    [Tooltip("클리어 문구가 나타날 때 효과음 (선택)")]
+    [SerializeField]
+    private AudioClip _clearSfx;
+
     [Tooltip("처치 연출이 모두 끝나고 조작이 풀릴 때 (스테이지 클리어 / 다음 씬 연결용)")]
     [SerializeField]
     private UnityEvent _onDefeatSequenceFinished;
@@ -233,6 +225,7 @@ public class BossCinematicDirector : MonoBehaviour
     private RectTransform _bottomBar;
     private CanvasGroup _titleGroup;
     private Image _flashImage;
+    private Image _tintImage;
     private float _letterboxAmount;
     private Coroutine _letterboxRoutine;
     private Coroutine _defeatRoutine;
@@ -320,20 +313,6 @@ public class BossCinematicDirector : MonoBehaviour
             return;
         }
 
-        if (_playIntroOnlyOnce)
-        {
-            string key = $"{gameObject.scene.name}/{_boss.BossName}";
-
-            // 리스폰 등으로 이미 본 등장 연출은 생략하고 음악만 시작
-            if (!SeenIntros.Add(key))
-            {
-                // Boss.StartFight가 이 이벤트 직후 확인해서 하울링 없이 바로 대기 → 패턴으로 넘어감
-                _boss.SkipIntro = _skipIntroHowlOnRespawn;
-                // BossAudio requests the catalog music on fight start.
-                return;
-            }
-        }
-
         // 연출이 끝날 때까지 보스가 패턴을 시작하지 않도록 등장 상태를 붙잡아 둠
         _boss.HoldIntro = true;
         StartCoroutine(IntroRoutine());
@@ -375,7 +354,7 @@ public class BossCinematicDirector : MonoBehaviour
     {
         LockPlayer();
         SetLetterbox(true);
-        // BossAudio requests the catalog music on fight start.
+        PlayBgm(_phase1Bgm);
 
         // 보스 쪽으로 카메라 이동 + 줌
         if (_cameraFollow != null)
@@ -419,7 +398,7 @@ public class BossCinematicDirector : MonoBehaviour
             SetLetterbox(true);
         }
 
-        // BossAudio requests the catalog music on phase change.
+        PlayBgm(_phase2Bgm);
         StartCoroutine(FlashRoutine(_flashColor, _flashPeakAlpha, _flashDuration));
         StartCoroutine(TintRoutine(true));
 
@@ -441,14 +420,17 @@ public class BossCinematicDirector : MonoBehaviour
         // 마무리 공격이 맞는 순간: 흰 화면 플래시 + 슬로모션
         StartCoroutine(FlashRoutine(_defeatFlashColor, _defeatFlashPeakAlpha, _defeatFlashDuration));
         StartCoroutine(SlowMotionRoutine());
-        // BossAudio requests Boss.Defeat once when defeat is confirmed.
+        PlaySfx(_defeatSfx);
 
         if (_letterboxOnDefeat)
         {
             SetLetterbox(true);
         }
 
-        // BossAudio owns defeat music so this routine cannot cancel Music.Victory.
+        if (_stopBgmOnDefeat && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopBgm(_defeatBgmFadeTime);
+        }
 
         StartCoroutine(TintRoutine(false));
 
@@ -462,7 +444,7 @@ public class BossCinematicDirector : MonoBehaviour
         // 클리어 문구
         if (_clearGroup != null)
         {
-            // BossAudio requests Music.Victory once when defeat is confirmed.
+            PlaySfx(_clearSfx);
             yield return FadeCanvasGroup(_clearGroup, 0f, 1f, _clearFadeIn);
             yield return Wait(_clearHold);
             yield return FadeCanvasGroup(_clearGroup, 1f, 0f, _clearFadeOut);
@@ -538,10 +520,12 @@ public class BossCinematicDirector : MonoBehaviour
         _isSlowMotion = false;
     }
 
-    /// <summary>분노 색조 켜기 / 끄기 (보스 스프라이트만. 화면 전체 붉은 색조는 사용 안 함)</summary>
+    /// <summary>분노 색조 켜기 / 끄기 (보스 스프라이트 + 화면)</summary>
     private IEnumerator TintRoutine(bool angry)
     {
         float elapsed = 0f;
+        float startScreen = _tintImage != null ? _tintImage.color.a : 0f;
+        float endScreen = angry ? _screenAngerTint.a : 0f;
 
         while (elapsed < _tintTransitionTime)
         {
@@ -549,6 +533,11 @@ public class BossCinematicDirector : MonoBehaviour
             float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / _tintTransitionTime));
 
             ApplyBossTint(angry ? t : 1f - t);
+            if (_tintImage != null)
+            {
+                SetImageAlpha(_tintImage, _screenAngerTint, Mathf.Lerp(startScreen, endScreen, t));
+            }
+
             yield return null;
         }
     }
@@ -666,6 +655,22 @@ public class BossCinematicDirector : MonoBehaviour
         }
     }
 
+    private static void PlaySfx(AudioClip clip)
+    {
+        if (clip != null && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySfx(clip);
+        }
+    }
+
+    private void PlayBgm(AudioClip clip)
+    {
+        if (clip != null && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayBgm(clip, _bgmFadeTime);
+        }
+    }
+
     #endregion
 
     #region UI
@@ -685,7 +690,11 @@ public class BossCinematicDirector : MonoBehaviour
         scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.matchWidthOrHeight = 0.5f;
 
-        // 플래시 → 레터박스 → 타이틀 순서로 위에 그려짐
+        // 화면 색조 → 플래시 → 레터박스 → 타이틀 순서로 위에 그려짐
+        _tintImage = CreateImage("AngerTint", canvasObject.transform, _screenAngerTint);
+        Stretch(_tintImage.rectTransform, Vector2.zero, Vector2.one);
+        SetImageAlpha(_tintImage, _screenAngerTint, 0f);
+
         _flashImage = CreateImage("Flash", canvasObject.transform, _flashColor);
         Stretch(_flashImage.rectTransform, Vector2.zero, Vector2.one);
         SetImageAlpha(_flashImage, _flashColor, 0f);
