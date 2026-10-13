@@ -142,13 +142,26 @@ public class BossSummonPattern : BossPattern
     private float _hitFallbackDuration = 1f;
 
     [Header("궁극기 실패 (즉사)")]
-    [Tooltip("즉사 연출 프리팹 (PF_BossDeathSpike). 플레이어 위치에 생성")]
+    [Tooltip("즉사 연출 프리팹 (PF_BossDeathSpike). Attach To Camera면 카메라 자식, 아니면 플레이어 위치에 생성")]
     [SerializeField]
     private GameObject _deathVfxPrefab;
 
-    [Tooltip("즉사 연출 위치 보정 (플레이어 발밑 기준)")]
+    [Tooltip("켜면 즉사 연출을 메인 카메라 자식으로 생성 (화면을 덮는 연출이 플레이어 / 카메라 이동에 밀리지 않고 화면에 고정)")]
+    [SerializeField]
+    private bool _attachDeathVfxToCamera = true;
+
+    [Tooltip("즉사 연출 위치 보정. 카메라 자식이면 화면 중앙 기준, 아니면 플레이어 발밑 기준")]
     [SerializeField]
     private Vector2 _deathVfxOffset = Vector2.zero;
+
+    [Tooltip("(카메라 자식일 때) 카메라 앞쪽 거리. 카메라 z가 -10이면 10 = 월드 z 0. 카메라 Near Clip보다 커야 보임")]
+    [SerializeField, Min(0.01f)]
+    private float _deathVfxCameraDepth = 10f;
+
+    [Tooltip("(카메라 자식일 때) 이 카메라 크기(Orthographic Size) 기준으로 만든 연출이면 입력. " +
+             "줌으로 카메라 크기가 달라져도 화면을 똑같이 덮도록 크기를 맞춤. 0이면 프리팹 크기 그대로")]
+    [SerializeField, Min(0f)]
+    private float _deathVfxReferenceOrthoSize = 0f;
 
     [Tooltip("즉사 연출이 사라지기까지 (초)")]
     [SerializeField, Min(0.1f)]
@@ -507,12 +520,7 @@ public class BossSummonPattern : BossPattern
         Boss.SetTrigger(_releaseTrigger);
 
         Transform player = Boss.Player;
-        if (_deathVfxPrefab != null && player != null)
-        {
-            Vector3 position = player.position + (Vector3)_deathVfxOffset;
-            GameObject vfx = Instantiate(_deathVfxPrefab, position, Quaternion.identity);
-            Destroy(vfx, _deathVfxLifetime);
-        }
+        SpawnDeathVfx(player);
 
         CameraShake.Shake(_deathShake);
         if (_deathScreenColor.a > 0f)
@@ -551,6 +559,43 @@ public class BossSummonPattern : BossPattern
         }
 
         return _chargeClip == null || Boss.IsPlayingClip(_chargeClip);
+    }
+
+    /// <summary>즉사 연출 생성. 카메라 자식이면 화면에 고정, 아니면 플레이어 위치</summary>
+    private void SpawnDeathVfx(Transform player)
+    {
+        if (_deathVfxPrefab == null)
+        {
+            return;
+        }
+
+        Camera camera = _attachDeathVfxToCamera ? Camera.main : null;
+        if (camera != null)
+        {
+            GameObject vfx = Instantiate(_deathVfxPrefab, camera.transform);
+            vfx.transform.localPosition = new Vector3(_deathVfxOffset.x, _deathVfxOffset.y, _deathVfxCameraDepth);
+            vfx.transform.localRotation = Quaternion.identity;
+
+            if (_deathVfxReferenceOrthoSize > 0f && camera.orthographic)
+            {
+                vfx.transform.localScale *= camera.orthographicSize / _deathVfxReferenceOrthoSize;
+            }
+
+            Destroy(vfx, _deathVfxLifetime);
+            return;
+        }
+
+        if (_attachDeathVfxToCamera)
+        {
+            Debug.LogWarning($"{name}: {PatternName} 메인 카메라(MainCamera 태그)를 찾지 못해 즉사 연출을 플레이어 위치에 생성합니다.", this);
+        }
+
+        if (player != null)
+        {
+            Vector3 position = player.position + (Vector3)_deathVfxOffset;
+            GameObject vfx = Instantiate(_deathVfxPrefab, position, Quaternion.identity);
+            Destroy(vfx, _deathVfxLifetime);
+        }
     }
 
     private void SetChargeProgress(float value)
