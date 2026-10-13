@@ -28,10 +28,6 @@ public class BossSummonPattern : BossPattern
     [SerializeField]
     private Transform _summonPoint;
 
-    [Tooltip("점프할 때 재생할 애니메이터 트리거 (비우면 애니메이션 변경 없음). 착지하면 대기 상태(Idle State)로 바로 돌려서 angry가 곧바로 시작되게 함")]
-    [SerializeField]
-    private string _jumpTrigger = "";
-
     [Tooltip("뛰어오를 때 발밑 먼지 (크기 / 위치는 Boss의 점프 먼지 설정)")]
     [SerializeField]
     private bool _takeoffDust = true;
@@ -40,9 +36,18 @@ public class BossSummonPattern : BossPattern
     [SerializeField]
     private bool _landingDust = true;
 
-    [Tooltip("소환 위치까지 점프하는 시간 (초)")]
+    [Tooltip("소환 위치까지 공중에서 이동하는 속도 (초당 거리, 출발 → 도착 직선 거리 기준). 멀수록 오래 떠 있음. " +
+             "애니메이션은 시작(Boss_Move_Start) → 공중(체공 시간 동안 유지) → 착지(Boss_Move_End). 상태 이름은 Boss에서 설정")]
+    [SerializeField, Min(0.1f)]
+    private float _jumpSpeed = 20f;
+
+    [Tooltip("체공 시간 최소 (초)")]
     [SerializeField, Min(0.05f)]
-    private float _jumpDuration = 0.8f;
+    private float _minJumpDuration = 0.2f;
+
+    [Tooltip("체공 시간 최대 (초)")]
+    [SerializeField, Min(0.05f)]
+    private float _maxJumpDuration = 1f;
 
     [Tooltip("출발 / 도착 중 높은 쪽 기준으로 더 올라가는 높이")]
     [SerializeField, Min(0f)]
@@ -52,7 +57,7 @@ public class BossSummonPattern : BossPattern
     [SerializeField]
     private bool _disableCollisionWhileJumping = true;
 
-    [Tooltip("착지 후 angry 시작까지 대기 (초)")]
+    [Tooltip("착지 애니메이션이 끝난 뒤 궁극기 시작까지 추가 대기 (초)")]
     [SerializeField, Min(0f)]
     private float _delayAfterLanding = 0.2f;
 
@@ -126,9 +131,13 @@ public class BossSummonPattern : BossPattern
     [SerializeField]
     private string _chargeProgressParameter = "ultimateProgress";
 
-    [Tooltip("실패(즉사) 시 보낼 트리거 (차지 → 해방 애니메이션)")]
+    [Tooltip("해방 상태를 직접 재생하지 못했을 때만 보내는 예비 트리거 (차지 → 해방 전이)")]
     [SerializeField]
     private string _releaseTrigger = "ultimateRelease";
+
+    [Tooltip("해방 애니메이터 상태 이름. 실패 시 이 상태를 직접 재생 (트리거 전이에 의존하지 않음)")]
+    [SerializeField]
+    private string _releaseStateName = "boss_Charge_Release";
 
     [Tooltip("파훼 시 재생할 피격 애니메이터 상태 이름")]
     [SerializeField]
@@ -141,36 +150,94 @@ public class BossSummonPattern : BossPattern
     [SerializeField, Min(0f)]
     private float _hitFallbackDuration = 1f;
 
+    [Header("차지 중 빨아들이기 VFX")]
+    [Tooltip("차지 애니메이션(Ultimate Charge)이 재생되는 동안 보스에 붙여 반복 재생할 VFX (PF_BossSuction_VFX). 비우면 사용 안 함")]
+    [SerializeField]
+    private GameObject _suctionVfxPrefab;
+
+    [Tooltip("VFX를 붙일 입 위치 (Visual 아래 SuctionPoint. 차지 애니메이션 키로 입을 따라 움직임). " +
+             "비우면 보스 아래에서 이름이 SuctionPoint인 오브젝트를 찾고, 없으면 보스에 붙임")]
+    [SerializeField]
+    private Transform _suctionVfxPoint;
+
+    [Tooltip("붙인 위치 기준 추가 보정 (입 위치에서 살짝 앞 / 위로 옮기고 싶을 때)")]
+    [SerializeField]
+    private Vector2 _suctionVfxOffset = Vector2.zero;
+
+    [Tooltip("VFX 좌우 반전 (입 방향과 반대로 나오면 켜기)")]
+    [SerializeField]
+    private bool _flipSuctionVfx = false;
+
+    [Tooltip("VFX 크기 배율")]
+    [SerializeField, Min(0.01f)]
+    private float _suctionVfxScale = 1f;
+
     [Header("궁극기 실패 (즉사)")]
-    [Tooltip("즉사 연출 프리팹 (PF_BossDeathSpike). 플레이어 위치에 생성")]
+    [Tooltip("해방 애니메이션 최대 대기 시간 (초). 보통은 애니메이터가 해방 상태를 벗어나는 순간 끝남")]
+    [SerializeField, Min(0f)]
+    private float _releaseFallbackDuration = 4f;
+
+    [Tooltip("해방 애니메이션 시작부터 즉사 연출(가시 VFX / 붉은 화면 / 흔들림)까지 (초, 실제 시간). 부풀었던 몸이 터지며 줄어드는 순간에 맞추기. " +
+             "해방 상태 Speed가 1이면 약 1.5초, 2.5면 약 0.6초. " +
+             "플레이어가 죽고 Death Delay(StageManager, 기본 1초) 뒤 화면이 멈추므로, 너무 이르면 해방 애니메이션이 끝까지 안 보임")]
+    [SerializeField, Min(0f)]
+    private float _deathVfxDelay = 0.6f;
+
+    [Tooltip("즉사 연출 프리팹 (PF_BossDeathSpike). Attach To Camera면 카메라 자식, 아니면 플레이어 위치에 생성")]
     [SerializeField]
     private GameObject _deathVfxPrefab;
 
-    [Tooltip("즉사 연출 위치 보정 (플레이어 발밑 기준)")]
+    [Tooltip("켜면 즉사 연출을 메인 카메라 자식으로 생성 (화면을 덮는 연출이 플레이어 / 카메라 이동에 밀리지 않고 화면에 고정)")]
+    [SerializeField]
+    private bool _attachDeathVfxToCamera = true;
+
+    [Tooltip("즉사 연출 위치 보정. 카메라 자식이면 화면 중앙 기준, 아니면 플레이어 발밑 기준")]
     [SerializeField]
     private Vector2 _deathVfxOffset = Vector2.zero;
+
+    [Tooltip("(카메라 자식일 때) 카메라 앞쪽 거리. 카메라 z가 -10이면 10 = 월드 z 0. 카메라 Near Clip보다 커야 보임")]
+    [SerializeField, Min(0.01f)]
+    private float _deathVfxCameraDepth = 10f;
+
+    [Tooltip("(카메라 자식일 때) 이 카메라 크기(Orthographic Size) 기준으로 만든 연출이면 입력. " +
+             "줌으로 카메라 크기가 달라져도 화면을 똑같이 덮도록 크기를 맞춤. 0이면 프리팹 크기 그대로")]
+    [SerializeField, Min(0f)]
+    private float _deathVfxReferenceOrthoSize = 0f;
 
     [Tooltip("즉사 연출이 사라지기까지 (초)")]
     [SerializeField, Min(0.1f)]
     private float _deathVfxLifetime = 3f;
 
-    [Tooltip("즉사 연출 생성 후 플레이어가 죽기까지 (초). 가시가 솟는 타이밍에 맞추기")]
+    [Tooltip("즉사 연출(VFX)이 재생되는 시간 (초). VFX가 끝난 뒤 붉은 화면 / 흔들림과 함께 플레이어가 죽음. " +
+             "0이면 프리팹의 파티클 / 애니메이션 길이로 자동 계산")]
     [SerializeField, Min(0f)]
-    private float _killDelay = 0.3f;
+    private float _deathVfxPlayDuration = 0f;
+
+    [Tooltip("VFX가 끝난 뒤 플레이어가 죽기까지 추가 대기 (초). 0이면 VFX가 끝나는 순간 붉은 화면과 함께 바로 사망")]
+    [SerializeField, Min(0f)]
+    private float _killDelay = 0f;
 
     [Tooltip("사망 원인 표시 이름")]
     [SerializeField]
     private string _killReason = "궁극기 (가시 즉사)";
 
-    [Tooltip("즉사 시 화면을 덮는 색 (알파 = 최대 진하기). 알파 0이면 사용 안 함")]
+    [Tooltip("즉사 시 화면을 덮는 색. 알파 = 임팩트 직후 잠깐 남는 진하기 (여기서 Fade Out 동안 빠짐). 알파 0이면 붉은 화면 사용 안 함")]
     [SerializeField]
     private Color _deathScreenColor = new Color(0.8f, 0f, 0f, 0.55f);
 
-    [Tooltip("붉은 화면이 차오르는 시간 (초)")]
-    [SerializeField, Min(0.01f)]
-    private float _deathScreenFadeIn = 0.15f;
+    [Tooltip("임팩트 순간 붉은 화면 진하기 (0 ~ 1). 이 가장 진한 순간에 가시 VFX를 지움 (화면에 가려 사라지는 게 안 보이도록)")]
+    [SerializeField, Range(0f, 1f)]
+    private float _deathImpactPeakAlpha = 0.95f;
 
-    [Tooltip("붉은 화면이 빠지는 시간 (초)")]
+    [Tooltip("임팩트 최대 진하기를 유지하는 시간 (초, 실제 시간)")]
+    [SerializeField, Min(0f)]
+    private float _deathImpactHold = 0.05f;
+
+    [Tooltip("임팩트 최대 진하기에서 Death Screen Color 알파까지 빠르게 빠지는 시간 (초)")]
+    [SerializeField, Min(0.01f)]
+    private float _deathImpactDrop = 0.12f;
+
+    [Tooltip("붉은 화면이 완전히 빠지는 시간 (초)")]
     [SerializeField, Min(0.01f)]
     private float _deathScreenFadeOut = 0.8f;
 
@@ -187,6 +254,8 @@ public class BossSummonPattern : BossPattern
     private bool _pending;
     private bool _isRunning;
     private bool _isJumping;
+    private bool _ultimateFailed;
+    private GameObject _suctionVfx;
 
     public override bool IsForced => true;
     public override bool BlocksDirectDamage => _blockDirectDamage && _isRunning;
@@ -290,6 +359,7 @@ public class BossSummonPattern : BossPattern
         base.OnPatternStart();
         _pending = false;
         _isRunning = true;
+        _ultimateFailed = false;
     }
 
     /// <summary>궁극기 전에 소환 위치로 점프. 끝나면 대기 상태로 돌려 ultimate 트리거가 바로 전이되게 함</summary>
@@ -305,35 +375,54 @@ public class BossSummonPattern : BossPattern
         Vector2 start = Boss.Position;
         Vector2 target = _summonPoint.position;
 
+        // 점프 시작 애니메이션 (Boss의 Jump Takeoff Ratio 지점에서 이륙)
         Boss.FaceDirection(target.x - start.x);
-        if (!string.IsNullOrEmpty(_jumpTrigger))
+        Boss.PlayJumpStart();
+        yield return null;
+
+        float startTimeout = Time.time + Boss.JumpStateTimeout;
+        while (Boss.IsBeforeJumpTakeoff && Time.time < startTimeout)
         {
-            Boss.SetTrigger(_jumpTrigger);
+            yield return null;
         }
 
+        // 이륙
+        start = Boss.Position;
+        Boss.PlayJumpAir();
         SetJumping(true);
 
-        // 이륙 먼지 (Boss의 Takeoff Dust Timing만큼 늦게. 음수는 시작 순간)
+        // 이륙 먼지 (Boss의 Takeoff Dust Timing만큼 늦게. 음수는 이륙 순간)
         if (_takeoffDust)
         {
-            Boss.PlayJumpDust(start.x, start.y, Boss.TakeoffDustTiming);
+            Boss.PlayJumpDust(start.x, start.y, Mathf.Max(0f, Boss.TakeoffDustTiming));
         }
 
         float landingTiming = Boss.LandingDustTiming;
         bool landingDustPlayed = !_landingDust;
 
         float apexY = Mathf.Max(start.y, target.y) + _jumpHeight;
+
+        // 거리에 따라 체공 시간이 정해짐 (같은 속도로 이동)
+        float minDuration = Mathf.Min(_minJumpDuration, _maxJumpDuration);
+        float maxDuration = Mathf.Max(_minJumpDuration, _maxJumpDuration);
+        float jumpDuration = Mathf.Clamp(Vector2.Distance(start, target) / Mathf.Max(0.1f, _jumpSpeed), minDuration, maxDuration);
+
+        bool endAnimationPlayed = false;
         float elapsed = 0f;
-        while (elapsed < _jumpDuration)
+        while (elapsed < jumpDuration)
         {
             elapsed += Time.fixedDeltaTime;
-            float t = Mathf.Clamp01(elapsed / _jumpDuration);
+            float t = Mathf.Clamp01(elapsed / jumpDuration);
 
-            float x = Mathf.Lerp(start.x, target.x, Mathf.SmoothStep(0f, 1f, t));
+            // 가로는 일정한 속도로
+            float x = Mathf.Lerp(start.x, target.x, t);
             Boss.MoveTo(new Vector2(x, GetJumpY(t, start.y, apexY, target.y)));
 
+            // 공중 애니메이션 유지, 착지 직전(Boss의 Jump End Lead Time)부터 착지 애니메이션
+            endAnimationPlayed = Boss.UpdateJumpAirAnimation(jumpDuration - elapsed, endAnimationPlayed);
+
             // 착지 직전에 미리 (Landing Dust Timing이 음수)
-            if (!landingDustPlayed && landingTiming < 0f && _jumpDuration - elapsed <= -landingTiming)
+            if (!landingDustPlayed && landingTiming < 0f && jumpDuration - elapsed <= -landingTiming)
             {
                 Boss.PlayJumpDust(target.x, target.y);
                 landingDustPlayed = true;
@@ -342,7 +431,13 @@ public class BossSummonPattern : BossPattern
             yield return new WaitForFixedUpdate();
         }
 
+        // 착지
         Boss.MoveTo(target);
+        if (!endAnimationPlayed)
+        {
+            Boss.PlayJumpEnd();
+        }
+
         yield return new WaitForFixedUpdate();
 
         if (!landingDustPlayed)
@@ -351,12 +446,18 @@ public class BossSummonPattern : BossPattern
         }
 
         SetJumping(false);
-
-        // ultimate 전이는 대기(Boss_Idle)에서만 있으므로, 점프 애니메이션이 끝나기를 기다리지 않고 바로 대기로
-        Boss.ForceIdleAnimation();
-
         CameraShake.Shake(_landingShake);
         Boss.FacePlayer();
+
+        // 착지 애니메이션이 끝날 때까지
+        float endTimeout = Time.time + Boss.JumpStateTimeout;
+        while (Boss.IsInJumpEnd && Time.time < endTimeout)
+        {
+            yield return null;
+        }
+
+        // ultimate 전이는 대기(Boss_Idle)에서 확실히 시작되도록 대기 상태로
+        Boss.ForceIdleAnimation();
 
         if (_delayAfterLanding > 0f)
         {
@@ -396,6 +497,7 @@ public class BossSummonPattern : BossPattern
 
     private int _gimmickHits;
     private Image _deathScreen;
+    private GameObject _deathVfxInstance;
 
     protected override IEnumerator Execute()
     {
@@ -441,6 +543,7 @@ public class BossSummonPattern : BossPattern
             if (chargeStart < 0f && IsInChargeState())
             {
                 chargeStart = Time.time;
+                StartSuctionVfx();
                 Boss.Log($"{PatternName}: 차지 시작 (남은 시간 {deadline - chargeStart:0.0}초)");
             }
 
@@ -456,6 +559,9 @@ public class BossSummonPattern : BossPattern
         BossBaby.OnHitBoss -= HandleGimmickHit;
         BossBaby.CountHitsOnly = false;
         Boss.ClearMinions();
+
+        // 차지가 끝났으므로(파훼 / 해방) 빨아들이기 중지
+        StopSuctionVfx();
 
         if (success)
         {
@@ -503,26 +609,55 @@ public class BossSummonPattern : BossPattern
     private IEnumerator UltimateFail()
     {
         Boss.Log($"{PatternName}: 파훼 실패 → 즉사");
+        _ultimateFailed = true;
         SetChargeProgress(1f);
-        Boss.SetTrigger(_releaseTrigger);
 
-        Transform player = Boss.Player;
-        if (_deathVfxPrefab != null && player != null)
+        // 해방 애니메이션은 트리거(전이)에 맡기지 않고 직접 재생.
+        // 차지 상태는 Motion Time(ultimateProgress)으로 시간이 고정돼 있어, 전이 설정(Exit Time 등)에 따라 트리거로 넘어가지 않는 경우가 있음
+        PlayReleaseState();
+        yield return null;
+
+        if (!IsInState(_releaseStateName))
         {
-            Vector3 position = player.position + (Vector3)_deathVfxOffset;
-            GameObject vfx = Instantiate(_deathVfxPrefab, position, Quaternion.identity);
-            Destroy(vfx, _deathVfxLifetime);
+            // 직접 재생이 안 되면(상태 이름이 다른 경우 등) 트리거로 한 번 더 시도
+            Debug.LogWarning($"{name}: {PatternName} 해방 상태({_releaseStateName})를 직접 재생하지 못해 트리거({_releaseTrigger})로 시도합니다. " +
+                             $"지금 클립: {CurrentStateDebugName()}. Release State Name을 애니메이터 상태 이름과 맞춰 주세요.", this);
+            Boss.SetTrigger(_releaseTrigger);
+        }
+        else
+        {
+            Boss.Log($"{PatternName}: 해방 애니메이션 시작");
         }
 
-        CameraShake.Shake(_deathShake);
-        if (_deathScreenColor.a > 0f)
+        // 해방 애니메이션이 터지는 순간까지 기다렸다가 즉사 연출
+        // (바로 죽이면 사망 화면이 해방 애니메이션 초반에 화면을 멈춰서 해방이 안 보임)
+        if (_deathVfxDelay > 0f)
         {
-            Boss.StartCoroutine(DeathScreenRoutine());
+            yield return new WaitForSeconds(_deathVfxDelay);
+        }
+
+        // 즉사 VFX를 먼저 끝까지 보여 준 뒤 → 붉은 화면 / 흔들림과 함께 체력이 닳아 사망
+        Transform player = Boss.Player;
+        float vfxDuration = SpawnDeathVfx(player);
+        if (vfxDuration > 0f)
+        {
+            yield return new WaitForSeconds(vfxDuration);
         }
 
         if (_killDelay > 0f)
         {
             yield return new WaitForSeconds(_killDelay);
+        }
+
+        // 임팩트: 붉은 화면이 한 번에 가장 진하게 덮이고, 그 순간 가시 VFX를 지운 뒤 빠짐
+        CameraShake.Shake(_deathShake);
+        if (_deathScreenColor.a > 0f || _deathImpactPeakAlpha > 0f)
+        {
+            Boss.StartCoroutine(DeathScreenRoutine());
+        }
+        else
+        {
+            DestroyDeathVfx();
         }
 
         PlayerHealth playerHealth = player != null ? player.GetComponentInParent<PlayerHealth>() : null;
@@ -531,12 +666,119 @@ public class BossSummonPattern : BossPattern
             playerHealth.Kill(_killReason);
         }
 
-        // 해방 애니메이션이 끝날 때까지 (이후 애니메이터 전이로 대기)
-        yield return new WaitForSeconds(1f);
+        // 해방 애니메이션이 끝날 때까지 패턴 유지 (중간에 다음 패턴이 시작되지 않도록. 이후 애니메이터 전이로 대기)
+        // 상태 속도(Speed)가 바뀌어도 맞도록 시간 대신 애니메이터가 해방 상태를 벗어날 때까지 기다림 (최대 Release Fallback Duration)
+        float waitUntil = Time.time + _releaseFallbackDuration;
+        while (IsInState(_releaseStateName) && Time.time < waitUntil)
+        {
+            yield return null;
+        }
+
         Boss.ResetTrigger(_releaseTrigger);
     }
 
     /// <summary>애니메이터가 차지 상태인지 (상태 이름 → 클립 순으로 확인, 둘 다 없으면 바로 true)</summary>
+    /// <summary>차지 애니메이션이 시작되면 보스에 빨아들이기 VFX를 붙여 반복 재생</summary>
+    private void StartSuctionVfx()
+    {
+        if (_suctionVfxPrefab == null || Boss == null || _suctionVfx != null)
+        {
+            return;
+        }
+
+        Transform parent = ResolveSuctionPoint();
+        _suctionVfx = Instantiate(_suctionVfxPrefab, parent);
+        _suctionVfx.transform.localPosition = new Vector3(_suctionVfxOffset.x, _suctionVfxOffset.y, 0f);
+        _suctionVfx.transform.localRotation = Quaternion.identity;
+
+        Vector3 scale = _suctionVfx.transform.localScale * _suctionVfxScale;
+        if (_flipSuctionVfx)
+        {
+            scale.x = -scale.x;
+        }
+
+        _suctionVfx.transform.localScale = scale;
+    }
+
+    /// <summary>VFX를 붙일 곳: 지정한 입 위치 → 보스 아래 SuctionPoint → 보스</summary>
+    private Transform ResolveSuctionPoint()
+    {
+        if (_suctionVfxPoint != null)
+        {
+            return _suctionVfxPoint;
+        }
+
+        foreach (Transform child in Boss.GetComponentsInChildren<Transform>(true))
+        {
+            if (child.name == "SuctionPoint")
+            {
+                _suctionVfxPoint = child;
+                return child;
+            }
+        }
+
+        return Boss.transform;
+    }
+
+    private void StopSuctionVfx()
+    {
+        if (_suctionVfx != null)
+        {
+            Destroy(_suctionVfx);
+        }
+
+        _suctionVfx = null;
+    }
+
+    /// <summary>해방 상태를 처음부터 바로 재생 (하위 상태 머신 안에 있어도 이름으로 재생)</summary>
+    private void PlayReleaseState()
+    {
+        Animator animator = Boss != null ? Boss.GetComponentInChildren<Animator>() : null;
+        if (animator == null || string.IsNullOrEmpty(_releaseStateName))
+        {
+            return;
+        }
+
+        Boss.ResumeAnimator();
+        Boss.ResetTrigger(_releaseTrigger);
+        animator.Play(Animator.StringToHash(_releaseStateName), 0, 0f);
+    }
+
+    /// <summary>애니메이터가 지금 해당 이름의 상태인지 (전이 중이면 다음 상태도 확인)</summary>
+    private bool IsInState(string stateName)
+    {
+        if (string.IsNullOrEmpty(stateName) || Boss == null)
+        {
+            return false;
+        }
+
+        Animator animator = Boss.GetComponentInChildren<Animator>();
+        if (animator == null)
+        {
+            return false;
+        }
+
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName(stateName))
+        {
+            return true;
+        }
+
+        return animator.IsInTransition(0) && animator.GetNextAnimatorStateInfo(0).IsName(stateName);
+    }
+
+    /// <summary>경고 로그용: 지금 재생 중인 클립 이름</summary>
+    private string CurrentStateDebugName()
+    {
+        Animator animator = Boss != null ? Boss.GetComponentInChildren<Animator>() : null;
+        if (animator == null)
+        {
+            return "(애니메이터 없음)";
+        }
+
+        AnimatorClipInfo[] clips = animator.GetCurrentAnimatorClipInfo(0);
+        return clips.Length > 0 && clips[0].clip != null ? clips[0].clip.name : "(클립 없음)";
+    }
+
     private bool IsInChargeState()
     {
         Animator animator = Boss.GetComponentInChildren<Animator>();
@@ -551,6 +793,93 @@ public class BossSummonPattern : BossPattern
         }
 
         return _chargeClip == null || Boss.IsPlayingClip(_chargeClip);
+    }
+
+    /// <summary>즉사 연출 생성. 카메라 자식이면 화면에 고정, 아니면 플레이어 위치. 반환값 = VFX 재생 시간 (초, 없으면 0)</summary>
+    private float SpawnDeathVfx(Transform player)
+    {
+        if (_deathVfxPrefab == null)
+        {
+            return 0f;
+        }
+
+        float playDuration = _deathVfxPlayDuration > 0f ? _deathVfxPlayDuration : EstimateVfxDuration(_deathVfxPrefab);
+        // 재생이 끝나기 전에 지워지지 않도록 (사망 후 화면이 멈춰도 남아 있게 약간 여유)
+        float lifetime = Mathf.Max(_deathVfxLifetime, playDuration + 0.5f);
+
+        Camera camera = _attachDeathVfxToCamera ? Camera.main : null;
+        if (camera != null)
+        {
+            GameObject vfx = Instantiate(_deathVfxPrefab, camera.transform);
+            vfx.transform.localPosition = new Vector3(_deathVfxOffset.x, _deathVfxOffset.y, _deathVfxCameraDepth);
+            vfx.transform.localRotation = Quaternion.identity;
+
+            if (_deathVfxReferenceOrthoSize > 0f && camera.orthographic)
+            {
+                vfx.transform.localScale *= camera.orthographicSize / _deathVfxReferenceOrthoSize;
+            }
+
+            Destroy(vfx, lifetime);
+            _deathVfxInstance = vfx;
+            return playDuration;
+        }
+
+        if (_attachDeathVfxToCamera)
+        {
+            Debug.LogWarning($"{name}: {PatternName} 메인 카메라(MainCamera 태그)를 찾지 못해 즉사 연출을 플레이어 위치에 생성합니다.", this);
+        }
+
+        if (player != null)
+        {
+            Vector3 position = player.position + (Vector3)_deathVfxOffset;
+            GameObject vfx = Instantiate(_deathVfxPrefab, position, Quaternion.identity);
+            Destroy(vfx, lifetime);
+            _deathVfxInstance = vfx;
+            return playDuration;
+        }
+
+        return 0f;
+    }
+
+    /// <summary>
+    /// VFX 프리팹의 재생 길이 추정: 반복이 아닌 파티클(시작 지연 + 지속 + 최대 수명)과
+    /// 애니메이터 / 애니메이션 클립 중 가장 긴 것. 찾지 못하면 Death Vfx Lifetime
+    /// </summary>
+    private float EstimateVfxDuration(GameObject prefab)
+    {
+        float longest = 0f;
+
+        foreach (ParticleSystem particles in prefab.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            ParticleSystem.MainModule main = particles.main;
+            if (main.loop)
+            {
+                continue;
+            }
+
+            float end = main.startDelay.constantMax + main.duration + main.startLifetime.constantMax;
+            longest = Mathf.Max(longest, end);
+        }
+
+        foreach (Animator animator in prefab.GetComponentsInChildren<Animator>(true))
+        {
+            RuntimeAnimatorController controller = animator.runtimeAnimatorController;
+            if (controller == null)
+            {
+                continue;
+            }
+
+            float speed = animator.speed > 0f ? animator.speed : 1f;
+            foreach (AnimationClip clip in controller.animationClips)
+            {
+                if (clip != null && !clip.isLooping)
+                {
+                    longest = Mathf.Max(longest, clip.length / speed);
+                }
+            }
+        }
+
+        return longest > 0f ? longest : _deathVfxLifetime;
     }
 
     private void SetChargeProgress(float value)
@@ -576,7 +905,17 @@ public class BossSummonPattern : BossPattern
         }
     }
 
-    /// <summary>화면 전체를 붉게 덮었다가 빠짐 (런타임에 오버레이 생성)</summary>
+    private void DestroyDeathVfx()
+    {
+        if (_deathVfxInstance != null)
+        {
+            Destroy(_deathVfxInstance);
+        }
+
+        _deathVfxInstance = null;
+    }
+
+    /// <summary>화면 전체를 붉게 확 덮었다가(임팩트) 빠짐 (런타임에 오버레이 생성)</summary>
     private IEnumerator DeathScreenRoutine()
     {
         if (_deathScreen == null)
@@ -599,18 +938,33 @@ public class BossSummonPattern : BossPattern
 
         Image screen = _deathScreen;
         Color color = _deathScreenColor;
-        float maxAlpha = color.a;
+        float settleAlpha = color.a;
+        float peakAlpha = Mathf.Max(_deathImpactPeakAlpha, settleAlpha);
 
-        for (float t = 0f; t < _deathScreenFadeIn && screen != null; t += Time.unscaledDeltaTime)
+        // 임팩트: 페이드 없이 바로 가장 진하게. 같은 프레임에 가시 VFX를 지워 붉은 화면에 가려지게
+        color.a = peakAlpha;
+        screen.color = color;
+        DestroyDeathVfx();
+
+        for (float t = 0f; t < _deathImpactHold && screen != null; t += Time.unscaledDeltaTime)
         {
-            color.a = Mathf.Lerp(0f, maxAlpha, t / _deathScreenFadeIn);
+            yield return null;
+        }
+
+        // 최대 진하기 → 남는 진하기로 빠르게 (처음이 가장 빠르게 빠지는 곡선)
+        for (float t = 0f; t < _deathImpactDrop && screen != null; t += Time.unscaledDeltaTime)
+        {
+            float x = 1f - (t / _deathImpactDrop);
+            color.a = Mathf.Lerp(settleAlpha, peakAlpha, x * x);
             screen.color = color;
             yield return null;
         }
 
+        // 남는 진하기 → 0
         for (float t = 0f; t < _deathScreenFadeOut && screen != null; t += Time.unscaledDeltaTime)
         {
-            color.a = Mathf.Lerp(maxAlpha, 0f, t / _deathScreenFadeOut);
+            float x = 1f - (t / _deathScreenFadeOut);
+            color.a = settleAlpha * x * x;
             screen.color = color;
             yield return null;
         }
@@ -679,6 +1033,9 @@ public class BossSummonPattern : BossPattern
 
     protected override void Cleanup()
     {
+        // 차지 중에 끊겼으면 빨아들이기 VFX 제거
+        StopSuctionVfx();
+
         // 궁극기 기믹 중에 끊겼으면 집계 해제
         BossBaby.OnHitBoss -= HandleGimmickHit;
         BossBaby.CountHitsOnly = false;
@@ -694,7 +1051,8 @@ public class BossSummonPattern : BossPattern
         {
             Boss.ClearMinions();
 
-            if (_returnPattern != null)
+            // 즉사(실패)했으면 복귀 패턴 없음 (해방 애니메이션 도중 찍기가 시작되지 않도록)
+            if (_returnPattern != null && !_ultimateFailed)
             {
                 Boss.QueuePattern(_returnPattern);
             }

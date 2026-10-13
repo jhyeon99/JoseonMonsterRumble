@@ -33,6 +33,38 @@ Transform:
   - {fileID: 400001}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 652bf59256ba41ada32513db8c3fdac3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossPoisonSpewPattern
+  _patternName: "\uB3C5\uBD84\uC0AC"
+  _phases: -1
+  _floors: -1
+  _weight: 0
+  _cooldown: 0
+  _animationTrigger: PoisonSpew
+  _animationClip: {fileID: 0}
+  _followingClips: []
+  _durationOverride: 0
+  _fallbackDuration: 3.1875
+  _animationSpeed: 1
+  _animationStartTimeout: 1.5
+  _afterDelay: 0
+  _disableContactDamage: 0
+  _hitStartRatio: 0.19607843
+  _hitEndRatio: 0.74509805
+  _vfxPrefab: {fileID: 100000, guid: 652bf59256ba41ada32513db8c3fdac4, type: 3}
+  _mouth: {fileID: 400001}
+  _bossRenderer: {fileID: 0}
+  _followThroughLeadRatio: 0.17254902
 --- !u!1 &100001
 GameObject:
   m_ObjectHideFlags: 0
@@ -64,35 +96,3 @@ Transform:
   m_Children: []
   m_Father: {fileID: 400000}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 20}
---- !u!114 &11400000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 100000}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 652bf59256ba41ada32513db8c3fdac3, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::BossPoisonSpewPattern
-  _patternName: 독분사
-  _phases: 3
-  _floors: 7
-  _weight: 0
-  _cooldown: 0
-  _animationTrigger: PoisonSpew
-  _animationClip: {fileID: 0}
-  _followingClips: []
-  _durationOverride: 0
-  _fallbackDuration: 3.1875
-  _animationSpeed: 1
-  _animationStartTimeout: 1.5
-  _afterDelay: 0
-  _disableContactDamage: 0
-  _hitStartRatio: 0.19607843
-  _hitEndRatio: 0.74509805
-  _vfxPrefab: {fileID: 100000, guid: 652bf59256ba41ada32513db8c3fdac4, type: 3}
-  _mouth: {fileID: 400001}
-  _bossRenderer: {fileID: 0}
-  _followThroughLeadRatio: 0.17254902
