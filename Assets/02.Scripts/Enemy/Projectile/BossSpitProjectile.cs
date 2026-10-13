@@ -11,6 +11,16 @@ using UnityEngine;
 /// </summary>
 public class BossSpitProjectile : Projectile
 {
+    [Header("독")]
+    [Tooltip("맞으면 걸리는 독 지속 시간 (초). 0이면 독 없음")]
+    [SerializeField, Min(0f)]
+    private float _poisonDuration = 10f;
+
+    protected override void ModifyHitData(ref HitData hitData)
+    {
+        hitData.PoisonDuration = _poisonDuration;
+    }
+
     [Header("포물선")]
     [Tooltip("아래로 당기는 가속도 (클수록 빨리 떨어지고 궤적이 둥글게 휨)")]
     [SerializeField, Min(0.01f)]
