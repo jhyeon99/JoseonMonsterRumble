@@ -3,9 +3,6 @@ using UnityEngine;
 public sealed partial class Ep1TutorialManager
 {
     [SerializeField] private bool _requirePracticeInput = true;
-    [SerializeField, Min(0.1f)] private float _guardPracticeHoldDuration = 0.5f;
-
-    private float _guardPracticeHeldTime;
     private Enemy _guardPracticeEnemy;
     private bool _guardPracticeAttackStarted;
     private bool _highJumpPracticeActive;
@@ -46,12 +43,17 @@ public sealed partial class Ep1TutorialManager
         }
         if (_combatPlayer == null || _combatInput == null || _guard == null) return;
         UpdatePracticeTargetProtection();
-        _guard.SetTutorialGuardPractice(this, _combatStep == CombatStep.WaitingForRegularGuard &&
-            !_regularGuardSucceeded && !IsCheckpointTutorialPending && !IsHighJumpPracticePending);
+        _guard.SetTutorialGuardPractice(this, IsGuardDemonstrationActive ||
+            (_combatStep == CombatStep.WaitingForRegularGuard && !_regularGuardSucceeded &&
+            !IsCheckpointTutorialPending && !IsHighJumpPracticePending));
         if (!_regularGuardSucceeded && !_guardPracticeAttackStarted) ParkGuardPracticeEnemy();
         GameplayInputActions actions = GameplayInputActions.All;
         bool parryPractice = false;
-        if (_highJumpPracticeActive && IsHighJumpPracticePending)
+        if (IsGuardDemonstrationActive)
+        {
+            actions = GameplayInputActions.None;
+        }
+        else if (_highJumpPracticeActive && IsHighJumpPracticePending)
         {
             actions = GameplayInputActions.Movement | GameplayInputActions.Jump;
         }
@@ -60,16 +62,13 @@ public sealed partial class Ep1TutorialManager
             if (advanceHold && !PauseController.IsGameplayInputBlocked && !SceneArrivalFade.IsTransitioning &&
                 !IsCheckpointTutorialPending && !IsHighJumpPracticePending)
             {
-                UpdateGuardPractice(Time.deltaTime);
+                UpdateGuardPractice();
             }
-            else if (advanceHold && !_regularGuardSucceeded)
-            {
-                _guardPracticeHeldTime = 0f;
-            }
-            actions = _guardPracticeAttackStarted ? GameplayInputActions.Guard :
+            actions = IsGuardDemonstrationActive ? GameplayInputActions.None :
                 GameplayInputActions.Movement | GameplayInputActions.Guard;
         }
-        else if (_combatStep == CombatStep.WaitingForFinisher && !_secondFinisherSucceeded)
+        else if ((_combatStep == CombatStep.WaitingForParryHint ||
+            _combatStep == CombatStep.WaitingForFinisher) && !_secondFinisherSucceeded)
         {
             parryPractice = !_parryFinisherExplained;
             actions = GameplayInputActions.Movement |
@@ -85,24 +84,18 @@ public sealed partial class Ep1TutorialManager
             actions = GameplayInputActions.Movement;
         }
 
-        _guard.SetTutorialParryAssist(this, parryPractice);
         if (actions == GameplayInputActions.All) _combatInput.ClearTutorialInputRestriction(this);
         else _combatInput.SetTutorialInputRestriction(this, actions);
     }
 
-    private void UpdateGuardPractice(float deltaTime)
+    private void UpdateGuardPractice()
     {
-        if (_regularGuardSucceeded) return;
-        if (!_combatInput.IsGuardKey || !_guard.IsGuarding)
+        if (_regularGuardSucceeded || IsGuardDemonstrationActive || !_combatInput.IsGuardKey ||
+            !_combatPlayer.IsGrounded || _guardPracticeEnemy == null || _guardPracticeEnemy.IsDefeated)
         {
-            _guardPracticeHeldTime = 0f;
-            _guardPracticeAttackStarted = false;
-            ParkGuardPracticeEnemy();
             return;
         }
-        if (_guardPracticeAttackStarted) return;
-        _guardPracticeHeldTime += deltaTime;
-        if (_guardPracticeHeldTime < _guardPracticeHoldDuration) return;
+        BeginGuardDemonstration();
         _guardPracticeAttackStarted = true;
         if (_guardPracticeEnemy != null && !_guardPracticeEnemy.IsDefeated)
         {
@@ -171,7 +164,7 @@ public sealed partial class Ep1TutorialManager
 
     private void ReleaseRequiredPractice()
     {
-        _guardPracticeHeldTime = 0f;
+        ReleaseGuardDemonstration();
         _guardPracticeAttackStarted = false;
         if (_guardPracticeEnemy != null && !_guardPracticeEnemy.IsDefeated &&
             _guardPracticeEnemy.StateMachine.CurrentState is GuardPracticeWaitingState)
@@ -181,7 +174,6 @@ public sealed partial class Ep1TutorialManager
         _guardPracticeEnemy = null;
         _highJumpPracticeActive = false;
         if (_combatInput != null) _combatInput.ClearTutorialInputRestriction(this);
-        if (_guard != null) _guard.SetTutorialParryAssist(this, false);
         if (_guard != null) _guard.SetTutorialGuardPractice(this, false);
         if (_combatPlayer == null || _combatPlayer.StateMachine.CurrentState != _combatPlayer.FinisherState)
             _heldPracticeGroggy?.Release();

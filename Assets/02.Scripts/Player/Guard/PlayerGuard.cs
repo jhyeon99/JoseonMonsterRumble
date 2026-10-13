@@ -93,7 +93,6 @@ public class PlayerGuard : MonoBehaviour
 
     // 마지막으로 패링 판정을 연 시각 (연타 방지용)
     private float _lastParryWindowOpenedTime = float.NegativeInfinity;
-    private UnityEngine.Object _tutorialParryOwner;
     private UnityEngine.Object _tutorialGuardOwner;
 
     public float CurrentGauge => _currentGauge;
@@ -109,12 +108,6 @@ public class PlayerGuard : MonoBehaviour
 
     /// <summary>기본 판정 시간 기준으로 지금 패링 판정 중인지 (UI, 디버그용)</summary>
     public bool IsParryWindowOpen => _isGuarding && Time.time - _parryWindowStartTime <= _parryWindow;
-
-    public void SetTutorialParryAssist(UnityEngine.Object owner, bool enabled)
-    {
-        if (enabled && owner != null) _tutorialParryOwner = owner;
-        else if (_tutorialParryOwner == owner) _tutorialParryOwner = null;
-    }
 
     public void SetTutorialGuardPractice(UnityEngine.Object owner, bool enabled)
     {
@@ -161,7 +154,6 @@ public class PlayerGuard : MonoBehaviour
         _isGuarding = false;
         _parryWindowStartTime = float.NegativeInfinity;
         _drainResumeTime = float.NegativeInfinity;
-        _tutorialParryOwner = null;
         _tutorialGuardOwner = null;
     }
 
@@ -304,7 +296,6 @@ public class PlayerGuard : MonoBehaviour
 
     private bool IsInParryWindow(AttackDefense defense)
     {
-        if (_tutorialParryOwner != null) return true;
         float window = defense.ParryWindowOverride > 0f ? defense.ParryWindowOverride : _parryWindow;
         return Time.time - _parryWindowStartTime <= window;
     }
