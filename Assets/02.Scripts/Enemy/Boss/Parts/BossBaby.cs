@@ -10,6 +10,19 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
 {
+    /// <summary>날려 보낸 올챙이가 보스에게 부딪힘 (소환 기믹 파훼 횟수 집계용)</summary>
+    public static event System.Action<Boss> OnHitBoss;
+
+    /// <summary>true면 보스에게 부딪혀도 데미지 없이 횟수만 셈 (궁극기 기믹 진행 중 소환 패턴이 켬)</summary>
+    public static bool CountHitsOnly { get; set; }
+
+    [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStatics()
+    {
+        OnHitBoss = null;
+        CountHitsOnly = false;
+    }
+
     [Header("체력")]
     [SerializeField, Min(1f)]
     private float _maxHp = 60f;
@@ -378,6 +391,8 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
             return true;
         }
 
+        if (hitData.Damage > 0f) AudioManager.Instance?.PlaySceneEvent("Boss.BabyHurt", this);
+
         // 그 외 공격은 뒤로 튕겨 나감 (위로 살짝 떠서 바닥 마찰에 덜 막힘)
         float pushX = hitData.AttackDirection.x >= 0f ? 1f : -1f;
         float speedX = _nudgeSpeed + (Mathf.Max(0f, hitData.KnockbackForce) * _attackKnockbackMultiplier);
@@ -391,6 +406,7 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
     private void Die()
     {
         _isDead = true;
+        if (!_isLaunched) AudioManager.Instance?.PlaySceneEvent("Boss.BabyDeath", this);
 
         if (_deathEffect != null)
         {
@@ -483,6 +499,7 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
         }
 
         _isLaunched = true;
+        AudioManager.Instance?.PlaySceneEvent("Boss.BabyLaunch", this);
         _body.bodyType = RigidbodyType2D.Kinematic;
         _body.linearVelocity = Vector2.zero;
 
@@ -515,11 +532,20 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
 
     private void HitBoss()
     {
-        if (_boss.Health.TakeGimmickDamage(_gimmickDamage))
+        if (CountHitsOnly)
         {
+            // 기믹 진행 중: 데미지 없이 맞춘 횟수만 (타격감은 그대로)
             CameraShake.Shake(_impactShake);
             HitStop.Play(_impactHitStop);
         }
+        else if (_boss.Health.TakeGimmickDamage(_gimmickDamage))
+        {
+            AudioManager.Instance?.PlaySceneEvent("Boss.BabyHitBoss", this);
+            CameraShake.Shake(_impactShake);
+            HitStop.Play(_impactHitStop);
+        }
+
+        OnHitBoss?.Invoke(_boss);
 
         // 부딪힌 자리에서 회전을 멈추고 죽는 애니메이션 후 사라짐
         transform.rotation = Quaternion.identity;

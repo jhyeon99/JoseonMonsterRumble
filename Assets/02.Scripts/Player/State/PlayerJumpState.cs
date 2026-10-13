@@ -22,7 +22,10 @@ public class PlayerJumpState : PlayerBaseState
     {
         base.Exit();
 
-        _player.Movement.OnLanded();
+        if (_player.IsGrounded)
+        {
+            _player.Movement.OnLanded();
+        }
     }
 
     public override void Execute()
@@ -33,6 +36,11 @@ public class PlayerJumpState : PlayerBaseState
             _player.Movement.CurrentPlatform != null ? _player.Movement.CurrentPlatform.Velocity.y : 0f;
 
         float relativeVelocityY = _rigidbody2D.linearVelocity.y - platformVelocityY;
+
+        if (!_player.IsGrounded && _inputHandler.TryUseAttackInput() && _player.TryEnterAirAttack())
+        {
+            return;
+        }
 
         if (_player.IsGrounded && relativeVelocityY <= 0.1f)
         {

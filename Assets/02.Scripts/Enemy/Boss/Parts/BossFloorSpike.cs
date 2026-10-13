@@ -42,6 +42,26 @@ public class BossFloorSpike : MonoBehaviour
     private bool _isRunning;
     private bool _hasHit;
 
+    private bool _visible = true;
+    private Renderer[] _renderers;
+
+    private void SetVisible(bool visible)
+    {
+        _visible = visible;
+        if (_renderers == null)
+        {
+            _renderers = GetComponentsInChildren<Renderer>(true);
+        }
+
+        foreach (Renderer renderer in _renderers)
+        {
+            if (renderer != null)
+            {
+                renderer.enabled = visible;
+            }
+        }
+    }
+
     private void Awake()
     {
         _collider = GetComponent<Collider2D>();
@@ -52,8 +72,8 @@ public class BossFloorSpike : MonoBehaviour
         _filter.useTriggers = true;
     }
 
-    /// <summary>upPosition = 다 솟았을 때 위치. 그보다 riseHeight만큼 아래에서 시작</summary>
-    public void Begin(Boss boss, Vector2 upPosition, float riseHeight, float riseTime, float holdTime, float sinkTime)
+    /// <summary>upPosition = 다 솟았을 때 위치. 그보다 riseHeight만큼 아래에서 시작. delay초 뒤에 솟음 (그동안 숨김)</summary>
+    public void Begin(Boss boss, Vector2 upPosition, float riseHeight, float riseTime, float holdTime, float sinkTime, float delay = 0f)
     {
         _boss = boss;
         if (_boss != null)
@@ -67,9 +87,10 @@ public class BossFloorSpike : MonoBehaviour
         _riseTime = Mathf.Max(0.01f, riseTime);
         _holdTime = Mathf.Max(0f, holdTime);
         _sinkTime = Mathf.Max(0.01f, sinkTime);
-        _elapsed = 0f;
+        _elapsed = -Mathf.Max(0f, delay);
         _hasHit = false;
         _isRunning = true;
+        SetVisible(_elapsed >= 0f);
 
         transform.SetPositionAndRotation(_downPosition, Quaternion.Euler(0f, 0f, _uprightRotation));
     }
@@ -82,6 +103,17 @@ public class BossFloorSpike : MonoBehaviour
         }
 
         _elapsed += Time.deltaTime;
+
+        // 순서대로 솟는 파도: 차례가 올 때까지 숨긴 채 대기
+        if (_elapsed < 0f)
+        {
+            return;
+        }
+
+        if (!_visible)
+        {
+            SetVisible(true);
+        }
 
         float amount;
         if (_elapsed < _riseTime)

@@ -187,16 +187,23 @@ MonoBehaviour:
     ParryWindowOverride: 0
     GuardGaugeCost: 25
     BlockInvincibleTime: 0
+    FreeBlockOnParryTiming: 0
   _reflectToShooter: 1
   _ignoreGroundWhenReturning: 1
   _gravity: 20
   _rotateToVelocity: 1
   _spriteFacesLeft: 1
   _parryFlashMaterial: {fileID: 2100000, guid: b1fa789cd0c840749a215887ef0d2396, type: 2}
+  _parryFlashColor: {r: 1, g: 0.95, b: 0.6, a: 1}
+  _parryFlashPeakOpacity: 0.9
+  _parryFlashDuration: 0.25
+  _parryFlashInterval: 0.35
   _endBool: isEnd
   _endClip: {fileID: 7400000, guid: 43eee4a9f6b56b344a3a25ed93d50176, type: 2}
   _endFallbackDuration: 0.5
   _resetRotationOnEnd: 1
+  _endSurfaceOffset: 1
+  _endImpactPoint: {x: 0, y: 0}
 --- !u!95 &6621908413285813134
 Animator:
   serializedVersion: 7
