@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -77,7 +77,7 @@ internal sealed class Ep1TutorialFocusOverlay : IDisposable
         _continue.text = continueMessage;
         float width = Mathf.Min(textSize.x, screen.x - 64f);
         SetRect(_message.rectTransform, new Rect(24f, 0f, width - 48f, textSize.y));
-        float height = Mathf.Max(textSize.y, _message.preferredHeight);
+        float height = Mathf.Max(fontSize, Mathf.Ceil(_message.preferredHeight));
         float cardHeight = height + 108f;
         float x = focus.xMax + 28f;
         float y = focus.yMax - cardHeight;

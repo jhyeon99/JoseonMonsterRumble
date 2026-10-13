@@ -22,6 +22,8 @@ public class Player : MonoBehaviour
     public PlayerJumpState JumpState => _jumpState;
     private PlayerAttackState _attackState;
     public PlayerAttackState AttackState => _attackState;
+    private PlayerAirAttackState _airAttackState;
+    public PlayerAirAttackState AirAttackState => _airAttackState;
     private PlayerDodgeState _dodgeState;
     public PlayerDodgeState DodgeState => _dodgeState;
     private PlayerDeadState _deadState;
@@ -45,6 +47,7 @@ public class Player : MonoBehaviour
     public ActionMotionData DodgeMotion => _dodgeMotion;
     [SerializeField] private ActionMotionData _attackMotion = new ActionMotionData();
     public ActionMotionData AttackMotion => _attackMotion;
+
 
     private PlayerInputHandler _inputHandler;
     private PlayerHealth _health;
@@ -92,6 +95,7 @@ public class Player : MonoBehaviour
     private static readonly int PotionAnimStateFullHash = Animator.StringToHash("Base Layer." + PotionAnimState);
 
     private const string IdleAnimState = "Player_Idle";
+    private const string MissingAirAttackWarning = "공중공격: 공중 상태, Animator 연결 및 공중공격 데이터를 확인하세요.";
     private static readonly int IdleAnimStateHash = Animator.StringToHash(IdleAnimState);
     private static readonly int IdleAnimStateFullHash = Animator.StringToHash("Base Layer." + IdleAnimState);
 
@@ -235,6 +239,7 @@ public class Player : MonoBehaviour
         _moveState = new PlayerMoveState(this, _stateMachine);
         _jumpState = new PlayerJumpState(this, _stateMachine);
         _attackState = new PlayerAttackState(this, _stateMachine);
+        _airAttackState = new PlayerAirAttackState(this, _stateMachine);
         _dodgeState = new PlayerDodgeState(this, _stateMachine);
         _deadState = new PlayerDeadState(this, _stateMachine);
         _hitState = new PlayerHitState(this, _stateMachine);
@@ -244,11 +249,26 @@ public class Player : MonoBehaviour
         _potionState = new PlayerPotionState(this, _stateMachine);
     }
 
+    public bool TryEnterAirAttack()
+    {
+        if (IsGrounded || _animator == null ||
+            (!_animator.HasState(0, PlayerAirAttackState.AnimationStateHash) &&
+             !_animator.HasState(0, PlayerAirAttackState.FullAnimationStateHash)) ||
+            !_attack.TryGetAirAttackData(out _))
+        {
+            Debug.LogWarning(MissingAirAttackWarning, this);
+            return false;
+        }
+        _stateMachine.ChangeState(_airAttackState);
+        return true;
+    }
+
     /// <summary>물약 사용 가능 시 제자리 복용 상태로 전이. 전이했으면 true</summary>
     public bool TryEnterPotion()
     {
         if (!IsGrounded || !_health.CanUsePotion)
         {
+            if (!_health.CanUsePotion) GetComponent<PlayerAudio>()?.PlayUnavailable();
             return false;
         }
 

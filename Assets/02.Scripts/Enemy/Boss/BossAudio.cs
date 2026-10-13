@@ -89,6 +89,7 @@ public sealed class BossAudio : ActorAudio
         _stateExecution = 0;
         if (next is BossDefeatedState) return;
         _stateExecution = BeginAction();
+        if (previous is BossGroggyState && next is BossIdleState) PlayResult("Boss.GroggyRecover", transform.position);
         if (next is BossIntroState) PlayAction("Boss.Intro", _stateExecution);
         else if (next is BossPhaseTransitionState) PlayAction("Boss.PhaseHowl", _stateExecution);
         else if (next is BossGroggyState) PlayResult("Boss.Groggy", transform.position);

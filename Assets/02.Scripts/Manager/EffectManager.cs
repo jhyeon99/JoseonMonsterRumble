@@ -146,9 +146,26 @@ public class EffectManager : MonoBehaviour
         Play(EffectType.LandingDust, position);
     }
 
+    public void PlayParryLaunchDisappear(Vector2 position)
+    {
+        Play(EffectType.ParryLaunchDisappear, position);
+    }
+
+    /// <summary>보스 찍기 착지 때 발밑에서 돌이 튀는 이펙트</summary>
+    public void PlayBossStompExplosion(Vector2 position, float scale = 1f, bool flipX = false)
+    {
+        Play(EffectType.BossStompExplosion, position, flipX, scale);
+    }
+
     /// <summary>
     /// 상황별 메서드가 아직 없는 이펙트용. 가능하면 상황별 메서드를 추가해서 사용.
     /// </summary>
+    /// <summary>보스 점프 / 착지 때 발밑 먼지</summary>
+    public void PlayBossJumpDust(Vector2 position, float scale = 1f, bool flipX = false)
+    {
+        Play(EffectType.BossJumpDust, position, flipX, scale);
+    }
+
     public void Play(EffectType type, Vector2 position, bool flipX = false, float scale = 1f)
     {
         if (_pool == null) return;

@@ -252,6 +252,7 @@ public class PlayerWeaponBuff : MonoBehaviour
         auraObject.transform.localPosition = new Vector3(0.12f, 0.45f, 0f);
 
         _auraParticles = auraObject.AddComponent<ParticleSystem>();
+        _auraParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         ParticleSystemRenderer psRenderer = auraObject.GetComponent<ParticleSystemRenderer>();
 
         if (_sourceRenderer != null)
@@ -286,6 +287,7 @@ public class PlayerWeaponBuff : MonoBehaviour
 
         // 파티클 시스템 메인 모듈 구성
         ParticleSystem.MainModule main = _auraParticles.main;
+        main.playOnAwake = false;
         main.duration = 1.0f;
         main.loop = true;
         main.startLifetime = new ParticleSystem.MinMaxCurve(0.35f, 0.65f);
@@ -351,7 +353,5 @@ public class PlayerWeaponBuff : MonoBehaviour
             new Keyframe(1.0f, 0.0f)
         );
         sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(1.0f, sizeCurve);
-
-        _auraParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 }

@@ -62,6 +62,7 @@ public class PlayerInputHandler : MonoBehaviour
     public bool TryUseJumpInput() => IsActionAllowed(GameplayInputActions.Jump) && _jumpBuffer.TryUse();
     public bool TryUseDodgeInput() => IsActionAllowed(GameplayInputActions.Dodge) && _dodgeBuffer.TryUse();
     public bool TryUseAttackInput() => IsActionAllowed(GameplayInputActions.Attack) && _attackBuffer.TryUse();
+    public void ResetAttackInput() => _attackBuffer.Clear();
     public bool TryUseRangedAttackInput() => IsActionAllowed(GameplayInputActions.RangedAttack) && _rangedAttackBuffer.TryUse();
     public bool TryUsePotionInput() => IsActionAllowed(GameplayInputActions.Potion) && _potionBuffer.TryUse();
     public bool TryUseGuardInput() => IsActionAllowed(GameplayInputActions.Guard) && _guardBuffer.TryUse();

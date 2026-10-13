@@ -105,7 +105,8 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: 057c67818ee04c5a91c9f53f29ee4959, type: 3}
 --- !u!4 &5265002004316910404 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 400000, guid: 057c67818ee04c5a91c9f53f29ee4959, type: 3}
+  m_CorrespondingSourceObject: {fileID: 400000, guid: 057c67818ee04c5a91c9f53f29ee4959,
+    type: 3}
   m_PrefabInstance: {fileID: 5265002004316514756}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6640327715072257697
@@ -183,7 +184,8 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: 54743173681d42c49b309d850c85acc2, type: 3}
 --- !u!4 &6640327715072652321 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 400000, guid: 54743173681d42c49b309d850c85acc2, type: 3}
+  m_CorrespondingSourceObject: {fileID: 400000, guid: 54743173681d42c49b309d850c85acc2,
+    type: 3}
   m_PrefabInstance: {fileID: 6640327715072257697}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &7325847401334403896
@@ -197,6 +199,14 @@ PrefabInstance:
     - target: {fileID: 100000, guid: 7d990f7bd4924af2bcd3d52eb1420971, type: 3}
       propertyPath: m_Name
       value: PF_PL_MossyCreekStone
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 7d990f7bd4924af2bcd3d52eb1420971, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.10267579
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 7d990f7bd4924af2bcd3d52eb1420971, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.10267579
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 7d990f7bd4924af2bcd3d52eb1420971, type: 3}
       propertyPath: m_LocalPosition.x
@@ -245,6 +255,7 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: 7d990f7bd4924af2bcd3d52eb1420971, type: 3}
 --- !u!4 &7325847401334794680 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 400000, guid: 7d990f7bd4924af2bcd3d52eb1420971, type: 3}
+  m_CorrespondingSourceObject: {fileID: 400000, guid: 7d990f7bd4924af2bcd3d52eb1420971,
+    type: 3}
   m_PrefabInstance: {fileID: 7325847401334403896}
   m_PrefabAsset: {fileID: 0}

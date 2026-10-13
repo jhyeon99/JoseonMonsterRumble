@@ -155,7 +155,7 @@ public sealed partial class Ep1TutorialManager
             Enemy enemy = _boundPrerequisites[1].GetComponent<Enemy>();
             // After a respawn, resume the unfinished finisher without repeating a completed parry lesson.
             if (!enemy.IsGroggy && !enemy.IsDefeated) enemy.EnterGroggy(2f);
-            GroggyState groggy = enemy.StateMachine.CurrentState as GroggyState;
+            var groggy = enemy.StateMachine.CurrentState as GroggyState;
             if (groggy != null)
             {
                 _heldPracticeGroggy = groggy;

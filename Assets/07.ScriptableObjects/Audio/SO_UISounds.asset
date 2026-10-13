@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameAudio.SoundSetSO
   _sounds:
   - SoundId: UI.Click
-    DisplayName: UI.Click
+    DisplayName: "버튼 클릭 처리"
     Clips:
     - {fileID: 8300000, guid: b385562f829672946b59445038d25490, type: 3}
     Volume: 1
@@ -24,7 +24,7 @@ MonoBehaviour:
     Priority: 70
     MaxCount: 4
   - SoundId: UI.Hover
-    DisplayName: UI.Hover
+    DisplayName: "버튼 포인터 진입"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -33,7 +33,7 @@ MonoBehaviour:
     Priority: 70
     MaxCount: 4
   - SoundId: UI.PanelOpen
-    DisplayName: UI.PanelOpen
+    DisplayName: "패널 열림"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -42,7 +42,7 @@ MonoBehaviour:
     Priority: 70
     MaxCount: 4
   - SoundId: UI.PanelClose
-    DisplayName: UI.PanelClose
+    DisplayName: "패널 닫힘"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -51,7 +51,7 @@ MonoBehaviour:
     Priority: 70
     MaxCount: 4
   - SoundId: UI.Slider
-    DisplayName: UI.Slider
+    DisplayName: "사용자 조작으로 슬라이더 값 변경"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -63,7 +63,7 @@ MonoBehaviour:
   - EventId: UI.Click
     Enabled: 1
     SoundId: UI.Click
-    TriggerDescription: UI.Click
+    TriggerDescription: "버튼 클릭 처리"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 4
@@ -73,21 +73,21 @@ MonoBehaviour:
     BgmFadeDuration: -1
     LoopEndRule: 
   - EventId: UI.Hover
-    Enabled: 0
+    Enabled: 1
     SoundId: UI.Hover
-    TriggerDescription: UI.Hover
+    TriggerDescription: "버튼 포인터 진입"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 4
     Loop: 0
-    MinInterval: 0
+    MinInterval: 0.1
     IntervalScope: 1
     BgmFadeDuration: -1
     LoopEndRule: 
   - EventId: UI.PanelOpen
-    Enabled: 0
+    Enabled: 1
     SoundId: UI.PanelOpen
-    TriggerDescription: UI.PanelOpen
+    TriggerDescription: "패널 열림"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 4
@@ -97,9 +97,9 @@ MonoBehaviour:
     BgmFadeDuration: -1
     LoopEndRule: 
   - EventId: UI.PanelClose
-    Enabled: 0
+    Enabled: 1
     SoundId: UI.PanelClose
-    TriggerDescription: UI.PanelClose
+    TriggerDescription: "패널 닫힘"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 4
@@ -109,9 +109,9 @@ MonoBehaviour:
     BgmFadeDuration: -1
     LoopEndRule: 
   - EventId: UI.Slider
-    Enabled: 0
+    Enabled: 1
     SoundId: UI.Slider
-    TriggerDescription: UI.Slider
+    TriggerDescription: "사용자 조작으로 슬라이더 값 변경"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 4
