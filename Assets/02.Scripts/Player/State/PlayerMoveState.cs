@@ -29,7 +29,7 @@ public class PlayerMoveState : PlayerBaseState
             return;
         }
 
-        if (_inputHandler.TryUseAttackInput())
+        if ((_player.IsGrounded || _player.CanEnterAirAttack()) && _inputHandler.TryUseAttackInput())
         {
             if (!_player.IsGrounded)
             {

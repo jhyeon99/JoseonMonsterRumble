@@ -449,6 +449,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerRangedAttack
   _flipTarget: {fileID: 1668539038824801414}
   _slotRoot: {fileID: 128689173627535363}
+  _rangePreviewProjectile: {fileID: 1857549370956392727, guid: f3451da9fd85ca246ad1cb820b0ec053, type: 3}
+  _showFireRange: 1
   _chargeInterval: 0.22
   _minimumChargeInterval: 0.1
   _soulCostPerTalisman: 1
