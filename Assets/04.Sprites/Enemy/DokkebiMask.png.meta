@@ -1,0 +1,559 @@
+fileFormatVersion: 2
+guid: 621bb0f4cd0ac9348aafcac622ac38b0
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5314013068026631562
+    second: DokkebiMask_0
+  - first:
+      213: 532883776456548310
+    second: DokkebiMask_1
+  - first:
+      213: -9184158430262761160
+    second: DokkebiMask_2
+  - first:
+      213: 2808892067329727978
+    second: DokkebiMask_3
+  - first:
+      213: -4275930680813365535
+    second: DokkebiMask_4
+  - first:
+      213: 1838329706970561473
+    second: DokkebiMask_5
+  - first:
+      213: 5601675805747992433
+    second: DokkebiMask_6
+  - first:
+      213: 618181610173609018
+    second: DokkebiMask_7
+  - first:
+      213: -7542357762275826390
+    second: DokkebiMask_8
+  - first:
+      213: 2165604054926644605
+    second: DokkebiMask_9
+  - first:
+      213: -7766153582319582953
+    second: DokkebiMask_10
+  - first:
+      213: -218109361942434638
+    second: DokkebiMask_11
+  - first:
+      213: -4725387965907017501
+    second: DokkebiMask_12
+  - first:
+      213: -5863030965021489307
+    second: DokkebiMask_13
+  - first:
+      213: -3370205891516863539
+    second: DokkebiMask_14
+  - first:
+      213: 161011823444668905
+    second: DokkebiMask_15
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 300
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: DokkebiMask_0
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 0
+        width: 1075
+        height: 1384
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 67a2d7cf445d046b0800000000000000
+      internalID: -5314013068026631562
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DokkebiMask_1
+      rect:
+        serializedVersion: 2
+        x: 545
+        y: 1376
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6dfd24aa8fe256700800000000000000
+      internalID: 532883776456548310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DokkebiMask_2
+      rect:
+        serializedVersion: 2
+        x: 551
+        y: 1374
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 839674341905b8080800000000000000
+      internalID: -9184158430262761160
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DokkebiMask_3
+      rect:
+        serializedVersion: 2
+        x: 631
+        y: 1381
+        width: 23
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aedd99df3703bf620800000000000000
+      internalID: 2808892067329727978
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DokkebiMask_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1177
+        width: 99
+        height: 197
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e6dced53b7d8a4c0800000000000000
+      internalID: -4275930680813365535
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DokkebiMask_5
+      rect:
+        serializedVersion: 2
+        x: 1016
+        y: 989
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1cb370ce02f038910800000000000000
+      internalID: 1838329706970561473
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DokkebiMask_6
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 901
+        width: 7
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 177528467762dbd40800000000000000
+      internalID: 5601675805747992433
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DokkebiMask_7
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 734
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a34b31136e8349800800000000000000
+      internalID: 618181610173609018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DokkebiMask_8
+      rect:
+        serializedVersion: 2
+        x: 126
+        y: 676
+        width: 9
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a25a3aa8399245790800000000000000
+      internalID: -7542357762275826390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DokkebiMask_9
+      rect:
+        serializedVersion: 2
+        x: 978
+        y: 684
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d755c020a65cd0e10800000000000000
+      internalID: 2165604054926644605
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DokkebiMask_10
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 629
+        width: 19
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 711c6b6b674193490800000000000000
+      internalID: -7766153582319582953
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DokkebiMask_11
+      rect:
+        serializedVersion: 2
+        x: 158
+        y: 635
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2bceb3fd0be19fcf0800000000000000
+      internalID: -218109361942434638
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DokkebiMask_12
+      rect:
+        serializedVersion: 2
+        x: 944
+        y: 603
+        width: 17
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e0e4326eac0c6eb0800000000000000
+      internalID: -4725387965907017501
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DokkebiMask_13
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 565
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56747c6a66452aea0800000000000000
+      internalID: -5863030965021489307
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DokkebiMask_14
+      rect:
+        serializedVersion: 2
+        x: 954
+        y: 518
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dcb6538099f9a31d0800000000000000
+      internalID: -3370205891516863539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DokkebiMask_15
+      rect:
+        serializedVersion: 2
+        x: 972
+        y: 527
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e1be0d76670c3200800000000000000
+      internalID: 161011823444668905
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      DokkebiMask_0: -5314013068026631562
+      DokkebiMask_1: 532883776456548310
+      DokkebiMask_10: -7766153582319582953
+      DokkebiMask_11: -218109361942434638
+      DokkebiMask_12: -4725387965907017501
+      DokkebiMask_13: -5863030965021489307
+      DokkebiMask_14: -3370205891516863539
+      DokkebiMask_15: 161011823444668905
+      DokkebiMask_2: -9184158430262761160
+      DokkebiMask_3: 2808892067329727978
+      DokkebiMask_4: -4275930680813365535
+      DokkebiMask_5: 1838329706970561473
+      DokkebiMask_6: 5601675805747992433
+      DokkebiMask_7: 618181610173609018
+      DokkebiMask_8: -7542357762275826390
+      DokkebiMask_9: 2165604054926644605
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
