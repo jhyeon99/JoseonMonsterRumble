@@ -1179,7 +1179,7 @@ Transform:
   m_GameObject: {fileID: 626587056}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 12, y: 2.7, z: 0}
+  m_LocalPosition: {x: 12, y: 2.3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2595,9 +2595,10 @@ MonoBehaviour:
   _hopCount: 1
   _hopDistance: 25
   _hopHeight: 7.5
-  _takeoffRatio: 0.3
-  _landRatio: 0.9
-  _nextHopRatio: 1
+  _airSpeed: 20
+  _minAirDuration: 0.15
+  _maxAirDuration: 0.75
+  _nextHopDelay: 0
   _overshootDistance: 5
   _overshootJitter: 0.3
   _edgeMargin: 2
@@ -3090,7 +3091,7 @@ Transform:
   m_GameObject: {fileID: 1942571980}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 12, y: 2.7, z: 0}
+  m_LocalPosition: {x: 12, y: 2.3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3722,9 +3723,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
+      propertyPath: _jumpEndLeadTime
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
       propertyPath: _introNextPattern
       value: 
       objectReference: {fileID: 1847312036}
+    - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _jumpTakeoffRatio
+      value: 0.4
+      objectReference: {fileID: 0}
     - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _finishMarkerPoint
@@ -3915,13 +3926,18 @@ PrefabInstance:
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _phases
-      value: 2
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _hitClip
       value: 
       objectReference: {fileID: 7400000, guid: efa43d4278994e74fa25cf0aec476790, type: 2}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _jumpSpeed
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _spawnLine
@@ -3940,7 +3956,7 @@ PrefabInstance:
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _maxDuration
-      value: 30
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
@@ -3955,13 +3971,39 @@ PrefabInstance:
         type: 3}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
+      propertyPath: _flipSuctionVfx
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
       propertyPath: _releaseTrigger
       value: ultimateCancel
       objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
+      propertyPath: _suctionVfxPoint
+      value: 
+      objectReference: {fileID: 7894052878302603947}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
       propertyPath: _animationTrigger
       value: ultimate
+      objectReference: {fileID: 0}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _suctionVfxPrefab
+      value: 
+      objectReference: {fileID: 5311888299119341374, guid: 9dbe22d6b49fa61489d4b2e7aa7f32ce,
+        type: 3}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _suctionVfxOffset.x
+      value: 2.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _suctionVfxOffset.y
+      value: -0.1
       objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
@@ -3971,7 +4013,7 @@ PrefabInstance:
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _phase1HpRatios.Array.size
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
@@ -3996,7 +4038,7 @@ PrefabInstance:
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: '_phase1HpRatios.Array.data[0]'
-      value: 0.9
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
@@ -4037,6 +4079,12 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1847312050}
   m_SourcePrefab: {fileID: 100100000, guid: de8d85715d11ee24394c7cfaefda911e, type: 3}
+--- !u!4 &7894052878302603947 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7593365885540328354, guid: de8d85715d11ee24394c7cfaefda911e,
+    type: 3}
+  m_PrefabInstance: {fileID: 7894052878302603946}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8179876039420071328
 PrefabInstance:
   m_ObjectHideFlags: 0

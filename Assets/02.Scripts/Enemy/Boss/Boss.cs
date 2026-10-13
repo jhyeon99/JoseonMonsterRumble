@@ -175,9 +175,14 @@ public class Boss : MonoBehaviour, IFinishable
     private Vector2 _finishMarkerOffset = new Vector2(0f, 0.5f);
 
     [Header("점프 애니메이션 (짧은 점프 / 소환 점프 공통: 시작 → 공중 → 착지)")]
-    [Tooltip("점프 시작(웅크렸다 뛰어오름) 애니메이터 상태. 이 상태가 끝나는 순간 땅에서 떨어짐")]
+    [Tooltip("점프 시작(웅크렸다 뛰어오름) 애니메이터 상태")]
     [SerializeField]
     private string _jumpStartState = "Boss_Move_Start";
+
+    [Tooltip("시작 애니메이션의 이 지점(0~1)에서 땅에서 떨어짐. 1 = 시작 애니메이션이 끝날 때. " +
+             "이륙 후 남은 시작 애니메이션은 이동하면서 그대로 재생되고, 끝나면 공중 애니메이션으로 이어짐")]
+    [SerializeField, Range(0f, 1f)]
+    private float _jumpTakeoffRatio = 0.6f;
 
     [Tooltip("공중 애니메이터 상태. 공중에 있는 동안 계속 유지 (끝나 가면 처음부터 다시 재생)")]
     [SerializeField]
@@ -186,6 +191,10 @@ public class Boss : MonoBehaviour, IFinishable
     [Tooltip("착지 애니메이터 상태. 땅에 닿는 순간 재생하고, 끝나면 애니메이터 전이로 대기")]
     [SerializeField]
     private string _jumpEndState = "Boss_Move_End";
+
+    [Tooltip("착지 애니메이션을 땅에 닿기 이만큼 전부터 재생 (초). 0이면 땅에 닿는 순간. 착지 클립 앞부분(다리를 뻗는 동작 등)이 공중에서 나오도록")]
+    [SerializeField, Min(0f)]
+    private float _jumpEndLeadTime = 0.15f;
 
     [Tooltip("시작 / 착지 애니메이션이 끝나기를 기다리는 최대 시간 (초). 상태가 없거나 멈췄을 때 대비")]
     [SerializeField, Min(0.1f)]
@@ -1012,6 +1021,30 @@ public class Boss : MonoBehaviour, IFinishable
 
     public float JumpStateTimeout => _jumpStateTimeout;
 
+    /// <summary>착지 애니메이션을 땅에 닿기 몇 초 전부터 재생할지</summary>
+    public float JumpEndLeadTime => _jumpEndLeadTime;
+
+    /// <summary>
+    /// 공중 이동 중 매 물리 프레임 호출. 착지까지 남은 시간이 Jump End Lead Time 이하가 되면 착지 애니메이션을 한 번 재생, 그 전에는 공중 애니메이션 유지.
+    /// 착지 애니메이션을 재생했으면 true
+    /// </summary>
+    public bool UpdateJumpAirAnimation(float remainingAirTime, bool endPlayed)
+    {
+        if (endPlayed)
+        {
+            return true;
+        }
+
+        if (remainingAirTime <= _jumpEndLeadTime)
+        {
+            PlayJumpEnd();
+            return true;
+        }
+
+        KeepJumpAir();
+        return false;
+    }
+
     /// <summary>점프 시작 애니메이션 재생</summary>
     public void PlayJumpStart()
     {
@@ -1019,9 +1052,14 @@ public class Boss : MonoBehaviour, IFinishable
         PlayStateOrWarn(_jumpStartState, "Jump Start State");
     }
 
-    /// <summary>공중 애니메이션 재생 (땅에서 떨어지는 순간)</summary>
+    /// <summary>공중 애니메이션 재생 (땅에서 떨어지는 순간). 시작 애니메이션이 아직 재생 중이면 끝까지 두고 애니메이터 전이로 이어지게 함</summary>
     public void PlayJumpAir()
     {
+        if (IsInAnimatorState(_jumpStartState))
+        {
+            return;
+        }
+
         PlayStateOrWarn(_jumpAirState, "Jump Air State");
     }
 
@@ -1031,6 +1069,12 @@ public class Boss : MonoBehaviour, IFinishable
     public void KeepJumpAir()
     {
         if (_animator == null || string.IsNullOrEmpty(_jumpAirState))
+        {
+            return;
+        }
+
+        // 이륙 후 남은 시작 애니메이션은 끝까지 재생 (끝나면 애니메이터 전이로 공중 애니메이션)
+        if (IsInAnimatorState(_jumpStartState))
         {
             return;
         }
@@ -1052,8 +1096,22 @@ public class Boss : MonoBehaviour, IFinishable
     public bool IsInJumpStart => IsInAnimatorState(_jumpStartState);
     public bool IsInJumpEnd => IsInAnimatorState(_jumpEndState);
 
-    /// <summary>점프 시작 애니메이션이 끝나기까지 남은 시간 (초). 시작 상태가 아니면 0</summary>
-    public float JumpStartRemaining
+    /// <summary>아직 이륙 지점(Jump Takeoff Ratio) 전인지 (시작 애니메이션 중, 땅에 있어야 하는 구간)</summary>
+    public bool IsBeforeJumpTakeoff
+    {
+        get
+        {
+            if (_animator == null || !IsInAnimatorState(_jumpStartState))
+            {
+                return false;
+            }
+
+            return _animator.GetCurrentAnimatorStateInfo(0).normalizedTime < _jumpTakeoffRatio;
+        }
+    }
+
+    /// <summary>이륙 지점(Jump Takeoff Ratio)까지 남은 시간 (초). 시작 상태가 아니면 0</summary>
+    public float JumpTakeoffRemaining
     {
         get
         {
@@ -1063,7 +1121,7 @@ public class Boss : MonoBehaviour, IFinishable
             }
 
             AnimatorStateInfo info = _animator.GetCurrentAnimatorStateInfo(0);
-            return Mathf.Max(0f, (1f - info.normalizedTime) * info.length);
+            return Mathf.Max(0f, (_jumpTakeoffRatio - info.normalizedTime) * info.length);
         }
     }
 

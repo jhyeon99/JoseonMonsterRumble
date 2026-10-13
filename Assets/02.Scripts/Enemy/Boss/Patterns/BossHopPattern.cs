@@ -35,15 +35,15 @@ public class BossHopPattern : BossPattern
 
     [Tooltip("공중에서 가로로 이동하는 속도 (초당 거리). 멀리 뛸수록 오래 떠 있음 (체공 시간 = 거리 / 속도)")]
     [SerializeField, Min(0.1f)]
-    private float _airSpeed = 12f;
+    private float _airSpeed = 24f;
 
     [Tooltip("체공 시간 최소 (초). 아주 가까이 뛸 때도 이만큼은 떠 있음")]
     [SerializeField, Min(0.05f)]
-    private float _minAirDuration = 0.3f;
+    private float _minAirDuration = 0.15f;
 
     [Tooltip("체공 시간 최대 (초)")]
     [SerializeField, Min(0.05f)]
-    private float _maxAirDuration = 1.5f;
+    private float _maxAirDuration = 0.75f;
 
     [Tooltip("연속 점프일 때 착지 후 다음 점프까지 (초). 0 = 착지 애니메이션이 끝난 뒤, 양수 = 착지하고 그만큼 뒤 바로")]
     [SerializeField, Min(0f)]
@@ -130,11 +130,11 @@ public class BossHopPattern : BossPattern
         // 애니메이터가 시작 상태로 바뀌는 건 다음 갱신부터
         yield return null;
 
-        // 시작 애니메이션이 끝날 때까지 제자리 (웅크리기)
+        // 이륙 지점(Boss의 Jump Takeoff Ratio)까지 제자리 (웅크리기)
         float timeout = Time.time + Boss.JumpStateTimeout;
-        while (Boss.IsInJumpStart && Time.time < timeout)
+        while (Boss.IsBeforeJumpTakeoff && Time.time < timeout)
         {
-            if (!takeoffDustPlayed && takeoffTiming < 0f && Boss.JumpStartRemaining <= -takeoffTiming)
+            if (!takeoffDustPlayed && takeoffTiming < 0f && Boss.JumpTakeoffRemaining <= -takeoffTiming)
             {
                 Boss.PlayJumpDust(Boss.Position.x, Boss.GroundY);
                 takeoffDustPlayed = true;
@@ -165,6 +165,7 @@ public class BossHopPattern : BossPattern
         float airDuration = GetAirDuration(Mathf.Abs(targetX - startX));
 
         _airborne = true;
+        bool endAnimationPlayed = false;
         float elapsed = 0f;
         while (elapsed < airDuration)
         {
@@ -174,7 +175,9 @@ public class BossHopPattern : BossPattern
             // 출발 높이에서 먼저 위로 뛰어오른 뒤 바닥으로 떨어지는 포물선 (같은 높이면 기존과 동일)
             float y = GetHopY(t, startY, groundY);
             Boss.MoveTo(new Vector2(x, y));
-            Boss.KeepJumpAir();
+
+            // 공중 애니메이션 유지, 착지 직전(Boss의 Jump End Lead Time)부터 착지 애니메이션
+            endAnimationPlayed = Boss.UpdateJumpAirAnimation(airDuration - elapsed, endAnimationPlayed);
 
             // 착지 직전에 미리 (Landing Dust Timing이 음수)
             if (!landingDustPlayed && landingTiming < 0f && airDuration - elapsed <= -landingTiming)
@@ -190,7 +193,11 @@ public class BossHopPattern : BossPattern
         Boss.MoveTo(new Vector2(targetX, groundY));
         Boss.SnapToGround();
         _airborne = false;
-        Boss.PlayJumpEnd();
+        if (!endAnimationPlayed)
+        {
+            Boss.PlayJumpEnd();
+        }
+
         CameraShake.Shake(_landingShake);
 
         if (!landingDustPlayed)
