@@ -59,6 +59,9 @@ public class BossTailPattern : BossPattern
 
     private bool _turned;
 
+    /// <summary>Turn Ratio = 1: 애니메이터가 꼬리 클립을 벗어나는 프레임에 돌아보기 대기 중</summary>
+    private bool _turnPending;
+
     private void Reset()
     {
         SetDefaults("꼬리치며 뒤돌기", BossPhaseMask.Both, BossFloorMask.Floor1 | BossFloorMask.Floor2);
@@ -135,6 +138,7 @@ public class BossTailPattern : BossPattern
     protected override void OnPatternStart()
     {
         _turned = false;
+        _turnPending = false;
 
         // 대기 중에 플레이어를 돌아봤어도, 등을 보이던 원래 방향으로 되돌려 꼬리가 플레이어를 향하게 함
         Boss.FaceDirection(Boss.IdleEnterFacingX);
@@ -175,6 +179,15 @@ public class BossTailPattern : BossPattern
 
         SetHitboxes(false);
 
+        // Turn Ratio = 1: 시간(Progress)으로 재면 애니메이터보다 한 프레임 빨리 돌 수 있으므로,
+        // 애니메이터가 실제로 꼬리 클립을 벗어나는 프레임에 LateUpdate에서 돌아봄
+        if (!_turned && _turnRatio >= 1f)
+        {
+            _turned = true;
+            _turnPending = true;
+            yield break;
+        }
+
         // 뒤돌기 지점이 판정 뒤라면 거기까지 기다렸다가 돌기
         while (!_turned && Progress < _turnRatio)
         {
@@ -187,12 +200,33 @@ public class BossTailPattern : BossPattern
     /// <summary>Turn Ratio에 도달하면 한 번만 플레이어 쪽으로 방향 전환</summary>
     private void TryTurn(bool force = false)
     {
-        if (_turned || (!force && Progress < _turnRatio))
+        if (_turned || _turnRatio >= 1f || (!force && Progress < _turnRatio))
         {
             return;
         }
 
         _turned = true;
+        Boss.FacePlayer();
+    }
+
+    /// <summary>
+    /// LateUpdate는 애니메이터가 이번 프레임 스프라이트를 정한 뒤, 화면에 그리기 전에 호출됨.
+    /// 여기서 꼬리 클립을 벗어난 걸 확인하고 돌아보면 대기 첫 프레임과 방향 전환이 같은 프레임에 보임
+    /// (코루틴은 애니메이터보다 먼저 돌아서, 시간으로 재면 마지막 프레임이 남은 채 먼저 돌 수 있음)
+    /// </summary>
+    private void LateUpdate()
+    {
+        if (!_turnPending || Boss == null)
+        {
+            return;
+        }
+
+        if (Boss.HasAnimator && IsPlayingPatternClip())
+        {
+            return;
+        }
+
+        _turnPending = false;
         Boss.FacePlayer();
     }
 
@@ -259,6 +293,13 @@ public class BossTailPattern : BossPattern
     {
         SetHitboxes(false);
         SetTelegraph(false);
+
+        // 돌아보기 전에 끝났으면(애니메이터 없음 등) 여기서 마저 돌아봄 (기존과 같은 결과)
+        if (_turnPending && Boss != null)
+        {
+            _turnPending = false;
+            Boss.FacePlayer();
+        }
 
         if (Boss != null && !string.IsNullOrEmpty(_playerBehindBool))
         {
