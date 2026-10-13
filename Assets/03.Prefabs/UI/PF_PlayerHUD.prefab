@@ -993,10 +993,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _worldCamera: {fileID: 0}
   _textPrefab: {fileID: 0}
-  _damageFont: {fileID: 11400000, guid: 3b1366bdf0fa7da4b8179539b08c9917, type: 2}
-  _damageMaterial: {fileID: 2100000, guid: 797da318d2bb853489d304e40d31b41c, type: 2}
-  _finisherFont: {fileID: 11400000, guid: 3b1366bdf0fa7da4b8179539b08c9917, type: 2}
-  _finisherMaterial: {fileID: 2100000, guid: edc605389415fb847b63a2b10767a2e2, type: 2}
+  _damageFont: {fileID: 11400000, guid: 67ee05c03968c204688fb944f42eed7b, type: 2}
+  _damageMaterial: {fileID: 2100000, guid: b96c77d44f3adc54e99f55f6cdb23dcb, type: 2}
+  _finisherFont: {fileID: 11400000, guid: 1de61f9bc15be0e4f871d808990a96c2, type: 2}
+  _finisherMaterial: {fileID: 2100000, guid: 246bd34aaabb3274786619365cbc18c5, type: 2}
   _duration: 0.8
   _popDuration: 0.12
   _popScale: 1.18
@@ -3437,8 +3437,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 3
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 3b1366bdf0fa7da4b8179539b08c9917, type: 2}
-  m_sharedMaterial: {fileID: -7781934580616552074, guid: 3b1366bdf0fa7da4b8179539b08c9917, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 67ee05c03968c204688fb944f42eed7b, type: 2}
+  m_sharedMaterial: {fileID: 2475702888578739171, guid: 67ee05c03968c204688fb944f42eed7b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
