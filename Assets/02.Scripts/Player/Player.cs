@@ -249,12 +249,17 @@ public class Player : MonoBehaviour
         _potionState = new PlayerPotionState(this, _stateMachine);
     }
 
+    public bool CanEnterAirAttack()
+    {
+        return !IsGrounded && _animator != null && _attack != null &&
+            (_animator.HasState(0, PlayerAirAttackState.AnimationStateHash) ||
+             _animator.HasState(0, PlayerAirAttackState.FullAnimationStateHash)) &&
+            _attack.TryGetAirAttackData(out _);
+    }
+
     public bool TryEnterAirAttack()
     {
-        if (IsGrounded || _animator == null ||
-            (!_animator.HasState(0, PlayerAirAttackState.AnimationStateHash) &&
-             !_animator.HasState(0, PlayerAirAttackState.FullAnimationStateHash)) ||
-            !_attack.TryGetAirAttackData(out _))
+        if (!CanEnterAirAttack())
         {
             Debug.LogWarning(MissingAirAttackWarning, this);
             return false;
