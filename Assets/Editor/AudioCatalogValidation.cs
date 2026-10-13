@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using GameAudio;
 
@@ -8,6 +8,19 @@ public static class AudioCatalogValidation
     {
         var issues = new List<string>();
         if (catalog == null) { issues.Add("AudioCatalog가 지정되지 않았습니다."); return issues; }
+        var monsters = new HashSet<EnemyData>();
+        var monsterSets = new HashSet<SoundSetSO>();
+        if (catalog.Monsters != null)
+        {
+            foreach (MonsterSoundProfile profile in catalog.Monsters)
+            {
+                if (profile == null) { issues.Add("몬스터 오디오 항목이 비어 있습니다."); continue; }
+                if (profile.Monster == null) issues.Add(profile.DisplayName + ": 몬스터 데이터를 선택하세요.");
+                else if (!monsters.Add(profile.Monster)) issues.Add(profile.DisplayName + ": 같은 몬스터 데이터가 중복 등록되었습니다.");
+                if (profile.Sounds == null) issues.Add(profile.DisplayName + ": SoundSet을 연결하세요.");
+                else if (!monsterSets.Add(profile.Sounds)) issues.Add(profile.DisplayName + ": 다른 몬스터와 SoundSet을 공유하고 있습니다. 개별 음원이 필요하면 복제하세요.");
+            }
+        }
         var sets = new HashSet<SoundSetSO>(catalog.EnumerateSets());
         var ids = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (SoundSetSO set in sets)

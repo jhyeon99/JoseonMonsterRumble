@@ -94,6 +94,13 @@ public sealed partial class Ep1TutorialManager
             _regularGuardSucceeded ? CombatStep.WaitingForRegularGuard : CombatStep.WaitingForHint;
         _startParryHint = _combatStep == CombatStep.WaitingForParryHint;
         BindCombatEvents();
+#if UNITY_EDITOR
+        if (IsSkippedForTesting || MapTestMode.IsEnabled)
+        {
+            SkipForTesting();
+            return;
+        }
+#endif
         UpdateRequiredPractice();
     }
 
@@ -121,6 +128,7 @@ public sealed partial class Ep1TutorialManager
 
     internal bool CanShowHint(Ep1TutorialHintType type)
     {
+        if (IsSkippedForTesting) return false;
         if (type == Ep1TutorialHintType.Finisher) return IsFinisherPractice && !IsParryTutorialPending;
         if (type == Ep1TutorialHintType.Respawn) return false;
         if (IsParryTutorialPending || IsCheckpointCinematicActive || IsCheckpointIntroductionPending ||
@@ -163,6 +171,13 @@ public sealed partial class Ep1TutorialManager
 
     private void Update()
     {
+#if UNITY_EDITOR
+        if (IsSkippedForTesting || MapTestMode.IsEnabled)
+        {
+            SkipForTesting();
+            return;
+        }
+#endif
         if (_guard == null || _combatPlayer == null || _combatInput == null) return;
         if (_combatPlayer.Health.IsDead || (StageManager.Instance != null && StageManager.Instance.IsRespawning))
         {
