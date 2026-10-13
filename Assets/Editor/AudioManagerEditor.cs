@@ -70,11 +70,15 @@ public sealed class AudioManagerEditor : Editor
         if (Foldout("Enemy", "몬스터"))
         {
             EditorGUI.indentLevel++;
-            DrawCategory(catalogObject, "Ground.Melee", "지상 / 근접", "Ground");
-            DrawCategory(catalogObject, "Ground.Ranged", "지상 / 원거리", "Ground");
-            DrawCategory(catalogObject, "Air.Melee", "공중 / 근접", "Air");
-            DrawCategory(catalogObject, "Air.Ranged", "공중 / 원거리", "Air");
-            DrawCategory(catalogObject, "Buff", "버프형 (조건부)", "Buff");
+            DrawMonsterProfiles(catalogObject);
+            if (Foldout("EnemyDefaults", "미등록 몬스터의 기본 설정"))
+            {
+                DrawCategory(catalogObject, "Ground.Melee", "지상 / 근접 기본값", "Ground");
+                DrawCategory(catalogObject, "Ground.Ranged", "지상 / 원거리 기본값", "Ground");
+                DrawCategory(catalogObject, "Air.Melee", "공중 / 근접 기본값", "Air");
+                DrawCategory(catalogObject, "Air.Ranged", "공중 / 원거리 기본값", "Air");
+                DrawCategory(catalogObject, "Buff", "버프형 기본값", "Buff");
+            }
             EditorGUI.indentLevel--;
         }
         DrawCategory(catalogObject, "Boss", "보스", "Boss");
@@ -83,6 +87,63 @@ public sealed class AudioManagerEditor : Editor
         DrawCategory(catalogObject, "Environment", "환경", "Environment");
         DrawCategory(catalogObject, "UI", "UI", "UI");
         DrawCategory(catalogObject, "Prologue", "프롤로그", "Prologue");
+    }
+
+    private void DrawMonsterProfiles(SerializedObject catalog)
+    {
+        EditorGUILayout.HelpBox("각 몬스터 항목의 음원·볼륨·피치·지연을 따로 조절합니다. 다른 몬스터를 추가할 때는 기존 항목을 복제하고 몬스터 데이터를 선택하세요.", MessageType.Info);
+        SerializedProperty profiles = catalog.FindProperty("Monsters");
+        for (int i = 0; i < profiles.arraySize; i++)
+        {
+            SerializedProperty profile = profiles.GetArrayElementAtIndex(i);
+            string name = profile.FindPropertyRelative("DisplayName").stringValue;
+            string prefix = profile.FindPropertyRelative("EventPrefix").stringValue;
+            string path = "Monsters.Array.data[" + i + "]";
+            DrawCategory(catalog, path + ".Sounds", string.IsNullOrEmpty(name) ? "몬스터 " + (i + 1) : name, prefix);
+        }
+    }
+
+    private void DuplicateMonster(SerializedObject catalog, string profilePath, SoundSetSO source)
+    {
+        SerializedProperty original = catalog.FindProperty(profilePath);
+        string prefix = original.FindPropertyRelative("EventPrefix").stringValue;
+        string label = original.FindPropertyRelative("DisplayName").stringValue + " (복제)";
+        SoundSetSO copy = Instantiate(source);
+        copy.name = source.name + "_Copy";
+        var copiedData = new SerializedObject(copy);
+        var ids = new Dictionary<string, string>(StringComparer.Ordinal);
+        string uniquePrefix = "Monster_" + Guid.NewGuid().ToString("N");
+        SerializedProperty sounds = copiedData.FindProperty("_sounds");
+        for (int i = 0; i < sounds.arraySize; i++)
+        {
+            SerializedProperty id = sounds.GetArrayElementAtIndex(i).FindPropertyRelative("SoundId");
+            string previous = id.stringValue;
+            string replacement = uniquePrefix + "." + i;
+            if (!string.IsNullOrWhiteSpace(previous)) ids[previous] = replacement;
+            id.stringValue = replacement;
+        }
+        SerializedProperty events = copiedData.FindProperty("_events");
+        for (int i = 0; i < events.arraySize; i++)
+        {
+            SerializedProperty id = events.GetArrayElementAtIndex(i).FindPropertyRelative("SoundId");
+            if (ids.TryGetValue(id.stringValue, out string replacement)) id.stringValue = replacement;
+        }
+        copiedData.ApplyModifiedPropertiesWithoutUndo();
+        copiedData.Dispose();
+        string assetPath = AssetDatabase.GenerateUniqueAssetPath("Assets/07.ScriptableObjects/Audio/" + copy.name + ".asset");
+        AssetDatabase.CreateAsset(copy, assetPath);
+        Undo.RegisterCreatedObjectUndo(copy, "Duplicate monster audio");
+        SerializedProperty profiles = catalog.FindProperty("Monsters");
+        int index = profiles.arraySize;
+        profiles.InsertArrayElementAtIndex(index);
+        SerializedProperty added = profiles.GetArrayElementAtIndex(index);
+        added.FindPropertyRelative("Monster").objectReferenceValue = null;
+        added.FindPropertyRelative("DisplayName").stringValue = label;
+        added.FindPropertyRelative("EventPrefix").stringValue = prefix;
+        added.FindPropertyRelative("Sounds").objectReferenceValue = copy;
+        catalog.ApplyModifiedProperties();
+        AssetDatabase.SaveAssetIfDirty(copy);
+        AssetDatabase.SaveAssetIfDirty(_catalog);
     }
 
     private void DrawGlobalSettings()
@@ -150,10 +211,23 @@ public sealed class AudioManagerEditor : Editor
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
         {
             SerializedProperty reference = catalog.FindProperty(path);
+            bool monsterProfile = path.StartsWith("Monsters.", StringComparison.Ordinal);
+            string profilePath = monsterProfile ? path.Substring(0, path.Length - ".Sounds".Length) : null;
+            if (monsterProfile)
+            {
+                SerializedProperty profile = catalog.FindProperty(profilePath);
+                EditorGUILayout.PropertyField(profile.FindPropertyRelative("DisplayName"), new GUIContent("몬스터 이름"));
+                EditorGUILayout.PropertyField(profile.FindPropertyRelative("Monster"), new GUIContent("몬스터 데이터"));
+            }
             EditorGUILayout.PropertyField(reference, new GUIContent("SoundSet"));
             catalog.ApplyModifiedProperties();
             var set = reference.objectReferenceValue as SoundSetSO;
             if (set == null) { EditorGUILayout.LabelField("SoundSet을 연결하면 인라인 편집이 표시됩니다."); return; }
+            if (monsterProfile && GUILayout.Button("다른 몬스터용으로 복제"))
+            {
+                DuplicateMonster(catalog, profilePath, set);
+                GUIUtility.ExitGUI();
+            }
             var data = AssetObject(set);
             SerializedProperty events = data.FindProperty("_events");
             EditorGUILayout.LabelField("이벤트 연결", EditorStyles.boldLabel);
