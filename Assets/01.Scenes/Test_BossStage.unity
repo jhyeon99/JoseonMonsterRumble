@@ -1120,6 +1120,7 @@ MonoBehaviour:
   _durationOverride: 0
   _colliders: []
   _solidRatio: 0.85
+  _swapToStaticWhenGrown: 1
 --- !u!1 &766428127
 GameObject:
   m_ObjectHideFlags: 0
@@ -1369,6 +1370,7 @@ MonoBehaviour:
   _durationOverride: 0
   _colliders: []
   _solidRatio: 0.85
+  _swapToStaticWhenGrown: 1
 --- !u!1001 &1147268440
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1913,6 +1915,7 @@ MonoBehaviour:
   _durationOverride: 0
   _colliders: []
   _solidRatio: 0.85
+  _swapToStaticWhenGrown: 1
 --- !u!1 &1427632698
 GameObject:
   m_ObjectHideFlags: 0
@@ -2043,6 +2046,7 @@ MonoBehaviour:
   _durationOverride: 0
   _colliders: []
   _solidRatio: 0.85
+  _swapToStaticWhenGrown: 1
 --- !u!1001 &1455301013
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2408,6 +2412,7 @@ MonoBehaviour:
   _transitionSpeed: 1.5
   _gapBetween: 0.1
   _maxPatternWait: 6
+  _growDefaultOnStart: 1
   _boss: {fileID: 1847312023}
 --- !u!4 &1606109927
 Transform:
