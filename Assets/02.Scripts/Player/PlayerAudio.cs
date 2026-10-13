@@ -12,6 +12,7 @@ public sealed class PlayerAudio : ActorAudio
     private ulong _attackExecution, _chargeExecution;
     private bool _died, _finisherPlayed;
     public ulong AttackExecutionId => _attackExecution;
+    public SoundSetSO SoundSet => ResolveSet();
     private ulong _movementExecution;
     private bool _wasGrounded;
     private bool _groundedInitialized;
@@ -129,7 +130,16 @@ public sealed class PlayerAudio : ActorAudio
     private void OnParried(HitData hit) => PlayResult("Player.Parry", hit.HitPoint);
     private void OnGuardBroken() => PlayResult("Player.GuardBreak", transform.position);
     private void OnPotionUsed() => PlayResult("Player.PotionUse", transform.position);
-    private void OnFired(int count) { if (count > 0) PlayResult("Player.TalismanFire", transform.position); }
+    private void OnFired(int count)
+    {
+        // Result remains a one-shot for the firing group; Entity is owned by each projectile.
+        SoundSetSO set = ResolveSet();
+        if (count > 0 && set != null && set.TryGetEvent("Player.TalismanFire", out EventBinding binding) &&
+            binding.LifetimePolicy == LifetimePolicy.Result)
+        {
+            PlayResult("Player.TalismanFire", transform.position);
+        }
+    }
 
     private void OnChargeStep(int count)
     {
