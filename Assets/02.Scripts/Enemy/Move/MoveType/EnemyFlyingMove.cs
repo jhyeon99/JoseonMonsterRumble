@@ -405,7 +405,8 @@ public class EnemyFlyingMove : EnemyMoveType
     public void UpdateMeleeChaseFlight()
     {
         float distance = Enemy.GetDistanceToPlayer();
-        if (distance > Enemy.Data.AttackDetectRange + ChaseDistanceMargin)
+        bool needsNavigation = _meleeAttack.ShouldChaseTarget();
+        if (needsNavigation || distance > Enemy.Data.AttackDetectRange + ChaseDistanceMargin)
         {
             _meleeFlightMode = MeleeFlightMode.Approaching;
         }
@@ -415,11 +416,18 @@ public class EnemyFlyingMove : EnemyMoveType
         }
         if (_meleeFlightMode == MeleeFlightMode.Hovering)
         {
+            _meleeAttack.ResetNavigationProgress();
             HoverInPlace();
             return;
         }
-        Vector2 offset = _meleeAttack.GetTargetPosition() + Vector2.up * _meleeAttack.Data.DiveHeight - Rigidbody.position;
-        ApplyMeleeFlightVelocity(offset.normalized * Enemy.Data.MoveSpeed);
+        Vector2 targetPosition = _meleeAttack.GetTargetPosition() + Vector2.up * _meleeAttack.Data.DiveHeight;
+        if (needsNavigation && _meleeAttack.IsAtPosition(targetPosition))
+        {
+            targetPosition = _meleeAttack.GetTargetPosition();
+        }
+        Vector2 velocity = _meleeAttack.CalculateNavigationVelocity(targetPosition, Enemy.Data.MoveSpeed, true);
+        ApplyMeleeFlightVelocity(velocity);
+        _meleeAttack.RecordNavigationMovement(Rigidbody.linearVelocity * Time.fixedDeltaTime);
     }
 
     private void ApplyMeleeFlightVelocity(Vector2 desiredVelocity, bool faceTarget = true)
