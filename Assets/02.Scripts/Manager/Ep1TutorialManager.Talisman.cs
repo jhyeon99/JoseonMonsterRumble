@@ -198,6 +198,7 @@ public sealed partial class Ep1TutorialManager
         {
             if (_talismanStep == TalismanStep.WaitingForEnemies)
             {
+                if (_requirePracticeInput && AreTalismanPrerequisitesDefeated()) EnsureTalismanPracticeSouls(3);
                 if (!AreTalismanPrerequisitesDefeated() ||
                     _combatPlayer.Soul.CurrentSoul < Mathf.Min(_combatPlayer.Soul.MaxSoul, _talismanMinimumSouls) ||
                     !IsTalismanTargetVisible() ||
@@ -336,7 +337,9 @@ public sealed partial class Ep1TutorialManager
     private void HandleTalismanFired(int count)
     {
         if (!IsTalismanTapPractice && !IsTalismanChargePractice) return;
-        _pendingTalismanShotCount = count;
+        // Keep a successful shot even if another firing callback arrives before the next Update.
+        bool success = IsTalismanTapPractice ? count == 1 : count >= 2;
+        if (success || _pendingTalismanShotCount == 0) _pendingTalismanShotCount = count;
         _talismanShotAt = Time.time;
         // Let the firing animation/projectile creation finish before any tutorial pause.
     }

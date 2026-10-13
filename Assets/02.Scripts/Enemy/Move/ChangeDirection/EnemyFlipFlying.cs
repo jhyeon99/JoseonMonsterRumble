@@ -12,6 +12,11 @@ public class EnemyFlipFlying : EnemyFlip
             melee.FlyingAttack.FaceDirection(Enemy.GetDirectionToPlayer());
             return;
         }
+        if (Enemy.Combat is EnemyRangedCombat)
+        {
+            // 원거리 비행은 EnemyRotation이 회전과 뒤집기를 함께 처리한다.
+            return;
+        }
         Vector3 scale = transform.localScale;
 
         if (Enemy.GetDirectionToPlayer().x >= 0f)
