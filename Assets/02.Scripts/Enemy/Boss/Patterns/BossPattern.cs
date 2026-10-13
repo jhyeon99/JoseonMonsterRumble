@@ -101,6 +101,12 @@ public abstract class BossPattern : MonoBehaviour
     /// <summary>true면 CanUse일 때 다른 패턴보다 먼저, 대기 시간 없이 바로 사용 (체력 비율 발동 패턴 등)</summary>
     public virtual bool IsForced => false;
 
+    /// <summary>
+    /// false면 패턴 시작 시 Animation Trigger를 보내지 않고 Animation Clip 재생도 기다리지 않음
+    /// (점프처럼 패턴이 애니메이터 상태를 직접 재생하며 시간을 정하는 경우)
+    /// </summary>
+    protected virtual bool UsesPatternAnimation => true;
+
     /// <summary>true면 이 패턴 중 보스가 플레이어의 직접 공격을 받지 않음 (기믹 데미지는 받음)</summary>
     public virtual bool BlocksDirectDamage => false;
 
@@ -230,11 +236,14 @@ public abstract class BossPattern : MonoBehaviour
         }
 
         _startTime = Time.time;
-        Boss.SetTrigger(AnimationTrigger);
+        if (UsesPatternAnimation)
+        {
+            Boss.SetTrigger(AnimationTrigger);
+        }
 
         // 애니메이터가 실제로 이 클립을 재생하기 시작한 순간부터 진행도를 셈
         // (이전 애니메이션이 끝나기를 기다리는 동안 판정 / 발사가 먼저 나가지 않도록)
-        if (_animationClip != null && Boss.HasAnimator)
+        if (UsesPatternAnimation && _animationClip != null && Boss.HasAnimator)
         {
             float waitUntil = Time.time + _animationStartTimeout;
             while (!Boss.IsPlayingClip(_animationClip) && Time.time < waitUntil)
@@ -265,7 +274,7 @@ public abstract class BossPattern : MonoBehaviour
 
         // 시간이 다 됐어도 애니메이터가 아직 이 패턴 클립을 재생 중이면 끝날 때까지 기다림
         // (다음 패턴 트리거가 이전 애니메이션 도중에 들어가 두 번째부터 꼬이는 문제 방지)
-        if (_animationClip != null && Boss.HasAnimator)
+        if (UsesPatternAnimation && _animationClip != null && Boss.HasAnimator)
         {
             float waitUntil = Time.time + _animationStartTimeout;
             while (IsPlayingPatternClip() && Time.time < waitUntil)
