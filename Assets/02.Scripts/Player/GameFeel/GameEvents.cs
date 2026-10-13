@@ -28,30 +28,6 @@ public class GameEvents
     /// <summary>마무리 공격 타격 순간 (타격 위치)</summary>
     public static event Action<Vector2> OnFinisher;
 
-    /// <summary>마무리 공격 화면 연출에 필요한 공격자와 대상.</summary>
-    public static event Action<Transform, Transform> OnFinisherImpact;
-
-    /// <summary>마무리 공격 타격 전의 애니메이션 진행도. 0은 공격 시작, 1은 타격 프레임.</summary>
-    public static event Action<Transform, Transform, float> OnFinisherAnticipation;
-
-    public static event Action OnFinisherAnticipationCancelled;
-
-    public static void TriggerFinisherAnticipation(Transform attacker, Transform target, float progress)
-    {
-        OnFinisherAnticipation?.Invoke(attacker, target, progress);
-    }
-
-    public static void TriggerFinisherAnticipationCancelled()
-    {
-        OnFinisherAnticipationCancelled?.Invoke();
-    }
-
-    public static void TriggerFinisher(Vector2 point, Transform attacker, Transform target)
-    {
-        OnFinisherImpact?.Invoke(attacker, target);
-        TriggerFinisher(point);
-    }
-
     public static void TriggerFinisher(Vector2 point)
     {
         OnFinisher?.Invoke(point);

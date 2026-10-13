@@ -88,7 +88,6 @@ public class EnemyContactDamage : MonoBehaviour
         Vector2 hitPoint = other.ClosestPoint(_zone.bounds.center);
 
         var hitData = new HitData(_damage, _knockbackForce, hitPoint, attackDirection, _defense, null, 0, _attackName);
-        hitData.Attacker = _enemy != null ? _enemy.gameObject : _boss.gameObject;
         damageable.TakeDamage(hitData);
         _nextHitTime = Time.time + _hitInterval;
     }

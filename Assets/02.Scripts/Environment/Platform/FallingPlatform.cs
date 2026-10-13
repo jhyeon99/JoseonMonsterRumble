@@ -19,7 +19,6 @@ public class FallingPlatform : MonoBehaviour
     private float _startRotation;
     private Vector3 _visualStartLocalPosition;
     private Coroutine _fallRoutine;
-    private GameAudio.EventAudio _audio;
 
     private enum PlatformState
     {
@@ -103,32 +102,21 @@ public class FallingPlatform : MonoBehaviour
             _fallRoutine = null;
         }
 
-        if (_audio != null) _audio.Cancel();
         RestorePlatform();
     }
 
     private IEnumerator FallRoutine()
     {
-        _audio = GameAudio.EventAudio.For(this, "Environment");
-        _audio.Begin();
-        _audio.Play("Environment.FallingWarning");
         PlayBreakAnimation();
 
         yield return new WaitForSeconds(_fallDelay);
 
-        _audio.Complete();
-        AudioManager.Instance?.PlaySceneEvent("Environment.FallingBreak", this);
         StartFalling();
 
         yield return new WaitForSeconds(_respawnDelay);
 
         _fallRoutine = null;
         RestorePlatform();
-    }
-
-    private void OnDisable()
-    {
-        if (_audio != null) _audio.Cancel();
     }
 
     private void PlayBreakAnimation()

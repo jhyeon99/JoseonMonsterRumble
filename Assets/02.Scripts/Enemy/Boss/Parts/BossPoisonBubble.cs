@@ -120,7 +120,6 @@ public class BossPoisonBubble : MonoBehaviour, IDamageable, IHitFeedbackSource
     private void Pop()
     {
         _isPopped = true;
-        AudioManager.Instance?.PlaySceneEvent("Boss.BubblePop", this);
 
         if (_popEffect != null)
         {
@@ -131,7 +130,6 @@ public class BossPoisonBubble : MonoBehaviour, IDamageable, IHitFeedbackSource
         {
             BossBaby tadpole = Instantiate(_tadpolePrefab, transform.position, Quaternion.identity);
             tadpole.Initialize(_boss);
-            AudioManager.Instance?.PlaySceneEvent("Boss.BabySpawn", tadpole);
         }
 
         Destroy(gameObject);

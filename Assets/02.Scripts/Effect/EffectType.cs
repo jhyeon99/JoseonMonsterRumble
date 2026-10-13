@@ -4,9 +4,4 @@ public enum EffectType
     EnemyHit,
     BossSpit,
     BossHowl,
-    WalkDust,
-    LandingDust,
-    ParryLaunchDisappear,
-    BossStompExplosion,
-    BossJumpDust,
 }

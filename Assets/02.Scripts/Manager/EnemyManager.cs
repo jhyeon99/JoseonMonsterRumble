@@ -93,36 +93,30 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
-    public Enemy GetTargetAttackerForBuff(Vector2 requesterPosition)
+    public Enemy GetTargetAttackerForBuff()
     {
-        Enemy closestAttacker = null;
-        float closestDistanceSquared = float.PositiveInfinity;
+        Enemy damagedAttacker = ActiveEnemies.Find(e =>
+            e.Type == EnemyType.Attacker &&
+            e.Health.IsAlive &&
+            e.Health.IsDamaged &&
+            !e.IsTargetedForBuff
+        );
 
-        foreach (Enemy enemy in ActiveEnemies)
+        if (damagedAttacker != null)
         {
-            if (enemy == null || enemy.Type != EnemyType.Attacker ||
-                !enemy.isActiveAndEnabled || enemy.IsDefeated || enemy.Health == null ||
-                !enemy.Health.IsAlive || enemy.IsTargetedForBuff)
-            {
-                continue;
-            }
-
-            float distanceSquared = ((Vector2)enemy.transform.position - requesterPosition).sqrMagnitude;
-            if (distanceSquared < closestDistanceSquared)
-            {
-                closestDistanceSquared = distanceSquared;
-                closestAttacker = enemy;
-            }
+            return damagedAttacker;
         }
 
-        return closestAttacker;
+        return ActiveEnemies.Find(e =>
+            e.Type == EnemyType.Attacker &&
+            e.Health.IsAlive &&
+            !e.IsTargetedForBuff
+        );
     }
 
     public Enemy GetDamagedAttackerWithoutBuffer()
     {
-        return ActiveEnemies.Find(e =>
-            e != null && e.Type == EnemyType.Attacker && e.Health != null &&
-            e.Health.IsAlive && e.Health.IsDamaged && !e.IsTargetedForBuff);
+        return GetTargetAttackerForBuff();
     }
 
     private void CheckAttackersLive()
