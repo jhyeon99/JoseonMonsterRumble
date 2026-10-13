@@ -173,6 +173,11 @@ public class GroundProjectile : Projectile
             {
                 continue;
             }
+            if (damageable is PlayerHealth playerHealth && playerHealth.IsInvincible)
+            {
+                NotifyInvincibleHit(playerHealth, hit.point);
+                continue;
+            }
             transform.position = hitPosition;
             ApplyHit(damageable, hit.point);
             return;

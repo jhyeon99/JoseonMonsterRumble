@@ -1,0 +1,168 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 216dd2e5960f4b5c830aa01ce2661746, type: 3}
+  m_Name: SO_EnvironmentSounds
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudio.SoundSetSO
+  _sounds:
+  - SoundId: Environment.Checkpoint
+    DisplayName: "\uC0C8 \uCCB4\uD06C\uD3EC\uC778\uD2B8 \uC800\uC7A5 \uC131\uACF5"
+    Clips:
+    - {fileID: 8300000, guid: 563ec2dd25195e143b3783efca256986, type: 3}
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Environment.FallingWarning
+    DisplayName: "\uBC1C\uD310 \uD30C\uAD34 \uC608\uACE0 \uC560\uB2C8\uBA54\uC774\uC158
+      \uC2DC\uC791"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Environment.FallingBreak
+    DisplayName: "\uBC1C\uD310 \uC2E4\uC81C \uB099\uD558 \uC2DC\uC791"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Environment.PlatformStart
+    DisplayName: "\uBC1C\uD310 \uC774\uB3D9 \uC2E4\uD589 \uC2DC\uC791"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Environment.PlatformLoop
+    DisplayName: "\uBC1C\uD310 \uC774\uB3D9 \uC2E4\uD589 \uC2DC\uC791"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 1
+  - SoundId: Environment.PlatformStop
+    DisplayName: "\uBAA9\uC801\uC9C0 \uB3C4\uCC29\uC73C\uB85C \uC815\uC0C1 \uC815\uC9C0"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Environment.Switch
+    DisplayName: "\uBC1C\uD310 \uC774\uB3D9 \uC694\uCCAD \uC131\uACF5"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  _events:
+  - EventId: Environment.Checkpoint
+    Enabled: 1
+    SoundId: Environment.Checkpoint
+    TriggerDescription: "\uC0C8 \uCCB4\uD06C\uD3EC\uC778\uD2B8 \uC800\uC7A5 \uC131\uACF5"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Environment.FallingWarning
+    Enabled: 1
+    SoundId: Environment.FallingWarning
+    TriggerDescription: "\uBC1C\uD310 \uD30C\uAD34 \uC608\uACE0 \uC560\uB2C8\uBA54\uC774\uC158
+      \uC2DC\uC791"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Environment.FallingBreak
+    Enabled: 1
+    SoundId: Environment.FallingBreak
+    TriggerDescription: "\uBC1C\uD310 \uC2E4\uC81C \uB099\uD558 \uC2DC\uC791"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Environment.PlatformStart
+    Enabled: 1
+    SoundId: Environment.PlatformStart
+    TriggerDescription: "\uBC1C\uD310 \uC774\uB3D9 \uC2E4\uD589 \uC2DC\uC791"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Environment.PlatformLoop
+    Enabled: 1
+    SoundId: Environment.PlatformLoop
+    TriggerDescription: "\uBC1C\uD310 \uC774\uB3D9 \uC2E4\uD589 \uC2DC\uC791"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 1
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: "\uD589\uB3D9 \uC885\uB8CC\xB7\uCDE8\uC18C, \uBE44\uD65C\uC131\uD654
+      \uB610\uB294 \uC52C \uC885\uB8CC"
+  - EventId: Environment.PlatformStop
+    Enabled: 1
+    SoundId: Environment.PlatformStop
+    TriggerDescription: "\uBAA9\uC801\uC9C0 \uB3C4\uCC29\uC73C\uB85C \uC815\uC0C1
+      \uC815\uC9C0"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Environment.Switch
+    Enabled: 1
+    SoundId: Environment.Switch
+    TriggerDescription: "\uBC1C\uD310 \uC774\uB3D9 \uC694\uCCAD \uC131\uACF5"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 

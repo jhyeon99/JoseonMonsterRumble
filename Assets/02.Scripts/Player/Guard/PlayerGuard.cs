@@ -93,6 +93,7 @@ public class PlayerGuard : MonoBehaviour
 
     // 마지막으로 패링 판정을 연 시각 (연타 방지용)
     private float _lastParryWindowOpenedTime = float.NegativeInfinity;
+    private UnityEngine.Object _tutorialGuardOwner;
 
     public float CurrentGauge => _currentGauge;
     public float MaxGauge => _maxGauge;
@@ -107,6 +108,24 @@ public class PlayerGuard : MonoBehaviour
 
     /// <summary>기본 판정 시간 기준으로 지금 패링 판정 중인지 (UI, 디버그용)</summary>
     public bool IsParryWindowOpen => _isGuarding && Time.time - _parryWindowStartTime <= _parryWindow;
+
+    public void SetTutorialGuardPractice(UnityEngine.Object owner, bool enabled)
+    {
+        if (enabled && owner != null)
+        {
+            if (_tutorialGuardOwner != owner)
+            {
+                ChangeGauge(_maxGauge - _currentGauge);
+                _recoverTimer = 0f;
+            }
+            _tutorialGuardOwner = owner;
+            _parryWindowStartTime = float.NegativeInfinity;
+        }
+        else if (_tutorialGuardOwner == owner)
+        {
+            _tutorialGuardOwner = null;
+        }
+    }
 
     /// <summary>게이지 변경 (현재값, 최대값). UI 연결용</summary>
     public event Action<float, float> OnGaugeChanged;
@@ -135,6 +154,7 @@ public class PlayerGuard : MonoBehaviour
         _isGuarding = false;
         _parryWindowStartTime = float.NegativeInfinity;
         _drainResumeTime = float.NegativeInfinity;
+        _tutorialGuardOwner = null;
     }
 
     private void Update()
@@ -143,6 +163,8 @@ public class PlayerGuard : MonoBehaviour
 
         if (_isGuarding)
         {
+            // The first lesson waits for a real hit; approaching/windup time must not exhaust its gauge.
+            if (_tutorialGuardOwner != null) return;
             if (BlockDrainPauseRemaining > 0f)
             {
                 return;
@@ -173,6 +195,7 @@ public class PlayerGuard : MonoBehaviour
         _isGuarding = true;
         _parryWindowStartTime = float.NegativeInfinity;
 
+        if (_tutorialGuardOwner != null) return;
         if (!canOpenParryWindow)
         {
             return;
@@ -234,6 +257,14 @@ public class PlayerGuard : MonoBehaviour
             OnParried?.Invoke(hitData);
             Log("패링 성공");
             return GuardResult.Parried;
+        }
+
+        // 패링 불가 공격이라도 패링 타이밍에 막으면 게이지 소모 없이 막기만 (공격에서 켠 경우)
+        if (!defense.Parryable && defense.FreeBlockOnParryTiming && IsInParryWindow(defense))
+        {
+            OnBlocked?.Invoke(hitData);
+            Log("패링 타이밍 가드 (패링 불가 공격, 게이지 소모 없음)");
+            return GuardResult.Blocked;
         }
 
         // 남은 게이지가 소모량보다 적으면 가드 브레이크 → 막지 못하고 그대로 피격

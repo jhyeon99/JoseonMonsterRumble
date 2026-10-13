@@ -180,6 +180,8 @@ MonoBehaviour:
     Unblockable: 1
     ParryWindowOverride: 0
     GuardGaugeCost: 0
+    BlockInvincibleTime: 0
+    FreeBlockOnParryTiming: 0
 --- !u!1 &2057356393512570043
 GameObject:
   m_ObjectHideFlags: 0
@@ -312,6 +314,7 @@ GameObject:
   - component: {fileID: -3787385288428544344}
   - component: {fileID: 1842194761569257879}
   - component: {fileID: 6944414531245368504}
+  - component: {fileID: 6778535843782367592}
   m_Layer: 7
   m_Name: EnemyBuff
   m_TagString: Enemy
@@ -458,6 +461,10 @@ MonoBehaviour:
   _followLerpSpeed: 8.5
   _decelerateDistance: 5
   _arrivalDistance: 0.45
+  _wanderRadius: 2.5
+  _wanderSpeed: 1.6
+  _wanderHoverAmplitude: 0.3
+  _wanderHoverFrequency: 2
 --- !u!114 &6900135879620250934
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -470,6 +477,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 728a422b81f2dc84abbffee7b8ef4ec0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+  _damageVarianceRatio: 0.1
 --- !u!114 &8846624967543919300
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -522,3 +530,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GroundDirectionLock
   _flip: {fileID: 1842194761569257879}
+--- !u!114 &6778535843782367592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9002607081654718196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d47f898a35324391bdc05e4fe6b4f0b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAudio
+  _soundSet: {fileID: 0}

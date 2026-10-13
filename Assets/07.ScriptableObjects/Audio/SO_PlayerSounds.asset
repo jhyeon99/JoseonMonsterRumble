@@ -1,0 +1,498 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 216dd2e5960f4b5c830aa01ce2661746, type: 3}
+  m_Name: SO_PlayerSounds
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudio.SoundSetSO
+  _sounds:
+  - SoundId: Player.Attack1
+    DisplayName: "\uD574\uB2F9 1\uD0C0 \uACF5\uACA9 \uC2DC\uC791"
+    Clips:
+    - {fileID: 8300000, guid: de2a60563399c324791ed2f9795bf26b, type: 3}
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Attack2
+    DisplayName: "\uD574\uB2F9 2\uD0C0 \uACF5\uACA9 \uC2DC\uC791"
+    Clips:
+    - {fileID: 8300000, guid: 14a25cd5db294e648b4f7c9be6420d23, type: 3}
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Attack3
+    DisplayName: "\uD574\uB2F9 3\uD0C0 \uACF5\uACA9 \uC2DC\uC791"
+    Clips:
+    - {fileID: 8300000, guid: 83b263246196beb429dd974455a46587, type: 3}
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.MeleeImpact
+    DisplayName: "\uC2E4\uC81C \uD53C\uD574\uAC00 \uC801\uC6A9\uB41C \uADFC\uC811
+      \uBA85\uC911"
+    Clips:
+    - {fileID: 8300000, guid: 210c1e3a1abc6314b860e293c5addf95, type: 3}
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Footstep
+    DisplayName: "\uC811\uC9C0\xB7\uC774\uB3D9 \uC911 \uBC1C \uB514\uB524 \uB9C8\uCEE4"
+    Clips:
+    - {fileID: 8300000, guid: 89d8d551d08c1fa41b3159747ffd5f69, type: 3}
+    Volume: 0.546
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Jump
+    DisplayName: "\uC810\uD504 \uC2E4\uD589 \uC131\uACF5"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Land
+    DisplayName: "\uC2E4\uC81C \uACF5\uC911 \u2192 \uC811\uC9C0 \uC804\uD658"
+    Clips:
+    - {fileID: 8300000, guid: b4d37775a04d6634dac931608f5608f9, type: 3}
+    Volume: 0.375
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Dodge
+    DisplayName: "\uBC31\uC2A4\uD15D \uC2E4\uD589 \uC2DC\uC791"
+    Clips:
+    - {fileID: 8300000, guid: e38425275bbd7f145bad5daccce44d20, type: 3}
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Hurt
+    DisplayName: "\uBC29\uC5B4\uB418\uC9C0 \uC54A\uC740 \uBE44\uCE58\uBA85 \uD53C\uD574
+      \uC801\uC6A9"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Death
+    DisplayName: "\uC0AC\uB9DD \uD655\uC815"
+    Clips:
+    - {fileID: 0}
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Block
+    DisplayName: "\uC2E4\uC81C \uAC00\uB4DC \uBC29\uC5B4 \uC131\uACF5"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Parry
+    DisplayName: "\uC2E4\uC81C \uD328\uB9C1 \uC131\uACF5"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.GuardBreak
+    DisplayName: "\uAC00\uB4DC \uBE0C\uB808\uC774\uD06C \uD655\uC815"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Finisher
+    DisplayName: "\uB9C8\uBB34\uB9AC \uD0C0\uACA9 \uC2E4\uD589\uB2F9 1\uD68C"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.ChargeStep
+    DisplayName: "\uBD80\uC801 \uC2AC\uB86F \uD65C\uC131\uD654 \uC131\uACF5"
+    Clips:
+    - {fileID: 8300000, guid: e27e05bcd0a3c2e4992fba227dc4bb4b, type: 3}
+    Volume: 0.102
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.TalismanFire
+    DisplayName: "\uC2E4\uC81C \uBD80\uC801 \uBC1C\uC0AC \uBB36\uC74C\uB2F9 1\uD68C"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.TalismanExplosion
+    DisplayName: "\uC720\uD6A8 \uBA85\uC911\uC73C\uB85C \uBD80\uC801 \uD3ED\uBC1C
+      \uC2DC\uC791"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.PotionUse
+    DisplayName: "\uBB3C\uC57D \uD68C\uBCF5\xB7\uC18C\uBAA8 \uC131\uACF5"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.GuardEnter
+    DisplayName: "\uAC00\uB4DC \uC790\uC138 \uC9C4\uC785 \uC131\uACF5"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.ChargeLoop
+    DisplayName: "\uBD80\uC801 \uCDA9\uC804 \uC2DC\uC791"
+    Clips:
+    - {fileID: 8300000, guid: 4be4ee3b74de5b44885ce87beddf2d94, type: 3}
+    Volume: 0.297
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 1
+  - SoundId: Player.ChargeFull
+    DisplayName: "\uCD5C\uB300 \uCDA9\uC804 \uB2E8\uACC4 \uCD5C\uCD08 \uB3C4\uB2EC"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.Unavailable
+    DisplayName: "\uC790\uC6D0 \uBD80\uC871 \uB4F1\uC73C\uB85C \uC0AC\uC6A9 \uC2E4\uD328"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  _events:
+  - EventId: Player.Attack1
+    Enabled: 1
+    SoundId: Player.Attack1
+    TriggerDescription: "\uD574\uB2F9 1\uD0C0 \uACF5\uACA9 \uC2DC\uC791"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Attack2
+    Enabled: 1
+    SoundId: Player.Attack2
+    TriggerDescription: "\uD574\uB2F9 2\uD0C0 \uACF5\uACA9 \uC2DC\uC791"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Attack3
+    Enabled: 1
+    SoundId: Player.Attack3
+    TriggerDescription: "\uD574\uB2F9 3\uD0C0 \uACF5\uACA9 \uC2DC\uC791"
+    Delay: 0.28
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.MeleeImpact
+    Enabled: 1
+    SoundId: Player.MeleeImpact
+    TriggerDescription: "\uC2E4\uC81C \uD53C\uD574\uAC00 \uC801\uC6A9\uB41C \uADFC\uC811
+      \uBA85\uC911"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Footstep
+    Enabled: 1
+    SoundId: Player.Footstep
+    TriggerDescription: "\uC811\uC9C0\xB7\uC774\uB3D9 \uC911 \uBC1C \uB514\uB524
+      \uB9C8\uCEE4"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0.15
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Jump
+    Enabled: 1
+    SoundId: Player.Jump
+    TriggerDescription: "\uC810\uD504 \uC2E4\uD589 \uC131\uACF5"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Land
+    Enabled: 1
+    SoundId: Player.Land
+    TriggerDescription: "\uC2E4\uC81C \uACF5\uC911 \u2192 \uC811\uC9C0 \uC804\uD658"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Dodge
+    Enabled: 1
+    SoundId: Player.Dodge
+    TriggerDescription: "\uBC31\uC2A4\uD15D \uC2E4\uD589 \uC2DC\uC791"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Hurt
+    Enabled: 1
+    SoundId: Player.Hurt
+    TriggerDescription: "\uBC29\uC5B4\uB418\uC9C0 \uC54A\uC740 \uBE44\uCE58\uBA85
+      \uD53C\uD574 \uC801\uC6A9"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Death
+    Enabled: 1
+    SoundId: Player.Death
+    TriggerDescription: "\uC0AC\uB9DD \uD655\uC815"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Block
+    Enabled: 1
+    SoundId: Player.Block
+    TriggerDescription: "\uC2E4\uC81C \uAC00\uB4DC \uBC29\uC5B4 \uC131\uACF5"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Parry
+    Enabled: 1
+    SoundId: Player.Parry
+    TriggerDescription: "\uC2E4\uC81C \uD328\uB9C1 \uC131\uACF5"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.GuardBreak
+    Enabled: 1
+    SoundId: Player.GuardBreak
+    TriggerDescription: "\uAC00\uB4DC \uBE0C\uB808\uC774\uD06C \uD655\uC815"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Finisher
+    Enabled: 1
+    SoundId: Player.Finisher
+    TriggerDescription: "\uB9C8\uBB34\uB9AC \uD0C0\uACA9 \uC2E4\uD589\uB2F9 1\uD68C"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.ChargeStep
+    Enabled: 1
+    SoundId: Player.ChargeStep
+    TriggerDescription: "\uBD80\uC801 \uC2AC\uB86F \uD65C\uC131\uD654 \uC131\uACF5"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.TalismanFire
+    Enabled: 1
+    SoundId: Player.TalismanFire
+    TriggerDescription: "\uC2E4\uC81C \uBD80\uC801 \uBC1C\uC0AC \uBB36\uC74C\uB2F9
+      1\uD68C"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.TalismanExplosion
+    Enabled: 1
+    SoundId: Player.TalismanExplosion
+    TriggerDescription: "\uC720\uD6A8 \uBA85\uC911\uC73C\uB85C \uBD80\uC801 \uD3ED\uBC1C
+      \uC2DC\uC791"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.PotionUse
+    Enabled: 1
+    SoundId: Player.PotionUse
+    TriggerDescription: "\uBB3C\uC57D \uD68C\uBCF5\xB7\uC18C\uBAA8 \uC131\uACF5"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.GuardEnter
+    Enabled: 1
+    SoundId: Player.GuardEnter
+    TriggerDescription: "\uAC00\uB4DC \uC790\uC138 \uC9C4\uC785 \uC131\uACF5"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.ChargeLoop
+    Enabled: 1
+    SoundId: Player.ChargeLoop
+    TriggerDescription: "\uBD80\uC801 \uCDA9\uC804 \uC2DC\uC791"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 1
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: "\uD589\uB3D9 \uC885\uB8CC\xB7\uCDE8\uC18C, \uBE44\uD65C\uC131\uD654
+      \uB610\uB294 \uC52C \uC885\uB8CC"
+  - EventId: Player.ChargeFull
+    Enabled: 1
+    SoundId: Player.ChargeFull
+    TriggerDescription: "\uCD5C\uB300 \uCDA9\uC804 \uB2E8\uACC4 \uCD5C\uCD08 \uB3C4\uB2EC"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.Unavailable
+    Enabled: 1
+    SoundId: Player.Unavailable
+    TriggerDescription: "\uC790\uC6D0 \uBD80\uC871 \uB4F1\uC73C\uB85C \uC0AC\uC6A9
+      \uC2E4\uD328"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0.1
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
