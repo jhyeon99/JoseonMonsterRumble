@@ -338,11 +338,6 @@ public class BossStompPattern : BossPattern
         ShowLandingMarker(false, targetX, groundY);
         CameraShake.Shake(_landingShake);
 
-        // 마지막 찍기가 땅에 닿는 순간 찍기 플랫폼이 자라남
-        if (isLast && Boss.Platforms != null)
-        {
-            Boss.Platforms.NotifyStompLanded();
-        }
         if (!vfxPlayed)
         {
             PlayStompVfx(targetX, groundY);
@@ -357,6 +352,14 @@ public class BossStompPattern : BossPattern
         _stompHitbox.Activate();
         yield return WaitUntilProgress(HitEndRatio);
         _stompHitbox.Deactivate();
+
+        // 마지막 찍기가 패링되지 않고 판정까지 끝나면 착지로 보고 찍기 플랫폼이 자라남.
+        // 판정 중 패링되면 그로기로 패턴이 끊겨 여기까지 오지 않음 → 착지 안 한 것으로 처리
+        // (착지 순간에 바로 알리면 자라나던 찍기 플랫폼이 패링 그로기로 곧바로 기본 배치로 다시 바뀌어 연속 2번 전환됨)
+        if (isLast && Boss.Platforms != null)
+        {
+            Boss.Platforms.NotifyStompLanded();
+        }
     }
 
     /// <summary>착지 지점 발밑에서 돌 튀는 이펙트</summary>
