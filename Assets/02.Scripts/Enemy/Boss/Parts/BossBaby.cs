@@ -27,7 +27,12 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
     [SerializeField, Min(1f)]
     private float _maxHp = 60f;
 
-    [Tooltip("생성 직후 공격을 받지 않는 시간 (초). 방울을 터트린 공격(3타 등)에 나오자마자 같이 맞지 않도록. 플레이어 공격 판정 시간보다 길게")]
+    [Tooltip("켜면 방울에서 나와 처음 땅에 닿을 때까지 공격을 받지 않고 접촉 데미지도 주지 않음")]
+    [SerializeField]
+    private bool _harmlessUntilLanded = true;
+
+    [Tooltip("생성 직후 최소 이 시간 동안은 땅에 닿아 있어도 공격을 받지 않고 접촉 데미지도 주지 않음 (초). " +
+             "땅 위에서 바로 생성될 때 방울을 터트린 공격(3타 등)에 같이 맞지 않도록. 0이면 땅에 닿는 순간 바로 해제")]
     [SerializeField, Min(0f)]
     private float _spawnInvincibleTime = 0.4f;
 
@@ -154,6 +159,7 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
     private bool _isLaunched;
     private bool _isDead;
     private float _invincibleUntil;
+    private bool _hasLanded;
     private Animator _animator;
     private readonly HashSet<int> _animatorParameters = new HashSet<int>();
 
@@ -196,6 +202,9 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
         _groundFilter.useTriggers = false;
     }
 
+    /// <summary>생성 직후 보호 중인지: 처음 땅에 닿기 전이거나 최소 보호 시간 안이면 서로 데미지 없음</summary>
+    private bool IsSpawnProtected => (_harmlessUntilLanded && !_hasLanded) || Time.time < _invincibleUntil;
+
     private void FixedUpdate()
     {
         // 죽는 애니메이션 중에는 제자리 (떠 있었으면 그대로 떨어짐)
@@ -211,8 +220,18 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
             return;
         }
 
+        if (!_hasLanded && IsGrounded())
+        {
+            _hasLanded = true;
+        }
+
         Wander();
-        CheckContact();
+
+        // 생성 직후 보호 중(땅에 닿기 전 등)에는 플레이어에게 접촉 데미지 없음
+        if (!IsSpawnProtected)
+        {
+            CheckContact();
+        }
     }
 
     private void PickDirection()
@@ -364,8 +383,8 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
             return false;
         }
 
-        // 방울을 터트린 그 공격에 같이 맞지 않도록 생성 직후 잠깐 무적
-        if (Time.time < _invincibleUntil)
+        // 방울에서 나와 땅에 닿기 전(+ 최소 보호 시간)에는 무적. 방울을 터트린 그 공격에 같이 맞지 않도록
+        if (IsSpawnProtected)
         {
             return false;
         }

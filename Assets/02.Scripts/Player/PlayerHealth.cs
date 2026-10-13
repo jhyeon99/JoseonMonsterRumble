@@ -23,6 +23,34 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     [SerializeField] private float _invincibleTime = 1.0f;
 
+    [Header("독 (상태이상)")]
+    [Tooltip("독 한 번에 깎이는 체력")]
+    [SerializeField, Min(0f)] private float _poisonTickDamage = 1f;
+
+    [Tooltip("독 피해 간격 (초)")]
+    [SerializeField, Min(0.05f)] private float _poisonTickInterval = 1f;
+
+    [Tooltip("끄면 독으로는 체력 1 아래로 내려가지 않음 (독으로 죽지 않음)")]
+    [SerializeField] private bool _poisonCanKill = true;
+
+    [Tooltip("사망 원인 표시 이름")]
+    [SerializeField] private string _poisonKillReason = "독";
+
+    private float _poisonRemaining;
+    private float _poisonTickTimer;
+
+    /// <summary>지금 독에 걸려 있는지</summary>
+    public bool IsPoisoned => _poisonRemaining > 0f && !_isDead;
+
+    /// <summary>남은 독 시간 (초)</summary>
+    public float PoisonRemaining => IsPoisoned ? _poisonRemaining : 0f;
+
+    /// <summary>독이 걸리거나(true) 풀릴 때(false)</summary>
+    public event Action<bool> OnPoisonChanged;
+
+    /// <summary>독으로 체력이 깎일 때 (실제로 깎인 양). 데미지 숫자 표시용</summary>
+    public event Action<float> OnPoisonDamaged;
+
     private bool _isDead;
     public bool IsDead => _isDead;
 
@@ -61,6 +89,12 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         _isRespawnProtected = false;
         LastFatalHitData = default;
         _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+
+        // 독 걸렸을 때 캐릭터 초록빛 연출 (프리팹에 없으면 자동으로 붙임)
+        if (!TryGetComponent(out PlayerPoisonVisual _))
+        {
+            gameObject.AddComponent<PlayerPoisonVisual>();
+        }
     }
 
     private void Start()
@@ -117,6 +151,12 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         if (_isDead) return true;
 
         OnHit?.Invoke(hitdata);
+
+        // 독 공격이면 독 상태이상 (실제로 피해를 입었을 때만)
+        if (hitdata.PoisonDuration > 0f)
+        {
+            ApplyPoison(hitdata.PoisonDuration);
+        }
 
         if (TryGetComponent<HitFlash>(out HitFlash flash))
         {
@@ -181,6 +221,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     private void Update()
     {
+        UpdatePoison();
+
         if (_potionCooldownTimer > 0f)
         {
             _potionCooldownTimer -= Time.deltaTime;
@@ -241,8 +283,106 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     private void Die()
     {
         _isDead = true;
+        ClearPoison();
         OnDied?.Invoke();
     }
+
+    #region 독
+
+    /// <summary>독 상태이상. 이미 걸려 있으면 남은 시간을 duration으로 다시 채움 (중첩되지 않음)</summary>
+    public void ApplyPoison(float duration)
+    {
+        if (_isDead || duration <= 0f)
+        {
+            return;
+        }
+
+        bool wasPoisoned = IsPoisoned;
+        _poisonRemaining = Mathf.Max(_poisonRemaining, duration);
+
+        if (!wasPoisoned)
+        {
+            _poisonTickTimer = _poisonTickInterval;
+            OnPoisonChanged?.Invoke(true);
+        }
+    }
+
+    /// <summary>독 해제</summary>
+    public void ClearPoison()
+    {
+        bool wasPoisoned = _poisonRemaining > 0f;
+        _poisonRemaining = 0f;
+        _poisonTickTimer = 0f;
+
+        if (wasPoisoned)
+        {
+            OnPoisonChanged?.Invoke(false);
+        }
+    }
+
+    private void UpdatePoison()
+    {
+        if (_poisonRemaining <= 0f)
+        {
+            return;
+        }
+
+        if (_isDead)
+        {
+            ClearPoison();
+            return;
+        }
+
+        float deltaTime = Time.deltaTime;
+        _poisonRemaining -= deltaTime;
+        _poisonTickTimer -= deltaTime;
+
+        if (_poisonTickTimer <= 0f)
+        {
+            _poisonTickTimer += _poisonTickInterval;
+            PoisonTick();
+        }
+
+        if (_poisonRemaining <= 0f)
+        {
+            ClearPoison();
+        }
+    }
+
+    /// <summary>독 피해 한 번. 무적 / 가드와 상관없이 깎이고, 피격 연출(넉백 / 무적 / 붉은 화면)은 없음</summary>
+    private void PoisonTick()
+    {
+        if (_isDead || _isRespawnProtected || MapTestMode.IsEnabled || _poisonTickDamage <= 0f)
+        {
+            return;
+        }
+
+        float minHealth = _poisonCanKill ? 0f : Mathf.Min(1f, _currentHealth);
+        float next = Mathf.Max(_currentHealth - _poisonTickDamage, minHealth);
+        if (Mathf.Approximately(next, _currentHealth))
+        {
+            return;
+        }
+
+        float damage = _currentHealth - next;
+        _currentHealth = next;
+        OnPoisonDamaged?.Invoke(damage);
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+
+        if (_currentHealth <= 0f)
+        {
+            LastFatalHitData = new HitData(
+                damage: _poisonTickDamage,
+                knockbackForce: 0f,
+                hitPoint: transform.position,
+                attackDirection: Vector2.zero,
+                attackName: _poisonKillReason
+            );
+            Die();
+        }
+    }
+
+    #endregion
 
     private void StartInvincible()
     {
@@ -296,6 +436,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     private void OnDisable()
     {
+        ClearPoison();
         _isRespawnProtected = false;
         int playerLayer = gameObject.layer;
         int enemyAttackLayer = Constants.Layers.EnemyAttack;
