@@ -113,22 +113,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         }
 
         GameEvents.TriggerPlayerHit(hitdata);
-        _currentHealth = Mathf.Max(_currentHealth - hitdata.Damage, 0f);
-
-        if (_currentHealth <= 0f)
-        {
-            if (string.IsNullOrWhiteSpace(hitdata.AttackName))
-            {
-                hitdata.AttackName = "치명적인 피해";
-            }
-
-            LastFatalHitData = hitdata;
-            OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
-            Die();
-            return true;
-        }
-
-        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+        ApplyHealthDamage(hitdata);
+        if (_isDead) return true;
 
         OnHit?.Invoke(hitdata);
 
@@ -143,6 +129,41 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
             StartInvincible();
         }
         return true;
+    }
+
+    /// <summary>환경 피해는 피격 무적과 가드를 무시하되 연출 및 리스폰 보호는 유지한다.</summary>
+    public bool TakeHazardDamage(HitData hitdata)
+    {
+        if (MapTestMode.IsEnabled || _isDead || _isCinematicInvincible || _isRespawnProtected)
+            return false;
+
+        if (hitdata.Damage <= 0f)
+            return false;
+
+        // 연속 피해가 경직, 히트스톱 또는 일반 공격용 무적을 반복해서 만들지 않게 한다.
+        ApplyHealthDamage(hitdata);
+        return true;
+    }
+
+    private void ApplyHealthDamage(HitData hitdata)
+    {
+        _currentHealth = Mathf.Max(_currentHealth - hitdata.Damage, 0f);
+
+        if (_currentHealth <= 0f)
+        {
+            if (string.IsNullOrWhiteSpace(hitdata.AttackName))
+            {
+                hitdata.AttackName = "치명적인 피해";
+            }
+
+            LastFatalHitData = hitdata;
+            OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+            Die();
+            return;
+        }
+
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+
     }
 
     public void Heal(float amount)
