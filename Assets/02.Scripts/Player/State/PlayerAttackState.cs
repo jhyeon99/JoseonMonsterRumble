@@ -342,6 +342,17 @@ public class PlayerAttackState : PlayerBaseState
             return;
         }
 
+        // 회피 캔슬: 1타 / 2타는 준비 / 공격 / Recover 모든 구간에서 바로 회피 가능.
+        // 3타는 회피 캔슬 불가 (Recover가 끝날 때까지 유지)
+        if (_currentComboIndex < 2 &&
+            _player.IsGrounded &&
+            _player.Movement.CanDodge &&
+            _inputHandler.TryUseDodgeInput())
+        {
+            _stateMachine.ChangeState(_player.DodgeState);
+            return;
+        }
+
         Animator animator = _player.Animator;
         if (animator != null)
         {
@@ -376,8 +387,7 @@ public class PlayerAttackState : PlayerBaseState
                 }
             }
 
-            // 회피 캔슬: 현재 콤보의 Recover 애니메이션이 시작되면 (Recover로 넘어가는 전이 중 포함) 바로 가능
-            // Recover 시작 직전에 누른 입력도 입력 버퍼(0.1초) 안이면 시작하자마자 회피
+            // Recover 중 방향 전환 (Recover로 넘어가는 전이 중 포함). 회피 캔슬은 위에서 1타 / 2타만 처리
             bool isEnteringComboRecover = inTransition && IsCurrentComboRecoverState(nextInfo);
             if (isCurrentComboRecover || isEnteringComboRecover)
             {
@@ -386,14 +396,6 @@ public class PlayerAttackState : PlayerBaseState
                 if (Mathf.Abs(moveX) > 0.01f)
                 {
                     _player.transform.localScale = new Vector3(Mathf.Sign(moveX), 1f, 1f);
-                }
-
-                if (_player.IsGrounded &&
-                    _player.Movement.CanDodge &&
-                    _inputHandler.TryUseDodgeInput())
-                {
-                    _stateMachine.ChangeState(_player.DodgeState);
-                    return;
                 }
             }
 

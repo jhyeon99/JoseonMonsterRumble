@@ -4,9 +4,10 @@ using UnityEngine;
 /// <summary>
 /// 짧은 점프. 플레이어가 가까이 있을 때 플레이어를 뛰어넘어 살짝 반대편에 착지.
 /// - 별도 공격 판정 없음. 보스 몸통 접촉 데미지(EnemyContactDamage)로 공격 (Disable Contact Damage는 꺼 둘 것)
-/// - 0 ~ 이륙 비율: 제자리 (웅크리기), 이륙 ~ 착지 비율: 점프 이동, 이후: 착지 후 마무리
-/// - 점프 횟수가 2 이상이면 애니메이션을 처음부터 다시 재생해 연속으로 뜀
-/// (판정 시작 / 끝 비율은 사용하지 않음)
+/// - 애니메이션: 시작(Boss_Move_Start) → 공중(Boss_Move_Air, 체공 시간 동안 유지) → 착지(Boss_Move_End). 상태 이름은 Boss에서 설정
+/// - 시작 애니메이션이 끝나는 순간 이륙, Air Speed로 일정하게 가로 이동 (체공 시간 = 거리 / 속도) 후 착지
+/// - 점프 횟수가 2 이상이면 착지 후 다시 시작부터 연속으로 뜀
+/// (Animation Trigger / Animation Clip, 판정 시작 / 끝 비율은 사용하지 않음)
 /// </summary>
 public class BossHopPattern : BossPattern
 {
@@ -19,7 +20,7 @@ public class BossHopPattern : BossPattern
     [SerializeField, Min(0f)]
     private float _maxDistance = 6f;
 
-    [Header("점프 (비율은 애니메이션 길이 대비)")]
+    [Header("점프")]
     [Tooltip("연속으로 뛰는 횟수")]
     [SerializeField, Min(1)]
     private int _hopCount = 1;
@@ -32,17 +33,21 @@ public class BossHopPattern : BossPattern
     [SerializeField, Min(0f)]
     private float _hopHeight = 1.5f;
 
-    [Tooltip("땅에서 떨어지는 지점")]
-    [SerializeField, Range(0f, 1f)]
-    private float _takeoffRatio = 0.2f;
+    [Tooltip("공중에서 가로로 이동하는 속도 (초당 거리). 멀리 뛸수록 오래 떠 있음 (체공 시간 = 거리 / 속도)")]
+    [SerializeField, Min(0.1f)]
+    private float _airSpeed = 24f;
 
-    [Tooltip("착지하는 지점")]
-    [SerializeField, Range(0f, 1f)]
-    private float _landRatio = 0.7f;
+    [Tooltip("체공 시간 최소 (초). 아주 가까이 뛸 때도 이만큼은 떠 있음")]
+    [SerializeField, Min(0.05f)]
+    private float _minAirDuration = 0.15f;
 
-    [Tooltip("마지막이 아닌 점프에서 다음 점프를 시작하는 지점. 1 = 애니메이션이 끝난 뒤")]
-    [SerializeField, Range(0f, 1f)]
-    private float _nextHopRatio = 1f;
+    [Tooltip("체공 시간 최대 (초)")]
+    [SerializeField, Min(0.05f)]
+    private float _maxAirDuration = 0.75f;
+
+    [Tooltip("연속 점프일 때 착지 후 다음 점프까지 (초). 0 = 착지 애니메이션이 끝난 뒤, 양수 = 착지하고 그만큼 뒤 바로")]
+    [SerializeField, Min(0f)]
+    private float _nextHopDelay = 0f;
 
     [Tooltip("플레이어를 넘어 반대편으로 이만큼 더 가서 착지 (0이면 플레이어 위치에 착지)")]
     [SerializeField, Min(0f)]
@@ -84,29 +89,31 @@ public class BossHopPattern : BossPattern
         return distance >= _minDistance && distance <= _maxDistance;
     }
 
+    /// <summary>패턴 트리거 / 클립 대신 Boss의 점프 상태(시작 → 공중 → 착지)를 직접 재생</summary>
+    protected override bool UsesPatternAnimation => false;
+
+    /// <summary>애니메이션 길이가 아니라 체공 시간으로 끝을 정함</summary>
+    protected override bool WaitForDurationAfterExecute => false;
+
     protected override IEnumerator Execute()
     {
-        float nextHopRatio = Mathf.Max(_nextHopRatio, _landRatio);
-
         for (int i = 0; i < _hopCount; i++)
         {
-            if (i > 0)
-            {
-                // 같은 애니메이션을 처음부터 다시 재생 (진행도도 0부터)
-                Boss.FacePlayer();
-                ReplayAnimation();
-            }
-
             yield return Hop();
 
-            if (i < _hopCount - 1)
+            bool isLast = i == _hopCount - 1;
+            if (!isLast && _nextHopDelay > 0f)
             {
-                yield return WaitUntilProgress(nextHopRatio);
+                yield return new WaitForSeconds(_nextHopDelay);
+                continue;
             }
+
+            // 착지 애니메이션이 끝날 때까지 (끝나면 애니메이터 전이로 대기)
+            yield return WaitJumpEnd();
         }
     }
 
-    /// <summary>이륙 비율까지 대기 → 플레이어 쪽으로 포물선 이동 → 착지</summary>
+    /// <summary>시작 애니메이션 → (끝나는 순간) 이륙 → 공중에서 포물선 이동 → 착지 애니메이션</summary>
     private IEnumerator Hop()
     {
         // 이륙 먼지를 일찍 내는 경우 (Boss의 Takeoff Dust Timing이 음수)
@@ -115,43 +122,65 @@ public class BossHopPattern : BossPattern
         // 높은 곳(시작 위치 등)에서 출발하면 발밑에 땅이 없으므로 이륙 먼지 생략
         bool startsOnGround = Mathf.Abs(Boss.Position.y - Boss.GroundY) < 0.1f;
         bool takeoffDust = _takeoffDust && startsOnGround;
-
-        if (takeoffDust && takeoffTiming < 0f)
-        {
-            float earlyRatio = _takeoffRatio + (takeoffTiming / Mathf.Max(0.0001f, Duration));
-            yield return WaitUntilProgress(Mathf.Max(0f, earlyRatio));
-            Boss.PlayJumpDust(Boss.Position.x, Boss.GroundY);
-        }
-
-        yield return WaitUntilProgress(_takeoffRatio);
+        bool takeoffDustPlayed = !takeoffDust;
 
         Boss.FacePlayer();
+        Boss.PlayJumpStart();
+
+        // 애니메이터가 시작 상태로 바뀌는 건 다음 갱신부터
+        yield return null;
+
+        // 이륙 지점(Boss의 Jump Takeoff Ratio)까지 제자리 (웅크리기)
+        float timeout = Time.time + Boss.JumpStateTimeout;
+        while (Boss.IsBeforeJumpTakeoff && Time.time < timeout)
+        {
+            if (!takeoffDustPlayed && takeoffTiming < 0f && Boss.JumpTakeoffRemaining <= -takeoffTiming)
+            {
+                Boss.PlayJumpDust(Boss.Position.x, Boss.GroundY);
+                takeoffDustPlayed = true;
+            }
+
+            yield return null;
+        }
+
+        // 이륙
+        Boss.FacePlayer();
+        Boss.PlayJumpAir();
+
         float startX = Boss.Position.x;
         // 지금 높이에서 출발 (높은 시작 위치에서도 바닥으로 먼저 내려가지 않고 그 자리에서 뜀)
         float startY = Boss.Position.y;
         float groundY = Boss.GroundY;
         float targetX = GetTargetX(startX);
-        float landRatio = Mathf.Max(_landRatio, _takeoffRatio + 0.01f);
 
-        if (takeoffDust && takeoffTiming >= 0f)
+        if (!takeoffDustPlayed)
         {
-            Boss.PlayJumpDust(startX, groundY, takeoffTiming);
+            Boss.PlayJumpDust(startX, groundY, Mathf.Max(0f, takeoffTiming));
         }
 
         float landingTiming = Boss.LandingDustTiming;
         bool landingDustPlayed = !_landingDust;
 
+        // 거리에 따라 체공 시간이 정해짐 (같은 속도로 이동)
+        float airDuration = GetAirDuration(Mathf.Abs(targetX - startX));
+
         _airborne = true;
-        while (Progress < landRatio)
+        bool endAnimationPlayed = false;
+        float elapsed = 0f;
+        while (elapsed < airDuration)
         {
-            float t = Mathf.InverseLerp(_takeoffRatio, landRatio, Progress);
+            elapsed += Time.fixedDeltaTime;
+            float t = Mathf.Clamp01(elapsed / airDuration);
             float x = Mathf.Lerp(startX, targetX, t);
             // 출발 높이에서 먼저 위로 뛰어오른 뒤 바닥으로 떨어지는 포물선 (같은 높이면 기존과 동일)
             float y = GetHopY(t, startY, groundY);
             Boss.MoveTo(new Vector2(x, y));
 
+            // 공중 애니메이션 유지, 착지 직전(Boss의 Jump End Lead Time)부터 착지 애니메이션
+            endAnimationPlayed = Boss.UpdateJumpAirAnimation(airDuration - elapsed, endAnimationPlayed);
+
             // 착지 직전에 미리 (Landing Dust Timing이 음수)
-            if (!landingDustPlayed && landingTiming < 0f && (landRatio - Progress) * Duration <= -landingTiming)
+            if (!landingDustPlayed && landingTiming < 0f && airDuration - elapsed <= -landingTiming)
             {
                 Boss.PlayJumpDust(targetX, groundY);
                 landingDustPlayed = true;
@@ -160,14 +189,41 @@ public class BossHopPattern : BossPattern
             yield return new WaitForFixedUpdate();
         }
 
+        // 착지
         Boss.MoveTo(new Vector2(targetX, groundY));
         Boss.SnapToGround();
         _airborne = false;
+        if (!endAnimationPlayed)
+        {
+            Boss.PlayJumpEnd();
+        }
+
         CameraShake.Shake(_landingShake);
 
         if (!landingDustPlayed)
         {
             Boss.PlayJumpDust(targetX, groundY, landingTiming);
+        }
+    }
+
+    /// <summary>체공 시간 = 가로 거리 / 속도 (최소 / 최대 사이)</summary>
+    private float GetAirDuration(float distance)
+    {
+        float min = Mathf.Min(_minAirDuration, _maxAirDuration);
+        float max = Mathf.Max(_minAirDuration, _maxAirDuration);
+        return Mathf.Clamp(distance / Mathf.Max(0.1f, _airSpeed), min, max);
+    }
+
+    /// <summary>착지 애니메이션이 끝날 때까지 대기 (최대 Boss의 Jump State Timeout)</summary>
+    private IEnumerator WaitJumpEnd()
+    {
+        // 애니메이터가 착지 상태로 바뀌는 건 다음 갱신부터
+        yield return null;
+
+        float timeout = Time.time + Boss.JumpStateTimeout;
+        while (Boss.IsInJumpEnd && Time.time < timeout)
+        {
+            yield return null;
         }
     }
 
