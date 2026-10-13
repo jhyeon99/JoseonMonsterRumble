@@ -28,10 +28,6 @@ public class BossSummonPattern : BossPattern
     [SerializeField]
     private Transform _summonPoint;
 
-    [Tooltip("점프할 때 재생할 애니메이터 트리거 (비우면 애니메이션 변경 없음). 착지하면 대기 상태(Idle State)로 바로 돌려서 angry가 곧바로 시작되게 함")]
-    [SerializeField]
-    private string _jumpTrigger = "";
-
     [Tooltip("뛰어오를 때 발밑 먼지 (크기 / 위치는 Boss의 점프 먼지 설정)")]
     [SerializeField]
     private bool _takeoffDust = true;
@@ -40,9 +36,18 @@ public class BossSummonPattern : BossPattern
     [SerializeField]
     private bool _landingDust = true;
 
-    [Tooltip("소환 위치까지 점프하는 시간 (초)")]
+    [Tooltip("소환 위치까지 공중에서 이동하는 속도 (초당 거리, 출발 → 도착 직선 거리 기준). 멀수록 오래 떠 있음. " +
+             "애니메이션은 시작(Boss_Move_Start) → 공중(체공 시간 동안 유지) → 착지(Boss_Move_End). 상태 이름은 Boss에서 설정")]
+    [SerializeField, Min(0.1f)]
+    private float _jumpSpeed = 10f;
+
+    [Tooltip("체공 시간 최소 (초)")]
     [SerializeField, Min(0.05f)]
-    private float _jumpDuration = 0.8f;
+    private float _minJumpDuration = 0.4f;
+
+    [Tooltip("체공 시간 최대 (초)")]
+    [SerializeField, Min(0.05f)]
+    private float _maxJumpDuration = 2f;
 
     [Tooltip("출발 / 도착 중 높은 쪽 기준으로 더 올라가는 높이")]
     [SerializeField, Min(0f)]
@@ -52,7 +57,7 @@ public class BossSummonPattern : BossPattern
     [SerializeField]
     private bool _disableCollisionWhileJumping = true;
 
-    [Tooltip("착지 후 angry 시작까지 대기 (초)")]
+    [Tooltip("착지 애니메이션이 끝난 뒤 궁극기 시작까지 추가 대기 (초)")]
     [SerializeField, Min(0f)]
     private float _delayAfterLanding = 0.2f;
 
@@ -334,35 +339,51 @@ public class BossSummonPattern : BossPattern
         Vector2 start = Boss.Position;
         Vector2 target = _summonPoint.position;
 
+        // 점프 시작 애니메이션 (끝나는 순간 이륙)
         Boss.FaceDirection(target.x - start.x);
-        if (!string.IsNullOrEmpty(_jumpTrigger))
+        Boss.PlayJumpStart();
+        yield return null;
+
+        float startTimeout = Time.time + Boss.JumpStateTimeout;
+        while (Boss.IsInJumpStart && Time.time < startTimeout)
         {
-            Boss.SetTrigger(_jumpTrigger);
+            yield return null;
         }
 
+        // 이륙
+        start = Boss.Position;
+        Boss.PlayJumpAir();
         SetJumping(true);
 
-        // 이륙 먼지 (Boss의 Takeoff Dust Timing만큼 늦게. 음수는 시작 순간)
+        // 이륙 먼지 (Boss의 Takeoff Dust Timing만큼 늦게. 음수는 이륙 순간)
         if (_takeoffDust)
         {
-            Boss.PlayJumpDust(start.x, start.y, Boss.TakeoffDustTiming);
+            Boss.PlayJumpDust(start.x, start.y, Mathf.Max(0f, Boss.TakeoffDustTiming));
         }
 
         float landingTiming = Boss.LandingDustTiming;
         bool landingDustPlayed = !_landingDust;
 
         float apexY = Mathf.Max(start.y, target.y) + _jumpHeight;
+
+        // 거리에 따라 체공 시간이 정해짐 (같은 속도로 이동)
+        float minDuration = Mathf.Min(_minJumpDuration, _maxJumpDuration);
+        float maxDuration = Mathf.Max(_minJumpDuration, _maxJumpDuration);
+        float jumpDuration = Mathf.Clamp(Vector2.Distance(start, target) / Mathf.Max(0.1f, _jumpSpeed), minDuration, maxDuration);
+
         float elapsed = 0f;
-        while (elapsed < _jumpDuration)
+        while (elapsed < jumpDuration)
         {
             elapsed += Time.fixedDeltaTime;
-            float t = Mathf.Clamp01(elapsed / _jumpDuration);
+            float t = Mathf.Clamp01(elapsed / jumpDuration);
 
-            float x = Mathf.Lerp(start.x, target.x, Mathf.SmoothStep(0f, 1f, t));
+            // 가로는 일정한 속도로
+            float x = Mathf.Lerp(start.x, target.x, t);
             Boss.MoveTo(new Vector2(x, GetJumpY(t, start.y, apexY, target.y)));
+            Boss.KeepJumpAir();
 
             // 착지 직전에 미리 (Landing Dust Timing이 음수)
-            if (!landingDustPlayed && landingTiming < 0f && _jumpDuration - elapsed <= -landingTiming)
+            if (!landingDustPlayed && landingTiming < 0f && jumpDuration - elapsed <= -landingTiming)
             {
                 Boss.PlayJumpDust(target.x, target.y);
                 landingDustPlayed = true;
@@ -371,7 +392,9 @@ public class BossSummonPattern : BossPattern
             yield return new WaitForFixedUpdate();
         }
 
+        // 착지
         Boss.MoveTo(target);
+        Boss.PlayJumpEnd();
         yield return new WaitForFixedUpdate();
 
         if (!landingDustPlayed)
@@ -380,12 +403,18 @@ public class BossSummonPattern : BossPattern
         }
 
         SetJumping(false);
-
-        // ultimate 전이는 대기(Boss_Idle)에서만 있으므로, 점프 애니메이션이 끝나기를 기다리지 않고 바로 대기로
-        Boss.ForceIdleAnimation();
-
         CameraShake.Shake(_landingShake);
         Boss.FacePlayer();
+
+        // 착지 애니메이션이 끝날 때까지
+        float endTimeout = Time.time + Boss.JumpStateTimeout;
+        while (Boss.IsInJumpEnd && Time.time < endTimeout)
+        {
+            yield return null;
+        }
+
+        // ultimate 전이는 대기(Boss_Idle)에서 확실히 시작되도록 대기 상태로
+        Boss.ForceIdleAnimation();
 
         if (_delayAfterLanding > 0f)
         {

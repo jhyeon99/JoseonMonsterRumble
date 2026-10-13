@@ -174,6 +174,23 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField]
     private Vector2 _finishMarkerOffset = new Vector2(0f, 0.5f);
 
+    [Header("점프 애니메이션 (짧은 점프 / 소환 점프 공통: 시작 → 공중 → 착지)")]
+    [Tooltip("점프 시작(웅크렸다 뛰어오름) 애니메이터 상태. 이 상태가 끝나는 순간 땅에서 떨어짐")]
+    [SerializeField]
+    private string _jumpStartState = "Boss_Move_Start";
+
+    [Tooltip("공중 애니메이터 상태. 공중에 있는 동안 계속 유지 (끝나 가면 처음부터 다시 재생)")]
+    [SerializeField]
+    private string _jumpAirState = "Boss_Move_Air";
+
+    [Tooltip("착지 애니메이터 상태. 땅에 닿는 순간 재생하고, 끝나면 애니메이터 전이로 대기")]
+    [SerializeField]
+    private string _jumpEndState = "Boss_Move_End";
+
+    [Tooltip("시작 / 착지 애니메이션이 끝나기를 기다리는 최대 시간 (초). 상태가 없거나 멈췄을 때 대비")]
+    [SerializeField, Min(0.1f)]
+    private float _jumpStateTimeout = 2f;
+
     [Header("점프 / 착지 먼지 (PF_Boss_JumpDust_VFX, 짧은 점프 / 소환 점프 / 찍기 공통)")]
     [Tooltip("먼지 크기 배율")]
     [SerializeField, Min(0f)]
@@ -990,6 +1007,96 @@ public class Boss : MonoBehaviour, IFinishable
         _animator.Play(stateHash, 0, 0f);
         return true;
     }
+
+    #region 점프 애니메이션 (시작 → 공중 → 착지)
+
+    public float JumpStateTimeout => _jumpStateTimeout;
+
+    /// <summary>점프 시작 애니메이션 재생</summary>
+    public void PlayJumpStart()
+    {
+        ResumeAnimator();
+        PlayStateOrWarn(_jumpStartState, "Jump Start State");
+    }
+
+    /// <summary>공중 애니메이션 재생 (땅에서 떨어지는 순간)</summary>
+    public void PlayJumpAir()
+    {
+        PlayStateOrWarn(_jumpAirState, "Jump Air State");
+    }
+
+    /// <summary>
+    /// 공중에 있는 동안 매 프레임 호출. 공중 애니메이션이 끝나 가거나 다른 상태(착지 등)로 넘어갔으면 처음부터 다시 재생해 유지
+    /// </summary>
+    public void KeepJumpAir()
+    {
+        if (_animator == null || string.IsNullOrEmpty(_jumpAirState))
+        {
+            return;
+        }
+
+        AnimatorStateInfo info = _animator.GetCurrentAnimatorStateInfo(0);
+        bool inAir = info.IsName(_jumpAirState) && !_animator.IsInTransition(0);
+        if (!inAir || info.normalizedTime >= 0.95f)
+        {
+            PlayState(_jumpAirState);
+        }
+    }
+
+    /// <summary>착지 애니메이션 재생 (땅에 닿는 순간)</summary>
+    public void PlayJumpEnd()
+    {
+        PlayStateOrWarn(_jumpEndState, "Jump End State");
+    }
+
+    public bool IsInJumpStart => IsInAnimatorState(_jumpStartState);
+    public bool IsInJumpEnd => IsInAnimatorState(_jumpEndState);
+
+    /// <summary>점프 시작 애니메이션이 끝나기까지 남은 시간 (초). 시작 상태가 아니면 0</summary>
+    public float JumpStartRemaining
+    {
+        get
+        {
+            if (_animator == null || !IsInAnimatorState(_jumpStartState))
+            {
+                return 0f;
+            }
+
+            AnimatorStateInfo info = _animator.GetCurrentAnimatorStateInfo(0);
+            return Mathf.Max(0f, (1f - info.normalizedTime) * info.length);
+        }
+    }
+
+    /// <summary>애니메이터가 지금 해당 이름의 상태인지 (전이 중이면 다음 상태도 확인)</summary>
+    public bool IsInAnimatorState(string stateName)
+    {
+        if (_animator == null || string.IsNullOrEmpty(stateName) || !_animator.isActiveAndEnabled)
+        {
+            return false;
+        }
+
+        if (_animator.GetCurrentAnimatorStateInfo(0).IsName(stateName))
+        {
+            return true;
+        }
+
+        return _animator.IsInTransition(0) && _animator.GetNextAnimatorStateInfo(0).IsName(stateName);
+    }
+
+    private void PlayStateOrWarn(string stateName, string fieldName)
+    {
+        if (string.IsNullOrEmpty(stateName))
+        {
+            return;
+        }
+
+        if (!PlayState(stateName))
+        {
+            Debug.LogWarning($"{name}: 점프 애니메이션 상태({stateName})가 애니메이터에 없습니다. Boss의 {fieldName}을 확인하세요.", this);
+        }
+    }
+
+    #endregion
 
     /// <summary>애니메이터 상태를 이름으로 바로 재생. 상태가 없으면 false</summary>
     public bool PlayState(string stateName)
