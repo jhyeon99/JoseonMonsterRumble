@@ -7,6 +7,8 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public sealed class Ep0CombatTutorial : MonoBehaviour
 {
+    private const int RequiredAttackHits = 3;
+
     [Header("Scene references")]
     [SerializeField] private Player _player;
     [SerializeField] private Enemy _enemy;
@@ -70,7 +72,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     private Transform _monsterFocus;
     private float _normalCameraSize;
     private bool _hasCameraSize;
-    private bool _attackHit;
+    private int _attackHitCount;
     private bool _tutorialPaused;
     private bool _dodgeKeyReleased;
     private bool _dodgeTriggered;
@@ -300,7 +302,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     {
         _normalCameraSize = _camera.ScreenSizeInWorldCoordinates.y * 0.5f;
         _hasCameraSize = true;
-        _attackHit = false;
+        _attackHitCount = 0;
         _dodgeTriggered = false;
         _normalInputWasEnabled = _input.enabled;
         Phase = "FirstMonsterFocus";
@@ -312,11 +314,14 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         yield return WaitRealtime(_noticeDuration);
         Phase = "Attack";
         SetPlayerControl(true);
-        Show(_attackText, "", "X");
-        while (!_attackHit) yield return null;
+        _input.SetTutorialInputRestriction(this, GameplayInputActions.Movement | GameplayInputActions.Attack);
+        ShowAttackProgress();
+        while (_attackHitCount < RequiredAttackHits) yield return null;
+        _input.SetTutorialInputRestriction(this, GameplayInputActions.Movement);
         SetPlayerControl(false);
         while (_player.StateMachine.CurrentState == _player.AttackState) yield return null;
         yield return WaitForNeutralPlayer();
+        _input.ClearTutorialInputRestriction(this);
 
         SetPlayerControl(false);
         FaceEachOther();
@@ -544,9 +549,16 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
     private void HandleEnemyHit(HitData hitData)
     {
-        if (Phase == "Attack" && hitData.ComboStep >= 1 && hitData.ComboStep <= 3)
-            _attackHit = true;
+        if (Phase != "Attack" || hitData.ComboStep < 1 || hitData.ComboStep > 3 ||
+            _attackHitCount >= RequiredAttackHits)
+        {
+            return;
+        }
+        _attackHitCount++;
+        ShowAttackProgress();
     }
+
+    private void ShowAttackProgress() => Show(_attackText, $"일반 공격 {_attackHitCount}/{RequiredAttackHits}", "X");
 
     private void Show(string dialogue, string instruction, string key)
     {
@@ -580,6 +592,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         }
         if (_input != null)
         {
+            _input.ClearTutorialInputRestriction(this);
             if (_running) SetPlayerControl(_normalInputWasEnabled);
             ClearPlayerInput();
         }
