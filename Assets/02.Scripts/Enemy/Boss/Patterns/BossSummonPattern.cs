@@ -39,15 +39,15 @@ public class BossSummonPattern : BossPattern
     [Tooltip("소환 위치까지 공중에서 이동하는 속도 (초당 거리, 출발 → 도착 직선 거리 기준). 멀수록 오래 떠 있음. " +
              "애니메이션은 시작(Boss_Move_Start) → 공중(체공 시간 동안 유지) → 착지(Boss_Move_End). 상태 이름은 Boss에서 설정")]
     [SerializeField, Min(0.1f)]
-    private float _jumpSpeed = 10f;
+    private float _jumpSpeed = 20f;
 
     [Tooltip("체공 시간 최소 (초)")]
     [SerializeField, Min(0.05f)]
-    private float _minJumpDuration = 0.4f;
+    private float _minJumpDuration = 0.2f;
 
     [Tooltip("체공 시간 최대 (초)")]
     [SerializeField, Min(0.05f)]
-    private float _maxJumpDuration = 2f;
+    private float _maxJumpDuration = 1f;
 
     [Tooltip("출발 / 도착 중 높은 쪽 기준으로 더 올라가는 높이")]
     [SerializeField, Min(0f)]
@@ -150,6 +150,28 @@ public class BossSummonPattern : BossPattern
     [SerializeField, Min(0f)]
     private float _hitFallbackDuration = 1f;
 
+    [Header("차지 중 빨아들이기 VFX")]
+    [Tooltip("차지 애니메이션(Ultimate Charge)이 재생되는 동안 보스에 붙여 반복 재생할 VFX (PF_BossSuction_VFX). 비우면 사용 안 함")]
+    [SerializeField]
+    private GameObject _suctionVfxPrefab;
+
+    [Tooltip("VFX를 붙일 입 위치 (Visual 아래 SuctionPoint. 차지 애니메이션 키로 입을 따라 움직임). " +
+             "비우면 보스 아래에서 이름이 SuctionPoint인 오브젝트를 찾고, 없으면 보스에 붙임")]
+    [SerializeField]
+    private Transform _suctionVfxPoint;
+
+    [Tooltip("붙인 위치 기준 추가 보정 (입 위치에서 살짝 앞 / 위로 옮기고 싶을 때)")]
+    [SerializeField]
+    private Vector2 _suctionVfxOffset = Vector2.zero;
+
+    [Tooltip("VFX 좌우 반전 (입 방향과 반대로 나오면 켜기)")]
+    [SerializeField]
+    private bool _flipSuctionVfx = false;
+
+    [Tooltip("VFX 크기 배율")]
+    [SerializeField, Min(0.01f)]
+    private float _suctionVfxScale = 1f;
+
     [Header("궁극기 실패 (즉사)")]
     [Tooltip("해방 애니메이션 최대 대기 시간 (초). 보통은 애니메이터가 해방 상태를 벗어나는 순간 끝남")]
     [SerializeField, Min(0f)]
@@ -220,6 +242,7 @@ public class BossSummonPattern : BossPattern
     private bool _isRunning;
     private bool _isJumping;
     private bool _ultimateFailed;
+    private GameObject _suctionVfx;
 
     public override bool IsForced => true;
     public override bool BlocksDirectDamage => _blockDirectDamage && _isRunning;
@@ -339,13 +362,13 @@ public class BossSummonPattern : BossPattern
         Vector2 start = Boss.Position;
         Vector2 target = _summonPoint.position;
 
-        // 점프 시작 애니메이션 (끝나는 순간 이륙)
+        // 점프 시작 애니메이션 (Boss의 Jump Takeoff Ratio 지점에서 이륙)
         Boss.FaceDirection(target.x - start.x);
         Boss.PlayJumpStart();
         yield return null;
 
         float startTimeout = Time.time + Boss.JumpStateTimeout;
-        while (Boss.IsInJumpStart && Time.time < startTimeout)
+        while (Boss.IsBeforeJumpTakeoff && Time.time < startTimeout)
         {
             yield return null;
         }
@@ -371,6 +394,7 @@ public class BossSummonPattern : BossPattern
         float maxDuration = Mathf.Max(_minJumpDuration, _maxJumpDuration);
         float jumpDuration = Mathf.Clamp(Vector2.Distance(start, target) / Mathf.Max(0.1f, _jumpSpeed), minDuration, maxDuration);
 
+        bool endAnimationPlayed = false;
         float elapsed = 0f;
         while (elapsed < jumpDuration)
         {
@@ -380,7 +404,9 @@ public class BossSummonPattern : BossPattern
             // 가로는 일정한 속도로
             float x = Mathf.Lerp(start.x, target.x, t);
             Boss.MoveTo(new Vector2(x, GetJumpY(t, start.y, apexY, target.y)));
-            Boss.KeepJumpAir();
+
+            // 공중 애니메이션 유지, 착지 직전(Boss의 Jump End Lead Time)부터 착지 애니메이션
+            endAnimationPlayed = Boss.UpdateJumpAirAnimation(jumpDuration - elapsed, endAnimationPlayed);
 
             // 착지 직전에 미리 (Landing Dust Timing이 음수)
             if (!landingDustPlayed && landingTiming < 0f && jumpDuration - elapsed <= -landingTiming)
@@ -394,7 +420,11 @@ public class BossSummonPattern : BossPattern
 
         // 착지
         Boss.MoveTo(target);
-        Boss.PlayJumpEnd();
+        if (!endAnimationPlayed)
+        {
+            Boss.PlayJumpEnd();
+        }
+
         yield return new WaitForFixedUpdate();
 
         if (!landingDustPlayed)
@@ -499,6 +529,7 @@ public class BossSummonPattern : BossPattern
             if (chargeStart < 0f && IsInChargeState())
             {
                 chargeStart = Time.time;
+                StartSuctionVfx();
                 Boss.Log($"{PatternName}: 차지 시작 (남은 시간 {deadline - chargeStart:0.0}초)");
             }
 
@@ -514,6 +545,9 @@ public class BossSummonPattern : BossPattern
         BossBaby.OnHitBoss -= HandleGimmickHit;
         BossBaby.CountHitsOnly = false;
         Boss.ClearMinions();
+
+        // 차지가 끝났으므로(파훼 / 해방) 빨아들이기 중지
+        StopSuctionVfx();
 
         if (success)
         {
@@ -620,6 +654,58 @@ public class BossSummonPattern : BossPattern
     }
 
     /// <summary>애니메이터가 차지 상태인지 (상태 이름 → 클립 순으로 확인, 둘 다 없으면 바로 true)</summary>
+    /// <summary>차지 애니메이션이 시작되면 보스에 빨아들이기 VFX를 붙여 반복 재생</summary>
+    private void StartSuctionVfx()
+    {
+        if (_suctionVfxPrefab == null || Boss == null || _suctionVfx != null)
+        {
+            return;
+        }
+
+        Transform parent = ResolveSuctionPoint();
+        _suctionVfx = Instantiate(_suctionVfxPrefab, parent);
+        _suctionVfx.transform.localPosition = new Vector3(_suctionVfxOffset.x, _suctionVfxOffset.y, 0f);
+        _suctionVfx.transform.localRotation = Quaternion.identity;
+
+        Vector3 scale = _suctionVfx.transform.localScale * _suctionVfxScale;
+        if (_flipSuctionVfx)
+        {
+            scale.x = -scale.x;
+        }
+
+        _suctionVfx.transform.localScale = scale;
+    }
+
+    /// <summary>VFX를 붙일 곳: 지정한 입 위치 → 보스 아래 SuctionPoint → 보스</summary>
+    private Transform ResolveSuctionPoint()
+    {
+        if (_suctionVfxPoint != null)
+        {
+            return _suctionVfxPoint;
+        }
+
+        foreach (Transform child in Boss.GetComponentsInChildren<Transform>(true))
+        {
+            if (child.name == "SuctionPoint")
+            {
+                _suctionVfxPoint = child;
+                return child;
+            }
+        }
+
+        return Boss.transform;
+    }
+
+    private void StopSuctionVfx()
+    {
+        if (_suctionVfx != null)
+        {
+            Destroy(_suctionVfx);
+        }
+
+        _suctionVfx = null;
+    }
+
     /// <summary>해방 상태를 처음부터 바로 재생 (하위 상태 머신 안에 있어도 이름으로 재생)</summary>
     private void PlayReleaseState()
     {
@@ -848,6 +934,9 @@ public class BossSummonPattern : BossPattern
 
     protected override void Cleanup()
     {
+        // 차지 중에 끊겼으면 빨아들이기 VFX 제거
+        StopSuctionVfx();
+
         // 궁극기 기믹 중에 끊겼으면 집계 해제
         BossBaby.OnHitBoss -= HandleGimmickHit;
         BossBaby.CountHitsOnly = false;
