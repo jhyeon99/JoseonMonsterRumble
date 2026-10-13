@@ -208,23 +208,36 @@ public class BossSummonPattern : BossPattern
     [SerializeField, Min(0.1f)]
     private float _deathVfxLifetime = 3f;
 
-    [Tooltip("즉사 연출 생성 후 플레이어가 죽기까지 (초). 가시가 솟는 타이밍에 맞추기")]
+    [Tooltip("즉사 연출(VFX)이 재생되는 시간 (초). VFX가 끝난 뒤 붉은 화면 / 흔들림과 함께 플레이어가 죽음. " +
+             "0이면 프리팹의 파티클 / 애니메이션 길이로 자동 계산")]
     [SerializeField, Min(0f)]
-    private float _killDelay = 0.3f;
+    private float _deathVfxPlayDuration = 0f;
+
+    [Tooltip("VFX가 끝난 뒤 플레이어가 죽기까지 추가 대기 (초). 0이면 VFX가 끝나는 순간 붉은 화면과 함께 바로 사망")]
+    [SerializeField, Min(0f)]
+    private float _killDelay = 0f;
 
     [Tooltip("사망 원인 표시 이름")]
     [SerializeField]
     private string _killReason = "궁극기 (가시 즉사)";
 
-    [Tooltip("즉사 시 화면을 덮는 색 (알파 = 최대 진하기). 알파 0이면 사용 안 함")]
+    [Tooltip("즉사 시 화면을 덮는 색. 알파 = 임팩트 직후 잠깐 남는 진하기 (여기서 Fade Out 동안 빠짐). 알파 0이면 붉은 화면 사용 안 함")]
     [SerializeField]
     private Color _deathScreenColor = new Color(0.8f, 0f, 0f, 0.55f);
 
-    [Tooltip("붉은 화면이 차오르는 시간 (초)")]
-    [SerializeField, Min(0.01f)]
-    private float _deathScreenFadeIn = 0.15f;
+    [Tooltip("임팩트 순간 붉은 화면 진하기 (0 ~ 1). 이 가장 진한 순간에 가시 VFX를 지움 (화면에 가려 사라지는 게 안 보이도록)")]
+    [SerializeField, Range(0f, 1f)]
+    private float _deathImpactPeakAlpha = 0.95f;
 
-    [Tooltip("붉은 화면이 빠지는 시간 (초)")]
+    [Tooltip("임팩트 최대 진하기를 유지하는 시간 (초, 실제 시간)")]
+    [SerializeField, Min(0f)]
+    private float _deathImpactHold = 0.05f;
+
+    [Tooltip("임팩트 최대 진하기에서 Death Screen Color 알파까지 빠르게 빠지는 시간 (초)")]
+    [SerializeField, Min(0.01f)]
+    private float _deathImpactDrop = 0.12f;
+
+    [Tooltip("붉은 화면이 완전히 빠지는 시간 (초)")]
     [SerializeField, Min(0.01f)]
     private float _deathScreenFadeOut = 0.8f;
 
@@ -484,6 +497,7 @@ public class BossSummonPattern : BossPattern
 
     private int _gimmickHits;
     private Image _deathScreen;
+    private GameObject _deathVfxInstance;
 
     protected override IEnumerator Execute()
     {
@@ -622,18 +636,28 @@ public class BossSummonPattern : BossPattern
             yield return new WaitForSeconds(_deathVfxDelay);
         }
 
+        // 즉사 VFX를 먼저 끝까지 보여 준 뒤 → 붉은 화면 / 흔들림과 함께 체력이 닳아 사망
         Transform player = Boss.Player;
-        SpawnDeathVfx(player);
-
-        CameraShake.Shake(_deathShake);
-        if (_deathScreenColor.a > 0f)
+        float vfxDuration = SpawnDeathVfx(player);
+        if (vfxDuration > 0f)
         {
-            Boss.StartCoroutine(DeathScreenRoutine());
+            yield return new WaitForSeconds(vfxDuration);
         }
 
         if (_killDelay > 0f)
         {
             yield return new WaitForSeconds(_killDelay);
+        }
+
+        // 임팩트: 붉은 화면이 한 번에 가장 진하게 덮이고, 그 순간 가시 VFX를 지운 뒤 빠짐
+        CameraShake.Shake(_deathShake);
+        if (_deathScreenColor.a > 0f || _deathImpactPeakAlpha > 0f)
+        {
+            Boss.StartCoroutine(DeathScreenRoutine());
+        }
+        else
+        {
+            DestroyDeathVfx();
         }
 
         PlayerHealth playerHealth = player != null ? player.GetComponentInParent<PlayerHealth>() : null;
@@ -771,13 +795,17 @@ public class BossSummonPattern : BossPattern
         return _chargeClip == null || Boss.IsPlayingClip(_chargeClip);
     }
 
-    /// <summary>즉사 연출 생성. 카메라 자식이면 화면에 고정, 아니면 플레이어 위치</summary>
-    private void SpawnDeathVfx(Transform player)
+    /// <summary>즉사 연출 생성. 카메라 자식이면 화면에 고정, 아니면 플레이어 위치. 반환값 = VFX 재생 시간 (초, 없으면 0)</summary>
+    private float SpawnDeathVfx(Transform player)
     {
         if (_deathVfxPrefab == null)
         {
-            return;
+            return 0f;
         }
+
+        float playDuration = _deathVfxPlayDuration > 0f ? _deathVfxPlayDuration : EstimateVfxDuration(_deathVfxPrefab);
+        // 재생이 끝나기 전에 지워지지 않도록 (사망 후 화면이 멈춰도 남아 있게 약간 여유)
+        float lifetime = Mathf.Max(_deathVfxLifetime, playDuration + 0.5f);
 
         Camera camera = _attachDeathVfxToCamera ? Camera.main : null;
         if (camera != null)
@@ -791,8 +819,9 @@ public class BossSummonPattern : BossPattern
                 vfx.transform.localScale *= camera.orthographicSize / _deathVfxReferenceOrthoSize;
             }
 
-            Destroy(vfx, _deathVfxLifetime);
-            return;
+            Destroy(vfx, lifetime);
+            _deathVfxInstance = vfx;
+            return playDuration;
         }
 
         if (_attachDeathVfxToCamera)
@@ -804,8 +833,53 @@ public class BossSummonPattern : BossPattern
         {
             Vector3 position = player.position + (Vector3)_deathVfxOffset;
             GameObject vfx = Instantiate(_deathVfxPrefab, position, Quaternion.identity);
-            Destroy(vfx, _deathVfxLifetime);
+            Destroy(vfx, lifetime);
+            _deathVfxInstance = vfx;
+            return playDuration;
         }
+
+        return 0f;
+    }
+
+    /// <summary>
+    /// VFX 프리팹의 재생 길이 추정: 반복이 아닌 파티클(시작 지연 + 지속 + 최대 수명)과
+    /// 애니메이터 / 애니메이션 클립 중 가장 긴 것. 찾지 못하면 Death Vfx Lifetime
+    /// </summary>
+    private float EstimateVfxDuration(GameObject prefab)
+    {
+        float longest = 0f;
+
+        foreach (ParticleSystem particles in prefab.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            ParticleSystem.MainModule main = particles.main;
+            if (main.loop)
+            {
+                continue;
+            }
+
+            float end = main.startDelay.constantMax + main.duration + main.startLifetime.constantMax;
+            longest = Mathf.Max(longest, end);
+        }
+
+        foreach (Animator animator in prefab.GetComponentsInChildren<Animator>(true))
+        {
+            RuntimeAnimatorController controller = animator.runtimeAnimatorController;
+            if (controller == null)
+            {
+                continue;
+            }
+
+            float speed = animator.speed > 0f ? animator.speed : 1f;
+            foreach (AnimationClip clip in controller.animationClips)
+            {
+                if (clip != null && !clip.isLooping)
+                {
+                    longest = Mathf.Max(longest, clip.length / speed);
+                }
+            }
+        }
+
+        return longest > 0f ? longest : _deathVfxLifetime;
     }
 
     private void SetChargeProgress(float value)
@@ -831,7 +905,17 @@ public class BossSummonPattern : BossPattern
         }
     }
 
-    /// <summary>화면 전체를 붉게 덮었다가 빠짐 (런타임에 오버레이 생성)</summary>
+    private void DestroyDeathVfx()
+    {
+        if (_deathVfxInstance != null)
+        {
+            Destroy(_deathVfxInstance);
+        }
+
+        _deathVfxInstance = null;
+    }
+
+    /// <summary>화면 전체를 붉게 확 덮었다가(임팩트) 빠짐 (런타임에 오버레이 생성)</summary>
     private IEnumerator DeathScreenRoutine()
     {
         if (_deathScreen == null)
@@ -854,18 +938,33 @@ public class BossSummonPattern : BossPattern
 
         Image screen = _deathScreen;
         Color color = _deathScreenColor;
-        float maxAlpha = color.a;
+        float settleAlpha = color.a;
+        float peakAlpha = Mathf.Max(_deathImpactPeakAlpha, settleAlpha);
 
-        for (float t = 0f; t < _deathScreenFadeIn && screen != null; t += Time.unscaledDeltaTime)
+        // 임팩트: 페이드 없이 바로 가장 진하게. 같은 프레임에 가시 VFX를 지워 붉은 화면에 가려지게
+        color.a = peakAlpha;
+        screen.color = color;
+        DestroyDeathVfx();
+
+        for (float t = 0f; t < _deathImpactHold && screen != null; t += Time.unscaledDeltaTime)
         {
-            color.a = Mathf.Lerp(0f, maxAlpha, t / _deathScreenFadeIn);
+            yield return null;
+        }
+
+        // 최대 진하기 → 남는 진하기로 빠르게 (처음이 가장 빠르게 빠지는 곡선)
+        for (float t = 0f; t < _deathImpactDrop && screen != null; t += Time.unscaledDeltaTime)
+        {
+            float x = 1f - (t / _deathImpactDrop);
+            color.a = Mathf.Lerp(settleAlpha, peakAlpha, x * x);
             screen.color = color;
             yield return null;
         }
 
+        // 남는 진하기 → 0
         for (float t = 0f; t < _deathScreenFadeOut && screen != null; t += Time.unscaledDeltaTime)
         {
-            color.a = Mathf.Lerp(maxAlpha, 0f, t / _deathScreenFadeOut);
+            float x = 1f - (t / _deathScreenFadeOut);
+            color.a = settleAlpha * x * x;
             screen.color = color;
             yield return null;
         }
