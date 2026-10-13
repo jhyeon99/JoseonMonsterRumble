@@ -45,29 +45,6 @@ public class MovingPlatform : MonoBehaviour
     private int _targetIndex = 1;
     private float _waitTimer;
     private bool _isValid;
-    private GameAudio.EventAudio _audio;
-    private bool _audioMoving;
-
-    private void UpdateAudio(bool moving, bool completed)
-    {
-        if (moving == _audioMoving) return;
-        if (_audio == null) _audio = GameAudio.EventAudio.For(this, "Environment");
-        _audioMoving = moving;
-        if (moving)
-        {
-            _audio.Begin();
-            _audio.Play("Environment.PlatformStart");
-            _audio.Play("Environment.PlatformLoop");
-        }
-        else
-        {
-            if (completed) _audio.Complete();
-            else _audio.Cancel();
-            if (completed) AudioManager.Instance?.PlaySceneEvent("Environment.PlatformStop", this);
-        }
-    }
-
-    private void OnDisable() => UpdateAudio(false, false);
 
     private readonly HashSet<Collider2D> _passengerColliders =
         new HashSet<Collider2D>();
@@ -86,11 +63,7 @@ public class MovingPlatform : MonoBehaviour
         _velocity = Vector2.zero;
         _deltaPosition = Vector2.zero;
 
-        if (!_isValid || !IsMovingState())
-        {
-            UpdateAudio(false, false);
-            return;
-        }
+        if (!_isValid || !IsMovingState()) return;
 
         if (_waitTimer > 0f)
         {
@@ -98,7 +71,6 @@ public class MovingPlatform : MonoBehaviour
             return;
         }
 
-        UpdateAudio(_speed > 0f, false);
         MoveToTarget();
     }
 
@@ -130,7 +102,6 @@ public class MovingPlatform : MonoBehaviour
     {
         if (!_isValid) return;
 
-        UpdateAudio(false, false);
         _platformBody.position = _points[0].position;
         _targetIndex = 1;
         _waitTimer = 0f;
@@ -229,7 +200,6 @@ public class MovingPlatform : MonoBehaviour
 
     private void ReachTarget()
     {
-        UpdateAudio(false, true);
         if (_state == MovementState.MovingForward)
         {
             ReachForwardTarget();

@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 7553262986410587866}
   - component: {fileID: 2862393485749829237}
   - component: {fileID: 2862393485749829238}
-  - component: {fileID: 2862393485749829239}
   m_Layer: 16
   m_Name: PF_OffSpawnpoint
   m_TagString: Untagged
@@ -84,7 +83,7 @@ SpriteRenderer:
   m_SortingLayer: 8
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 3254d3c5af2c85949b61922ef2d94a26, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 565c27494a33fc94fbc1953874895b5e, type: 3}
   m_Color: {r: 0.82444817, g: 0.83427036, b: 0.9150943, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -128,17 +127,9 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 7.2045593}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0}
-    oldSize: {x: 7.2, y: 12.8}
-    newSize: {x: 10.24, y: 15.36}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
+  m_Offset: {x: 0, y: 0}
   m_AutoTiling: 0
-  m_Size: {x: 6, y: 11.8692665}
+  m_Size: {x: 6, y: 15.36}
   m_EdgeRadius: 0
 --- !u!114 &2862393485749829238
 MonoBehaviour:
@@ -150,34 +141,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0e1180c67d5c407e8ac0d2ca5a460522, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RespawnPoint
   _checkpointId: Jangseung_01
   _isDefault: 0
-  _inactiveSprite: {fileID: 21300000, guid: 3254d3c5af2c85949b61922ef2d94a26, type: 3}
-  _activeSprite: {fileID: 21300000, guid: 59de4a33c45164d4096843acf2d7d76a, type: 3}
-  _activationAnimator: {fileID: 2862393485749829239}
-  _activationAnimation: {fileID: 7400000, guid: 9f26acda7a15a5d4ba981a48853a7700,
-    type: 2}
---- !u!95 &2862393485749829239
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2862393485749829236}
-  m_Enabled: 0
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 62b26d4e675b414499dec7ecf32b0fce, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
+  _inactiveSprite: {fileID: 21300000, guid: 565c27494a33fc94fbc1953874895b5e, type: 3}
+  _activeSprite: {fileID: 21300000, guid: a79e00b28331d94488fe3f8b58a6b052, type: 3}

@@ -1,12 +1,10 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class UI_PotionCount : MonoBehaviour
 {
     [SerializeField] private PlayerHealth _playerHealth;
     [SerializeField] private TMP_Text _countText;
-    [SerializeField] private Image _cooldownOverlay;
 
     private void Awake()
     {
@@ -16,24 +14,10 @@ public class UI_PotionCount : MonoBehaviour
             _playerHealth = FindFirstObjectByType<PlayerHealth>();
         }
 
-        if (_cooldownOverlay == null)
-        {
-            Transform overlayTransform = transform.parent != null
-                ? transform.parent.Find("Cooldown_Overlay")
-                : null;
-
-            if (overlayTransform != null)
-            {
-                _cooldownOverlay = overlayTransform.GetComponent<Image>();
-            }
-        }
-
         if (_playerHealth == null)
         {
             Debug.LogWarning($"{name}: PlayerHealth를 찾지 못했습니다.", this);
         }
-
-        ResetCooldownOverlay();
     }
 
     private void OnEnable()
@@ -50,8 +34,6 @@ public class UI_PotionCount : MonoBehaviour
         {
             _playerHealth.OnPotionChanged -= UpdateText;
         }
-
-        ResetCooldownOverlay();
     }
 
     private void Start()
@@ -62,48 +44,11 @@ public class UI_PotionCount : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        UpdateCooldown();
-    }
-
     private void UpdateText(int count)
     {
         if (_countText != null)
         {
             _countText.text = count.ToString();
-        }
-    }
-
-    private void UpdateCooldown()
-    {
-        if (_cooldownOverlay == null || _playerHealth == null) return;
-
-        float ratio = _playerHealth.PotionCooldownRatio;
-        if (ratio > 0f)
-        {
-            if (!_cooldownOverlay.gameObject.activeSelf)
-            {
-                _cooldownOverlay.gameObject.SetActive(true);
-            }
-            _cooldownOverlay.fillAmount = ratio;
-        }
-        else
-        {
-            if (_cooldownOverlay.gameObject.activeSelf)
-            {
-                _cooldownOverlay.fillAmount = 0f;
-                _cooldownOverlay.gameObject.SetActive(false);
-            }
-        }
-    }
-
-    private void ResetCooldownOverlay()
-    {
-        if (_cooldownOverlay != null)
-        {
-            _cooldownOverlay.fillAmount = 0f;
-            _cooldownOverlay.gameObject.SetActive(false);
         }
     }
 }

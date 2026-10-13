@@ -17,10 +17,6 @@ public class BossProjectile : MonoBehaviour, IParryable
     private bool _spriteFacesRight = true;
 
     [Header("데미지")]
-    [Tooltip("공격 이름 (사망 원인 표시용)")]
-    [SerializeField]
-    private string _attackName = "가시";
-
     [SerializeField, Min(0f)] private float _damage = 15f;
     [SerializeField, Min(0f)] private float _knockbackForce = 6f;
 
@@ -32,13 +28,6 @@ public class BossProjectile : MonoBehaviour, IParryable
     private ContactFilter2D _filter;
     private Vector2 _direction = Vector2.right;
     private float _timer;
-    private GameObject _attacker;
-
-    /// <summary>쏜 대상 (사망 원인 표시용)</summary>
-    public void SetAttacker(GameObject attacker)
-    {
-        _attacker = attacker;
-    }
 
     private void Awake()
     {
@@ -109,16 +98,8 @@ public class BossProjectile : MonoBehaviour, IParryable
                 other.ClosestPoint(transform.position),
                 _direction,
                 _defense,
-                this,
-                attackName: _attackName
+                this
             );
-            hitData.Attacker = _attacker;
-
-            if (damageable is PlayerHealth playerHealth && playerHealth.IsInvincible)
-            {
-                playerHealth.TakeDamage(hitData);
-                continue;
-            }
 
             damageable.TakeDamage(hitData);
             Destroy(gameObject);

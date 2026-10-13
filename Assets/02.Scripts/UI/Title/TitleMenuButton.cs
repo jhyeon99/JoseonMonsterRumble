@@ -92,10 +92,6 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
             return;
         }
 
-        if (!_isSelected && Input.anyKeyDown)
-        {
-            PlayHoverSound();
-        }
         ApplyHighlight(true);
     }
 
@@ -111,10 +107,6 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
             return;
         }
 
-        if (!_isSelected)
-        {
-            PlayHoverSound();
-        }
         ApplyHighlight(true);
 
         if (EventSystem.current != null)
@@ -172,6 +164,11 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
 
     public void ApplyHighlight(bool isSelected)
     {
+        if (!_isSelected && isSelected)
+        {
+            PlayHoverSound();
+        }
+
         _isSelected = isSelected;
 
         if (_selectFrame != null)
@@ -215,8 +212,7 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
 
     private void HandleClick()
     {
-        // Button.onClick may have closed the panel before this handler runs.
-        if (!isActiveAndEnabled || !_isInteractable || _isAnyButtonClicked)
+        if (!_isInteractable || _isAnyButtonClicked)
         {
             return;
         }
@@ -238,25 +234,59 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
         yield return new WaitForSecondsRealtime(_actionDelay);
 
         ApplyPress(false);
+        _onClickAction?.Invoke();
         _isInteractable = true;
         _isAnyButtonClicked = false;
         _clickActionCoroutine = null;
-        // The callback can disable or destroy this button. Finish cleanup first.
-        _onClickAction?.Invoke();
     }
 
     private void PlayClickSound()
     {
-        AudioManager manager = AudioManager.Instance;
-        if (manager == null)
+        AudioClip clipToPlay = _clickSound;
+        float volumeToPlay = _clickVolume;
+
+        if (clipToPlay == null && AudioManager.Instance != null)
+        {
+            clipToPlay = AudioManager.Instance.ButtonClickClip;
+        }
+
+        if (clipToPlay == null)
+        {
             return;
-        manager.PlayUiEvent("UI.Click", _clickSound != null ? _clickSound : manager.ButtonClickClip, _clickVolume);
+        }
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySfx(clipToPlay, volumeToPlay);
+            return;
+        }
+
+        Vector3 position = Camera.main != null ? Camera.main.transform.position : transform.position;
+        AudioSource.PlayClipAtPoint(clipToPlay, position, volumeToPlay);
     }
+
     private void PlayHoverSound()
     {
-        AudioManager manager = AudioManager.Instance;
-        if (manager == null)
+        AudioClip clipToPlay = _hoverSound;
+        float volumeToPlay = _hoverVolume;
+
+        if (clipToPlay == null && AudioManager.Instance != null)
+        {
+            clipToPlay = AudioManager.Instance.ButtonHoverClip;
+        }
+
+        if (clipToPlay == null)
+        {
             return;
-        manager.PlayUiEvent("UI.Hover", _hoverSound != null ? _hoverSound : manager.ButtonHoverClip, _hoverVolume);
+        }
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySfx(clipToPlay, volumeToPlay);
+            return;
+        }
+
+        Vector3 position = Camera.main != null ? Camera.main.transform.position : transform.position;
+        AudioSource.PlayClipAtPoint(clipToPlay, position, volumeToPlay);
     }
 }

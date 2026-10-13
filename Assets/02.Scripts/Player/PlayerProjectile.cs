@@ -166,7 +166,6 @@ public class PlayerProjectile : Projectile
         _isLaunching = false;
 
         SnapToHitTarget(hitCollider);
-        AudioManager.Instance?.PlaySceneEvent("Player.TalismanExplosion", this);
         StopTrackingTarget();
 
         if (_collider2D != null)

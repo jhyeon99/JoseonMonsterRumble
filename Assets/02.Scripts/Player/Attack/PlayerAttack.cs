@@ -9,7 +9,6 @@ using UnityEngine;
 public class PlayerAttack : MonoBehaviour
 {
     [SerializeField] private AttackDataTableSO _attackDataTableSO;
-    [SerializeField] private AttackDataTableSO _airAttackDataTableSO;
     [SerializeField] private Transform _attackOrigin;
     [SerializeField] private LayerMask _enemyLayer;
     [Tooltip("콜라이더 중심과 외곽 접점 사이 보간 비율 (0: 몸체 중심, 1: 외곽 표면)")]
@@ -31,20 +30,10 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField, ReadOnly] private bool _isHitboxActive;
 
     public bool IsHitboxActive => _isHitboxActive;
-    public event System.Action<int> OnAttackStepStarted;
-    public event System.Action<bool> OnAttackStepEnded;
-    public event System.Action<HitData> OnMeleeImpact;
-    private bool _stepActive;
 
     // 한 번의 공격 단계에서 같은 적은 한 번만 맞도록
     private readonly HashSet<IDamageable> _hitTargets = new HashSet<IDamageable>();
     private AttackData _activeStep;
-    private Player _player;
-
-    private void Awake()
-    {
-        _player = GetComponent<Player>();
-    }
 
     public bool TryGetAttackData(int index, out AttackData attackData)
     {
@@ -59,40 +48,14 @@ public class PlayerAttack : MonoBehaviour
         return false;
     }
 
-    public bool TryGetAirAttackData(out AttackData attackData)
-    {
-        if (_airAttackDataTableSO != null && _airAttackDataTableSO.Data != null &&
-            _airAttackDataTableSO.Data.Length > 0)
-        {
-            attackData = _airAttackDataTableSO.Data[0];
-            return true;
-        }
-        attackData = default;
-        return false;
-    }
-
-    /// <summary>공격 단계 시작. 판정은 아직 켜지 않음.</summary>
+    /// <summary>
+    /// 공격 단계 시작 (판정은 아직 켜지 않음). 콤보 단계가 바뀔 때마다 호출.
+    /// </summary>
     public void StartAttackStep(int index)
     {
-        InitializeAttackStep(TryGetAttackData(index, out _) ? index + 1 : 0);
-    }
-
-    public void StartAirAttackStep()
-    {
-        InitializeAttackStep(TryGetAirAttackData(out _) ? 1 : 0);
-    }
-
-    private void InitializeAttackStep(int comboStep)
-    {
-        CompleteAttackStep();
         EndHitbox();
         _hitTargets.Clear();
-        _currentCombo = comboStep;
-        if (_currentCombo > 0)
-        {
-            _stepActive = true;
-            OnAttackStepStarted?.Invoke(_currentCombo);
-        }
+        _currentCombo = TryGetAttackData(index, out _) ? index + 1 : 0;
     }
 
     /// <summary>
@@ -105,19 +68,6 @@ public class PlayerAttack : MonoBehaviour
             return;
         }
 
-        ApplyHitbox(attackData);
-    }
-
-    public void BeginAirAttackHitbox()
-    {
-        if (TryGetAirAttackData(out AttackData attackData))
-        {
-            ApplyHitbox(attackData);
-        }
-    }
-
-    private void ApplyHitbox(AttackData attackData)
-    {
         _activeStep = attackData;
         _isHitboxActive = true;
 
@@ -131,20 +81,8 @@ public class PlayerAttack : MonoBehaviour
         _isHitboxActive = false;
     }
 
-    public void CompleteAttackStep()
-    {
-        if (!_stepActive) return;
-        _stepActive = false;
-        OnAttackStepEnded?.Invoke(true);
-    }
-
     public void StopAttack()
     {
-        if (_stepActive)
-        {
-            _stepActive = false;
-            OnAttackStepEnded?.Invoke(false);
-        }
         EndHitbox();
         _hitTargets.Clear();
         _currentCombo = 0;
@@ -179,23 +117,14 @@ public class PlayerAttack : MonoBehaviour
                 : GetOverlapCenter(center, _activeStep.HitboxSize, hit.bounds, edgePoint);
             Vector3 attackDir = (hit.bounds.center - transform.position).normalized;
 
-            float finalDamage = _activeStep.Damage;
-            bool isBuffed = _player != null && _player.WeaponBuff != null && _player.WeaponBuff.IsBuffActive;
-            if (isBuffed)
-            {
-                finalDamage *= _player.WeaponBuff.DamageMultiplier;
-            }
-
             var hitData = new HitData(
-                finalDamage,
+                _activeStep.Damage,
                 _activeStep.KnockbackForce,
                 hitPoint,
                 attackDir,
-                comboStep: _currentCombo,
-                isBuffed: isBuffed
+                comboStep: _currentCombo
             );
-            if (damageable.TakeDamage(hitData) && hitData.Damage > 0f)
-                OnMeleeImpact?.Invoke(hitData);
+            damageable.TakeDamage(hitData);
         }
     }
 
@@ -231,7 +160,7 @@ public class PlayerAttack : MonoBehaviour
             isPlayerOrChild = (selectedGO == gameObject || selectedGO.transform.IsChildOf(transform));
         }
 
-        bool isAttackDataSelected = activeObj == _attackDataTableSO || activeObj == _airAttackDataTableSO;
+        bool isAttackDataSelected = (activeObj == _attackDataTableSO);
 
         // Player 본체, 자식 오브젝트(Visual 등), 또는 연결된 AttackData 에셋이 선택되었을 때 렌더링
         if (!isPlayerOrChild && !isAttackDataSelected)
@@ -261,7 +190,8 @@ public class PlayerAttack : MonoBehaviour
         // 플레이 중 실제 공격 판정이 활성화된 프레임에는 빨간색으로 점등 표시
         if (Application.isPlaying && _isHitboxActive)
         {
-            AttackData activeStep = _activeStep;
+            int activeIndex = Mathf.Clamp(_currentCombo - 1, 0, _attackDataTableSO.Data.Length - 1);
+            AttackData activeStep = _attackDataTableSO.Data[activeIndex];
 
             Vector3 activeCenter = _attackOrigin.position + _attackOrigin.TransformDirection(activeStep.HitboxOffset);
             Gizmos.color = new Color(1f, 0f, 0f, 0.35f);
@@ -285,13 +215,6 @@ public class PlayerAttack : MonoBehaviour
             new Color(0.2f, 1f, 0.4f, 0.15f), // 2타 반투명 면
             new Color(1f, 0.5f, 0.1f, 0.15f)  // 3타 반투명 면
         };
-
-        if (TryGetAirAttackData(out AttackData airAttack))
-        {
-            Vector3 airCenter = _attackOrigin.position + _attackOrigin.TransformDirection(airAttack.HitboxOffset);
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawWireCube(airCenter, airAttack.HitboxSize);
-        }
 
         for (int i = 0; i < _attackDataTableSO.Data.Length; i++)
         {

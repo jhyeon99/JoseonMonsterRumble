@@ -3,70 +3,45 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 피격 또는 마무리 공격 시 화면 외곽에 비네트 펄스를 연출하는 UI 컴포넌트.
-/// - 선택한 GameEvents.OnPlayerHit 또는 OnFinisher 이벤트에 반응
+/// 플레이어 피격 시 화면 외곽에 붉은 비네트 펄스를 연출하는 UI 컴포넌트.
+/// - GameEvents.OnPlayerHit 이벤트에 반응하여 동작
 /// - 타임스케일(히트스톱/일시정지)에 영향받지 않도록 실제 시간(Time.unscaledDeltaTime) 기준 보간
 /// </summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(CanvasGroup))]
 public class UI_HitVignette : MonoBehaviour
 {
-    private enum PulseTrigger
-    {
-        PlayerHit,
-        Finisher,
-    }
-
-    [SerializeField] private PulseTrigger _trigger;
-    [SerializeField, Range(0f, 1f)] private float _finisherPeakAlpha = 0.48f;
-
     [Header("참조 컴포넌트")]
     [SerializeField] private CanvasGroup _canvasGroup;
     [SerializeField] private Image _vignetteImage;
 
     [Header("기본 연출 설정")]
     [Tooltip("비네트 펄스가 지속되는 총 시간 (초)")]
-    [SerializeField, Min(0.05f)] private float _pulseDuration = 0.28f;
+    [SerializeField, Min(0.05f)] private float _pulseDuration = 0.2f;
 
     [Tooltip("최대 알파 도달까지 걸리는 시간 비율 (0~1)")]
-    [SerializeField, Range(0.05f, 0.5f)] private float _fadeInRatio = 0.1f;
+    [SerializeField, Range(0.05f, 0.5f)] private float _fadeInRatio = 0.15f;
 
     [Header("외곽 비네트 형태 설정")]
     [Tooltip("화면 중심부 완전 투명 영역 비율 (0~0.9)")]
-    [SerializeField, Range(0f, 0.9f)] private float _innerRadiusRatio = 0.28f;
+    [SerializeField, Range(0f, 0.9f)] private float _innerRadiusRatio = 0.55f;
 
-    [Tooltip("외곽 페이드 가파름 지수 (클수록 화면 끝 가장자리에만 색상 집중)")]
-    [SerializeField, Range(1f, 5f)] private float _falloffSharpness = 1.5f;
+    [Tooltip("외곽 페이드 가파름 지수 (클수록 화면 끝 가장자리에만 붉은빛 집중)")]
+    [SerializeField, Range(1f, 5f)] private float _falloffSharpness = 2.5f;
 
     [Header("데미지 비례 투명도 설정")]
     [Tooltip("최소 피격 시 기본 불투명도")]
-    [SerializeField, Range(0.05f, 1f)] private float _minAlpha = 0.45f;
+    [SerializeField, Range(0.05f, 1f)] private float _minAlpha = 0.25f;
 
     [Tooltip("최대 피격 시 한계 불투명도")]
-    [SerializeField, Range(0.1f, 1f)] private float _maxAlpha = 0.85f;
+    [SerializeField, Range(0.1f, 1f)] private float _maxAlpha = 0.65f;
 
     [Tooltip("최대 불투명도에 도달하는 기준 데미지")]
-    [SerializeField, Min(1f)] private float _damageForMaxAlpha = 35f;
+    [SerializeField, Min(1f)] private float _damageForMaxAlpha = 40f;
 
     [Header("색상 설정")]
-    [SerializeField] private Color _vignetteColor = new Color(0.92f, 0.04f, 0.04f, 1f);
+    [SerializeField] private Color _vignetteColor = new Color(0.85f, 0.05f, 0.05f, 1f);
 
-    [Header("저체력 위기 연출 설정")]
-    [Tooltip("저체력 위험 경고가 발동하는 체력 비율 기준 (0~1)")]
-    [SerializeField, Range(0.1f, 0.5f)] private float _lowHealthThreshold = 0.30f;
-
-    [Tooltip("저체력 비네트 펄스 주기 (초)")]
-    [SerializeField, Range(0.4f, 2f)] private float _heartbeatPeriod = 0.75f;
-
-    [Tooltip("저체력 비네트 최소 불투명도")]
-    [SerializeField, Range(0.05f, 0.4f)] private float _lowHealthMinAlpha = 0.15f;
-
-    [Tooltip("저체력 비네트 최대 불투명도")]
-    [SerializeField, Range(0.2f, 0.8f)] private float _lowHealthMaxAlpha = 0.55f;
-
-    private PlayerHealth _playerHealth;
-    private Coroutine _lowHealthCoroutine;
-    private bool _isLowHealth;
     private Coroutine _fadeCoroutine;
     private Sprite _generatedSprite;
 
@@ -77,25 +52,14 @@ public class UI_HitVignette : MonoBehaviour
 
     private void OnEnable()
     {
-        if (_trigger == PulseTrigger.Finisher)
-        {
-            GameEvents.OnFinisher += HandleFinisher;
-        }
-        else
-        {
-            GameEvents.OnPlayerHit += HandlePlayerHit;
-            SubscribeToHealth();
-        }
+        GameEvents.OnPlayerHit += HandlePlayerHit;
         ResetAlpha();
     }
 
     private void OnDisable()
     {
         GameEvents.OnPlayerHit -= HandlePlayerHit;
-        GameEvents.OnFinisher -= HandleFinisher;
-        UnsubscribeFromHealth();
         StopVignette();
-        StopLowHealthPulse();
     }
 
     private void OnDestroy()
@@ -145,11 +109,6 @@ public class UI_HitVignette : MonoBehaviour
     {
         float targetAlpha = CalculateTargetAlpha(hitData.Damage);
         PlayVignette(targetAlpha, _pulseDuration);
-    }
-
-    private void HandleFinisher(Vector2 point)
-    {
-        PlayVignette(_finisherPeakAlpha, _pulseDuration);
     }
 
     public void PlayVignette(float peakAlpha, float duration)
@@ -219,130 +178,8 @@ public class UI_HitVignette : MonoBehaviour
             yield return null;
         }
 
+        _canvasGroup.alpha = 0f;
         _fadeCoroutine = null;
-        if (!_isLowHealth && _canvasGroup != null)
-        {
-            _canvasGroup.alpha = 0f;
-        }
-    }
-
-    private void SubscribeToHealth()
-    {
-        if (_playerHealth == null)
-        {
-            _playerHealth = FindFirstObjectByType<PlayerHealth>();
-        }
-
-        if (_playerHealth != null)
-        {
-            _playerHealth.OnHealthChanged -= HandleHealthChanged;
-            _playerHealth.OnHealthChanged += HandleHealthChanged;
-            HandleHealthChanged(_playerHealth.CurrentHealth, _playerHealth.MaxHealth);
-        }
-    }
-
-    private void UnsubscribeFromHealth()
-    {
-        if (_playerHealth != null)
-        {
-            _playerHealth.OnHealthChanged -= HandleHealthChanged;
-        }
-    }
-
-    private void HandleHealthChanged(float currentHealth, float maxHealth)
-    {
-        float ratio = maxHealth > 0f ? (currentHealth / maxHealth) : 1f;
-        bool shouldPulse = ratio <= _lowHealthThreshold && currentHealth > 0f;
-
-        if (shouldPulse != _isLowHealth)
-        {
-            _isLowHealth = shouldPulse;
-            if (_isLowHealth)
-            {
-                StartLowHealthPulse();
-            }
-            else
-            {
-                StopLowHealthPulse();
-            }
-        }
-    }
-
-    private void StartLowHealthPulse()
-    {
-        if (_lowHealthCoroutine != null)
-        {
-            StopCoroutine(_lowHealthCoroutine);
-        }
-
-        _lowHealthCoroutine = StartCoroutine(AnimateLowHealthPulse());
-    }
-
-    private void StopLowHealthPulse()
-    {
-        if (_lowHealthCoroutine != null)
-        {
-            StopCoroutine(_lowHealthCoroutine);
-            _lowHealthCoroutine = null;
-        }
-
-        if (_canvasGroup != null && _fadeCoroutine == null)
-        {
-            _canvasGroup.alpha = 0f;
-        }
-    }
-
-    private IEnumerator AnimateLowHealthPulse()
-    {
-        float elapsed = 0f;
-
-        while (_isLowHealth)
-        {
-            elapsed += Time.unscaledDeltaTime;
-
-            if (_fadeCoroutine == null && _canvasGroup != null)
-            {
-                float cycle = (elapsed % _heartbeatPeriod) / _heartbeatPeriod;
-                float pulse;
-                if (cycle < 0.22f)
-                {
-                    pulse = Mathf.Sin(cycle / 0.22f * Mathf.PI);
-                }
-                else if (cycle < 0.48f)
-                {
-                    pulse = Mathf.Sin((cycle - 0.22f) / 0.26f * Mathf.PI) * 0.7f;
-                }
-                else
-                {
-                    pulse = 0f;
-                }
-
-                _canvasGroup.alpha = Mathf.Lerp(_lowHealthMinAlpha, _lowHealthMaxAlpha, pulse);
-            }
-
-            yield return null;
-        }
-
-        float currentAlpha = _canvasGroup != null ? _canvasGroup.alpha : 0f;
-        float fadeTime = 0.3f;
-        float fadeElapsed = 0f;
-
-        while (fadeElapsed < fadeTime)
-        {
-            fadeElapsed += Time.unscaledDeltaTime;
-            if (_fadeCoroutine == null && _canvasGroup != null)
-            {
-                _canvasGroup.alpha = Mathf.Lerp(currentAlpha, 0f, fadeElapsed / fadeTime);
-            }
-            yield return null;
-        }
-
-        if (_fadeCoroutine == null && _canvasGroup != null)
-        {
-            _canvasGroup.alpha = 0f;
-        }
-
-        _lowHealthCoroutine = null;
     }
 
     private Sprite CreateVignetteSprite()

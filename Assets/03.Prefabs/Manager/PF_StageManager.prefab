@@ -29,8 +29,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 882100000000000002}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3137954021376920542
@@ -45,43 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe24ea3f85e04c04b8476798319821d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StageManager
-  _deathScreen: {fileID: 882100000000000013}
+  _deathScreen: {fileID: 0}
   _deathDelay: 0.8
   _displayDuration: 0.8
-  _respawnProtectionDuration: 1.5
   _enableDebugRestartKey: 0
   _enemyClearOffsetX: 0
---- !u!1001 &882100000000000000
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 6527749906299031786}
-    m_Modifications:
-    - target: {fileID: 882000000000000001, guid: 83c7122d50e341d49e34552a42a40818, type: 3}
-      propertyPath: m_Name
-      value: DeathScreenUI
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 882000000000000006, guid: 83c7122d50e341d49e34552a42a40818, type: 3}
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 83c7122d50e341d49e34552a42a40818, type: 3}
---- !u!224 &882100000000000002 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 882000000000000002, guid: 83c7122d50e341d49e34552a42a40818, type: 3}
-  m_PrefabInstance: {fileID: 882100000000000000}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &882100000000000013 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 882000000000000013, guid: 83c7122d50e341d49e34552a42a40818, type: 3}
-  m_PrefabInstance: {fileID: 882100000000000000}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b31b0f8b01214be4809af91aa7f23413, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::DeathScreenView

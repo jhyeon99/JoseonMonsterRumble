@@ -74,12 +74,6 @@ public class EnemySpawnActivator : MonoBehaviour
             if (enemy.IsDefeated)
                 continue;
 
-            if (Ep1TutorialManager.IsEnemySpawnDeferred(enemy.Health))
-            {
-                if (enemy.gameObject.activeSelf) enemy.gameObject.SetActive(false);
-                continue;
-            }
-
             Vector3 enemyPosition = enemy.transform.position;
 
             bool isNearCamera =

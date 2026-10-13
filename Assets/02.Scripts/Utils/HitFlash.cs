@@ -50,7 +50,7 @@ public class HitFlash : MonoBehaviour
         flashColor.a = _spriteRenderer.color.a;
         _spriteRenderer.color = flashColor;
 
-        yield return new WaitForSecondsRealtime(_flashDuration);
+        yield return new WaitForSeconds(_flashDuration);
 
         RestoreColor();
         _flashRoutine = null;

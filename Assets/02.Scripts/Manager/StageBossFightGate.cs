@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-/// <summary>씬 페이드 / 리스폰 로딩 화면이 끝날 때까지 보스 전투 시작을 기다린다.</summary>
+/// <summary>씬 페이드가 끝날 때까지 보스 전투 시작을 기다린다.</summary>
 [DisallowMultipleComponent]
 public sealed class StageBossFightGate : MonoBehaviour
 {
@@ -10,7 +10,7 @@ public sealed class StageBossFightGate : MonoBehaviour
 
     public static bool TryDefer(Boss boss)
     {
-        if (!IsWaiting)
+        if (!SceneArrivalFade.IsTransitioning)
         {
             return false;
         }
@@ -31,7 +31,7 @@ public sealed class StageBossFightGate : MonoBehaviour
 
     private IEnumerator StartFightAfterFade()
     {
-        while (IsWaiting)
+        while (SceneArrivalFade.IsTransitioning)
         {
             if (_boss == null || !_boss.isActiveAndEnabled)
             {
@@ -47,11 +47,6 @@ public sealed class StageBossFightGate : MonoBehaviour
             _boss.StartFight();
         }
     }
-
-    // 리스폰 중(로딩 화면이 걷히기 전)에도 대기. 등장 연출을 생략하면 보스가 로딩 화면 뒤에서 먼저 움직이는 것 방지
-    private static bool IsWaiting =>
-        SceneArrivalFade.IsTransitioning
-        || (StageManager.Instance != null && StageManager.Instance.IsRespawning);
 
     public static void Cancel(Boss boss)
     {
