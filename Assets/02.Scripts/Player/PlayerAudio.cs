@@ -10,6 +10,7 @@ public sealed class PlayerAudio : ActorAudio
     private PlayerAttack _attack;
     private PlayerRangedAttack _ranged;
     private ulong _attackExecution, _chargeExecution;
+    private PlayHandle _chargeStepHandle;
     private bool _died, _finisherPlayed;
     public ulong AttackExecutionId => _attackExecution;
     public SoundSetSO SoundSet => ResolveSet();
@@ -45,6 +46,7 @@ public sealed class PlayerAudio : ActorAudio
         GameEvents.OnFinisherImpact -= OnFinisher;
         if (_player?.StateMachine != null) _player.StateMachine.OnStateChanged -= OnStateChanged;
         _movementExecution = 0;
+        StopChargeStepSound();
         base.OnDisable();
         _attackExecution = _chargeExecution = 0;
     }
@@ -111,6 +113,7 @@ public sealed class PlayerAudio : ActorAudio
         if (hit.Damage <= 0f || _died) return;
         if (_player == null || !_player.IsSuperArmorActive())
         {
+            StopChargeStepSound();
             CancelAllActions();
             _attackExecution = _chargeExecution = 0;
         }
@@ -122,6 +125,7 @@ public sealed class PlayerAudio : ActorAudio
         if (_died) return;
         _died = true;
         PlayResult("Player.Death", transform.position);
+        StopChargeStepSound();
         RetireOwner();
         _attackExecution = _chargeExecution = 0;
     }
@@ -149,12 +153,20 @@ public sealed class PlayerAudio : ActorAudio
             _chargeExecution = BeginAction();
             PlayAction("Player.ChargeLoop", _chargeExecution);
         }
-        PlayAction("Player.ChargeStep", _chargeExecution);
+        StopChargeStepSound();
+        _chargeStepHandle = PlayAction("Player.ChargeStep", _chargeExecution);
         if (_ranged != null && count == _ranged.SlotCount) PlayAction("Player.ChargeFull", _chargeExecution);
+    }
+
+    private void StopChargeStepSound()
+    {
+        if (Manager != null) Manager.StopHandle(_chargeStepHandle);
+        _chargeStepHandle = PlayHandle.Empty;
     }
 
     private void OnChargeEnded()
     {
+        StopChargeStepSound();
         // 충전은 정상 발사 때도 남은 단계 예약을 취소한다.
         EndAction(_chargeExecution, false);
         _chargeExecution = 0;

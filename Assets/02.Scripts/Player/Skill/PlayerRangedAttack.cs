@@ -97,8 +97,8 @@ public class PlayerRangedAttack : MonoBehaviour
                 continue;
             }
 
-            ActivateSlot(_activeCount);
             _activeCount++;
+            ActivateSlot(_activeCount - 1);
         }
     }
 
@@ -249,7 +249,6 @@ public class PlayerRangedAttack : MonoBehaviour
     {
         if (slotIndex >= 0 && slotIndex < _slotAnimators.Count)
         {
-            OnChargeStep?.Invoke(slotIndex + 1);
             Animator animator = _slotAnimators[slotIndex];
             if (animator != null && _slots[slotIndex].gameObject.activeSelf)
             {
@@ -258,6 +257,7 @@ public class PlayerRangedAttack : MonoBehaviour
             }
 
             _slotFeedbacks[slotIndex]?.PlayActivation();
+            OnChargeStep?.Invoke(slotIndex + 1);
         }
     }
 

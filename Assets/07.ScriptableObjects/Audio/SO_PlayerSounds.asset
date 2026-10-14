@@ -152,13 +152,13 @@ MonoBehaviour:
   - SoundId: Player.ChargeStep
     DisplayName: "\uBD80\uC801 \uC2AC\uB86F \uD65C\uC131\uD654 \uC131\uACF5"
     Clips:
-    - {fileID: 8300000, guid: e27e05bcd0a3c2e4992fba227dc4bb4b, type: 3}
+    - {fileID: 8300000, guid: 4be4ee3b74de5b44885ce87beddf2d94, type: 3}
     Volume: 0.102
     PitchMin: 1
     PitchMax: 1
     OutputGroup: 0
     Priority: 50
-    MaxCount: 4
+    MaxCount: 1
   - SoundId: Player.TalismanFire
     DisplayName: "\uBD80\uC801 \uBE44\uD589\uC74C"
     Clips:
@@ -461,7 +461,7 @@ MonoBehaviour:
     BgmFadeDuration: -1
     LoopEndRule: 
   - EventId: Player.ChargeLoop
-    Enabled: 1
+    Enabled: 0
     SoundId: Player.ChargeLoop
     TriggerDescription: "\uBD80\uC801 \uCDA9\uC804 \uC2DC\uC791"
     Delay: 0
