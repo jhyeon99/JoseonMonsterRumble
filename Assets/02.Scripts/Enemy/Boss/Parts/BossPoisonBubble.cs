@@ -103,6 +103,7 @@ public class BossPoisonBubble : MonoBehaviour, IDamageable, IHitFeedbackSource
 
         _currentHp = Mathf.Max(0f, _currentHp - hitData.Damage);
         OnHitFeedback?.Invoke(hitData);
+        AudioManager.Instance?.PlaySceneEvent("Boss.BubbleHurt", this);
 
         if (_hitFlash != null)
         {

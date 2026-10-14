@@ -238,6 +238,24 @@ MonoBehaviour:
     OutputGroup: 0
     Priority: 50
     MaxCount: 4
+  - SoundId: Boss.BubbleHurt
+    DisplayName: "개구리알에 실제 피해가 들어간 타격마다"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.TongueImpact
+    DisplayName: "보스 혀가 플레이어에게 실제 피해를 준 순간"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
   _events:
   - EventId: Boss.Intro
     Enabled: 1
@@ -538,4 +556,28 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 0
     BgmFadeDuration: -1
-    LoopEndRule: 
+    LoopEndRule:
+  - EventId: Boss.BubbleHurt
+    Enabled: 1
+    SoundId: Boss.BubbleHurt
+    TriggerDescription: "개구리알에 실제 피해가 들어간 타격마다"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule:
+  - EventId: Boss.TongueImpact
+    Enabled: 1
+    SoundId: Boss.TongueImpact
+    TriggerDescription: "보스 혀가 플레이어에게 실제 피해를 준 순간"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule:

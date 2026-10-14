@@ -34,7 +34,8 @@ MonoBehaviour:
     MaxCount: 1
   - SoundId: Music.Boss
     DisplayName: "\uC2E4\uC81C \uBCF4\uC2A4 \uC804\uD22C \uC2DC\uC791"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: ad87b426ff4cbf241aa4f8c83965a331, type: 3}
     Volume: 1
     PitchMin: 1
     PitchMax: 1
