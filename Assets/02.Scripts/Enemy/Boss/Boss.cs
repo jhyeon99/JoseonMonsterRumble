@@ -155,6 +155,12 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField, Min(0f)]
     private float _groggyEndFallbackDuration = 0.5f;
 
+    [Tooltip("그로기에서 일어난 뒤 몸통 접촉 데미지를 다시 허용하기까지의 시간입니다. 패턴 공격 판정은 유지합니다.")]
+    [SerializeField, Min(0f)]
+    private float _postGroggyContactDelay = 0.5f;
+
+    private float _contactDamageResumeTime;
+
     [SerializeField]
     private string _howlTrigger = "howl";
 
@@ -332,8 +338,9 @@ public class Boss : MonoBehaviour, IFinishable
 
     /// <summary>몸통 접촉 데미지를 줄 수 있는지 (대기 / 패턴 중일 때만, 접촉 데미지를 끄는 패턴 중에는 제외)</summary>
     public bool CanDealContactDamage =>
-        CurrentState is BossIdleState ||
-        (CurrentState is BossPatternState patternState && !patternState.Pattern.DisablesContactDamage && !patternState.Pattern.BlocksOutgoingDamage);
+        Time.time >= _contactDamageResumeTime &&
+        (CurrentState is BossIdleState ||
+        (CurrentState is BossPatternState patternState && !patternState.Pattern.DisablesContactDamage && !patternState.Pattern.BlocksOutgoingDamage));
 
     public bool CanDealPatternDamage =>
         CurrentState is BossPatternState patternState && !patternState.Pattern.BlocksOutgoingDamage;
@@ -583,6 +590,8 @@ public class Boss : MonoBehaviour, IFinishable
         if (_comboController != null && !(nextState is BossIdleState) && !(nextState is BossPatternState))
             _comboController.ResetCombo();
         BossState previous = CurrentState;
+        if (previous is BossGroggyState && nextState is BossIdleState)
+            _contactDamageResumeTime = Time.time + _postGroggyContactDelay;
         _stateMachine.ChangeState(nextState);
         OnAudioStateChanged?.Invoke(previous, nextState);
     }
