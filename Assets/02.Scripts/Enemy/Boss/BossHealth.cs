@@ -43,6 +43,7 @@ public class BossHealth : MonoBehaviour, IDamageable
 
     public float CurrentHp => _currentHp;
     public float MaxHp => _maxHp;
+    public bool LastDamageWasDuringGroggy { get; private set; }
 
     private void Awake()
     {
@@ -104,6 +105,7 @@ public class BossHealth : MonoBehaviour, IDamageable
         }
 
         // 보스는 넉백 없음
+        LastDamageWasDuringGroggy = _boss.CurrentState is BossGroggyState;
         ApplyDamage(hitData.Damage);
 
         // 일반 적과 같은 피격 공통 반응 (타격 소울, 히트스톱, 카메라 흔들림). 보스는 타격 소울만 더 크고 많이 차오름
@@ -123,6 +125,7 @@ public class BossHealth : MonoBehaviour, IDamageable
         }
 
         _boss.Log($"기믹 데미지 {damage}");
+        LastDamageWasDuringGroggy = _boss.CurrentState is BossGroggyState;
         ApplyDamage(damage);
 
         // 피격 연출용 (올챙이 충돌은 강한 피격으로 취급)

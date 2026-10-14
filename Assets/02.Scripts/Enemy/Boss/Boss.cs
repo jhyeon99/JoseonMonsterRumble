@@ -380,7 +380,7 @@ public class Boss : MonoBehaviour, IFinishable
     /// <summary>오른쪽을 보고 있는지</summary>
     public bool IsFacingRight => FacingX > 0f;
 
-    /// <summary>살아 있는 소환물 수 (독 방울 + 올챙이)</summary>
+    /// <summary>살아 있는 소환물 수 (개구리알 + 올챙이)</summary>
     public int MinionCount
     {
         get
@@ -917,7 +917,7 @@ public class Boss : MonoBehaviour, IFinishable
         _minions.Remove(minion);
     }
 
-    /// <summary>남은 독 방울 / 아기 모두 제거 (페이즈 전환, 완전 그로기 시)</summary>
+    /// <summary>남은 개구리알 / 아기 모두 제거 (페이즈 전환, 완전 그로기 시)</summary>
     private GameObject _finishMarker;
 
     /// <summary>머리 위 처치 직전 표시 위치</summary>
