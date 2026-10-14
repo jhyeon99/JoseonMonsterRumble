@@ -159,8 +159,8 @@ MonoBehaviour:
   - SoundId: Player.Finisher
     DisplayName: "\uB9C8\uBB34\uB9AC \uD0C0\uACA9 \uC2E4\uD589\uB2F9 1\uD68C"
     Clips:
-    - {fileID: 8300000, guid: 1dac7fb5695f4fd4b9f7023a18bc222a, type: 3}
-    StartOffset: 0
+    - {fileID: 8300000, guid: f69018410f2abae4995041cca93c93c7, type: 3}
+    StartOffset: 0.1
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -246,6 +246,17 @@ MonoBehaviour:
   - SoundId: Player.Unavailable
     DisplayName: "\uC790\uC6D0 \uBD80\uC871 \uB4F1\uC73C\uB85C \uC0AC\uC6A9 \uC2E4\uD328"
     Clips: []
+    StartOffset: 0
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Player.FinisherDisappear
+    DisplayName: "\uB0A0\uC544\uAC04 \uBAAC\uC2A4\uD130 \uC18C\uBA78 \uBC18\uC9DD\uC784"
+    Clips:
+    - {fileID: 8300000, guid: 78854babd7dc87547aad92ff0d1508e0, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -523,6 +534,19 @@ MonoBehaviour:
     LifetimePolicy: 2
     Loop: 0
     MinInterval: 0.1
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Player.FinisherDisappear
+    Enabled: 1
+    SoundId: Player.FinisherDisappear
+    TriggerDescription: "\uB9C8\uBB34\uB9AC\uB85C \uB0A0\uC544\uAC04 \uC77C\uBC18
+      \uBAAC\uC2A4\uD130\uC758 \uC18C\uBA78 \uBC18\uC9DD\uC784 \uC2DC\uC791"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
     IntervalScope: 0
     BgmFadeDuration: -1
     LoopEndRule: 

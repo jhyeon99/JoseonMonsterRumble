@@ -47,8 +47,9 @@ public sealed class AudioManagerEditor : Editor
         serializedObject.ApplyModifiedProperties();
         _catalog = ((AudioManager)target).Catalog;
         UpdateMusicLabels();
-        EnsureBossSound("Boss.Footstep", "보스 이동 착지 발바닥", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
-        EnsureBossSound("Boss.FrogAmbience", "보스전 배경 개구리 울음", LifetimePolicy.Entity, 0.2f, 0.95f, 1.05f, 1, 20);
+        EnsureSound(_catalog?.Player, "Player.FinisherDisappear", "날아간 몬스터 소멸 반짝임", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
+        EnsureSound(_catalog?.Boss, "Boss.Footstep", "보스 이동 착지 발바닥", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
+        EnsureSound(_catalog?.Boss, "Boss.FrogAmbience", "보스전 배경 개구리 울음", LifetimePolicy.Entity, 0.2f, 0.95f, 1.05f, 1, 20);
 
         List<string> warnings = AudioCatalogValidation.Validate(_catalog);
         if (warnings.Count > 0)
@@ -133,10 +134,9 @@ public sealed class AudioManagerEditor : Editor
         ApplyAssetChanges(data);
     }
 
-    private void EnsureBossSound(string eventId, string label, LifetimePolicy lifetime,
+    private void EnsureSound(SoundSetSO set, string eventId, string label, LifetimePolicy lifetime,
         float volume, float pitchMin, float pitchMax, int maxCount, int priority)
     {
-        SoundSetSO set = _catalog != null ? _catalog.Boss : null;
         if (set == null) return;
         bool hasEvent = set.TryGetEvent(eventId, out EventBinding binding);
         string soundId = hasEvent ? binding.SoundId : eventId;

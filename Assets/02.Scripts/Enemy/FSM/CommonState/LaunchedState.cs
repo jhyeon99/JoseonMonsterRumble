@@ -161,6 +161,7 @@ public class LaunchedState : EnemyState
         if (effectManager != null)
         {
             effectManager.PlayParryLaunchDisappear(_currentCenter);
+            AudioManager.Instance?.PlaySceneEvent("Player.FinisherDisappear", _enemy);
         }
         else
         {
