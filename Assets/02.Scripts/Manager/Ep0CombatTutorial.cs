@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public sealed class Ep0CombatTutorial : MonoBehaviour
 {
     private const int RequiredAttackHits = 3;
+    private const float FleeEndX = 294f;
 
     [Header("Scene references")]
     [SerializeField] private Player _player;
@@ -134,7 +135,23 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
         public override void Update() { }
 
-        public override void FixedUpdate() => _enemy.MoveType.Move(Vector2.right * _speedMultiplier);
+        public override void FixedUpdate()
+        {
+            if (_enemy.transform.position.x >= FleeEndX)
+            {
+                _enemy.MoveType.StopMove();
+                Vector3 position = _enemy.transform.position;
+                position.x = FleeEndX;
+                _enemy.EnemyRb.position = new Vector2(position.x, position.y);
+                _enemy.transform.position = position;
+                _enemy.Animation.SetRunning(false);
+                _enemy.Animation.ResetAnimationSpeed();
+                _enemy.gameObject.SetActive(false);
+                return;
+            }
+
+            _enemy.MoveType.Move(Vector2.right * _speedMultiplier);
+        }
 
         public override void Exit()
         {
@@ -389,7 +406,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         {
             float left = area.StartPosition.x + area.CenterOffset.x - area.AreaSize.x * 0.5f;
             float right = Mathf.Max(area.StartPosition.x + area.CenterOffset.x + area.AreaSize.x * 0.5f,
-                _enemy.transform.position.x + _fleeDistance);
+                Mathf.Max(_enemy.transform.position.x + _fleeDistance, FleeEndX + _fleeDistance));
             area.CenterOffset = new Vector2((left + right) * 0.5f - area.StartPosition.x, area.CenterOffset.y);
             area.AreaSize = new Vector2(right - left, area.AreaSize.y);
         }
