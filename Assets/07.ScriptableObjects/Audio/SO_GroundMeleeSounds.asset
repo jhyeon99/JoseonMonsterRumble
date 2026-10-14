@@ -47,7 +47,8 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: GroundMelee.MeleeAttack
     DisplayName: "\uADFC\uC811 \uACF5\uACA9 \uC2E4\uD589 \uC2DC\uC791"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: 870444be02154b04eb8b78eef6479a05, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -149,7 +150,7 @@ MonoBehaviour:
     Enabled: 1
     SoundId: GroundMelee.MeleeAttack
     TriggerDescription: "\uADFC\uC811 \uACF5\uACA9 \uC2E4\uD589 \uC2DC\uC791"
-    Delay: 0
+    Delay: 0.7
     TimeMode: 0
     LifetimePolicy: 0
     Loop: 0

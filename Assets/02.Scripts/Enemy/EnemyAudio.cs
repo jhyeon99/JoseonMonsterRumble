@@ -10,6 +10,7 @@ public sealed class EnemyAudio : ActorAudio
     private FlyingMeleeAttackController _flyingAttack;
     private ulong _stateExecution;
     private PlayHandle _ambience;
+    private PlayHandle _deathSound;
     private bool _dead;
     private Animator _animator;
     private readonly FootstepClock _footsteps = new FootstepClock();
@@ -23,6 +24,7 @@ public sealed class EnemyAudio : ActorAudio
         _ranged = GetComponent<EnemyRangedCombat>();
         _flyingAttack = GetComponent<FlyingMeleeAttackController>();
         _dead = false;
+        _deathSound = PlayHandle.Empty;
         _animator = GetComponentInChildren<Animator>();
         if (_health != null) { _health.OnHit += OnHit; _health.OnDeath += OnDeath; }
         if (_ranged != null) _ranged.OnProjectileFired += OnProjectileFired;
@@ -58,21 +60,49 @@ public sealed class EnemyAudio : ActorAudio
 
     private void OnStateChanged(EnemyState previous, EnemyState next)
     {
-        if (next is LaunchedState && Prefix == "Ground.") PlayResult("Ground.FinisherLaunch", transform.position);
+        if (next is LaunchedState)
+        {
+            AudioCatalogSO catalog = Manager?.Catalog;
+            if (catalog != null)
+            {
+                catalog.GetLaunchDeathFade(_enemy.Data, out float start, out float duration);
+                Manager.LimitSfxPlayback(_deathSound, start, duration);
+            }
+            if (Prefix == "Ground.") PlayResult("Ground.FinisherLaunch", transform.position);
+        }
         if (_dead) return;
+        bool continuesGroundSwing = previous is AttackPrepareGroundState && next is AttackState &&
+            _enemy.Combat is EnemyMeleeCombat && _enemy.MoveType is EnemyGroundMove;
         bool completed = previous is AttackState && next is AttackRecoveryState;
-        EndAction(_stateExecution, completed);
-        _stateExecution = 0;
+        // 준비에서 시작한 휘두르기 소리와 지연 예약은 타격 판정 상태까지 이어진다.
+        if (!continuesGroundSwing)
+        {
+            EndAction(_stateExecution, completed);
+            _stateExecution = 0;
+        }
         if (Manager != null) Manager.StopHandle(_ambience);
         _ambience = PlayHandle.Empty;
         if (next is DeadState || next is LaunchedState) return;
-        _stateExecution = BeginAction();
-        if (next is GroggyState) PlayResult(Prefix + "Groggy", transform.position);
-        else if (next is AttackState && _ranged == null)
+        if (_stateExecution == 0) _stateExecution = BeginAction();
+        if (next is GroggyState)
+        {
+            PlayResult(Prefix + "Groggy", transform.position);
+        }
+        else if (next is AttackState && _ranged == null && !continuesGroundSwing)
+        {
             PlayAction(Prefix == "Air." ? "Air.MeleeDash" : "Ground.MeleeAttack", _stateExecution);
+        }
         else if (next is AttackPrepareGroundState || next is AttackPrepareFlyingState)
+        {
             PlayAction(Prefix + "AttackReady", _stateExecution);
-        else if (next is ChaseState && previous is IdleState) PlayEntity(Prefix + "Detect");
+            if (next is AttackPrepareGroundState && _enemy.Combat is EnemyMeleeCombat)
+                PlayAction("Ground.MeleeAttack", _stateExecution);
+        }
+        else if (next is ChaseState && previous is IdleState)
+        {
+            PlayEntity(Prefix + "Detect");
+        }
+
         if (_enemy.MoveType is EnemyFlyingMove && (next is IdleState || next is ChaseState || next is ReturnToStartState || next is AttackRecoveryState))
         {
             PlayAction("Air.Flight", _stateExecution);
@@ -120,7 +150,7 @@ public sealed class EnemyAudio : ActorAudio
     {
         if (_dead) return;
         _dead = true;
-        PlayResult(Prefix + "Death", transform.position);
+        _deathSound = PlayResult(Prefix + "Death", transform.position);
         RetireOwner();
         _stateExecution = 0;
     }

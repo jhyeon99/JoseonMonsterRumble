@@ -60,7 +60,6 @@ public sealed class PlayerAudio : ActorAudio
         _movementExecution = BeginAction();
         if (next == _player.JumpState) PlayAction("Player.Jump", _movementExecution);
         else if (next == _player.DodgeState) PlayAction("Player.Dodge", _movementExecution);
-        else if (next == _player.GuardState) PlayAction("Player.GuardEnter", _movementExecution);
     }
 
     private void LateUpdate()

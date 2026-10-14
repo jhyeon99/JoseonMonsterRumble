@@ -104,7 +104,8 @@ MonoBehaviour:
   - SoundId: Player.Hurt
     DisplayName: "\uBC29\uC5B4\uB418\uC9C0 \uC54A\uC740 \uBE44\uCE58\uBA85 \uD53C\uD574
       \uC801\uC6A9"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: 4bfe533ba130e4f4bad04113bde04afa, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -115,7 +116,7 @@ MonoBehaviour:
   - SoundId: Player.Death
     DisplayName: "\uC0AC\uB9DD \uD655\uC815"
     Clips:
-    - {fileID: 0}
+    - {fileID: 8300000, guid: 988f4e451372c394299d2e409c3c2584, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -125,7 +126,8 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: Player.Block
     DisplayName: "\uC2E4\uC81C \uAC00\uB4DC \uBC29\uC5B4 \uC131\uACF5"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: a3d4784a3d485f144a5b03d0e472f595, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -135,7 +137,8 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: Player.Parry
     DisplayName: "\uC2E4\uC81C \uD328\uB9C1 \uC131\uACF5"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: ac7f3010e8c11d848b71057734a87412, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -155,7 +158,8 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: Player.Finisher
     DisplayName: "\uB9C8\uBB34\uB9AC \uD0C0\uACA9 \uC2E4\uD589\uB2F9 1\uD68C"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: 1dac7fb5695f4fd4b9f7023a18bc222a, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -188,7 +192,8 @@ MonoBehaviour:
   - SoundId: Player.TalismanExplosion
     DisplayName: "\uC720\uD6A8 \uBA85\uC911\uC73C\uB85C \uBD80\uC801 \uD3ED\uBC1C
       \uC2DC\uC791"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: 95605a52b7078a44598c756cf8bfd04b, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1

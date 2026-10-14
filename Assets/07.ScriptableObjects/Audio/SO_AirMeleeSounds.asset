@@ -17,6 +17,7 @@ MonoBehaviour:
     DisplayName: "\uBE44\uCE58\uBA85 \uD53C\uD574 \uC801\uC6A9"
     Clips:
     - {fileID: 8300000, guid: 6989a4ce49e844649995210db4121023, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -27,6 +28,7 @@ MonoBehaviour:
     DisplayName: "\uC0AC\uB9DD \uD655\uC815"
     Clips:
     - {fileID: 8300000, guid: a8e78d13cab011940b6fa1852268b4a3, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -35,7 +37,9 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: AirMelee.MeleeDash
     DisplayName: "U\uC790 \uB3CC\uC9C4 \uC2E4\uD589 \uC2DC\uC791"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: 413e17eaca1ab3d419ac04c8e71c7611, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -45,6 +49,7 @@ MonoBehaviour:
   - SoundId: AirMelee.RangedFire
     DisplayName: "\uD22C\uC0AC\uCCB4 \uC2E4\uC81C \uC0DD\uC131\xB7\uBC1C\uC0AC"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -54,6 +59,7 @@ MonoBehaviour:
   - SoundId: AirMelee.Flight
     DisplayName: "\uBE44\uD589 \uC774\uB3D9 \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -63,6 +69,7 @@ MonoBehaviour:
   - SoundId: AirMelee.Groggy
     DisplayName: "\uD328\uB9C1 \uD6C4 \uADF8\uB85C\uAE30 \uC9C4\uC785"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -72,6 +79,7 @@ MonoBehaviour:
   - SoundId: AirMelee.AttackReady
     DisplayName: "\uACF5\uACA9 \uC900\uBE44 \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -81,6 +89,7 @@ MonoBehaviour:
   - SoundId: AirMelee.Ambience
     DisplayName: "\uB300\uAE30\xB7\uC21C\uCC30 \uC0C1\uD0DC \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
