@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
+using GameAudio;
 
 /// <summary>
-/// 올챙이 (독 방울을 터트리면 나옴). 공격 패턴 없이 좌우로 무작위로 돌아다니며 닿으면 약한 접촉 데미지.
+/// 올챙이 (개구리알을 터트리면 나옴). 공격 패턴 없이 좌우로 무작위로 돌아다니며 닿으면 약한 접촉 데미지.
 /// 플레이어 콤보 3타에 맞으면 (그 공격으로 죽더라도) 보스에게 날아가 부딪혀 기믹 데미지.
 /// 그 외 공격은 체력이 깎이고 뒤로 밀림. 체력이 0이 되면 죽는 애니메이션 후 사라짐.
 /// 레이어는 Enemy (플레이어 근접 공격에 맞도록), Rigidbody2D(Dynamic) + 콜라이더 필요.
@@ -27,12 +28,12 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
     [SerializeField, Min(1f)]
     private float _maxHp = 60f;
 
-    [Tooltip("켜면 방울에서 나와 처음 땅에 닿을 때까지 공격을 받지 않고 접촉 데미지도 주지 않음")]
+    [Tooltip("켜면 개구리알에서 나와 처음 땅에 닿을 때까지 공격을 받지 않고 접촉 데미지도 주지 않음")]
     [SerializeField]
     private bool _harmlessUntilLanded = true;
 
     [Tooltip("생성 직후 최소 이 시간 동안은 땅에 닿아 있어도 공격을 받지 않고 접촉 데미지도 주지 않음 (초). " +
-             "땅 위에서 바로 생성될 때 방울을 터트린 공격(3타 등)에 같이 맞지 않도록. 0이면 땅에 닿는 순간 바로 해제")]
+             "땅 위에서 바로 생성될 때 개구리알을 터트린 공격(3타 등)에 같이 맞지 않도록. 0이면 땅에 닿는 순간 바로 해제")]
     [SerializeField, Min(0f)]
     private float _spawnInvincibleTime = 0.4f;
 
@@ -161,6 +162,12 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
     private float _direction;
     private bool _isLaunched;
     private bool _isDead;
+    private AudioManager _crawlManager;
+    private AudioOwnerKey _crawlOwner;
+    private PlayHandle _crawlHandle;
+    private AudioClip _previousCrawlClip;
+    private float _nextCrawlTime;
+    private bool _crawlPlaying;
     private float _invincibleUntil;
     private bool _hasLanded;
     private Animator _animator;
@@ -168,6 +175,67 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
 
     /// <summary>맞았을 때 (EnemyHitFeedback 피격 연출용)</summary>
     public event System.Action<HitData> OnHitFeedback;
+
+    private void OnEnable()
+    {
+        _crawlManager = AudioManager.Instance;
+        _crawlOwner = new AudioOwnerKey(GetInstanceID(), AudioLifetimeRegistry.NextOwnerGeneration());
+        _previousCrawlClip = null;
+        _crawlPlaying = false;
+        _nextCrawlTime = Time.time;
+    }
+
+    private void OnDisable()
+    {
+        StopCrawl();
+        if (_crawlManager != null) _crawlManager.ReleaseOwner(_crawlOwner);
+    }
+
+    private void ScheduleCrawl()
+    {
+        AudioCatalogSO catalog = _crawlManager != null ? _crawlManager.Catalog : null;
+        float first = catalog != null ? catalog.BabyCrawlMinInterval : 1f;
+        float second = catalog != null ? catalog.BabyCrawlMaxInterval : 3f;
+        float min = Mathf.Max(0.1f, Mathf.Min(first, second));
+        float max = Mathf.Max(min, Mathf.Max(first, second));
+        _nextCrawlTime = Time.time + Random.Range(min, max);
+    }
+
+    private void StopCrawl()
+    {
+        if (_crawlManager != null) _crawlManager.StopHandle(_crawlHandle);
+        _crawlHandle = PlayHandle.Empty;
+        if (_crawlPlaying) _nextCrawlTime = Time.time;
+        _crawlPlaying = false;
+    }
+
+    private void LateUpdate()
+    {
+        if (_crawlManager == null) return;
+        bool crawling = !_isDead && !_isLaunched && _body != null && IsGrounded();
+        if (!crawling)
+        {
+            StopCrawl();
+            return;
+        }
+        if (_crawlManager.IsHandleValid(_crawlHandle)) return;
+        if (_crawlPlaying)
+        {
+            _crawlPlaying = false;
+            _nextCrawlTime = Time.time;
+        }
+        if (Time.timeScale <= 0f || Time.time < _nextCrawlTime) return;
+        AudioCatalogSO catalog = _crawlManager.Catalog;
+        SoundSetSO set = catalog != null ? catalog.Boss : null;
+        if (set != null && set.TryGetEvent("Boss.BabyCrawl", out EventBinding binding) && binding.Enabled)
+        {
+            _crawlHandle = _crawlManager.PlayEntityLoop(set, "Boss.BabyCrawl", this, _crawlOwner);
+            AudioClip clip = _crawlManager.GetHandleClip(_crawlHandle);
+            if (clip != null) _previousCrawlClip = clip;
+            _crawlPlaying = !_crawlHandle.IsEmpty;
+        }
+        if (!_crawlPlaying) ScheduleCrawl();
+    }
 
     public void Initialize(Boss boss)
     {
@@ -266,7 +334,7 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
             PickDirection();
         }
 
-        // 방울에서 나와 떨어지는 동안(공중)은 움직이지 않고 그대로 낙하
+        // 개구리알에서 나와 떨어지는 동안(공중)은 움직이지 않고 그대로 낙하
         if (!isGrounded)
         {
             _body.linearVelocity = new Vector2(0f, _body.linearVelocity.y);
@@ -376,7 +444,7 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
             return false;
         }
 
-        // 방울에서 나와 땅에 닿기 전(+ 최소 보호 시간)에는 무적. 방울을 터트린 그 공격에 같이 맞지 않도록
+        // 개구리알에서 나와 땅에 닿기 전(+ 최소 보호 시간)에는 무적. 개구리알을 터트린 그 공격에 같이 맞지 않도록
         if (IsSpawnProtected)
         {
             return false;
@@ -418,6 +486,7 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
     private void Die()
     {
         _isDead = true;
+        StopCrawl();
         if (!_isLaunched) AudioManager.Instance?.PlaySceneEvent("Boss.BabyDeath", this);
 
         if (_deathEffect != null)
@@ -511,6 +580,7 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
         }
 
         _isLaunched = true;
+        StopCrawl();
         AudioManager.Instance?.PlaySceneEvent("Boss.BabyLaunch", this);
         _body.bodyType = RigidbodyType2D.Kinematic;
         _body.linearVelocity = Vector2.zero;
