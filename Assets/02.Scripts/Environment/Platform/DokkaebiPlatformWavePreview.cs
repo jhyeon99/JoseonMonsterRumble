@@ -31,8 +31,10 @@ public sealed class DokkaebiPlatformWavePreview : MonoBehaviour
     [SerializeField, Min(0.1f)] private float _spawnInterval = 0.8f;
     [SerializeField, Min(0f)] private float _waveInterval = 2f;
     [Header("임시 추락 테스트")]
+
     [SerializeField] private bool _testFallOnStart;
     [Header("클리어 후 스턴과 추락")]
+
     [SerializeField, Min(0f)] private float _stunPause = 0.6f;
     [SerializeField] private float _fallTiltAngle = -25f;
     [SerializeField, Min(0.01f)] private float _tiltDuration = 0.7f;
@@ -62,12 +64,15 @@ public sealed class DokkaebiPlatformWavePreview : MonoBehaviour
             StartImmediateFallTest();
             yield break;
         }
-        if (_rage == null || !_rage.isActiveAndEnabled || _platformSurface == null || _waves == null || _waves.Length != 3 ||
+
+        if (_rage == null || !_rage.isActiveAndEnabled || _platformSurface == null || _waves == null ||
+            _waves.Length != 3 ||
             !IsEnemyPrefabValid(_reserveEnemyPrefab))
         {
             Debug.LogWarning("DokkaebiPlatformWavePreview: 발판, 분노, 3웨이브 또는 보충 적 연결이 없습니다.", this);
             yield break;
         }
+
         foreach (Wave wave in _waves)
         {
             if (wave == null || wave.Enemies == null || wave.Enemies.Length == 0)
@@ -75,6 +80,7 @@ public sealed class DokkaebiPlatformWavePreview : MonoBehaviour
                 Debug.LogWarning("DokkaebiPlatformWavePreview: 비어 있는 웨이브가 있습니다.", this);
                 yield break;
             }
+
             foreach (SpawnEntry entry in wave.Enemies)
             {
                 if (entry == null || !IsEnemyPrefabValid(entry.Prefab))
@@ -84,17 +90,20 @@ public sealed class DokkaebiPlatformWavePreview : MonoBehaviour
                 }
             }
         }
+
         var player = GameObject.FindWithTag(Constants.Tags.Player);
         if (player != null)
         {
             _playerBody = player.GetComponent<Collider2D>();
             _playerHealth = player.GetComponent<PlayerHealth>();
         }
+
         if (_playerBody == null || _playerHealth == null)
         {
             Debug.LogWarning("DokkaebiPlatformWavePreview: 플레이어 Collider 또는 PlayerHealth가 없습니다.", this);
             yield break;
         }
+
         StartCoroutine(RunWaves());
     }
 
@@ -112,6 +121,7 @@ public sealed class DokkaebiPlatformWavePreview : MonoBehaviour
             if (_playerHealth.IsDead) yield break;
             yield return pollWait;
         }
+
         _rageCountAtStart = _rage.RageActivationCount;
         for (int index = 0; index < _waves.Length; index++)
         {
@@ -120,13 +130,24 @@ public sealed class DokkaebiPlatformWavePreview : MonoBehaviour
             Debug.Log($"도깨비 발판: {_currentWave}/3 웨이브 시작", this);
             foreach (SpawnEntry entry in wave.Enemies)
             {
-                if (_playerHealth.IsDead) { DestroySpawnedEnemies(); yield break; }
+                if (_playerHealth.IsDead)
+                {
+                    DestroySpawnedEnemies();
+                    yield break;
+                }
+
                 SpawnEnemy(entry.Prefab, entry.SurfaceOffset);
                 yield return new WaitForSeconds(_spawnInterval);
             }
+
             while (true)
             {
-                if (_playerHealth.IsDead) { DestroySpawnedEnemies(); yield break; }
+                if (_playerHealth.IsDead)
+                {
+                    DestroySpawnedEnemies();
+                    yield break;
+                }
+
                 UpdateAliveEnemyCount();
                 bool hasRequiredRage = _rage.RageActivationCount - _rageCountAtStart >= wave.MinimumRageCount;
                 bool isFinalWave = index == _waves.Length - 1;
@@ -138,10 +159,13 @@ public sealed class DokkaebiPlatformWavePreview : MonoBehaviour
                     _spawnReserveOnRight = !_spawnReserveOnRight;
                     SpawnEnemy(_reserveEnemyPrefab, new Vector2(_spawnReserveOnRight ? 3f : -3f, 0f));
                 }
+
                 yield return pollWait;
             }
+
             if (index < _waves.Length - 1) yield return new WaitForSeconds(_waveInterval);
         }
+
         if (!_rage.TryStartStun()) yield break;
         _isCompleted = true;
         Debug.Log("도깨비 발판: 3웨이브 방어 완료", this);
@@ -157,6 +181,7 @@ public sealed class DokkaebiPlatformWavePreview : MonoBehaviour
             Debug.LogWarning("DokkaebiPlatformWavePreview: 추락 테스트의 분노 또는 발판 연결이 없습니다.", this);
             return;
         }
+
         if (!_rage.IsStunned && !_rage.TryStartStun()) return;
         StopAllCoroutines();
         DestroySpawnedEnemies();
@@ -181,6 +206,7 @@ public sealed class DokkaebiPlatformWavePreview : MonoBehaviour
             transform.rotation = startRotation * Quaternion.AngleAxis(_fallTiltAngle * tiltProgress, Vector3.forward);
             yield return null;
         }
+
         _isFalling = false;
         gameObject.SetActive(false);
     }
@@ -202,6 +228,7 @@ public sealed class DokkaebiPlatformWavePreview : MonoBehaviour
             enemy.MoveArea.CenterOffset = new Vector2(surface.center.x - position.x, surface.max.y + 2f - position.y);
             enemy.MoveArea.AreaSize = new Vector2(Mathf.Max(1f, surface.size.x - 3f), 6f);
         }
+
         _spawnedEnemies.Add(enemy);
         _aliveEnemyCount++;
     }
@@ -217,12 +244,14 @@ public sealed class DokkaebiPlatformWavePreview : MonoBehaviour
                 _spawnedEnemies.RemoveAt(index);
                 continue;
             }
+
             if (enemy.transform.position.y < _platformSurface.bounds.max.y - 3f)
             {
                 Destroy(enemy.gameObject);
                 _spawnedEnemies.RemoveAt(index);
                 continue;
             }
+
             _aliveEnemyCount++;
         }
     }
@@ -233,6 +262,7 @@ public sealed class DokkaebiPlatformWavePreview : MonoBehaviour
         {
             if (enemy != null) Destroy(enemy.gameObject);
         }
+
         _spawnedEnemies.Clear();
         _aliveEnemyCount = 0;
     }
