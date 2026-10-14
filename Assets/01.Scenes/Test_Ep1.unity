@@ -9702,7 +9702,7 @@ MonoBehaviour:
     \uACF5\uACA9\uC744 \uB9C9\uC744 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
   _parryFinisherMessage: "\uD328\uB9C1\uC5D0 \uC131\uACF5\uD55C \uBAAC\uC2A4\uD130\uB294
     \uB178\uB797\uAC8C \uBC18\uC9DD\uC785\uB2C8\uB2E4.\nX\uB97C \uB20C\uB7EC \uB9C8\uBB34\uB9AC
-    \uACF5\uACA9\uC774 \uAC00\uB2A5\uD569\uB2C8\uB2E4."
+    \uACF5\uACA9"
   _parryZoomFactor: 0.45
   _parryZoomDuration: 0.5
   _parryReturnDuration: 0.4
@@ -31203,6 +31203,7 @@ MonoBehaviour:
   _maxX: 504
   _minY: -6
   _maxY: 3
+  _cameraViewBounds: {fileID: 0}
 --- !u!81 &470518168334494867
 AudioListener:
   m_ObjectHideFlags: 0
