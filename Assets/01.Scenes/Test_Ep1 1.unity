@@ -3229,12 +3229,12 @@ PrefabInstance:
     - target: {fileID: 1668539038824801414, guid: 02dae753a2a50bc49bc239cc07eb60a5,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 292.2
+      value: 403.09
       objectReference: {fileID: 0}
     - target: {fileID: 1668539038824801414, guid: 02dae753a2a50bc49bc239cc07eb60a5,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -13.3
+      value: -10.93
       objectReference: {fileID: 0}
     - target: {fileID: 1668539038824801414, guid: 02dae753a2a50bc49bc239cc07eb60a5,
         type: 3}
@@ -33778,6 +33778,7 @@ MonoBehaviour:
   _maxX: 504
   _minY: -6
   _maxY: 3
+  _cameraViewBounds: {fileID: 0}
 --- !u!81 &470518168334494867
 AudioListener:
   m_ObjectHideFlags: 0
@@ -48385,8 +48386,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1334980413
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 4e044b46bf755134e93f2523e14ef7fd, type: 3}

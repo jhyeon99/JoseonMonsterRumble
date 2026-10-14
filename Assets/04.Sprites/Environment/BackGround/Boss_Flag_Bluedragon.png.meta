@@ -1,0 +1,637 @@
+fileFormatVersion: 2
+guid: bc4a05d073c65d3489f5040330d0fd1f
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8608949153872897230
+    second: Boss_Flag_Bluedragon_0
+  - first:
+      213: 2856798538034075239
+    second: Boss_Flag_Bluedragon_1
+  - first:
+      213: -9041049840470853502
+    second: Boss_Flag_Bluedragon_2
+  - first:
+      213: 1960440517159525225
+    second: Boss_Flag_Bluedragon_3
+  - first:
+      213: -7719168050449195513
+    second: Boss_Flag_Bluedragon_4
+  - first:
+      213: -7436342550794637610
+    second: Boss_Flag_Bluedragon_5
+  - first:
+      213: -3657339671390470577
+    second: Boss_Flag_Bluedragon_6
+  - first:
+      213: -8047859552490143578
+    second: Boss_Flag_Bluedragon_7
+  - first:
+      213: -302354195857469831
+    second: Boss_Flag_Bluedragon_8
+  - first:
+      213: 6418909626799030658
+    second: Boss_Flag_Bluedragon_9
+  - first:
+      213: 427787833584296868
+    second: Boss_Flag_Bluedragon_10
+  - first:
+      213: -5201388644837406020
+    second: Boss_Flag_Bluedragon_11
+  - first:
+      213: 1337680891246982650
+    second: Boss_Flag_Bluedragon_12
+  - first:
+      213: 782518994643196849
+    second: Boss_Flag_Bluedragon_13
+  - first:
+      213: 8554428747600687445
+    second: Boss_Flag_Bluedragon_14
+  - first:
+      213: 1602479661428755834
+    second: Boss_Flag_Bluedragon_15
+  - first:
+      213: 2647023010662690957
+    second: Boss_Flag_Bluedragon_16
+  - first:
+      213: -2594351959214318525
+    second: Boss_Flag_Bluedragon_17
+  - first:
+      213: 2135323559852030293
+    second: Boss_Flag_Bluedragon_18
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 280
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_0
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 977
+        height: 1536
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec46efda4a1297770800000000000000
+      internalID: 8608949153872897230
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_1
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 1207
+        width: 7
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7665066622365a720800000000000000
+      internalID: 2856798538034075239
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_2
+      rect:
+        serializedVersion: 2
+        x: 961
+        y: 1204
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 288f126521db78280800000000000000
+      internalID: -9041049840470853502
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_3
+      rect:
+        serializedVersion: 2
+        x: 166
+        y: 1116
+        width: 13
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96b93947342e43b10800000000000000
+      internalID: 1960440517159525225
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_4
+      rect:
+        serializedVersion: 2
+        x: 944
+        y: 1135
+        width: 15
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70e5e675e8100e490800000000000000
+      internalID: -7719168050449195513
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_5
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 1075
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6de63c779ddccc890800000000000000
+      internalID: -7436342550794637610
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_6
+      rect:
+        serializedVersion: 2
+        x: 154
+        y: 1051
+        width: 7
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f4eb3df32f48e3dc0800000000000000
+      internalID: -3657339671390470577
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_7
+      rect:
+        serializedVersion: 2
+        x: 126
+        y: 1025
+        width: 17
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6a0479b5062405090800000000000000
+      internalID: -8047859552490143578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_8
+      rect:
+        serializedVersion: 2
+        x: 154
+        y: 1027
+        width: 7
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97e0197f572ddcbf0800000000000000
+      internalID: -302354195857469831
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_9
+      rect:
+        serializedVersion: 2
+        x: 120
+        y: 896
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28101b6fb4c841950800000000000000
+      internalID: 6418909626799030658
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_10
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 575
+        width: 21
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a3a604a4cecfe500800000000000000
+      internalID: 427787833584296868
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_11
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 599
+        width: 7
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cba47bde594f0d7b0800000000000000
+      internalID: -5201388644837406020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_12
+      rect:
+        serializedVersion: 2
+        x: 84
+        y: 577
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af5ba99eea5609210800000000000000
+      internalID: 1337680891246982650
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_13
+      rect:
+        serializedVersion: 2
+        x: 126
+        y: 511
+        width: 17
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bb14b131e01cda00800000000000000
+      internalID: 782518994643196849
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_14
+      rect:
+        serializedVersion: 2
+        x: 978
+        y: 412
+        width: 15
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 551f0256f9f67b670800000000000000
+      internalID: 8554428747600687445
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_15
+      rect:
+        serializedVersion: 2
+        x: 934
+        y: 374
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7dcf3303c62d3610800000000000000
+      internalID: 1602479661428755834
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_16
+      rect:
+        serializedVersion: 2
+        x: 974
+        y: 381
+        width: 17
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d80b5d6576d1cb420800000000000000
+      internalID: 2647023010662690957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_17
+      rect:
+        serializedVersion: 2
+        x: 903
+        y: 307
+        width: 16
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34c11b873a20ffbd0800000000000000
+      internalID: -2594351959214318525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bluedragon_18
+      rect:
+        serializedVersion: 2
+        x: 918
+        y: 314
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 559b089d67132ad10800000000000000
+      internalID: 2135323559852030293
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Boss_Flag_Bluedragon_0: 8608949153872897230
+      Boss_Flag_Bluedragon_1: 2856798538034075239
+      Boss_Flag_Bluedragon_10: 427787833584296868
+      Boss_Flag_Bluedragon_11: -5201388644837406020
+      Boss_Flag_Bluedragon_12: 1337680891246982650
+      Boss_Flag_Bluedragon_13: 782518994643196849
+      Boss_Flag_Bluedragon_14: 8554428747600687445
+      Boss_Flag_Bluedragon_15: 1602479661428755834
+      Boss_Flag_Bluedragon_16: 2647023010662690957
+      Boss_Flag_Bluedragon_17: -2594351959214318525
+      Boss_Flag_Bluedragon_18: 2135323559852030293
+      Boss_Flag_Bluedragon_2: -9041049840470853502
+      Boss_Flag_Bluedragon_3: 1960440517159525225
+      Boss_Flag_Bluedragon_4: -7719168050449195513
+      Boss_Flag_Bluedragon_5: -7436342550794637610
+      Boss_Flag_Bluedragon_6: -3657339671390470577
+      Boss_Flag_Bluedragon_7: -8047859552490143578
+      Boss_Flag_Bluedragon_8: -302354195857469831
+      Boss_Flag_Bluedragon_9: 6418909626799030658
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
