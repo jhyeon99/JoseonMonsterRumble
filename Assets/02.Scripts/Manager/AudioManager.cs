@@ -214,12 +214,20 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
     public void PlayPanelClose() => PlayUiEvent("UI.PanelClose", _uiAudioData != null ? _uiAudioData.PanelCloseClip : null, _uiAudioData != null ? _uiAudioData.PanelCloseVolume : 1f);
     public void PlaySlider() => PlayUiEvent("UI.Slider", _uiAudioData != null ? _uiAudioData.SliderTickClip : null, _uiAudioData != null ? _uiAudioData.SliderTickVolume : 1f);
 
-    public PlayHandle PlayEntityEvent(SoundSetSO set, string eventId, Component source, AudioOwnerKey owner)
+    public PlayHandle PlayEntityEvent(SoundSetSO set, string eventId, Component source, AudioOwnerKey owner, AudioClip excludedClip = null)
     {
         if (source == null || owner.IsEmpty) return PlayHandle.Empty;
         var context = new AudioContext(owner, 0, AudioLifetimeRegistry.ForScene(source.gameObject.scene), source.transform.position);
         return PlayEventCore(set, eventId, context, requiredLifetime: LifetimePolicy.Entity,
-            requiredOutput: AudioOutputGroup.Sfx);
+            requiredOutput: AudioOutputGroup.Sfx, excludedClip: excludedClip);
+    }
+
+    public PlayHandle PlayEntityLoop(SoundSetSO set, string eventId, Component source, AudioOwnerKey owner)
+    {
+        if (source == null || owner.IsEmpty) return PlayHandle.Empty;
+        var context = new AudioContext(owner, 0, AudioLifetimeRegistry.ForScene(source.gameObject.scene), source.transform.position);
+        return PlayEventCore(set, eventId, context, requiredLifetime: LifetimePolicy.Entity,
+            requiredOutput: AudioOutputGroup.Sfx, dedicatedChannel: true);
     }
 
     public PlayHandle PlaySceneEvent(string eventId, Component source)
@@ -386,6 +394,16 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
             }
             source.volume = (_isSfxMuted ? 0f : _sfxVolume) * gain;
         }
+        ApplyDedicatedSfxVolume();
+    }
+
+    private void ApplyDedicatedSfxVolume()
+    {
+        foreach (Request request in _channels.Values)
+        {
+            if (request.DedicatedChannel && request.Source != null)
+                request.Source.volume = (_isSfxMuted ? 0f : _sfxVolume) * request.Volume * request.Envelope;
+        }
     }
 
     [Header("통합 오디오")]
@@ -408,7 +426,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         public float EndFadeDuration, PlaybackElapsed;
         public float Envelope = 1f;
         public int Priority, MaxCount, StartSample;
-        public bool Loop, Bgm, Started, Paused;
+        public bool Loop, Bgm, Started, Paused, DedicatedChannel;
         public ulong MusicSequence, StartOrder;
         public AudioSource Source;
         public Coroutine Pending;
@@ -448,7 +466,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         => PlayEventCore(set, eventId, context);
 
     private PlayHandle PlayEventCore(SoundSetSO set, string eventId, AudioContext context,
-        AudioTimeMode? timeOverride = null, LifetimePolicy? requiredLifetime = null, AudioOutputGroup? requiredOutput = null)
+        AudioTimeMode? timeOverride = null, LifetimePolicy? requiredLifetime = null, AudioOutputGroup? requiredOutput = null, AudioClip excludedClip = null, bool dedicatedChannel = false)
     {
         if (this == null || _instance != this || !isActiveAndEnabled || string.IsNullOrWhiteSpace(eventId) || set == null || !set.TryGetEvent(eventId, out EventBinding binding) ||
             binding == null || !binding.Enabled || !binding.HasValidLifetime || !context.Supports(binding.LifetimePolicy) ||
@@ -499,14 +517,20 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         int count = 0;
         foreach (AudioClip clip in sound.Clips)
         {
-            if (sound.TryGetStartSample(clip, out _)) count++;
+            if (clip != excludedClip && sound.TryGetStartSample(clip, out _)) count++;
+        }
+        if (count == 0 && excludedClip != null)
+        {
+            excludedClip = null;
+            foreach (AudioClip clip in sound.Clips)
+                if (sound.TryGetStartSample(clip, out _)) count++;
         }
         if (count == 0) return PlayHandle.Empty;
         int choice = UnityEngine.Random.Range(0, count);
         AudioClip selected = null;
         foreach (AudioClip clip in sound.Clips)
         {
-            if (sound.TryGetStartSample(clip, out _) && choice-- == 0)
+            if (clip != excludedClip && sound.TryGetStartSample(clip, out _) && choice-- == 0)
             {
                 selected = clip;
                 break;
@@ -531,7 +555,8 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
             Fade = binding.BgmFadeDuration < 0f ? _defaultBgmFade : binding.BgmFadeDuration,
             Priority = Mathf.Clamp(sound.Priority, 0, 100),
             MaxCount = Mathf.Max(1, sound.MaxCount),
-            Loop = binding.Loop,
+            Loop = dedicatedChannel || binding.Loop,
+            DedicatedChannel = dedicatedChannel,
             Bgm = sound.OutputGroup == AudioOutputGroup.Bgm
         };
         AddRequest(request);
@@ -570,6 +595,8 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         request.FullVolumeDuration = Mathf.Max(0f, fullVolumeDuration);
         request.EndFadeDuration = Mathf.Max(0f, fadeDuration);
     }
+
+    public AudioClip GetHandleClip(PlayHandle handle) => IsHandleValid(handle) ? _requests[handle.RequestId].Clip : null;
 
     private bool AcceptContext(AudioContext context, LifetimePolicy lifetime)
     {
@@ -756,15 +783,23 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
                 count++;
             }
         }
-        if (count >= request.MaxCount)
+        if (!request.DedicatedChannel && count >= request.MaxCount)
         {
             StopHandle(request.Handle);
             return;
         }
         AudioSource channel = null;
+        if (request.DedicatedChannel)
+        {
+            var channelObject = new GameObject(request.EventId + " channel");
+            channelObject.transform.SetParent(transform, false);
+            channel = channelObject.AddComponent<AudioSource>();
+            channel.playOnAwake = false;
+            channel.spatialBlend = 0f;
+        }
         foreach (AudioSource source in _sfxPool)
         {
-            if (!_channels.ContainsKey(source))
+            if (channel == null && !_channels.ContainsKey(source))
             {
                 channel = source;
                 break;
@@ -775,7 +810,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
             Request victim = null;
             foreach (Request playing in _channels.Values)
             {
-                if (playing.Priority < request.Priority && (victim == null || playing.Priority < victim.Priority ||
+                if (!playing.DedicatedChannel && playing.Priority < request.Priority && (victim == null || playing.Priority < victim.Priority ||
                                 (playing.Priority == victim.Priority && playing.StartOrder < victim.StartOrder)))
                 {
                     victim = playing;
@@ -918,6 +953,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
             _channels.Remove(request.Source);
             request.Source.Stop();
             request.Source.clip = null;
+            if (request.DedicatedChannel) Destroy(request.Source.gameObject);
         }
     }
 

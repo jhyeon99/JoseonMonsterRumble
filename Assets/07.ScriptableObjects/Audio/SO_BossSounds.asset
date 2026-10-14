@@ -25,7 +25,8 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: Boss.Hurt
     DisplayName: "\uC9C1\uC811 \uACF5\uACA9 \uD53C\uD574 \uC801\uC6A9"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: 92bf2c05cac07af4b96686cdb01c9f43, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -96,9 +97,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.SummonStart
-    DisplayName: "\uB3C5 \uBC29\uC6B8 \uC18C\uD658 \uD328\uD134 \uC9C4\uC785"
+    DisplayName: "\uAC1C\uAD6C\uB9AC\uC54C \uC18C\uD658 \uD328\uD134 \uC9C4\uC785"
     Clips:
-    - {fileID: 8300000, guid: d86e5905de172da49aff8f79176d2385, type: 3}
+    - {fileID: 0}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -107,7 +108,8 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.BubblePop
-    DisplayName: "\uACF5\uACA9\uC5D0 \uC758\uD55C \uBC29\uC6B8 \uD30C\uC5F4 \uC131\uACF5"
+    DisplayName: "\uACF5\uACA9\uC5D0 \uC758\uD55C \uAC1C\uAD6C\uB9AC\uC54C \uD30C\uC5F4
+      \uC131\uACF5"
     Clips:
     - {fileID: 8300000, guid: 1fae7266dc0c4424aa138033c4b4ce1d, type: 3}
     StartOffset: 0
@@ -222,8 +224,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.BubbleSpawn
-    DisplayName: "\uB3C5 \uBC29\uC6B8 \uC6E8\uC774\uBE0C \uC0DD\uC131 \uC131\uACF5"
-    Clips: []
+    DisplayName: "\uAC1C\uAD6C\uB9AC\uC54C \uC6E8\uC774\uBE0C \uC0DD\uC131 \uC131\uACF5"
+    Clips:
+    - {fileID: 8300000, guid: d86e5905de172da49aff8f79176d2385, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -232,7 +235,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.BabySpawn
-    DisplayName: "\uBC29\uC6B8 \uD30C\uC5F4\uC5D0 \uC758\uD55C \uC62C\uCC59\uC774
+    DisplayName: "\uAC1C\uAD6C\uB9AC\uC54C \uD30C\uC5F4\uC5D0 \uC758\uD55C \uC62C\uCC59\uC774
       \uC0DD\uC131 \uC131\uACF5"
     Clips: []
     StartOffset: 0
@@ -244,7 +247,8 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: Boss.BabyHurt
     DisplayName: "\uC62C\uCC59\uC774 \uBE44\uCE58\uBA85 \uD53C\uD574 \uC801\uC6A9"
-    Clips: []
+    Clips:
+    - {fileID: 0}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -330,6 +334,52 @@ MonoBehaviour:
     OutputGroup: 0
     Priority: 20
     MaxCount: 1
+  - SoundId: Boss.GroggyHurt
+    DisplayName: "\uADF8\uB85C\uAE30 \uC0C1\uD0DC \uBCF4\uC2A4 \uD53C\uACA9"
+    Clips:
+    - {fileID: 8300000, guid: 1e8fdac24e7eb9a4186eafc81b7c6110, type: 3}
+    StartOffset: 0
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.Tail
+    DisplayName: "\uBCF4\uC2A4 \uAF2C\uB9AC \uD718\uB450\uB974\uAE30"
+    Clips:
+    - {fileID: 8300000, guid: ee23941ebe1df6f439edbec4e9803891, type: 3}
+    StartOffset: 0
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.TailImpact
+    DisplayName: "\uBCF4\uC2A4 \uAF2C\uB9AC \uACF5\uACA9 \uC2E4\uC81C \uBA85\uC911"
+    Clips:
+    - {fileID: 8300000, guid: a5caf6b81ca8a444b89857df320cd47b, type: 3}
+    StartOffset: 0
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.BabyCrawl
+    DisplayName: "\uC62C\uCC59\uC774 \uBC14\uB2E5 \uAE30\uC5B4\uB2E4\uB2C8\uAE30"
+    Clips:
+    - {fileID: 8300000, guid: fd8fc1756320eca4eb7851acaae350eb, type: 3}
+    - {fileID: 8300000, guid: f8bd42e910c52ed4b809c552839d9f03, type: 3}
+    - {fileID: 8300000, guid: 88d04012eee2b5441913a9e5cacc5fd2, type: 3}
+    StartOffset: 0
+    Volume: 0.2
+    PitchMin: 0.95
+    PitchMax: 1.05
+    OutputGroup: 0
+    Priority: 20
+    MaxCount: 3
   _events:
   - EventId: Boss.Intro
     Enabled: 1
@@ -430,7 +480,7 @@ MonoBehaviour:
   - EventId: Boss.SummonStart
     Enabled: 1
     SoundId: Boss.SummonStart
-    TriggerDescription: "\uB3C5 \uBC29\uC6B8 \uC18C\uD658 \uD328\uD134 \uC9C4\uC785"
+    TriggerDescription: "\uAC1C\uAD6C\uB9AC\uC54C \uC18C\uD658 \uD328\uD134 \uC9C4\uC785"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -442,8 +492,8 @@ MonoBehaviour:
   - EventId: Boss.BubblePop
     Enabled: 1
     SoundId: Boss.BubblePop
-    TriggerDescription: "\uACF5\uACA9\uC5D0 \uC758\uD55C \uBC29\uC6B8 \uD30C\uC5F4
-      \uC131\uACF5"
+    TriggerDescription: "\uACF5\uACA9\uC5D0 \uC758\uD55C \uAC1C\uAD6C\uB9AC\uC54C
+      \uD30C\uC5F4 \uC131\uACF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -581,7 +631,8 @@ MonoBehaviour:
   - EventId: Boss.BubbleSpawn
     Enabled: 1
     SoundId: Boss.BubbleSpawn
-    TriggerDescription: "\uB3C5 \uBC29\uC6B8 \uC6E8\uC774\uBE0C \uC0DD\uC131 \uC131\uACF5"
+    TriggerDescription: "\uAC1C\uAD6C\uB9AC\uC54C \uC6E8\uC774\uBE0C \uC0DD\uC131
+      \uC131\uACF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -593,8 +644,8 @@ MonoBehaviour:
   - EventId: Boss.BabySpawn
     Enabled: 1
     SoundId: Boss.BabySpawn
-    TriggerDescription: "\uBC29\uC6B8 \uD30C\uC5F4\uC5D0 \uC758\uD55C \uC62C\uCC59\uC774
-      \uC0DD\uC131 \uC131\uACF5"
+    TriggerDescription: "\uAC1C\uAD6C\uB9AC\uC54C \uD30C\uC5F4\uC5D0 \uC758\uD55C
+      \uC62C\uCC59\uC774 \uC0DD\uC131 \uC131\uACF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -681,8 +732,8 @@ MonoBehaviour:
   - EventId: Boss.Footstep
     Enabled: 1
     SoundId: Boss.Footstep
-    TriggerDescription: "\uAE30\uBCF8 \uC774\uB3D9\xB7\uD6C4\uD1F4 \uC810\uD504\uC758
-      \uC2E4\uC81C \uCC29\uC9C0\uB9C8\uB2E4 1\uD68C"
+    TriggerDescription: "\uC774\uB3D9\xB7\uD6C4\uD1F4\xB7\uCC0D\uAE30\xB7\uC18C\uD658
+      \uC810\uD504\uC758 \uC2E4\uC81C \uCC29\uC9C0\uB9C8\uB2E4 1\uD68C"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -704,3 +755,55 @@ MonoBehaviour:
     IntervalScope: 0
     BgmFadeDuration: -1
     LoopEndRule: 
+  - EventId: Boss.GroggyHurt
+    Enabled: 1
+    SoundId: Boss.GroggyHurt
+    TriggerDescription: "\uADF8\uB85C\uAE30 \uC0C1\uD0DC\uC5D0\uC11C \uC2E4\uC81C
+      \uD53C\uD574\uB97C \uBC1B\uC744 \uB54C"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.Tail
+    Enabled: 1
+    SoundId: Boss.Tail
+    TriggerDescription: "\uAF2C\uB9AC \uD718\uB450\uB974\uAE30 \uD310\uC815 \uC2DC\uC791"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.TailImpact
+    Enabled: 1
+    SoundId: Boss.TailImpact
+    TriggerDescription: "\uAF2C\uB9AC\uAC00 \uD50C\uB808\uC774\uC5B4\uC5D0\uAC8C
+      \uC2E4\uC81C \uD53C\uD574\uB97C \uC900 \uC21C\uAC04"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.BabyCrawl
+    Enabled: 1
+    SoundId: Boss.BabyCrawl
+    TriggerDescription: "\uAC01 \uC62C\uCC59\uC774\uAC00 \uBC14\uB2E5\uC5D0 \uC788\uB294
+      \uB3D9\uC548 \uB79C\uB364 \uC74C\uC6D0 1\uAC1C\uB97C \uACC4\uC18D \uBC18\uBCF5"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 1
+    Loop: 1
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: "\uACF5\uC911 \uC9C4\uC785 / \uB0A0\uB824 \uBCF4\uB0B4\uAE30 / \uC0AC\uB9DD
+      / \uBE44\uD65C\uC131\uD654"

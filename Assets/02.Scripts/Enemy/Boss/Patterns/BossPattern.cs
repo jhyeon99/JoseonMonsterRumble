@@ -88,6 +88,16 @@ public abstract class BossPattern : MonoBehaviour
 
     protected void AudioAction(string eventId) => OnAudioCue?.Invoke(this, eventId, transform.position, false);
     protected void AudioResult(string eventId, Vector3 position) => OnAudioCue?.Invoke(this, eventId, position, true);
+    protected bool PlayLandingFootstep(float remainingTime, bool played)
+    {
+        if (played) return true;
+        float lead = AudioManager.Instance?.Catalog?.BossFootstepLeadTime ?? 0f;
+        if (remainingTime > Mathf.Max(0f, lead)) return false;
+        AudioResult("Boss.Footstep", Boss.Position);
+        AudioResult("Boss.LandingBreak", Boss.Position);
+        return true;
+    }
+
     private int _patternStateHash;
 
     protected Boss Boss { get; private set; }
