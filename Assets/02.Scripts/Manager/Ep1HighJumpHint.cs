@@ -11,7 +11,6 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
     [SerializeField] private Sprite _cKey;
     [SerializeField] private Sprite _spaceKey;
     [SerializeField, Min(0.1f)] private float _triggerDistance = 3f;
-    [SerializeField, Min(0.1f)] private float _holdDuration = 0.3f;
     [SerializeField] private Vector2 _headOffset = new Vector2(0f, 95f);
     private Ep1TutorialManager _tutorialManager;
     private Ep1TutorialHintType _hintType;
@@ -29,7 +28,6 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
     private bool _shown;
     private bool _jumpStarted;
     private bool _heldLongEnough;
-    private float _heldTime;
     private float _displayElapsed;
     private bool IsTalismanHint => _hintType == Ep1TutorialHintType.TalismanTap ||
         _hintType == Ep1TutorialHintType.TalismanCharge;
@@ -182,7 +180,6 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
                 _shown = false;
                 _jumpStarted = false;
                 _heldLongEnough = false;
-                _heldTime = 0f;
                 return;
             }
             FinishHint();
@@ -237,22 +234,17 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
             }
             return;
         }
+        // 판정은 실제 점프 높이와 같은 기준 (PlayerMovement가 높은 점프로 확정했는지).
+        // 점프 도중에 힌트가 떠도 이번 점프의 결과를 그대로 읽으므로 놓치지 않음
         bool jumping = _player.StateMachine.CurrentState == _player.JumpState;
         if (jumping && !_jumpStarted)
         {
             _jumpStarted = true;
             _heldLongEnough = false;
-            _heldTime = 0f;
         }
-        if (_jumpStarted && jumping && !_player.IsGrounded && StageJumpInput.IsHeld)
+        if (_jumpStarted && jumping && _player.Movement.IsLongJump)
         {
-            _heldTime += Time.deltaTime;
-            float holdDuration = _tutorialManager != null ? _tutorialManager.HoldDuration : _holdDuration;
-            if (_heldTime >= holdDuration) _heldLongEnough = true;
-        }
-        else if (_jumpStarted && !_heldLongEnough)
-        {
-            _heldTime = 0f;
+            _heldLongEnough = true;
         }
         if (_jumpStarted && !jumping && _player.IsGrounded)
         {
