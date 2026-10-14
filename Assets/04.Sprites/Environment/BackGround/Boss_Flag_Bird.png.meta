@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: acf018446d9f08e4793b59889b9363f5
+guid: 12c959f286bd00542b302d48dace05ba
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4075896152856075722
-    second: Boss_Flag_0
+      213: 1371602397810980640
+    second: Boss_Flag_Bird_0
+  - first:
+      213: 3148200500916057710
+    second: Boss_Flag_Bird_1
+  - first:
+      213: -8158341724133143657
+    second: Boss_Flag_Bird_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +57,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 300
+  spritePixelsToUnits: 280
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -126,13 +132,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Boss_Flag_0
+      name: Boss_Flag_Bird_0
       rect:
         serializedVersion: 2
-        x: 40
+        x: 0
         y: 0
-        width: 878
-        height: 1643
+        width: 1015
+        height: 1536
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +147,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: acd1e5cb4fd709830800000000000000
-      internalID: 4075896152856075722
+      spriteID: 027f89e1d19e80310800000000000000
+      internalID: 1371602397810980640
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bird_1
+      rect:
+        serializedVersion: 2
+        x: 902
+        y: 1030
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e66fecafca7a0bb20800000000000000
+      internalID: 3148200500916057710
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Boss_Flag_Bird_2
+      rect:
+        serializedVersion: 2
+        x: 974
+        y: 837
+        width: 9
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79bcbc83d6fb7ce80800000000000000
+      internalID: -8158341724133143657
       vertices: []
       indices: 
       edges: []
@@ -161,7 +211,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Boss_Flag_0: 4075896152856075722
+      Boss_Flag_Bird_0: 1371602397810980640
+      Boss_Flag_Bird_1: 3148200500916057710
+      Boss_Flag_Bird_2: -8158341724133143657
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
