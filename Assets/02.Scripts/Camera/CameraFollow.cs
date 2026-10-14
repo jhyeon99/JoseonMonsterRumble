@@ -25,6 +25,44 @@ public class CameraFollow : MonoBehaviour
     [SerializeField]
     private float _maxY = 10f;
 
+    [Tooltip("연출 중에도 화면 전체가 안에 머물러야 할 배경. 비우면 기존 연출 이동 유지")]
+    [SerializeField] private SpriteRenderer _cameraViewBounds;
+
+    public Vector3 ConstrainCameraEffectPosition(Vector3 basePosition, Vector3 effectOffset, Camera camera)
+    {
+        if (_cameraViewBounds == null || camera == null || !camera.orthographic)
+            return basePosition + effectOffset;
+
+        Bounds bounds = _cameraViewBounds.bounds;
+        Vector3 right = camera.transform.right;
+        Vector3 up = camera.transform.up;
+        float halfWidth = camera.orthographicSize * (Mathf.Abs(right.x) * camera.aspect + Mathf.Abs(up.x));
+        float halfHeight = camera.orthographicSize * (Mathf.Abs(right.y) * camera.aspect + Mathf.Abs(up.y));
+        float minX = bounds.min.x + halfWidth;
+        float maxX = bounds.max.x - halfWidth;
+        float minY = bounds.min.y + halfHeight;
+        float maxY = bounds.max.y - halfHeight;
+
+        // 기준 위치는 그대로 두고 경계 방향의 연출 이동만 부드럽게 줄인다.
+        Vector3 position = basePosition;
+        position.x = minX <= maxX ? Mathf.Clamp(position.x, minX, maxX) : bounds.center.x;
+        position.y = minY <= maxY ? Mathf.Clamp(position.y, minY, maxY) : bounds.center.y;
+        position.x += LimitEffectOffset(effectOffset.x, effectOffset.x >= 0f ? maxX - position.x : position.x - minX);
+        position.y += LimitEffectOffset(effectOffset.y, effectOffset.y >= 0f ? maxY - position.y : position.y - minY);
+        position.z += effectOffset.z;
+        return position;
+    }
+
+    private static float LimitEffectOffset(float offset, float availableDistance)
+    {
+        if (availableDistance <= 0f) return 0f;
+        float magnitude = Mathf.Abs(offset);
+        float softStart = availableDistance * 0.5f;
+        if (magnitude <= softStart) return offset;
+        float excess = magnitude - softStart;
+        return Mathf.Sign(offset) * (softStart + softStart * excess / (softStart + excess));
+    }
+
 
     private Vector3 _velocity = Vector3.zero;
 

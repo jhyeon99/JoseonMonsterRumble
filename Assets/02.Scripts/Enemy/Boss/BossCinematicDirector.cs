@@ -114,6 +114,9 @@ public class BossCinematicDirector : MonoBehaviour
     [SerializeField, Min(1f)]
     private float _titleFontSize = 84f;
 
+    [SerializeField] private Sprite _titleSprite;
+    [SerializeField] private Vector2 _titleImageSize = new Vector2(520f, 390f);
+
     [SerializeField, Min(1f)]
     private float _subtitleFontSize = 34f;
 
@@ -137,6 +140,19 @@ public class BossCinematicDirector : MonoBehaviour
 
     [SerializeField]
     private bool _letterboxOnDefeat = true;
+
+    [Header("먹칠 레터박스")]
+    [SerializeField] private Sprite _topEdgeBrush;
+    [SerializeField] private Sprite _bottomEdgeBrush;
+    [SerializeField, Range(0f, 0.1f)] private float _letterboxEdgeHeight = 0.035f;
+    [Tooltip("붓자국 중 검은 띠 밖으로 드러나는 비율")]
+    [SerializeField, Range(0f, 1f)] private float _letterboxEdgeProtrusion = 0.8f;
+    [SerializeField, Min(0.01f)] private float _defeatLetterboxTime = 0.2f;
+
+    [Header("이름 배경 먹자국")]
+    [SerializeField] private Sprite _titleInkBrush;
+    [SerializeField] private Vector2 _titleInkSize = new Vector2(620f, 140f);
+    [SerializeField, Range(0f, 1f)] private float _titleInkOpacity = 0.85f;
 
     [Header("2페이즈 (하울링)")]
     [SerializeField]
@@ -215,6 +231,22 @@ public class BossCinematicDirector : MonoBehaviour
     [SerializeField, Min(0.01f)]
     private float _clearFadeOut = 0.6f;
 
+    [Header("격파 이미지와 먹자국")]
+    [SerializeField] private Sprite _clearSprite;
+    [SerializeField] private Sprite _clearInkBrush;
+    [SerializeField] private Vector2 _clearImageSize = new Vector2(720f, 540f);
+    [SerializeField] private Vector2 _clearInkSize = new Vector2(1020f, 480f);
+    [SerializeField, Range(0f, 1f)] private float _clearInkOpacity = 0.9f;
+    [SerializeField, Min(0.01f)] private float _clearInkRevealTime = 0.15f;
+    [SerializeField, Min(1f)] private float _clearStampScale = 1.15f;
+    [SerializeField, Min(0f)] private float _clearStampOffset = 24f;
+    [SerializeField, Range(0.1f, 0.9f)] private float _clearImpactRatio = 0.65f;
+    [SerializeField, Range(0.8f, 1f)] private float _clearStampLandingScale = 0.96f;
+    [SerializeField] private CameraShakeSettings _clearStampShake = new CameraShakeSettings(0.08f, 0.1f);
+    [SerializeField, Range(0f, 1f)] private float _clearStampFlashAlpha = 0.08f;
+    [SerializeField, Min(0.01f)] private float _clearStampFlashDuration = 0.08f;
+
+
     [Tooltip("처치 연출이 모두 끝나고 조작이 풀릴 때 (스테이지 클리어 / 다음 씬 연결용)")]
     [SerializeField]
     private UnityEvent _onDefeatSequenceFinished;
@@ -238,6 +270,9 @@ public class BossCinematicDirector : MonoBehaviour
     private Coroutine _defeatRoutine;
     private bool _isDefeatFinished;
     private CanvasGroup _clearGroup;
+    private CanvasGroup _clearInkGroup;
+    private CanvasGroup _clearArtworkGroup;
+    private RectTransform _clearArtwork;
     private bool _isSlowMotion;
 
     private void Awake()
@@ -284,6 +319,13 @@ public class BossCinematicDirector : MonoBehaviour
 
     private void OnDisable()
     {
+        StopAllCoroutines();
+        _letterboxRoutine = null;
+        _defeatRoutine = null;
+        if (_topBar != null && _bottomBar != null) ApplyLetterbox(0f);
+        if (_titleGroup != null) _titleGroup.alpha = 0f;
+        if (_clearGroup != null) _clearGroup.alpha = 0f;
+        if (_flashImage != null) SetImageAlpha(_flashImage, _flashColor, 0f);
         Boss.OnFightStarted -= HandleFightStarted;
         Boss.OnDefeated -= HandleDefeated;
 
@@ -405,7 +447,7 @@ public class BossCinematicDirector : MonoBehaviour
 
     private IEnumerator TitleRoutine()
     {
-        yield return Wait(_titleDelay);
+        yield return Wait(Mathf.Max(_titleDelay, _letterboxTime));
         yield return FadeCanvasGroup(_titleGroup, 0f, 1f, _titleFadeIn);
         yield return Wait(_titleHold);
         yield return FadeCanvasGroup(_titleGroup, 1f, 0f, _titleFadeOut);
@@ -443,11 +485,6 @@ public class BossCinematicDirector : MonoBehaviour
         StartCoroutine(SlowMotionRoutine());
         // BossAudio requests Boss.Defeat once when defeat is confirmed.
 
-        if (_letterboxOnDefeat)
-        {
-            SetLetterbox(true);
-        }
-
         // BossAudio owns defeat music so this routine cannot cancel Music.Victory.
 
         StartCoroutine(TintRoutine(false));
@@ -459,11 +496,29 @@ public class BossCinematicDirector : MonoBehaviour
             yield return null;
         }
 
+        yield return PlayClearPresentation();
+        UnlockPlayer();
+        _defeatRoutine = null;
+        _onDefeatSequenceFinished?.Invoke();
+    }
+
+    private IEnumerator PlayClearPresentation()
+    {
+        if (_letterboxOnDefeat)
+        {
+            SetLetterbox(true, _defeatLetterboxTime);
+            yield return Wait(_defeatLetterboxTime);
+        }
+
         // 클리어 문구
         if (_clearGroup != null)
         {
             // BossAudio requests Music.Victory once when defeat is confirmed.
-            yield return FadeCanvasGroup(_clearGroup, 0f, 1f, _clearFadeIn);
+            _clearGroup.alpha = 1f;
+            _clearArtworkGroup.alpha = 0f;
+            if (_clearInkGroup != null)
+                yield return FadeCanvasGroup(_clearInkGroup, 0f, 1f, _clearInkRevealTime);
+            yield return AnimateClearStamp();
             yield return Wait(_clearHold);
             yield return FadeCanvasGroup(_clearGroup, 1f, 0f, _clearFadeOut);
         }
@@ -471,11 +526,39 @@ public class BossCinematicDirector : MonoBehaviour
         if (_letterboxOnDefeat)
         {
             SetLetterbox(false);
+            yield return Wait(_letterboxTime);
         }
+    }
 
-        UnlockPlayer();
-        _defeatRoutine = null;
-        _onDefeatSequenceFinished?.Invoke();
+    private IEnumerator AnimateClearStamp()
+    {
+        float elapsed = 0f;
+        bool hasPlayedImpact = false;
+        while (elapsed < _clearFadeIn)
+        {
+            elapsed += DeltaTime();
+            float progress = Mathf.Clamp01(elapsed / Mathf.Max(0.01f, _clearFadeIn));
+            float impactRatio = Mathf.Clamp(_clearImpactRatio, 0.1f, 0.9f);
+            float approach = Mathf.Clamp01(progress / impactRatio);
+            float ease = 1f - Mathf.Pow(1f - approach, 3f);
+            float scale = progress < impactRatio
+                ? Mathf.Lerp(_clearStampScale, _clearStampLandingScale, ease)
+                : Mathf.Lerp(_clearStampLandingScale, 1f, Mathf.SmoothStep(0f, 1f, (progress - impactRatio) / (1f - impactRatio)));
+            _clearArtworkGroup.alpha = Mathf.Clamp01(progress / 0.2f);
+            _clearArtwork.localScale = Vector3.one * scale;
+            _clearArtwork.anchoredPosition = new Vector2(0f, 20f + _clearStampOffset * (1f - ease));
+            if (!hasPlayedImpact && progress >= impactRatio)
+            {
+                hasPlayedImpact = true;
+                CameraShake.Shake(_clearStampShake);
+                if (_clearStampFlashAlpha > 0f)
+                    StartCoroutine(FlashRoutine(Color.white, _clearStampFlashAlpha, _clearStampFlashDuration));
+            }
+            yield return null;
+        }
+        _clearArtworkGroup.alpha = 1f;
+        _clearArtwork.localScale = Vector3.one;
+        _clearArtwork.anchoredPosition = new Vector2(0f, 20f);
     }
 
     private IEnumerator FlashRoutine(Color color, float peakAlpha, float duration)
@@ -692,6 +775,8 @@ public class BossCinematicDirector : MonoBehaviour
 
         _topBar = CreateImage("LetterboxTop", canvasObject.transform, Color.black).rectTransform;
         _bottomBar = CreateImage("LetterboxBottom", canvasObject.transform, Color.black).rectTransform;
+        CreateLetterboxEdge(_topBar, _topEdgeBrush, true);
+        CreateLetterboxEdge(_bottomBar, _bottomEdgeBrush, false);
         ApplyLetterbox(0f);
 
         var titleObject = new GameObject("Title", typeof(RectTransform), typeof(CanvasGroup));
@@ -706,15 +791,31 @@ public class BossCinematicDirector : MonoBehaviour
         _titleGroup.interactable = false;
 
         string title = string.IsNullOrEmpty(_title) ? _boss.BossName : _title;
-        CreateText("Name", titleRect, title, _titleFontSize, new Vector2(0f, -20f));
+        if (_titleInkBrush != null)
+            CreateBrushImage("NameInk", titleRect, _titleInkBrush, _titleInkSize, new Vector2(0f, -20f), _titleInkOpacity);
+        if (_titleSprite != null)
+        {
+            Image nameImage = CreateImage("Name", titleRect, Color.white);
+            nameImage.sprite = _titleSprite;
+            nameImage.preserveAspect = true;
+            RectTransform rect = nameImage.rectTransform;
+            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = _titleImageSize;
+            rect.anchoredPosition = new Vector2(0f, -20f);
+        }
+        else
+        {
+            CreateText("Name", titleRect, title, _titleFontSize, new Vector2(0f, -20f));
+        }
 
         if (!string.IsNullOrEmpty(_subtitle))
         {
-            CreateText("Subtitle", titleRect, _subtitle, _subtitleFontSize, new Vector2(0f, 50f));
+            float subtitleY = _titleSprite != null ? _titleImageSize.y * 0.5f + 30f : 50f;
+            CreateText("Subtitle", titleRect, _subtitle, _subtitleFontSize, new Vector2(0f, subtitleY));
         }
 
         // 클리어 문구
-        if (!string.IsNullOrEmpty(_clearText))
+        if (_clearSprite != null || !string.IsNullOrEmpty(_clearText))
         {
             var clearObject = new GameObject("ClearTitle", typeof(RectTransform), typeof(CanvasGroup));
             clearObject.transform.SetParent(canvasObject.transform, false);
@@ -726,12 +827,41 @@ public class BossCinematicDirector : MonoBehaviour
             _clearGroup.alpha = 0f;
             _clearGroup.blocksRaycasts = false;
             _clearGroup.interactable = false;
+            if (_clearInkBrush != null)
+            {
+                Image ink = CreateBrushImage("ClearInk", clearRect, _clearInkBrush, _clearInkSize, new Vector2(0f, 20f), _clearInkOpacity);
+                _clearInkGroup = ink.gameObject.AddComponent<CanvasGroup>();
+                _clearInkGroup.alpha = 0f;
+                _clearInkGroup.blocksRaycasts = false;
+                _clearInkGroup.interactable = false;
+            }
 
-            CreateText("Clear", clearRect, _clearText, _clearFontSize, new Vector2(0f, 20f)).color = _clearColor;
+            var artworkObject = new GameObject("ClearArtwork", typeof(RectTransform), typeof(CanvasGroup));
+            artworkObject.transform.SetParent(clearRect, false);
+            _clearArtwork = (RectTransform)artworkObject.transform;
+            _clearArtwork.anchorMin = _clearArtwork.anchorMax = new Vector2(0.5f, 0.5f);
+            _clearArtwork.sizeDelta = _clearSprite != null ? _clearImageSize : new Vector2(1000f, _clearFontSize * 1.4f);
+            _clearArtwork.anchoredPosition = new Vector2(0f, 20f);
+            _clearArtworkGroup = artworkObject.GetComponent<CanvasGroup>();
+            _clearArtworkGroup.alpha = 0f;
+            _clearArtworkGroup.blocksRaycasts = false;
+            _clearArtworkGroup.interactable = false;
+            if (_clearSprite != null)
+            {
+                Image clearImage = CreateImage("Clear", _clearArtwork, Color.white);
+                clearImage.sprite = _clearSprite;
+                clearImage.preserveAspect = true;
+                Stretch(clearImage.rectTransform, Vector2.zero, Vector2.one);
+            }
+            else
+            {
+                CreateText("Clear", _clearArtwork, _clearText, _clearFontSize, Vector2.zero).color = _clearColor;
+            }
 
             if (!string.IsNullOrEmpty(_clearSubtext))
             {
-                CreateText("ClearSub", clearRect, _clearSubtext, _subtitleFontSize, new Vector2(0f, -70f));
+                float subtitleY = _clearSprite != null ? -_clearImageSize.y * 0.5f - 50f : -70f;
+                CreateText("ClearSub", clearRect, _clearSubtext, _subtitleFontSize, new Vector2(0f, subtitleY));
             }
         }
     }
@@ -744,6 +874,30 @@ public class BossCinematicDirector : MonoBehaviour
         image.color = color;
         image.raycastTarget = false;
         return image;
+    }
+
+    private static Image CreateBrushImage(string objectName, RectTransform parent, Sprite sprite, Vector2 size, Vector2 offset, float opacity)
+    {
+        Image image = CreateImage(objectName, parent, new Color(0f, 0f, 0f, opacity));
+        image.sprite = sprite;
+        RectTransform rect = image.rectTransform;
+        rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.sizeDelta = size;
+        rect.anchoredPosition = offset;
+        return image;
+    }
+
+    private void CreateLetterboxEdge(RectTransform parent, Sprite brush, bool top)
+    {
+        if (brush == null) return;
+        Image image = CreateImage("InkEdge", parent, Color.black);
+        image.sprite = brush;
+        float ratio = _letterboxEdgeHeight / Mathf.Max(0.001f, _letterboxHeight);
+        float protrusion = Mathf.Clamp01(_letterboxEdgeProtrusion);
+        Stretch(image.rectTransform,
+            new Vector2(0f, top ? -ratio * protrusion : 1f - ratio * (1f - protrusion)),
+            new Vector2(1f, top ? ratio * (1f - protrusion) : 1f + ratio * protrusion));
+        if (!top) image.rectTransform.localScale = new Vector3(-1f, -1f, 1f);
     }
 
     private TextMeshProUGUI CreateText(string objectName, RectTransform parent, string text, float size, Vector2 offset)
@@ -785,25 +939,25 @@ public class BossCinematicDirector : MonoBehaviour
         image.color = color;
     }
 
-    private void SetLetterbox(bool show)
+    private void SetLetterbox(bool show, float duration = -1f)
     {
         if (_letterboxRoutine != null)
         {
             StopCoroutine(_letterboxRoutine);
         }
 
-        _letterboxRoutine = StartCoroutine(LetterboxRoutine(show ? 1f : 0f));
+        _letterboxRoutine = StartCoroutine(LetterboxRoutine(show ? 1f : 0f, duration > 0f ? duration : _letterboxTime));
     }
 
-    private IEnumerator LetterboxRoutine(float target)
+    private IEnumerator LetterboxRoutine(float target, float duration)
     {
         float start = _letterboxAmount;
         float elapsed = 0f;
 
-        while (elapsed < _letterboxTime)
+        while (elapsed < duration)
         {
             elapsed += DeltaTime();
-            ApplyLetterbox(Mathf.Lerp(start, target, Mathf.SmoothStep(0f, 1f, elapsed / _letterboxTime)));
+            ApplyLetterbox(Mathf.Lerp(start, target, Mathf.SmoothStep(0f, 1f, elapsed / Mathf.Max(0.01f, duration))));
             yield return null;
         }
 
@@ -814,9 +968,9 @@ public class BossCinematicDirector : MonoBehaviour
     private void ApplyLetterbox(float amount)
     {
         _letterboxAmount = amount;
-        float height = _letterboxHeight * amount;
-        Stretch(_topBar, new Vector2(0f, 1f - height), Vector2.one);
-        Stretch(_bottomBar, Vector2.zero, new Vector2(1f, height));
+        float displacement = (_letterboxHeight + _letterboxEdgeHeight) * (1f - amount);
+        Stretch(_topBar, new Vector2(0f, 1f - _letterboxHeight + displacement), new Vector2(1f, 1f + displacement));
+        Stretch(_bottomBar, new Vector2(0f, -displacement), new Vector2(1f, _letterboxHeight - displacement));
     }
 
     private static IEnumerator FadeCanvasGroup(CanvasGroup group, float from, float to, float duration)

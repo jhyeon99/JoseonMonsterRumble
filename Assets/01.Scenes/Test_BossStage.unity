@@ -6830,6 +6830,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: PF_Camera
       objectReference: {fileID: 0}
+    - target: {fileID: 3058435715441207292, guid: 32e10db0df569104491554a680a0f3ff,
+        type: 3}
+      propertyPath: _cameraViewBounds
+      value: 
+      objectReference: {fileID: 2075978237}
     - target: {fileID: 6023677078052103037, guid: 32e10db0df569104491554a680a0f3ff,
         type: 3}
       propertyPath: m_Antialiasing

@@ -280,6 +280,7 @@ public class BossSummonPattern : BossPattern
     // 발판 전환과 소환 위치로 이동을 동시에 시작하고, 도착한 뒤 준비 완료를 확인한다.
     protected override bool ShouldWaitForPlatformsBeforePreparation => false;
     public override bool BlocksDirectDamage => _blockDirectDamage && _isRunning;
+    public override bool BlocksOutgoingDamage => true;
 
     /// <summary>점프 중에는 접촉 데미지 끔</summary>
     public override bool DisablesContactDamage =>
