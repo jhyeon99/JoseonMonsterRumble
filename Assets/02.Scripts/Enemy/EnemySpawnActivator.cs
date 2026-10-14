@@ -70,6 +70,12 @@ public class EnemySpawnActivator : MonoBehaviour
             if (enemy == null)
                 continue;
 
+            if (enemy.IsSpawnBlocked)
+            {
+                if (enemy.gameObject.activeSelf) enemy.gameObject.SetActive(false);
+                continue;
+            }
+
             // 사망했거나 마무리 공격으로 날아가는 적은 제외
             if (enemy.IsDefeated)
                 continue;

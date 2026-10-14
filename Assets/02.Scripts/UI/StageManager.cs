@@ -196,6 +196,7 @@ public sealed class StageManager : MonoBehaviour
         }
 
         _activeCheckpointId = point.CheckpointId;
+        ClearEnemiesBehind(point.gameObject.scene, point);
         if (_playerHealth != null)
         {
             _playerHealth.RefillPotions();
@@ -498,13 +499,13 @@ public sealed class StageManager : MonoBehaviour
         }
     }
 
-    // 씬 로드 직후(적의 Start 전)에 호출되어야 EnemyManager에 등록되기 전에 꺼짐
+    // 체크포인트 저장 직후와 해당 체크포인트에서 부활할 때 뒤쪽 적의 스폰을 차단한다.
     private void ClearEnemiesBehind(Scene scene, RespawnPoint point)
     {
         float limitX = point.Position.x + _enemyClearOffsetX;
 
         Enemy[] enemies = FindObjectsByType<Enemy>(
-            FindObjectsInactive.Exclude,
+            FindObjectsInactive.Include,
             FindObjectsSortMode.None
         );
 
@@ -518,8 +519,8 @@ public sealed class StageManager : MonoBehaviour
 
             if (enemy.transform.position.x < limitX)
             {
-                // Destroy나 사망 처리 대신 비활성화 (아이템 드롭 등 사망 로직이 돌지 않도록)
-                enemy.gameObject.SetActive(false);
+                // 사망 처리 없이 스폰을 차단하여 카메라가 가까워져도 다시 켜지지 않게 한다.
+                enemy.BlockSpawn();
             }
         }
     }
