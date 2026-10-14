@@ -97,7 +97,7 @@ public class ItemPool : MonoBehaviour
 
     private void HandleEnemyHit(HitData hitData)
     {
-        SpawnHitSoul(hitData.HitPoint, hitData.IsHeavyImpact);
+        SpawnHitSoul(hitData.HitPoint, hitData.IsHeavyImpact, hitData.SoulAmountMultiplier, hitData.SoulScaleMultiplier);
     }
 
     private void InitPool()
@@ -190,8 +190,16 @@ public class ItemPool : MonoBehaviour
 
     public void SpawnHitSoul(Vector2 hitPosition, bool isHeavy)
     {
-        float amount = isHeavy ? 0.35f : 0.15f;
-        float scale = isHeavy ? 1.85f : 0.95f;
+        SpawnHitSoul(hitPosition, isHeavy, 1f, 1f);
+    }
+
+    /// <summary>타격 소울 1개. amountMultiplier / scaleMultiplier는 맞은 쪽이 지정한 배율 (0 이하면 1배)</summary>
+    public void SpawnHitSoul(Vector2 hitPosition, bool isHeavy, float amountMultiplier, float scaleMultiplier)
+    {
+        if (amountMultiplier <= 0f) amountMultiplier = 1f;
+        if (scaleMultiplier <= 0f) scaleMultiplier = 1f;
+        float amount = (isHeavy ? 0.35f : 0.15f) * amountMultiplier;
+        float scale = (isHeavy ? 1.85f : 0.95f) * scaleMultiplier;
         Color color = GetRandomSoulColor();
 
         Vector2 randomDir = (Vector2.up * 1.5f + Random.insideUnitCircle * 1.2f).normalized;
