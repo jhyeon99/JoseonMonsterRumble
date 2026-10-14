@@ -282,6 +282,23 @@ public sealed class StageManager : MonoBehaviour
     }
 
     /// <summary>누구에게 무엇을 맞아 죽었는지 (공격자를 모르면 공격 이름만)</summary>
+    [Tooltip("사망 화면을 넘길 때 사망 음악이 사라지는 시간 (초)")]
+    [SerializeField, Min(0f)]
+    private float _deathMusicStopFade = 0.15f;
+
+    private void StopDeathSounds()
+    {
+        if (_playerHealth != null && _playerHealth.TryGetComponent(out PlayerAudio playerAudio))
+        {
+            playerAudio.StopDeathSound();
+        }
+
+        if (AudioManager.ExistingInstance != null)
+        {
+            AudioManager.ExistingInstance.StopBgm(_deathMusicStopFade);
+        }
+    }
+
     private static string BuildDeathLog(HitData hit)
     {
         string attackName = string.IsNullOrWhiteSpace(hit.AttackName) ? "알 수 없는 공격" : hit.AttackName;
@@ -348,6 +365,9 @@ public sealed class StageManager : MonoBehaviour
                 _deathScreen.SetCauseOfDeath(causeOfDeath);
                 yield return _deathScreen.FadeIn();
                 yield return _deathScreen.WaitForRestartInput();
+
+                // 사망 화면을 넘기면 사망 소리 / 사망 음악을 바로 끊음
+                StopDeathSounds();
             }
             else if (waitForDeath)
             {
