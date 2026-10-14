@@ -175,7 +175,6 @@ public sealed class DokkaebiPlatformWavePreview : MonoBehaviour
     [ContextMenu("테스트/즉시 스턴 추락")]
     public void StartImmediateFallTest()
     {
-        _isCompleted = true;
         if (!Application.isPlaying || _isFalling) return;
         if (_rage == null || _platformSurface == null)
         {

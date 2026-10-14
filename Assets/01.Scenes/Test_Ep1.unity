@@ -35885,6 +35885,7 @@ MonoBehaviour:
   _maxX: 504
   _minY: -6
   _maxY: 3
+  _cameraViewBounds: {fileID: 0}
 --- !u!81 &470518168334494867
 AudioListener:
   m_ObjectHideFlags: 0
@@ -60718,7 +60719,7 @@ PrefabInstance:
     - target: {fileID: -4974254676742620378, guid: e1509d913becb694880583ae2ea28454,
         type: 3}
       propertyPath: _detectionAreaSize.x
-      value: 17
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: -4974254676742620378, guid: e1509d913becb694880583ae2ea28454,
         type: 3}
@@ -60728,12 +60729,12 @@ PrefabInstance:
     - target: {fileID: 3119327638147340786, guid: e1509d913becb694880583ae2ea28454,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -345.81
+      value: -349.48
       objectReference: {fileID: 0}
     - target: {fileID: 3119327638147340786, guid: e1509d913becb694880583ae2ea28454,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -17.1
+      value: -17.48
       objectReference: {fileID: 0}
     - target: {fileID: 3119327638147340786, guid: e1509d913becb694880583ae2ea28454,
         type: 3}
