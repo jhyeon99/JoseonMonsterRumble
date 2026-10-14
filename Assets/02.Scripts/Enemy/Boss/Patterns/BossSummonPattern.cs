@@ -891,6 +891,7 @@ public class BossSummonPattern : BossPattern
 
             Destroy(vfx, lifetime);
             _deathVfxInstance = vfx;
+            AudioResult("Boss.NeedleFire", Boss.Position);
             return playDuration;
         }
 
@@ -905,6 +906,7 @@ public class BossSummonPattern : BossPattern
             GameObject vfx = Instantiate(_deathVfxPrefab, position, Quaternion.identity);
             Destroy(vfx, lifetime);
             _deathVfxInstance = vfx;
+            AudioResult("Boss.NeedleFire", Boss.Position);
             return playDuration;
         }
 

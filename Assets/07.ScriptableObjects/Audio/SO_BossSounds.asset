@@ -47,7 +47,8 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: Boss.Stomp
     DisplayName: "\uAC01 \uCC0D\uAE30\uC758 \uC2E4\uC81C \uCC29\uC9C0"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: b63a748aa343c6b48abd424ed4ab6044, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -57,7 +58,8 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: Boss.NeedleFire
     DisplayName: "\uC88C\uC6B0 \uBC14\uB298 \uBC1C\uC0AC \uBB36\uC74C \uC0DD\uC131"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: a0a32e686df86b04b81d3d0f1c7ae433, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -205,7 +207,8 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: Boss.ChargeLoop
     DisplayName: "\uC2E4\uC81C \uB3CC\uC9C4 \uC2DC\uC791"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: 28aaa737248b57e489f0781e5de3a837, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -380,6 +383,28 @@ MonoBehaviour:
     OutputGroup: 0
     Priority: 20
     MaxCount: 3
+  - SoundId: Boss.LandingBreak
+    DisplayName: "\uBCF4\uC2A4 \uCC29\uC9C0 \uBB34\uB108\uC9D0"
+    Clips:
+    - {fileID: 8300000, guid: 1c4e3b9562156134e9223f08b90d6b2d, type: 3}
+    StartOffset: 0
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.StompFootstep
+    DisplayName: "\uBCF4\uC2A4 \uCC0D\uAE30 \uBC1C\uBC14\uB2E5"
+    Clips:
+    - {fileID: 8300000, guid: e30a0174bd38ea843bfee888a5f1d2ac, type: 3}
+    StartOffset: 0
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
   _events:
   - EventId: Boss.Intro
     Enabled: 1
@@ -807,3 +832,29 @@ MonoBehaviour:
     BgmFadeDuration: -1
     LoopEndRule: "\uACF5\uC911 \uC9C4\uC785 / \uB0A0\uB824 \uBCF4\uB0B4\uAE30 / \uC0AC\uB9DD
       / \uBE44\uD65C\uC131\uD654"
+  - EventId: Boss.LandingBreak
+    Enabled: 1
+    SoundId: Boss.LandingBreak
+    TriggerDescription: "\uCC29\uC9C0 \uBC1C\uBC14\uB2E5 \uC18C\uB9AC\uC640 \uD568\uAED8
+      \uC7AC\uC0DD\uD558\uB294 \uBB34\uB108\uC9D0 \uC18C\uB9AC"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.StompFootstep
+    Enabled: 1
+    SoundId: Boss.StompFootstep
+    TriggerDescription: "\uCC0D\uAE30 \uCC29\uC9C0 \uC804\uC6A9 \uBC1C\uBC14\uB2E5
+      \uC18C\uB9AC"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 

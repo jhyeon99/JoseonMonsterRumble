@@ -222,6 +222,10 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
             requiredOutput: AudioOutputGroup.Sfx, excludedClip: excludedClip);
     }
 
+    public PlayHandle PlayDedicatedActionLoop(SoundSetSO set, string eventId, AudioContext context)
+        => PlayEventCore(set, eventId, context, requiredLifetime: LifetimePolicy.Action,
+            requiredOutput: AudioOutputGroup.Sfx, dedicatedChannel: true);
+
     public PlayHandle PlayEntityLoop(SoundSetSO set, string eventId, Component source, AudioOwnerKey owner)
     {
         if (source == null || owner.IsEmpty) return PlayHandle.Empty;
