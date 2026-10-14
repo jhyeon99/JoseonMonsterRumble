@@ -256,6 +256,15 @@ MonoBehaviour:
     OutputGroup: 0
     Priority: 50
     MaxCount: 4
+  - SoundId: Boss.SpitImpact
+    DisplayName: "보스 침이 플레이어에게 직접 피해를 준 순간"
+    Clips: []
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
   _events:
   - EventId: Boss.Intro
     Enabled: 1
@@ -573,6 +582,18 @@ MonoBehaviour:
     Enabled: 1
     SoundId: Boss.TongueImpact
     TriggerDescription: "보스 혀가 플레이어에게 실제 피해를 준 순간"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule:
+  - EventId: Boss.SpitImpact
+    Enabled: 1
+    SoundId: Boss.SpitImpact
+    TriggerDescription: "보스 침이 플레이어에게 직접 피해를 준 순간"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2

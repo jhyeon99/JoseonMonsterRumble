@@ -22,6 +22,11 @@ public class BossSpitProjectile : Projectile
         hitData.PoisonDuration = _poisonDuration;
     }
 
+    protected override void OnPlayerDamaged(HitData hitData)
+    {
+        AudioManager.Instance?.PlaySceneEvent("Boss.SpitImpact", this);
+    }
+
     [Header("포물선")]
     [Tooltip("아래로 당기는 가속도 (클수록 빨리 떨어지고 궤적이 둥글게 휨)")]
     [SerializeField, Min(0.01f)]
