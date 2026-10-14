@@ -51,8 +51,12 @@ Air.AttackReady|공격 준비 시작
 Air.Ambience|대기·순찰 상태 시작
 Boss.Intro|등장 연출 시작
 Boss.Hurt|직접 공격 피해 적용
-Boss.Footstep|기본 이동·후퇴 점프의 실제 착지마다 1회
+Boss.GroggyHurt|그로기 상태에서 실제 피해를 받을 때
+Boss.Footstep|이동·후퇴·찍기·소환 점프의 실제 착지마다 1회
+Boss.LandingBreak|착지 발바닥 소리와 함께 재생하는 무너짐 소리
 Boss.FrogAmbience|보스전 중 울음이 끝난 뒤 랜덤 휴식 간격으로 1회씩
+Boss.Tail|꼬리 휘두르기 판정 시작
+Boss.TailImpact|꼬리가 플레이어에게 실제 피해를 준 순간
 Boss.Tongue|각 높이의 혀 뻗기 시작
 Boss.TongueImpact|보스 혀가 플레이어에게 실제 피해를 준 순간
 Boss.Stomp|각 찍기의 실제 착지
@@ -61,9 +65,9 @@ Boss.Spit|각 침뱉기 발사 묶음 생성
 Boss.SpitImpact|보스 침이 플레이어에게 직접 피해를 준 순간
 Boss.ChargeStart|실제 돌진 이동·판정 시작
 Boss.PhaseHowl|1 → 2페이즈 전환 연출 시작
-Boss.SummonStart|독 방울 소환 패턴 진입
+Boss.SummonStart|개구리알 소환 패턴 진입
 Boss.BubbleHurt|개구리알에 실제 피해가 들어간 타격마다
-Boss.BubblePop|공격에 의한 방울 파열 성공
+Boss.BubblePop|공격에 의한 개구리알 파열 성공
 Boss.BabyLaunch|3타로 올챙이 날려 보내기 성공
 Boss.BabyHitBoss|올챙이 기믹 피해 적용 성공
 Boss.Groggy|찍기 패링 후 짧은 그로기 진입
@@ -74,8 +78,9 @@ Boss.Jump|각 찍기의 도약 시작
 Boss.TongueRetract|패링 후 혀 회수 시작
 Boss.ChargeLoop|실제 돌진 시작
 Boss.ChargeEnd|돌진 정상 종료
-Boss.BubbleSpawn|독 방울 웨이브 생성 성공
-Boss.BabySpawn|방울 파열에 의한 올챙이 생성 성공
+Boss.BubbleSpawn|개구리알 웨이브 생성 성공
+Boss.BabySpawn|개구리알 파열에 의한 올챙이 생성 성공
+Boss.BabyCrawl|각 올챙이가 바닥에 있는 동안 랜덤 음원 1개를 계속 반복
 Boss.BabyHurt|올챙이 비치명 피해 적용
 Boss.BabyDeath|올챙이 일반 사망 확정
 Boss.GroggyRecover|짧은 그로기 정상 회복

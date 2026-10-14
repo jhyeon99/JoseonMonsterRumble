@@ -56,10 +56,13 @@ MonoBehaviour:
     Melee: {fileID: 11400000, guid: a559d5313f7e42148bcb79d42728d426, type: 2}
     Ranged: {fileID: 11400000, guid: 86275e5a3bbd4a81817ec06e6073b485, type: 2}
   Boss: {fileID: 11400000, guid: 3bda48e52b484b079988934a1c2a22cc, type: 2}
+  BossFootstepLeadTime: 0.3
   BossFrogMinInterval: 3
   BossFrogMaxInterval: 8
   LaunchDeathSoundDuration: 1
   LaunchDeathSoundFade: 0.15
+  BabyCrawlMinInterval: 1
+  BabyCrawlMaxInterval: 3
   Music: {fileID: 11400000, guid: 79627dfb955f4f91b27e07675bc2e060, type: 2}
   Item: {fileID: 11400000, guid: 39e417b7b422448c8a093865067d8623, type: 2}
   Environment: {fileID: 11400000, guid: cace4725aea94b6b800a07b4a821f386, type: 2}
