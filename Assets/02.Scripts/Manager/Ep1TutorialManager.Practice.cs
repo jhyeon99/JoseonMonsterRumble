@@ -136,6 +136,8 @@ public sealed partial class Ep1TutorialManager
                 if (target == null) continue;
                 bool protect = i == 0 ? !_regularGuardSucceeded || !_guardGaugeExplained : !_secondFinisherSucceeded;
                 target.SetTutorialProtection(this, protect, i == 1 && IsFinisherPractice);
+                if (i == 0 && target.TryGetComponent(out EnemyMeleeCombat melee))
+                    melee.SetTutorialParrySuppressed(this, target.IsAlive);
             }
         }
         if (_talismanTarget != null) _talismanTarget.SetTutorialProtection(this, !_talismanExplained);
@@ -184,6 +186,11 @@ public sealed partial class Ep1TutorialManager
         {
             foreach (EnemyHealth target in _boundPrerequisites)
                 if (target != null) target.SetTutorialProtection(this, false);
+            if (_boundPrerequisites.Length > 0 && _boundPrerequisites[0] != null &&
+                _boundPrerequisites[0].TryGetComponent(out EnemyMeleeCombat melee))
+            {
+                melee.SetTutorialParrySuppressed(this, false);
+            }
         }
         if (_talismanTarget != null) _talismanTarget.SetTutorialProtection(this, false);
     }

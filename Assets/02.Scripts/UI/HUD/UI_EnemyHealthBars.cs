@@ -40,7 +40,7 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
     [SerializeField, Min(MinimumDuration)] private float _damageCatchupDuration = 0.35f;
     [SerializeField, Min(MinimumDuration)] private float _healCatchupDuration = 0.2f;
     [Header("도깨비불 효과")]
-    [SerializeField] private Color _shieldOverlayColor = new Color(1f, 1f, 1f, 0.38f);
+    [SerializeField] private Color _shieldOverlayColor = new Color(1f, 1f, 1f, 0.85f);
     [SerializeField] private Color _healOverlayColor = new Color(0.12f, 0.78f, 0.32f, 0.85f);
     [SerializeField, Min(MinimumDuration)] private float _healTintDuration = 0.35f;
     [SerializeField, Range(0f, 1f)] private float _healTintMaxWidthRatio = 0.06f;
@@ -89,24 +89,12 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
         public RectTransform FillMask;
     }
 
+    private const float PlatformSearchInterval = 2f;
+    private float _nextPlatformSearchTime;
+
     private void OnEnable()
     {
-        if (_overlayMaterial == null || _ragePlatforms == null) return;
-        foreach (DokkaebiPlatformRage platform in _ragePlatforms)
-        {
-            if (platform == null)
-            {
-                Debug.LogWarning("UI_EnemyHealthBars: 도깨비 발판 분노게이지 대상이 없습니다.", this);
-                continue;
-            }
-            var bar = new UI_RageBar { Platform = platform };
-            bar.Root = CreateRect("DokkaebiRageBar", _container, _barSize, Center);
-            CreateArtwork(BackgroundName, bar.Root, _backgroundTexture, Color.white, Center);
-            bar.FillMask = CreateMask(MainMaskName, bar.Root, _fillMaterial);
-            CreateArtwork(FrameName, bar.Root, _frameTexture, Color.white, Center);
-            bar.FillMask.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 0f);
-            _rageBars.Add(bar);
-        }
+        InitializeRageBars();
     }
 
     private void Awake()
@@ -123,6 +111,7 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
         // One owned material for all bars; image colours distinguish the two overlays.
         _overlayMaterial = new Material(_damageGhostMaterial);
         _overlayMaterial.SetColor(HighlightColorId, Color.white);
+        InitializeRageBars();
     }
 
     private void OnDestroy()
@@ -135,6 +124,7 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
 
     private void Start()
     {
+        InitializeRageBars();
         if (EnemyManager.Instance == null)
         {
             Debug.LogWarning(MissingManagerWarning, this);
@@ -157,6 +147,72 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
             if (bar.Root != null) Destroy(bar.Root.gameObject);
         }
         _rageBars.Clear();
+        _nextPlatformSearchTime = 0f;
+    }
+
+    private void InitializeRageBars()
+    {
+        if (_container == null) _container = (RectTransform)transform;
+        if (_canvas == null) _canvas = GetComponentInParent<Canvas>();
+        if (_backgroundTexture == null || _fillTexture == null || _frameTexture == null || _fillMaterial == null)
+        {
+            return;
+        }
+
+        if (_ragePlatforms == null || _ragePlatforms.Length == 0 || HasNullPlatform(_ragePlatforms))
+        {
+            if (Time.time >= _nextPlatformSearchTime)
+            {
+                _nextPlatformSearchTime = Time.time + PlatformSearchInterval;
+                _ragePlatforms = FindObjectsByType<DokkaebiPlatformRage>(FindObjectsSortMode.None);
+            }
+        }
+
+        if (_ragePlatforms == null) return;
+
+        foreach (DokkaebiPlatformRage platform in _ragePlatforms)
+        {
+            if (platform == null) continue;
+            if (HasRageBar(platform)) continue;
+            CreateRageBar(platform);
+        }
+    }
+
+    private bool HasRageBar(DokkaebiPlatformRage platform)
+    {
+        for (int i = 0; i < _rageBars.Count; i++)
+        {
+            if (_rageBars[i].Platform == platform) return true;
+        }
+        return false;
+    }
+
+    private static bool HasNullPlatform(DokkaebiPlatformRage[] platforms)
+    {
+        for (int i = 0; i < platforms.Length; i++)
+        {
+            if (platforms[i] == null) return true;
+        }
+        return false;
+    }
+
+    private void CreateRageBar(DokkaebiPlatformRage platform)
+    {
+        if (platform == null || _container == null) return;
+        var bar = new UI_RageBar { Platform = platform };
+        bar.Root = CreateRect("DokkaebiRageBar", _container, _barSize, Center);
+        CreateArtwork(BackgroundName, bar.Root, _backgroundTexture, Color.white, Center);
+        bar.FillMask = CreateMask(MainMaskName, bar.Root, _fillMaterial);
+        CreateArtwork(FrameName, bar.Root, _frameTexture, Color.white, Center);
+        bar.FillMask.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 0f);
+        _rageBars.Add(bar);
+    }
+
+    public void RegisterRagePlatform(DokkaebiPlatformRage platform)
+    {
+        if (platform == null) return;
+        if (HasRageBar(platform)) return;
+        CreateRageBar(platform);
     }
 
     private void LateUpdate()
@@ -202,25 +258,46 @@ public sealed class UI_EnemyHealthBars : MonoBehaviour
 
     private void UpdateRageBars(Camera worldCamera)
     {
-        if (_rageBars.Count == 0) return;
-        Canvas rootCanvas = _canvas.rootCanvas;
-        Camera uiCamera = rootCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : rootCanvas.worldCamera;
-        foreach (UI_RageBar bar in _rageBars)
+        if (_rageBars.Count == 0)
         {
+            InitializeRageBars();
+            if (_rageBars.Count == 0) return;
+        }
+
+        Canvas rootCanvas = _canvas != null ? _canvas.rootCanvas : null;
+        if (rootCanvas == null) return;
+        Camera uiCamera = rootCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : rootCanvas.worldCamera;
+        for (int i = _rageBars.Count - 1; i >= 0; i--)
+        {
+            UI_RageBar bar = _rageBars[i];
+            if (bar.Root == null)
+            {
+                _rageBars.RemoveAt(i);
+                continue;
+            }
+
             if (worldCamera == null || bar.Platform == null || !bar.Platform.gameObject.activeInHierarchy || bar.Platform.IsStunned)
             {
                 bar.Root.gameObject.SetActive(false);
                 continue;
             }
+
             Vector3 screenPosition = worldCamera.WorldToScreenPoint(bar.Platform.GaugeWorldPosition);
-            bool isVisible = screenPosition.z > 0f && worldCamera.pixelRect.Contains(screenPosition);
+            Rect visibleRect = worldCamera.pixelRect;
+            visibleRect.xMin -= _barSize.x * 0.5f;
+            visibleRect.xMax += _barSize.x * 0.5f;
+            visibleRect.yMin -= _barSize.y * 0.5f;
+            visibleRect.yMax += _barSize.y * 0.5f;
+            bool isVisible = screenPosition.z > 0f && visibleRect.Contains(screenPosition);
             bar.Root.gameObject.SetActive(isVisible);
             if (!isVisible) continue;
+
             if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 _container, screenPosition, uiCamera, out Vector2 localPosition))
             {
                 bar.Root.localPosition = localPosition;
             }
+
             bar.FillMask.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, _barSize.x * bar.Platform.GaugeRatio);
         }
     }

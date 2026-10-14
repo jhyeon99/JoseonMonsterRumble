@@ -83,7 +83,7 @@ public sealed partial class Ep1TutorialManager : MonoBehaviour
     [SerializeField, Min(0f)] private float _outlineThickness = 1f;
 
     [SerializeField, TextArea(2, 4)] private string _highJumpMessage = "길게 눌러 더 높이 점프";
-    [SerializeField, TextArea(2, 4)] private string _respawnMessage = "장승에 다가가면 리스폰 포인트가 활성화됩니다.";
+    [SerializeField, TextArea(2, 4)] private string _respawnMessage = "장승에 다가가면 리스폰 포인트가 활성화됩니다.\n물약도 모두 충전됩니다.";
     [SerializeField, TextArea(2, 4)] private string _parryMessage = "반짝이는 공격을 패링하면 적을 그로기 상태로 만들 수 있습니다.";
     [SerializeField] private string _keySeparator = "또는";
 

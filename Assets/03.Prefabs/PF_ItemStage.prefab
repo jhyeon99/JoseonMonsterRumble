@@ -1639,7 +1639,7 @@ PrefabInstance:
     - target: {fileID: 1615781974429301066, guid: 4b36b1382d742474ab7ec86bf7d515a6,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 34
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 1615781974429301066, guid: 4b36b1382d742474ab7ec86bf7d515a6,
         type: 3}
@@ -3264,6 +3264,11 @@ PrefabInstance:
       propertyPath: m_LocalPosition.x
       value: -543.3
       objectReference: {fileID: 0}
+    - target: {fileID: 554400000000000003, guid: 7730a1c233320dd419bde7b605d564d0,
+        type: 3}
+      propertyPath: _warpToCheckpointOnClose
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4333141568429454550, guid: 7730a1c233320dd419bde7b605d564d0,
         type: 3}
       propertyPath: m_LocalPosition.y
@@ -3282,12 +3287,12 @@ PrefabInstance:
     - target: {fileID: 4543700637059806195, guid: 7730a1c233320dd419bde7b605d564d0,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 623.85583
+      value: 464.5
       objectReference: {fileID: 0}
     - target: {fileID: 4543700637059806195, guid: 7730a1c233320dd419bde7b605d564d0,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.7190323
+      value: 39.2
       objectReference: {fileID: 0}
     - target: {fileID: 4543700637059806195, guid: 7730a1c233320dd419bde7b605d564d0,
         type: 3}
@@ -3372,6 +3377,10 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: PF_MovingPlatform_PassengerControlled
+      objectReference: {fileID: 0}
+    - target: {fileID: 337719204, guid: d38419f24ef446d5967b4dd55e920f2c, type: 3}
+      propertyPath: _requireItemToMove
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3985736029937711750, guid: 17b0045789ee8c4408a582682d1c2b25,
         type: 3}
