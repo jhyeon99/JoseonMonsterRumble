@@ -7,6 +7,7 @@ Shader "Team06/PoisonJetParticle"
         _BodyColor ("Body", Color) = (0.31, 0.39, 0.14, 1)
         _LightColor ("Light Pigment", Color) = (0.60, 0.64, 0.32, 1)
         _EdgeColor ("Dark Pigment", Color) = (0.16, 0.19, 0.085, 1)
+        _EmissionStrength ("Emission Strength", Range(0,8)) = 0
     }
     SubShader
     {
@@ -25,6 +26,7 @@ Shader "Team06/PoisonJetParticle"
             sampler2D _BrushTex;
             sampler2D _DetailTex;
             float4 _BodyColor, _LightColor, _EdgeColor;
+            float _EmissionStrength;
             struct Attributes { float4 position : POSITION; float2 uv : TEXCOORD0; float4 color : COLOR; };
             struct Varyings { float4 position : SV_POSITION; float2 uv : TEXCOORD0; float4 color : COLOR; };
             Varyings JetVertex(Attributes input)
@@ -48,6 +50,7 @@ Shader "Team06/PoisonJetParticle"
                 float alpha = 1.0 - smoothstep(edge - feather, edge + feather, radius);
                 float3 color = EvaluatePoisonPaint(paintUV, brush, detail, radius,
                     _BodyColor.rgb, _LightColor.rgb, _EdgeColor.rgb);
+                color += EvaluatePoisonEmission(paintUV, brush, detail, radius, _LightColor.rgb, _EmissionStrength);
                 return float4(color * input.color.rgb, alpha * _BodyColor.a * input.color.a);
             }
             ENDHLSL

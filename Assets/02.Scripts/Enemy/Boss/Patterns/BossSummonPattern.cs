@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -108,7 +109,25 @@ public class BossSummonPattern : BossPattern
     [Header("제한 시간")]
     [Tooltip("파훼 제한 시간 (초, 궁극기 애니메이션 시작부터). 차지 애니메이션이 이 시간에 맞춰 끝남")]
     [SerializeField, Min(0.1f)]
-    private float _maxDuration = 20f;
+    private float _maxDuration = 25f;
+
+    [Header("알 주기 흡입")]
+    [SerializeField, Min(0.1f)] private float _suctionInterval = 3f;
+    [SerializeField, Min(0f)] private float _suctionDistance = 4.5f;
+    [SerializeField, Min(0.01f)] private float _suctionDuration = 0.4f;
+    [SerializeField, Min(0.01f)] private float _absorbRadius = 0.8f;
+    [SerializeField, Min(0.01f)] private float _absorbDuration = 0.25f;
+    [SerializeField, Min(0f)] private float _absorbedTimeReduction = 1f;
+    [SerializeField, Min(0f)] private float _bossSpawnExclusionMargin = 1f;
+
+    private readonly List<BossPoisonBubble> _activeBubbles = new List<BossPoisonBubble>();
+    private Collider2D _spawnExclusionCollider;
+    private float _gimmickDeadline;
+    private Animator _chargeAnimator;
+    private int _chargeProgressHash;
+    private bool _hasChargeProgressParameter;
+    private float[] _placedBubbleXs;
+    private const int MaxSpawnAttempts = 32;
 
     [Header("궁극기 기믹 (차지 → 파훼 / 즉사)")]
     [Tooltip("궁극기 시작 애니메이터 트리거 (인스펙터의 Animation Trigger 대신 사용)")]
@@ -258,7 +277,10 @@ public class BossSummonPattern : BossPattern
     private GameObject _suctionVfx;
 
     public override bool IsForced => true;
+    // 발판 전환과 소환 위치로 이동을 동시에 시작하고, 도착한 뒤 준비 완료를 확인한다.
+    protected override bool ShouldWaitForPlatformsBeforePreparation => false;
     public override bool BlocksDirectDamage => _blockDirectDamage && _isRunning;
+    public override bool BlocksOutgoingDamage => true;
 
     /// <summary>점프 중에는 접촉 데미지 끔</summary>
     public override bool DisablesContactDamage =>
@@ -271,6 +293,24 @@ public class BossSummonPattern : BossPattern
 
     protected override void OnInitialize()
     {
+        _chargeAnimator = Boss.GetComponentInChildren<Animator>();
+        _hasChargeProgressParameter = false;
+        _chargeProgressHash = Animator.StringToHash(_chargeProgressParameter);
+        if (_chargeAnimator != null && !string.IsNullOrEmpty(_chargeProgressParameter))
+        {
+            foreach (AnimatorControllerParameter parameter in _chargeAnimator.parameters)
+            {
+                if (parameter.type == AnimatorControllerParameterType.Float && parameter.nameHash == _chargeProgressHash)
+                {
+                    _hasChargeProgressParameter = true;
+                    break;
+                }
+            }
+            if (!_hasChargeProgressParameter)
+                Debug.LogWarning($"{name}: 차지 진행도 Float 파라미터({_chargeProgressParameter})가 없습니다.", this);
+        }
+        _spawnExclusionCollider = Boss.GetComponent<Collider2D>();
+        ResolveSuctionPoint();
         if (_bubblePrefab == null)
         {
             Debug.LogWarning($"{name}: {PatternName}에 독 방울 프리팹이 없어 사용하지 않습니다.", this);
@@ -298,6 +338,8 @@ public class BossSummonPattern : BossPattern
         _usedPhase2 = new bool[_phase2HpRatios != null ? _phase2HpRatios.Length : 0];
         _pending = false;
     }
+
+    private void OnDisable() => Stop();
 
     private float _lastHp = float.PositiveInfinity;
 
@@ -344,6 +386,7 @@ public class BossSummonPattern : BossPattern
             if (!_isRunning)
             {
                 _pending = true;
+                Boss.RequestGimmick(this);
             }
         }
     }
@@ -513,7 +556,11 @@ public class BossSummonPattern : BossPattern
     private IEnumerator ExecuteUltimate()
     {
         float startTime = Time.time;
-        float deadline = startTime + _maxDuration;
+        _gimmickDeadline = startTime + _maxDuration;
+        if (_spawnExclusionCollider == null)
+        {
+            Debug.LogWarning("보스 알 생성: 몸체 Collider2D 참조가 없습니다.", this);
+        }
 
         _gimmickHits = 0;
         BossBaby.CountHitsOnly = true;
@@ -523,9 +570,13 @@ public class BossSummonPattern : BossPattern
 
         float nextWave = Time.time + _spawnDelayAfterLoop;
         float chargeStart = -1f;
+        float nextSuction = float.PositiveInfinity;
+        float suctionVfxStopTime = float.PositiveInfinity;
+        float chargeProgress = 0f;
+        float previousChargeTime = startTime;
         bool success = false;
 
-        while (Time.time < deadline)
+        while (Time.time < _gimmickDeadline)
         {
             if (_gimmickHits >= _requiredHits)
             {
@@ -543,14 +594,30 @@ public class BossSummonPattern : BossPattern
             if (chargeStart < 0f && IsInChargeState())
             {
                 chargeStart = Time.time;
-                StartSuctionVfx();
-                Boss.Log($"{PatternName}: 차지 시작 (남은 시간 {deadline - chargeStart:0.0}초)");
+                previousChargeTime = chargeStart;
+                nextSuction = chargeStart + _suctionInterval;
+                Boss.Log($"{PatternName}: 차지 시작 (남은 시간 {_gimmickDeadline - chargeStart:0.0}초)");
             }
 
             if (chargeStart >= 0f)
             {
-                float span = Mathf.Max(0.01f, deadline - chargeStart);
-                SetChargeProgress((Time.time - chargeStart) / span);
+                float delta = Time.time - previousChargeTime;
+                float remaining = Mathf.Max(delta, _gimmickDeadline - previousChargeTime);
+                chargeProgress = Mathf.Clamp01(chargeProgress + (1f - chargeProgress) * delta / Mathf.Max(0.01f, remaining));
+                previousChargeTime = Time.time;
+                SetChargeProgress(chargeProgress);
+                if (Time.time >= nextSuction)
+                {
+                    StartBubbleSuction();
+                    StartSuctionVfx();
+                    suctionVfxStopTime = Time.time + _suctionDuration + _absorbDuration;
+                    nextSuction = Time.time + _suctionInterval;
+                }
+                if (Time.time >= suctionVfxStopTime)
+                {
+                    StopSuctionVfx();
+                    suctionVfxStopTime = float.PositiveInfinity;
+                }
             }
 
             yield return null;
@@ -558,6 +625,7 @@ public class BossSummonPattern : BossPattern
 
         BossBaby.OnHitBoss -= HandleGimmickHit;
         BossBaby.CountHitsOnly = false;
+        ClearBubbleSubscriptions();
         Boss.ClearMinions();
 
         // 차지가 끝났으므로(파훼 / 해방) 빨아들이기 중지
@@ -677,7 +745,6 @@ public class BossSummonPattern : BossPattern
         Boss.ResetTrigger(_releaseTrigger);
     }
 
-    /// <summary>애니메이터가 차지 상태인지 (상태 이름 → 클립 순으로 확인, 둘 다 없으면 바로 true)</summary>
     /// <summary>차지 애니메이션이 시작되면 보스에 빨아들이기 VFX를 붙여 반복 재생</summary>
     private void StartSuctionVfx()
     {
@@ -733,7 +800,7 @@ public class BossSummonPattern : BossPattern
     /// <summary>해방 상태를 처음부터 바로 재생 (하위 상태 머신 안에 있어도 이름으로 재생)</summary>
     private void PlayReleaseState()
     {
-        Animator animator = Boss != null ? Boss.GetComponentInChildren<Animator>() : null;
+        Animator animator = _chargeAnimator;
         if (animator == null || string.IsNullOrEmpty(_releaseStateName))
         {
             return;
@@ -752,7 +819,7 @@ public class BossSummonPattern : BossPattern
             return false;
         }
 
-        Animator animator = Boss.GetComponentInChildren<Animator>();
+        Animator animator = _chargeAnimator;
         if (animator == null)
         {
             return false;
@@ -769,7 +836,7 @@ public class BossSummonPattern : BossPattern
     /// <summary>경고 로그용: 지금 재생 중인 클립 이름</summary>
     private string CurrentStateDebugName()
     {
-        Animator animator = Boss != null ? Boss.GetComponentInChildren<Animator>() : null;
+        Animator animator = _chargeAnimator;
         if (animator == null)
         {
             return "(애니메이터 없음)";
@@ -781,7 +848,7 @@ public class BossSummonPattern : BossPattern
 
     private bool IsInChargeState()
     {
-        Animator animator = Boss.GetComponentInChildren<Animator>();
+        Animator animator = _chargeAnimator;
         if (animator != null && !string.IsNullOrEmpty(_chargeStateName))
         {
             if (animator.GetCurrentAnimatorStateInfo(0).IsName(_chargeStateName))
@@ -884,25 +951,12 @@ public class BossSummonPattern : BossPattern
 
     private void SetChargeProgress(float value)
     {
-        if (string.IsNullOrEmpty(_chargeProgressParameter) || Boss == null || !Boss.HasAnimator)
+        if (!_hasChargeProgressParameter || _chargeAnimator == null)
         {
             return;
         }
 
-        Animator animator = Boss.GetComponentInChildren<Animator>();
-        if (animator == null)
-        {
-            return;
-        }
-
-        foreach (AnimatorControllerParameter parameter in animator.parameters)
-        {
-            if (parameter.type == AnimatorControllerParameterType.Float && parameter.name == _chargeProgressParameter)
-            {
-                animator.SetFloat(parameter.nameHash, Mathf.Clamp01(value));
-                return;
-            }
-        }
+        _chargeAnimator.SetFloat(_chargeProgressHash, Mathf.Clamp01(value));
     }
 
     private void DestroyDeathVfx()
@@ -998,22 +1052,27 @@ public class BossSummonPattern : BossPattern
             : (arena != null ? arena.GetFloorY(1) : Boss.GroundY) - _spawnBelowFloor;
         float topY = _despawnLine != null ? _despawnLine.position.y : float.PositiveInfinity;
 
-        float[] placed = new float[_bubblesPerWave];
+        if (_placedBubbleXs == null || _placedBubbleXs.Length < _bubblesPerWave)
+            _placedBubbleXs = new float[_bubblesPerWave];
+        float[] placed = _placedBubbleXs;
         int placedCount = 0;
 
         for (int i = 0; i < _bubblesPerWave; i++)
         {
             // 같은 웨이브끼리 너무 붙지 않게 몇 번 다시 뽑아 봄
             float x = Random.Range(left, right);
-            for (int attempt = 0; attempt < 8 && IsTooClose(x, placed, placedCount); attempt++)
+            for (int attempt = 0; attempt < MaxSpawnAttempts && (IsTooClose(x, placed, placedCount) || IsBelowBoss(x)); attempt++)
             {
                 x = Random.Range(left, right);
             }
+            if (IsTooClose(x, placed, placedCount) || IsBelowBoss(x)) continue;
 
             placed[placedCount++] = x;
 
             BossPoisonBubble bubble = Instantiate(_bubblePrefab, new Vector3(x, spawnY, 0f), Quaternion.identity);
             bubble.Initialize(Boss, topY);
+            bubble.OnAbsorbed += HandleBubbleAbsorbed;
+            _activeBubbles.Add(bubble);
         }
         if (placedCount > 0) AudioResult("Boss.BubbleSpawn", Boss.transform.position);
     }
@@ -1031,8 +1090,50 @@ public class BossSummonPattern : BossPattern
         return false;
     }
 
+    private bool IsBelowBoss(float x)
+    {
+        if (_spawnExclusionCollider == null) return true;
+        Bounds bounds = _spawnExclusionCollider.bounds;
+        return x >= bounds.min.x - _bossSpawnExclusionMargin && x <= bounds.max.x + _bossSpawnExclusionMargin;
+    }
+
+    private void StartBubbleSuction()
+    {
+        ResolveSuctionPoint();
+        if (_suctionVfxPoint == null)
+        {
+            Debug.LogWarning("보스 알 흡입: SuctionPoint 참조가 없습니다.", this);
+            return;
+        }
+        for (int i = _activeBubbles.Count - 1; i >= 0; i--)
+        {
+            BossPoisonBubble bubble = _activeBubbles[i];
+            if (bubble == null)
+            {
+                _activeBubbles.RemoveAt(i);
+                continue;
+            }
+            bubble.StartSuctionPulse(_suctionVfxPoint, _suctionDistance, _suctionDuration, _absorbRadius, _absorbDuration);
+        }
+    }
+
+    private void HandleBubbleAbsorbed()
+    {
+        _gimmickDeadline -= _absorbedTimeReduction;
+    }
+
+    private void ClearBubbleSubscriptions()
+    {
+        foreach (BossPoisonBubble bubble in _activeBubbles)
+        {
+            if (bubble != null) bubble.OnAbsorbed -= HandleBubbleAbsorbed;
+        }
+        _activeBubbles.Clear();
+    }
+
     protected override void Cleanup()
     {
+        ClearBubbleSubscriptions();
         // 차지 중에 끊겼으면 빨아들이기 VFX 제거
         StopSuctionVfx();
 

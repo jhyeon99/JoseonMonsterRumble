@@ -280,6 +280,9 @@ public class Boss : MonoBehaviour, IFinishable
     private Transform _player;
     private BossPattern _lastPattern;
     private BossPattern _queuedPattern;
+    private BossSummonPattern _pendingGimmick;
+    private bool _isChangingToGimmick;
+    private BossComboController _comboController;
     private bool _isAnimatorPaused;
     private float _animatorSpeedBeforePause = 1f;
 
@@ -326,7 +329,10 @@ public class Boss : MonoBehaviour, IFinishable
     /// <summary>몸통 접촉 데미지를 줄 수 있는지 (대기 / 패턴 중일 때만, 접촉 데미지를 끄는 패턴 중에는 제외)</summary>
     public bool CanDealContactDamage =>
         CurrentState is BossIdleState ||
-        (CurrentState is BossPatternState patternState && !patternState.Pattern.DisablesContactDamage);
+        (CurrentState is BossPatternState patternState && !patternState.Pattern.DisablesContactDamage && !patternState.Pattern.BlocksOutgoingDamage);
+
+    public bool CanDealPatternDamage =>
+        CurrentState is BossPatternState patternState && !patternState.Pattern.BlocksOutgoingDamage;
 
     /// <summary>지금 상태에서 데미지를 받는지</summary>
     public bool CanTakeDamage => CurrentState != null && CurrentState.CanTakeDamage;
@@ -340,7 +346,7 @@ public class Boss : MonoBehaviour, IFinishable
     {
         get
         {
-            if (_queuedPattern != null)
+            if (_queuedPattern != null || (_comboController != null && _comboController.HasPendingStep))
             {
                 return true;
             }
@@ -419,6 +425,9 @@ public class Boss : MonoBehaviour, IFinishable
         {
             pattern.Initialize(this);
         }
+
+        _comboController = GetComponent<BossComboController>();
+        if (_comboController != null) _comboController.Initialize(this, _patterns);
 
         if (_patterns.Count == 0)
         {
@@ -508,12 +517,17 @@ public class Boss : MonoBehaviour, IFinishable
             _playerFloor = _arena.GetFloor(_player.position);
         }
 
+        TryStartPendingGimmick();
         _stateMachine.Update();
         _currentStateName = CurrentState != null ? CurrentState.GetType().Name : "-";
     }
 
     private void OnDisable()
     {
+        if (CurrentState is BossPatternState patternState) patternState.Pattern.Stop();
+        if (_comboController != null) _comboController.ResetCombo();
+        _queuedPattern = null;
+        _pendingGimmick = null;
         StageBossFightGate.Cancel(this);
         ClearMinions();
         HideFinishMarker();
@@ -562,6 +576,8 @@ public class Boss : MonoBehaviour, IFinishable
 
     public void ChangeState(BossState nextState)
     {
+        if (_comboController != null && !(nextState is BossIdleState) && !(nextState is BossPatternState))
+            _comboController.ResetCombo();
         BossState previous = CurrentState;
         _stateMachine.ChangeState(nextState);
         OnAudioStateChanged?.Invoke(previous, nextState);
@@ -600,6 +616,7 @@ public class Boss : MonoBehaviour, IFinishable
 
     public void SetPhase(int phase)
     {
+        _pendingGimmick = null;
         _phase = phase;
         _lastPattern = null;
         _queuedPattern = null;
@@ -625,6 +642,7 @@ public class Boss : MonoBehaviour, IFinishable
     {
         selected = null;
         _candidates.Clear();
+        bool hadComboStep = _comboController != null && _comboController.HasPendingStep;
 
         // 예약된 패턴(소환 후 찍기로 복귀 등)이 가장 먼저. 조건(층 / 쿨타임 등) 무시
         if (_queuedPattern != null)
@@ -634,6 +652,7 @@ public class Boss : MonoBehaviour, IFinishable
 
             if (queued.isActiveAndEnabled)
             {
+                if (_comboController != null) _comboController.ResetCombo();
                 selected = queued;
                 _lastPattern = selected;
                 return true;
@@ -643,13 +662,34 @@ public class Boss : MonoBehaviour, IFinishable
         // 체력 비율 발동 등 무조건 써야 하는 패턴이 먼저
         foreach (BossPattern pattern in _patterns)
         {
-            if (pattern != null && pattern.IsForced && pattern.CanUse())
+            if (pattern != null && pattern.IsForced &&
+                (_comboController == null || !_comboController.isActiveAndEnabled || !(pattern is BossTailPattern)) && pattern.CanUse())
             {
+                if (_comboController != null) _comboController.ResetCombo();
                 selected = pattern;
                 _lastPattern = selected;
                 return true;
             }
         }
+
+        if (_comboController != null && _comboController.TrySelectNextPattern(out selected))
+        {
+            _lastPattern = selected;
+            return true;
+        }
+
+        foreach (BossPattern pattern in _patterns)
+        {
+            if (pattern != null && pattern.IsForced && pattern is BossTailPattern && pattern.CanUse())
+            {
+                selected = pattern;
+                _lastPattern = selected;
+                if (_comboController != null) _comboController.StartCombo(selected);
+                return true;
+            }
+        }
+
+        if (hadComboStep) FacePlayer();
 
         foreach (BossPattern pattern in _patterns)
         {
@@ -692,6 +732,7 @@ public class Boss : MonoBehaviour, IFinishable
         }
 
         _lastPattern = selected;
+        if (_comboController != null) _comboController.StartCombo(selected);
         return true;
     }
 
@@ -708,6 +749,38 @@ public class Boss : MonoBehaviour, IFinishable
     public void QueuePattern(BossPattern pattern)
     {
         _queuedPattern = pattern;
+    }
+
+    public void RequestGimmick(BossSummonPattern pattern)
+    {
+        _pendingGimmick = pattern;
+    }
+
+    private void TryStartPendingGimmick()
+    {
+        if (_pendingGimmick == null) return;
+        if (!_pendingGimmick.CanUse())
+        {
+            _pendingGimmick = null;
+            return;
+        }
+        // 등장, 페이즈 전환, 그로기는 기존 흐름을 유지한다.
+        if (!(CurrentState is BossIdleState) && !(CurrentState is BossPatternState)) return;
+        if (CurrentState is BossPatternState state && state.Pattern is BossSummonPattern) return;
+        BossSummonPattern gimmick = _pendingGimmick;
+        _pendingGimmick = null;
+        if (_queuedPattern == gimmick) _queuedPattern = null;
+        if (_comboController != null) _comboController.ResetCombo();
+        _lastPattern = gimmick;
+        _isChangingToGimmick = true;
+        try
+        {
+            ChangeState(new BossPatternState(this, gimmick));
+        }
+        finally
+        {
+            _isChangingToGimmick = false;
+        }
     }
 
     /// <summary>플레이어가 있는 층 (1 ~ 3)</summary>
@@ -806,6 +879,8 @@ public class Boss : MonoBehaviour, IFinishable
 
     public void SnapToGround()
     {
+        // 기믹으로 직접 연결할 때는 공중 패턴 정리 중 현재 높이를 보존한다.
+        if (_isChangingToGimmick) return;
         Vector2 position = Position;
         if (Mathf.Approximately(position.y, GroundY))
         {

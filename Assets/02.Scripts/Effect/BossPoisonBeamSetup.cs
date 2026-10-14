@@ -8,9 +8,15 @@ public sealed class BossPoisonBeamSetup : MonoBehaviour
     [SerializeField] private BossPoisonBeam _beam;
     [SerializeField] private Material _particleMaterial;
     [SerializeField] private Material _impactCloudMaterial;
+    [SerializeField] private Material _mouthMaterial;
+    [SerializeField] private Material _residualMaterial;
 
     private void Awake()
     {
-        if (!BossPoisonParticleFactory.InitializeParticles(_beam, _particleMaterial, _impactCloudMaterial)) enabled = false;
+        if (!BossPoisonParticleFactory.InitializeParticles(_beam, _particleMaterial, _impactCloudMaterial,
+            _mouthMaterial, _residualMaterial))
+        {
+            enabled = false;
+        }
     }
 }
