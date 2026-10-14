@@ -173,6 +173,12 @@ MonoBehaviour:
   _emergeSpeed: 5
   _riseSpeed: 0.8
   _fallbackLifeTime: 20
+  _hitPushSpeed: 2
+  _hitPushDeceleration: 12
+  _suctionFlash:
+    FlashDuration: 0.12
+    PeakOpacity: 0.85
+  _absorbHideRatio: 0.75
   _tadpolePrefab: {fileID: 2836923199409495039, guid: 55d19b71c0182b146b1e2bce8789903f,
     type: 3}
   _popEffect: {fileID: 0}

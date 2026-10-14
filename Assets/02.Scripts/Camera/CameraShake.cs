@@ -368,10 +368,12 @@ public class CameraShake : MonoBehaviour
         float zoomWeight = GetZoomWeight();
         Vector3 offset = GetShakeOffset() + GetKickOffset() + (Vector3)(_focusVector * zoomWeight);
 
-        transform.position += offset;
-        _lastOffset = offset;
-
         ApplyZoom(zoomWeight);
+        Vector3 basePosition = transform.position;
+        transform.position = _follow != null && _follow.isActiveAndEnabled
+            ? _follow.ConstrainCameraEffectPosition(basePosition, offset, _camera)
+            : basePosition + offset;
+        _lastOffset = transform.position - basePosition;
     }
 
     #region 계산
