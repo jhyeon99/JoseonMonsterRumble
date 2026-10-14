@@ -33,6 +33,7 @@ public sealed class AudioManagerEditor : Editor
             manager.SetBgmMute(manager.IsBgmMuted());
             manager.SetSfxMute(manager.IsSfxMuted());
         }
+        SaveDirtyAudioAssets();
         Repaint();
     }
 
@@ -44,6 +45,8 @@ public sealed class AudioManagerEditor : Editor
         EditorGUILayout.PropertyField(serializedObject.FindProperty("_catalog"), new GUIContent("Audio Catalog"));
         serializedObject.ApplyModifiedProperties();
         _catalog = ((AudioManager)target).Catalog;
+        EnsureBossSound("Boss.Footstep", "보스 이동 착지 발바닥", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
+        EnsureBossSound("Boss.FrogAmbience", "보스전 배경 개구리 울음", LifetimePolicy.Entity, 0.2f, 0.95f, 1.05f, 1, 20);
 
         List<string> warnings = AudioCatalogValidation.Validate(_catalog);
         if (warnings.Count > 0)
@@ -57,6 +60,7 @@ public sealed class AudioManagerEditor : Editor
         if (_catalog == null) return;
 
         EditorGUILayout.Space();
+        EditorGUILayout.LabelField("음원과 오디오 데이터 설정은 변경 즉시 자동 저장됩니다.", EditorStyles.wordWrappedMiniLabel);
         EditorGUILayout.HelpBox(Application.isPlaying
             ? "Play Mode: 카탈로그/SoundSet 편집은 실제 에셋에 저장됩니다. 매니저 참조·페이드 설정은 임시 변경이며, 글로벌 음량·음소거는 사용자 설정으로 저장됩니다."
             : "카탈로그와 SoundSet을 여기서 직접 편집합니다. Undo/Redo를 지원하며, 미리듣기는 항목 볼륨·피치만 사용하고 사용자 설정을 바꾸지 않습니다 (최대 15초).", MessageType.Info);
@@ -82,11 +86,70 @@ public sealed class AudioManagerEditor : Editor
             EditorGUI.indentLevel--;
         }
         DrawCategory(catalogObject, "Boss", "보스", "Boss");
+        if (Foldout("BossFrogInterval", "보스전 개구리 울음 간격"))
+        {
+            EditorGUILayout.HelpBox("보스전 시작 후 랜덤 간격으로 한 번씩 울고, 울음이 끝나면 다시 쉽니다. Boss.FrogAmbience에 음원을 넣으세요. 수명은 Entity, 반복 재생은 꺼짐으로 설정합니다.", MessageType.Info);
+            EditorGUILayout.PropertyField(catalogObject.FindProperty("BossFrogMinInterval"), new GUIContent("최소 휴식 시간 (초)"));
+            EditorGUILayout.PropertyField(catalogObject.FindProperty("BossFrogMaxInterval"), new GUIContent("최대 휴식 시간 (초)"));
+            ApplyAssetChanges(catalogObject);
+        }
         DrawCategory(catalogObject, "Music", "BGM", "Music");
         DrawCategory(catalogObject, "Item", "아이템", "Item");
         DrawCategory(catalogObject, "Environment", "환경", "Environment");
         DrawCategory(catalogObject, "UI", "UI", "UI");
         DrawCategory(catalogObject, "Prologue", "프롤로그", "Prologue");
+    }
+
+    private void EnsureBossSound(string eventId, string label, LifetimePolicy lifetime,
+        float volume, float pitchMin, float pitchMax, int maxCount, int priority)
+    {
+        SoundSetSO set = _catalog != null ? _catalog.Boss : null;
+        if (set == null) return;
+        bool hasEvent = set.TryGetEvent(eventId, out EventBinding binding);
+        string soundId = hasEvent ? binding.SoundId : eventId;
+        if (string.IsNullOrWhiteSpace(soundId)) return;
+        bool hasSound = set.TryGetSound(soundId, out _);
+        if (hasEvent && hasSound) return;
+
+        // Unity에 로드된 최신 연결을 보존하고, 없는 항목만 추가한다.
+        SerializedObject data = AssetObject(set);
+        if (!hasSound)
+        {
+            SerializedProperty sounds = data.FindProperty("_sounds");
+            int index = sounds.arraySize;
+            sounds.InsertArrayElementAtIndex(index);
+            SerializedProperty sound = sounds.GetArrayElementAtIndex(index);
+            sound.FindPropertyRelative("SoundId").stringValue = soundId;
+            sound.FindPropertyRelative("DisplayName").stringValue = label;
+            sound.FindPropertyRelative("Clips").ClearArray();
+            sound.FindPropertyRelative("StartOffset").floatValue = 0f;
+            sound.FindPropertyRelative("Volume").floatValue = volume;
+            sound.FindPropertyRelative("PitchMin").floatValue = pitchMin;
+            sound.FindPropertyRelative("PitchMax").floatValue = pitchMax;
+            sound.FindPropertyRelative("OutputGroup").enumValueIndex = (int)AudioOutputGroup.Sfx;
+            sound.FindPropertyRelative("Priority").intValue = priority;
+            sound.FindPropertyRelative("MaxCount").intValue = maxCount;
+        }
+        if (!hasEvent)
+        {
+            SerializedProperty events = data.FindProperty("_events");
+            int index = events.arraySize;
+            events.InsertArrayElementAtIndex(index);
+            SerializedProperty entry = events.GetArrayElementAtIndex(index);
+            entry.FindPropertyRelative("EventId").stringValue = eventId;
+            entry.FindPropertyRelative("Enabled").boolValue = true;
+            entry.FindPropertyRelative("SoundId").stringValue = soundId;
+            entry.FindPropertyRelative("TriggerDescription").stringValue = AudioEventEditorDefinitions.Description(eventId);
+            entry.FindPropertyRelative("Delay").floatValue = 0f;
+            entry.FindPropertyRelative("TimeMode").enumValueIndex = (int)AudioTimeMode.GameTime;
+            entry.FindPropertyRelative("LifetimePolicy").enumValueIndex = (int)lifetime;
+            entry.FindPropertyRelative("Loop").boolValue = false;
+            entry.FindPropertyRelative("MinInterval").floatValue = 0f;
+            entry.FindPropertyRelative("IntervalScope").enumValueIndex = (int)IntervalScope.Entity;
+            entry.FindPropertyRelative("BgmFadeDuration").floatValue = -1f;
+            entry.FindPropertyRelative("LoopEndRule").stringValue = "";
+        }
+        ApplyAssetChanges(data);
     }
 
     private void DrawMonsterProfiles(SerializedObject catalog)
@@ -141,7 +204,7 @@ public sealed class AudioManagerEditor : Editor
         added.FindPropertyRelative("DisplayName").stringValue = label;
         added.FindPropertyRelative("EventPrefix").stringValue = prefix;
         added.FindPropertyRelative("Sounds").objectReferenceValue = copy;
-        catalog.ApplyModifiedProperties();
+        ApplyAssetChanges(catalog);
         AssetDatabase.SaveAssetIfDirty(copy);
         AssetDatabase.SaveAssetIfDirty(_catalog);
     }
@@ -186,6 +249,22 @@ public sealed class AudioManagerEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 
+    private static void ApplyAssetChanges(SerializedObject data)
+    {
+        if (data.ApplyModifiedProperties())
+        {
+            AssetDatabase.SaveAssetIfDirty(data.targetObject);
+        }
+    }
+
+    private void SaveDirtyAudioAssets()
+    {
+        foreach (UnityEngine.Object asset in _assets.Keys)
+        {
+            if (asset != null) AssetDatabase.SaveAssetIfDirty(asset);
+        }
+    }
+
     private SerializedObject AssetObject(UnityEngine.Object asset)
     {
         if (!_assets.TryGetValue(asset, out SerializedObject result))
@@ -220,7 +299,7 @@ public sealed class AudioManagerEditor : Editor
                 EditorGUILayout.PropertyField(profile.FindPropertyRelative("Monster"), new GUIContent("몬스터 데이터"));
             }
             EditorGUILayout.PropertyField(reference, new GUIContent("SoundSet"));
-            catalog.ApplyModifiedProperties();
+            ApplyAssetChanges(catalog);
             var set = reference.objectReferenceValue as SoundSetSO;
             if (set == null) { EditorGUILayout.LabelField("SoundSet을 연결하면 인라인 편집이 표시됩니다."); return; }
             if (monsterProfile && GUILayout.Button("다른 몬스터용으로 복제"))
@@ -243,7 +322,7 @@ public sealed class AudioManagerEditor : Editor
                 if (GUILayout.Button("이벤트 삭제"))
                 {
                     events.DeleteArrayElementAtIndex(i);
-                    data.ApplyModifiedProperties();
+                    ApplyAssetChanges(data);
                     EditorGUI.indentLevel--;
                     break;
                 }
@@ -255,7 +334,7 @@ public sealed class AudioManagerEditor : Editor
                 events.InsertArrayElementAtIndex(i);
                 InitializeEvent(events.GetArrayElementAtIndex(i), prefix);
             }
-            data.ApplyModifiedProperties();
+            ApplyAssetChanges(data);
             if (Foldout(path + ":definitions", "사운드 정의 전체 (미연결 포함)"))
             {
                 SerializedProperty sounds = data.FindProperty("_sounds");
@@ -268,7 +347,7 @@ public sealed class AudioManagerEditor : Editor
                     if (GUILayout.Button("사운드 정의 삭제"))
                     {
                         sounds.DeleteArrayElementAtIndex(i);
-                        data.ApplyModifiedProperties();
+                        ApplyAssetChanges(data);
                         break;
                     }
                 }
@@ -279,7 +358,7 @@ public sealed class AudioManagerEditor : Editor
                     InitializeSound(sounds.GetArrayElementAtIndex(i), prefix);
                 }
             }
-            data.ApplyModifiedProperties();
+            ApplyAssetChanges(data);
         }
     }
 
@@ -308,7 +387,7 @@ public sealed class AudioManagerEditor : Editor
         string soundId = entry.FindPropertyRelative("SoundId").stringValue;
         if (FindSound(soundId, out SoundSetSO owner, out int index) && owner.Sounds[index].OutputGroup == AudioOutputGroup.Bgm)
             Property(entry, "BgmFadeDuration", "BGM 페이드 (음수: 기본값)");
-        data.ApplyModifiedProperties();
+        ApplyAssetChanges(data);
         if (owner == null) return;
         EditorGUILayout.LabelField("연결된 사운드 정의", EditorStyles.boldLabel);
         EditorGUILayout.LabelField("정의 위치", owner.name);
@@ -317,7 +396,7 @@ public sealed class AudioManagerEditor : Editor
             EditorGUILayout.HelpBox("다른 이벤트에서도 사용하는 사운드입니다. 수정은 모든 연결에 반영됩니다.\n" + string.Join("\n", users), MessageType.Info);
         var soundObject = AssetObject(owner);
         DrawSound(soundObject, soundObject.FindProperty("_sounds").GetArrayElementAtIndex(index), owner, index);
-        soundObject.ApplyModifiedProperties();
+        ApplyAssetChanges(soundObject);
     }
 
     private void DrawSoundPicker(SerializedProperty id)
@@ -369,13 +448,15 @@ public sealed class AudioManagerEditor : Editor
             }
             if (Foldout(owner.GetInstanceID() + ":clips:" + index, "랜덤 재생용 음원 목록"))
                 EditorGUILayout.PropertyField(clips, new GUIContent("음원 목록"), true);
+            EditorGUILayout.PropertyField(sound.FindPropertyRelative("StartOffset"),
+                new GUIContent("앞부분 건너뛰기 (초)", "0.2이면 음원의 0.2초 위치부터 재생합니다. 재생 지연과 별도로 적용되며 원본 파일은 바뀌지 않습니다."));
             Property(sound, "Volume", "항목 볼륨");
             Property(sound, "PitchMin", "피치 최소");
             Property(sound, "PitchMax", "피치 최대");
             Property(sound, "OutputGroup", "출력 그룹");
             Property(sound, "MaxCount", "최대 동시 재생 수");
             Property(sound, "Priority", "우선순위 (클수록 중요)");
-            data.ApplyModifiedProperties();
+            ApplyAssetChanges(data);
             using (new EditorGUILayout.HorizontalScope())
             {
                 using (new EditorGUI.DisabledScope(EditorApplication.isPlayingOrWillChangePlaymode))
@@ -409,6 +490,7 @@ public sealed class AudioManagerEditor : Editor
         sound.FindPropertyRelative("SoundId").stringValue = "";
         sound.FindPropertyRelative("DisplayName").stringValue = "";
         sound.FindPropertyRelative("Clips").ClearArray();
+        sound.FindPropertyRelative("StartOffset").floatValue = 0f;
         sound.FindPropertyRelative("Volume").floatValue = 1f;
         sound.FindPropertyRelative("PitchMin").floatValue = 1f;
         sound.FindPropertyRelative("PitchMax").floatValue = 1f;

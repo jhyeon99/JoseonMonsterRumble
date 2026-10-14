@@ -50,6 +50,8 @@ Air.AttackReady|공격 준비 시작
 Air.Ambience|대기·순찰 상태 시작
 Boss.Intro|등장 연출 시작
 Boss.Hurt|직접 공격 피해 적용
+Boss.Footstep|기본 이동·후퇴 점프의 실제 착지마다 1회
+Boss.FrogAmbience|보스전 중 울음이 끝난 뒤 랜덤 휴식 간격으로 1회씩
 Boss.Tongue|각 높이의 혀 뻗기 시작
 Boss.TongueImpact|보스 혀가 플레이어에게 실제 피해를 준 순간
 Boss.Stomp|각 찍기의 실제 착지

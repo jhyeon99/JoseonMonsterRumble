@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameAudio.SoundSetSO
   _sounds:
   - SoundId: Boss.Intro
-    DisplayName: "등장 연출 시작"
+    DisplayName: "\uB4F1\uC7A5 \uC5F0\uCD9C \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -23,8 +24,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.Hurt
-    DisplayName: "직접 공격 피해 적용"
+    DisplayName: "\uC9C1\uC811 \uACF5\uACA9 \uD53C\uD574 \uC801\uC6A9"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -32,8 +34,10 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.Tongue
-    DisplayName: "각 높이의 혀 뻗기 시작"
-    Clips: []
+    DisplayName: "\uAC01 \uB192\uC774\uC758 \uD600 \uBED7\uAE30 \uC2DC\uC791"
+    Clips:
+    - {fileID: 8300000, guid: 9ed635d6a70a5e146b7bf1f877fc1965, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -41,8 +45,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.Stomp
-    DisplayName: "각 찍기의 실제 착지"
+    DisplayName: "\uAC01 \uCC0D\uAE30\uC758 \uC2E4\uC81C \uCC29\uC9C0"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -50,8 +55,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.NeedleFire
-    DisplayName: "좌우 바늘 발사 묶음 생성"
+    DisplayName: "\uC88C\uC6B0 \uBC14\uB298 \uBC1C\uC0AC \uBB36\uC74C \uC0DD\uC131"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -59,8 +65,10 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.Spit
-    DisplayName: "각 침뱉기 발사 묶음 생성"
-    Clips: []
+    DisplayName: "\uAC01 \uCE68\uBC49\uAE30 \uBC1C\uC0AC \uBB36\uC74C \uC0DD\uC131"
+    Clips:
+    - {fileID: 8300000, guid: 3c67d6b472103b4469681a2d035c98ef, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -68,8 +76,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.ChargeStart
-    DisplayName: "실제 돌진 이동·판정 시작"
+    DisplayName: "\uC2E4\uC81C \uB3CC\uC9C4 \uC774\uB3D9\xB7\uD310\uC815 \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -77,8 +86,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.PhaseHowl
-    DisplayName: "1 → 2페이즈 전환 연출 시작"
+    DisplayName: "1 \u2192 2\uD398\uC774\uC988 \uC804\uD658 \uC5F0\uCD9C \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -86,8 +96,10 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.SummonStart
-    DisplayName: "독 방울 소환 패턴 진입"
-    Clips: []
+    DisplayName: "\uB3C5 \uBC29\uC6B8 \uC18C\uD658 \uD328\uD134 \uC9C4\uC785"
+    Clips:
+    - {fileID: 8300000, guid: d86e5905de172da49aff8f79176d2385, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -95,8 +107,10 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.BubblePop
-    DisplayName: "공격에 의한 방울 파열 성공"
-    Clips: []
+    DisplayName: "\uACF5\uACA9\uC5D0 \uC758\uD55C \uBC29\uC6B8 \uD30C\uC5F4 \uC131\uACF5"
+    Clips:
+    - {fileID: 8300000, guid: 1fae7266dc0c4424aa138033c4b4ce1d, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -104,8 +118,10 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.BabyLaunch
-    DisplayName: "3타로 올챙이 날려 보내기 성공"
+    DisplayName: "3\uD0C0\uB85C \uC62C\uCC59\uC774 \uB0A0\uB824 \uBCF4\uB0B4\uAE30
+      \uC131\uACF5"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -113,8 +129,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.BabyHitBoss
-    DisplayName: "올챙이 기믹 피해 적용 성공"
+    DisplayName: "\uC62C\uCC59\uC774 \uAE30\uBBF9 \uD53C\uD574 \uC801\uC6A9 \uC131\uACF5"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -122,8 +139,10 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.Groggy
-    DisplayName: "찍기 패링 후 짧은 그로기 진입"
+    DisplayName: "\uCC0D\uAE30 \uD328\uB9C1 \uD6C4 \uC9E7\uC740 \uADF8\uB85C\uAE30
+      \uC9C4\uC785"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -131,8 +150,10 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.FinalGroggy
-    DisplayName: "2페이즈 체력 소진 후 마무리 대기 진입"
+    DisplayName: "2\uD398\uC774\uC988 \uCCB4\uB825 \uC18C\uC9C4 \uD6C4 \uB9C8\uBB34\uB9AC
+      \uB300\uAE30 \uC9C4\uC785"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -140,8 +161,10 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.Defeat
-    DisplayName: "마무리에 의한 최종 처치 확정"
+    DisplayName: "\uB9C8\uBB34\uB9AC\uC5D0 \uC758\uD55C \uCD5C\uC885 \uCC98\uCE58
+      \uD655\uC815"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -149,8 +172,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.AttackReady
-    DisplayName: "패턴 예고 시작"
+    DisplayName: "\uD328\uD134 \uC608\uACE0 \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -158,8 +182,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.Jump
-    DisplayName: "각 찍기의 도약 시작"
+    DisplayName: "\uAC01 \uCC0D\uAE30\uC758 \uB3C4\uC57D \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -167,8 +192,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.TongueRetract
-    DisplayName: "패링 후 혀 회수 시작"
+    DisplayName: "\uD328\uB9C1 \uD6C4 \uD600 \uD68C\uC218 \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -176,8 +202,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.ChargeLoop
-    DisplayName: "실제 돌진 시작"
+    DisplayName: "\uC2E4\uC81C \uB3CC\uC9C4 \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -185,8 +212,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 1
   - SoundId: Boss.ChargeEnd
-    DisplayName: "돌진 정상 종료"
+    DisplayName: "\uB3CC\uC9C4 \uC815\uC0C1 \uC885\uB8CC"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -194,8 +222,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.BubbleSpawn
-    DisplayName: "독 방울 웨이브 생성 성공"
+    DisplayName: "\uB3C5 \uBC29\uC6B8 \uC6E8\uC774\uBE0C \uC0DD\uC131 \uC131\uACF5"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -203,8 +232,10 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.BabySpawn
-    DisplayName: "방울 파열에 의한 올챙이 생성 성공"
+    DisplayName: "\uBC29\uC6B8 \uD30C\uC5F4\uC5D0 \uC758\uD55C \uC62C\uCC59\uC774
+      \uC0DD\uC131 \uC131\uACF5"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -212,8 +243,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.BabyHurt
-    DisplayName: "올챙이 비치명 피해 적용"
+    DisplayName: "\uC62C\uCC59\uC774 \uBE44\uCE58\uBA85 \uD53C\uD574 \uC801\uC6A9"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -221,8 +253,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.BabyDeath
-    DisplayName: "올챙이 일반 사망 확정"
+    DisplayName: "\uC62C\uCC59\uC774 \uC77C\uBC18 \uC0AC\uB9DD \uD655\uC815"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -230,8 +263,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.GroggyRecover
-    DisplayName: "짧은 그로기 정상 회복"
+    DisplayName: "\uC9E7\uC740 \uADF8\uB85C\uAE30 \uC815\uC0C1 \uD68C\uBCF5"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -239,8 +273,11 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.BubbleHurt
-    DisplayName: "개구리알에 실제 피해가 들어간 타격마다"
-    Clips: []
+    DisplayName: "\uAC1C\uAD6C\uB9AC\uC54C\uC5D0 \uC2E4\uC81C \uD53C\uD574\uAC00
+      \uB4E4\uC5B4\uAC04 \uD0C0\uACA9\uB9C8\uB2E4"
+    Clips:
+    - {fileID: 8300000, guid: 1fae7266dc0c4424aa138033c4b4ce1d, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -248,8 +285,11 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.TongueImpact
-    DisplayName: "보스 혀가 플레이어에게 실제 피해를 준 순간"
-    Clips: []
+    DisplayName: "\uBCF4\uC2A4 \uD600\uAC00 \uD50C\uB808\uC774\uC5B4\uC5D0\uAC8C
+      \uC2E4\uC81C \uD53C\uD574\uB97C \uC900 \uC21C\uAC04"
+    Clips:
+    - {fileID: 8300000, guid: ddc34f25cd140014096812fd7ae580ae, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -257,19 +297,44 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Boss.SpitImpact
-    DisplayName: "보스 침이 플레이어에게 직접 피해를 준 순간"
-    Clips: []
+    DisplayName: "\uBCF4\uC2A4 \uCE68\uC774 \uD50C\uB808\uC774\uC5B4\uC5D0\uAC8C
+      \uC9C1\uC811 \uD53C\uD574\uB97C \uC900 \uC21C\uAC04"
+    Clips:
+    - {fileID: 8300000, guid: ed492c84ffe61744c83483e0a8ecb8a3, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
     OutputGroup: 0
     Priority: 50
     MaxCount: 4
+  - SoundId: Boss.Footstep
+    DisplayName: "\uBCF4\uC2A4 \uC774\uB3D9 \uCC29\uC9C0 \uBC1C\uBC14\uB2E5"
+    Clips:
+    - {fileID: 8300000, guid: f11202fbaf4c52e45b05086b461255a9, type: 3}
+    StartOffset: 0
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: Boss.FrogAmbience
+    DisplayName: "\uBCF4\uC2A4\uC804 \uBC30\uACBD \uAC1C\uAD6C\uB9AC \uC6B8\uC74C"
+    Clips:
+    - {fileID: 8300000, guid: e2d59886c73c724469862a1add5b312e, type: 3}
+    StartOffset: 0
+    Volume: 0.2
+    PitchMin: 0.95
+    PitchMax: 1.05
+    OutputGroup: 0
+    Priority: 20
+    MaxCount: 1
   _events:
   - EventId: Boss.Intro
     Enabled: 1
     SoundId: Boss.Intro
-    TriggerDescription: "등장 연출 시작"
+    TriggerDescription: "\uB4F1\uC7A5 \uC5F0\uCD9C \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -281,7 +346,7 @@ MonoBehaviour:
   - EventId: Boss.Hurt
     Enabled: 1
     SoundId: Boss.Hurt
-    TriggerDescription: "직접 공격 피해 적용"
+    TriggerDescription: "\uC9C1\uC811 \uACF5\uACA9 \uD53C\uD574 \uC801\uC6A9"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -293,7 +358,7 @@ MonoBehaviour:
   - EventId: Boss.Tongue
     Enabled: 1
     SoundId: Boss.Tongue
-    TriggerDescription: "각 높이의 혀 뻗기 시작"
+    TriggerDescription: "\uAC01 \uB192\uC774\uC758 \uD600 \uBED7\uAE30 \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -305,7 +370,7 @@ MonoBehaviour:
   - EventId: Boss.Stomp
     Enabled: 1
     SoundId: Boss.Stomp
-    TriggerDescription: "각 찍기의 실제 착지"
+    TriggerDescription: "\uAC01 \uCC0D\uAE30\uC758 \uC2E4\uC81C \uCC29\uC9C0"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -317,7 +382,7 @@ MonoBehaviour:
   - EventId: Boss.NeedleFire
     Enabled: 1
     SoundId: Boss.NeedleFire
-    TriggerDescription: "좌우 바늘 발사 묶음 생성"
+    TriggerDescription: "\uC88C\uC6B0 \uBC14\uB298 \uBC1C\uC0AC \uBB36\uC74C \uC0DD\uC131"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -329,7 +394,7 @@ MonoBehaviour:
   - EventId: Boss.Spit
     Enabled: 1
     SoundId: Boss.Spit
-    TriggerDescription: "각 침뱉기 발사 묶음 생성"
+    TriggerDescription: "\uAC01 \uCE68\uBC49\uAE30 \uBC1C\uC0AC \uBB36\uC74C \uC0DD\uC131"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -341,7 +406,7 @@ MonoBehaviour:
   - EventId: Boss.ChargeStart
     Enabled: 1
     SoundId: Boss.ChargeStart
-    TriggerDescription: "실제 돌진 이동·판정 시작"
+    TriggerDescription: "\uC2E4\uC81C \uB3CC\uC9C4 \uC774\uB3D9\xB7\uD310\uC815 \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -353,7 +418,7 @@ MonoBehaviour:
   - EventId: Boss.PhaseHowl
     Enabled: 1
     SoundId: Boss.PhaseHowl
-    TriggerDescription: "1 → 2페이즈 전환 연출 시작"
+    TriggerDescription: "1 \u2192 2\uD398\uC774\uC988 \uC804\uD658 \uC5F0\uCD9C \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -365,7 +430,7 @@ MonoBehaviour:
   - EventId: Boss.SummonStart
     Enabled: 1
     SoundId: Boss.SummonStart
-    TriggerDescription: "독 방울 소환 패턴 진입"
+    TriggerDescription: "\uB3C5 \uBC29\uC6B8 \uC18C\uD658 \uD328\uD134 \uC9C4\uC785"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -377,7 +442,8 @@ MonoBehaviour:
   - EventId: Boss.BubblePop
     Enabled: 1
     SoundId: Boss.BubblePop
-    TriggerDescription: "공격에 의한 방울 파열 성공"
+    TriggerDescription: "\uACF5\uACA9\uC5D0 \uC758\uD55C \uBC29\uC6B8 \uD30C\uC5F4
+      \uC131\uACF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -389,7 +455,8 @@ MonoBehaviour:
   - EventId: Boss.BabyLaunch
     Enabled: 1
     SoundId: Boss.BabyLaunch
-    TriggerDescription: "3타로 올챙이 날려 보내기 성공"
+    TriggerDescription: "3\uD0C0\uB85C \uC62C\uCC59\uC774 \uB0A0\uB824 \uBCF4\uB0B4\uAE30
+      \uC131\uACF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -401,7 +468,8 @@ MonoBehaviour:
   - EventId: Boss.BabyHitBoss
     Enabled: 1
     SoundId: Boss.BabyHitBoss
-    TriggerDescription: "올챙이 기믹 피해 적용 성공"
+    TriggerDescription: "\uC62C\uCC59\uC774 \uAE30\uBBF9 \uD53C\uD574 \uC801\uC6A9
+      \uC131\uACF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -413,7 +481,8 @@ MonoBehaviour:
   - EventId: Boss.Groggy
     Enabled: 1
     SoundId: Boss.Groggy
-    TriggerDescription: "찍기 패링 후 짧은 그로기 진입"
+    TriggerDescription: "\uCC0D\uAE30 \uD328\uB9C1 \uD6C4 \uC9E7\uC740 \uADF8\uB85C\uAE30
+      \uC9C4\uC785"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -425,7 +494,8 @@ MonoBehaviour:
   - EventId: Boss.FinalGroggy
     Enabled: 1
     SoundId: Boss.FinalGroggy
-    TriggerDescription: "2페이즈 체력 소진 후 마무리 대기 진입"
+    TriggerDescription: "2\uD398\uC774\uC988 \uCCB4\uB825 \uC18C\uC9C4 \uD6C4 \uB9C8\uBB34\uB9AC
+      \uB300\uAE30 \uC9C4\uC785"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -437,7 +507,8 @@ MonoBehaviour:
   - EventId: Boss.Defeat
     Enabled: 1
     SoundId: Boss.Defeat
-    TriggerDescription: "마무리에 의한 최종 처치 확정"
+    TriggerDescription: "\uB9C8\uBB34\uB9AC\uC5D0 \uC758\uD55C \uCD5C\uC885 \uCC98\uCE58
+      \uD655\uC815"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -449,7 +520,7 @@ MonoBehaviour:
   - EventId: Boss.AttackReady
     Enabled: 1
     SoundId: Boss.AttackReady
-    TriggerDescription: "패턴 예고 시작"
+    TriggerDescription: "\uD328\uD134 \uC608\uACE0 \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -461,7 +532,7 @@ MonoBehaviour:
   - EventId: Boss.Jump
     Enabled: 1
     SoundId: Boss.Jump
-    TriggerDescription: "각 찍기의 도약 시작"
+    TriggerDescription: "\uAC01 \uCC0D\uAE30\uC758 \uB3C4\uC57D \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -473,7 +544,7 @@ MonoBehaviour:
   - EventId: Boss.TongueRetract
     Enabled: 1
     SoundId: Boss.TongueRetract
-    TriggerDescription: "패링 후 혀 회수 시작"
+    TriggerDescription: "\uD328\uB9C1 \uD6C4 \uD600 \uD68C\uC218 \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -485,7 +556,7 @@ MonoBehaviour:
   - EventId: Boss.ChargeLoop
     Enabled: 1
     SoundId: Boss.ChargeLoop
-    TriggerDescription: "실제 돌진 시작"
+    TriggerDescription: "\uC2E4\uC81C \uB3CC\uC9C4 \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -493,11 +564,12 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 0
     BgmFadeDuration: -1
-    LoopEndRule: "행동 종료·취소, 비활성화 또는 씬 종료"
+    LoopEndRule: "\uD589\uB3D9 \uC885\uB8CC\xB7\uCDE8\uC18C, \uBE44\uD65C\uC131\uD654
+      \uB610\uB294 \uC52C \uC885\uB8CC"
   - EventId: Boss.ChargeEnd
     Enabled: 1
     SoundId: Boss.ChargeEnd
-    TriggerDescription: "돌진 정상 종료"
+    TriggerDescription: "\uB3CC\uC9C4 \uC815\uC0C1 \uC885\uB8CC"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -509,7 +581,7 @@ MonoBehaviour:
   - EventId: Boss.BubbleSpawn
     Enabled: 1
     SoundId: Boss.BubbleSpawn
-    TriggerDescription: "독 방울 웨이브 생성 성공"
+    TriggerDescription: "\uB3C5 \uBC29\uC6B8 \uC6E8\uC774\uBE0C \uC0DD\uC131 \uC131\uACF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -521,7 +593,8 @@ MonoBehaviour:
   - EventId: Boss.BabySpawn
     Enabled: 1
     SoundId: Boss.BabySpawn
-    TriggerDescription: "방울 파열에 의한 올챙이 생성 성공"
+    TriggerDescription: "\uBC29\uC6B8 \uD30C\uC5F4\uC5D0 \uC758\uD55C \uC62C\uCC59\uC774
+      \uC0DD\uC131 \uC131\uACF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -533,7 +606,7 @@ MonoBehaviour:
   - EventId: Boss.BabyHurt
     Enabled: 1
     SoundId: Boss.BabyHurt
-    TriggerDescription: "올챙이 비치명 피해 적용"
+    TriggerDescription: "\uC62C\uCC59\uC774 \uBE44\uCE58\uBA85 \uD53C\uD574 \uC801\uC6A9"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -545,7 +618,7 @@ MonoBehaviour:
   - EventId: Boss.BabyDeath
     Enabled: 1
     SoundId: Boss.BabyDeath
-    TriggerDescription: "올챙이 일반 사망 확정"
+    TriggerDescription: "\uC62C\uCC59\uC774 \uC77C\uBC18 \uC0AC\uB9DD \uD655\uC815"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -557,7 +630,7 @@ MonoBehaviour:
   - EventId: Boss.GroggyRecover
     Enabled: 1
     SoundId: Boss.GroggyRecover
-    TriggerDescription: "짧은 그로기 정상 회복"
+    TriggerDescription: "\uC9E7\uC740 \uADF8\uB85C\uAE30 \uC815\uC0C1 \uD68C\uBCF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -565,11 +638,12 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 0
     BgmFadeDuration: -1
-    LoopEndRule:
+    LoopEndRule: 
   - EventId: Boss.BubbleHurt
     Enabled: 1
     SoundId: Boss.BubbleHurt
-    TriggerDescription: "개구리알에 실제 피해가 들어간 타격마다"
+    TriggerDescription: "\uAC1C\uAD6C\uB9AC\uC54C\uC5D0 \uC2E4\uC81C \uD53C\uD574\uAC00
+      \uB4E4\uC5B4\uAC04 \uD0C0\uACA9\uB9C8\uB2E4"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -577,11 +651,12 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 0
     BgmFadeDuration: -1
-    LoopEndRule:
+    LoopEndRule: 
   - EventId: Boss.TongueImpact
     Enabled: 1
     SoundId: Boss.TongueImpact
-    TriggerDescription: "보스 혀가 플레이어에게 실제 피해를 준 순간"
+    TriggerDescription: "\uBCF4\uC2A4 \uD600\uAC00 \uD50C\uB808\uC774\uC5B4\uC5D0\uAC8C
+      \uC2E4\uC81C \uD53C\uD574\uB97C \uC900 \uC21C\uAC04"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -589,11 +664,12 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 0
     BgmFadeDuration: -1
-    LoopEndRule:
+    LoopEndRule: 
   - EventId: Boss.SpitImpact
     Enabled: 1
     SoundId: Boss.SpitImpact
-    TriggerDescription: "보스 침이 플레이어에게 직접 피해를 준 순간"
+    TriggerDescription: "\uBCF4\uC2A4 \uCE68\uC774 \uD50C\uB808\uC774\uC5B4\uC5D0\uAC8C
+      \uC9C1\uC811 \uD53C\uD574\uB97C \uC900 \uC21C\uAC04"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -601,4 +677,30 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 0
     BgmFadeDuration: -1
-    LoopEndRule:
+    LoopEndRule: 
+  - EventId: Boss.Footstep
+    Enabled: 1
+    SoundId: Boss.Footstep
+    TriggerDescription: "\uAE30\uBCF8 \uC774\uB3D9\xB7\uD6C4\uD1F4 \uC810\uD504\uC758
+      \uC2E4\uC81C \uCC29\uC9C0\uB9C8\uB2E4 1\uD68C"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Boss.FrogAmbience
+    Enabled: 1
+    SoundId: Boss.FrogAmbience
+    TriggerDescription: "\uBCF4\uC2A4\uC804 \uC911 \uC6B8\uC74C\uC774 \uB05D\uB09C
+      \uB4A4 \uB79C\uB364 \uD734\uC2DD \uAC04\uACA9\uC73C\uB85C 1\uD68C\uC529"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 1
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 

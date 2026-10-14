@@ -38,6 +38,15 @@ public static class AudioCatalogValidation
                 if (!Finite(sound.PitchMin) || !Finite(sound.PitchMax) || sound.PitchMin <= 0f || sound.PitchMax < sound.PitchMin)
                     issues.Add($"{label}: 피치는 양수이며 최소 ≤ 최대여야 합니다.");
                 if (!Finite(sound.Volume) || sound.Volume < 0f || sound.Volume > 1f) issues.Add($"{label}: 볼륨 범위는 0~1입니다.");
+                if (!sound.HasValidStartOffset) issues.Add($"{label}: 앞부분 건너뛰기 시간은 유한한 0 이상의 값이어야 합니다.");
+                else if (sound.Clips != null)
+                {
+                    foreach (UnityEngine.AudioClip clip in sound.Clips)
+                    {
+                        if (clip != null && !sound.TryGetStartSample(clip, out _))
+                            issues.Add($"{label}: 앞부분 건너뛰기 시간이 {clip.name}의 길이 이상입니다. 이 음원은 재생되지 않습니다.");
+                    }
+                }
                 if (sound.MaxCount < 1) issues.Add($"{label}: 최대 동시 재생 수는 1 이상이어야 합니다.");
             }
         }

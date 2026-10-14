@@ -403,7 +403,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         public IntervalScope IntervalScope;
         public AudioClip Clip;
         public float Volume, Pitch, Delay, Interval, Fade;
-        public int Priority, MaxCount;
+        public int Priority, MaxCount, StartSample;
         public bool Loop, Bgm, Started, Paused;
         public ulong MusicSequence, StartOrder;
         public AudioSource Source;
@@ -418,6 +418,8 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
     private Request _pendingMusic, _currentMusic;
     private readonly Dictionary<ulong, Request> _requests = new Dictionary<ulong, Request>();
     private readonly Dictionary<AudioSource, Request> _channels = new Dictionary<AudioSource, Request>();
+    private readonly Dictionary<(AudioClip, int), AudioClip> _trimmedLoops = new Dictionary<(AudioClip, int), AudioClip>();
+    private readonly HashSet<AudioClip> _warnedTrimClips = new HashSet<AudioClip>();
     private readonly Dictionary<int, uint> _ownerGenerations = new Dictionary<int, uint>();
     private readonly Dictionary<int, uint> _sceneGenerations = new Dictionary<int, uint>();
     private readonly HashSet<AudioOwnerKey> _releasedOwners = new HashSet<AudioOwnerKey>();
@@ -458,7 +460,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
             return PlayHandle.Empty;
         }
 
-        if (sound == null || string.IsNullOrWhiteSpace(sound.SoundId) || !sound.HasValidClip ||
+        if (sound == null || string.IsNullOrWhiteSpace(sound.SoundId) || !sound.HasValidClip || !sound.HasValidStartOffset ||
             sound.PitchMin <= 0f || sound.PitchMax < sound.PitchMin ||
             float.IsNaN(sound.PitchMin) || float.IsNaN(sound.PitchMax) || float.IsInfinity(sound.PitchMax) ||
             (requiredOutput.HasValue && sound.OutputGroup != requiredOutput.Value))
@@ -489,27 +491,27 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
             }
         }
 
-        // null 클립을 제외한 균등 랜덤 선택. 이후 데이터 변경은 이 요청에 영향을 주지 않는다.
+        // The trim point must leave at least one sample in the selected clip.
         int count = 0;
         foreach (AudioClip clip in sound.Clips)
         {
-            if (clip != null)
-            {
-                count++;
-            }
+            if (sound.TryGetStartSample(clip, out _)) count++;
         }
+        if (count == 0) return PlayHandle.Empty;
         int choice = UnityEngine.Random.Range(0, count);
         AudioClip selected = null;
         foreach (AudioClip clip in sound.Clips)
         {
-            if (clip != null && choice-- == 0)
+            if (sound.TryGetStartSample(clip, out _) && choice-- == 0)
             {
                 selected = clip;
                 break;
             }
         }
+        sound.TryGetStartSample(selected, out int startSample);
         var request = new Request
         {
+            StartSample = startSample,
             SetId = setId,
             EventId = eventId,
             SoundId = sound.SoundId,
@@ -655,6 +657,65 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         _lastStarts[IntervalKey(request)] = (Time.timeAsDouble, Time.unscaledTimeAsDouble);
     }
 
+    private bool PrepareTrimmedPlayback(Request request)
+    {
+        if (request.StartSample == 0) return true;
+        AudioClip original = request.Clip;
+        if (original.loadState == AudioDataLoadState.Unloaded) original.LoadAudioData();
+        if (original.loadState == AudioDataLoadState.Loading)
+        {
+            request.Pending = StartCoroutine(WaitForTrimData(request));
+            return false;
+        }
+        if (original.loadState != AudioDataLoadState.Loaded)
+        {
+            StopHandle(request.Handle);
+            return false;
+        }
+        if (!request.Loop) return true;
+        (AudioClip original, int StartSample) key = (original, request.StartSample);
+        if (!_trimmedLoops.TryGetValue(key, out AudioClip trimmed) || trimmed == null)
+        {
+            int remaining = original.samples - request.StartSample;
+            float[] samples = new float[remaining * original.channels];
+            if (!original.GetData(samples, request.StartSample))
+            {
+                if (_warnedTrimClips.Add(original))
+                    Debug.LogWarning($"{original.name}: 앞부분을 건너뛰는 반복음은 Audio Import Load Type을 Decompress On Load로 설정하세요.", this);
+                StopHandle(request.Handle);
+                return false;
+            }
+            trimmed = AudioClip.Create(original.name + " (trimmed loop)", remaining, original.channels, original.frequency, false);
+            trimmed.hideFlags = HideFlags.HideAndDontSave;
+            if (!trimmed.SetData(samples, 0))
+            {
+                Destroy(trimmed);
+                StopHandle(request.Handle);
+                return false;
+            }
+            _trimmedLoops[key] = trimmed;
+        }
+        request.Clip = trimmed;
+        request.StartSample = 0;
+        return true;
+    }
+
+    private IEnumerator WaitForTrimData(Request request)
+    {
+        while (request.Clip != null && request.Clip.loadState == AudioDataLoadState.Loading)
+        {
+            yield return null;
+            if (!CanStart(request))
+            {
+                request.Pending = null;
+                StopHandle(request.Handle);
+                yield break;
+            }
+        }
+        request.Pending = null;
+        StartRequest(request);
+    }
+
     private void StartRequest(Request request)
     {
         if (!CanStart(request) || request.Clip == null || !IntervalAllowed(request))
@@ -662,6 +723,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
             StopHandle(request.Handle);
             return;
         }
+        if (!PrepareTrimmedPlayback(request)) return;
         if (request.Bgm)
         {
             _bgmFadeCoroutine = StartCoroutine(TransitionMusic(request, request.Fade, request.MusicSequence));
@@ -713,6 +775,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         request.Source = channel;
         _channels[channel] = request;
         channel.clip = request.Clip;
+        channel.timeSamples = request.StartSample;
         channel.pitch = request.Pitch;
         channel.loop = request.Loop;
         channel.volume = (_isSfxMuted ? 0f : _sfxVolume) * request.Volume;
@@ -953,6 +1016,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         {
             request.Source = _bgmSource;
             _musicVolume = request.Volume;
+            _bgmSource.timeSamples = request.StartSample;
             _bgmSource.pitch = request.Pitch;
             _bgmSource.loop = request.Loop;
             _musicFade = duration > 0f ? 0f : 1f;
@@ -1074,6 +1138,11 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
     private void OnDestroy()
     {
         UnsubscribeSceneEvents();
+        foreach (AudioClip clip in _trimmedLoops.Values)
+        {
+            if (clip != null) Destroy(clip);
+        }
+        _trimmedLoops.Clear();
         if (_instance == this)
         {
             _isShuttingDown = true;
