@@ -3504,11 +3504,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 652bf59256ba41ada32513db8c3fdac5, type: 3}
       propertyPath: _weight
-      value: 0.5
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 652bf59256ba41ada32513db8c3fdac5, type: 3}
       propertyPath: _cooldown
-      value: 30
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 652bf59256ba41ada32513db8c3fdac5, type: 3}
       propertyPath: _vfxPrefab
@@ -3538,6 +3538,18 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1455301013}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1455301015 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 11400000, guid: 652bf59256ba41ada32513db8c3fdac5,
+    type: 3}
+  m_PrefabInstance: {fileID: 1455301013}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 652bf59256ba41ada32513db8c3fdac3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossPoisonSpewPattern
 --- !u!1001 &1500655848
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4024,6 +4036,85 @@ MonoBehaviour:
   - {x: 0.5, y: -0.5, z: 0}
   - {x: 0.5, y: 0.5, z: 0}
   - {x: -0.5, y: 0.5, z: 0}
+--- !u!1 &1654454052
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1654454053}
+  - component: {fileID: 1654454054}
+  m_Layer: 0
+  m_Name: RetreatHopPattern
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1654454053
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1654454052}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1847312037}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1654454054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1654454052}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1240309da74c04f48aff7b6df7c603f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossHopPattern
+  _patternName: "\uD6C4\uD1F4 \uC810\uD504"
+  _phases: -1
+  _floors: 1
+  _weight: 1.5
+  _cooldown: 0
+  _animationTrigger: hop
+  _animationClip: {fileID: 7400000, guid: ddb241990f77e6c43a82851448213d21, type: 2}
+  _followingClips: []
+  _durationOverride: 0
+  _fallbackDuration: 1.5
+  _animationSpeed: 1
+  _animationStartTimeout: 1.5
+  _afterDelay: 0
+  _disableContactDamage: 1
+  _hitStartRatio: 0
+  _hitEndRatio: 1
+  _minDistance: 0
+  _maxDistance: 8
+  _hopCount: 1
+  _hopDistance: 10
+  _hopHeight: 4
+  _airSpeed: 20
+  _minAirDuration: 0.15
+  _maxAirDuration: 0.75
+  _nextHopDelay: 0
+  _overshootDistance: 5
+  _overshootJitter: 0.3
+  _edgeMargin: 2
+  _retreatFromPlayer: 1
+  _minimumRetreatTravel: 4
+  _takeoffDust: 1
+  _landingDust: 1
+  _landingShake:
+    Duration: 0.12
+    Magnitude: 0.12
 --- !u!1 &1694803386
 GameObject:
   m_ObjectHideFlags: 0
@@ -4298,6 +4389,8 @@ MonoBehaviour:
   _overshootDistance: 5
   _overshootJitter: 0.3
   _edgeMargin: 2
+  _retreatFromPlayer: 0
+  _minimumRetreatTravel: 4
   _takeoffDust: 1
   _landingDust: 1
   _landingShake:
@@ -4324,7 +4417,7 @@ MonoBehaviour:
   _patternName: "\uC55E\uBC1C \uB54C\uB9AC\uAE30"
   _phases: -1
   _floors: 1
-  _weight: 100
+  _weight: 3
   _cooldown: 0
   _animationTrigger: melee
   _animationClip: {fileID: 7400000, guid: 30b24d4182ff0594e9297930cde9d1a3, type: 2}
@@ -6402,6 +6495,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
+      propertyPath: _suctionDistance
+      value: 4.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
       propertyPath: _summonPoint
       value: 
       objectReference: {fileID: 626587057}
@@ -6507,6 +6605,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1209447592}
+    - targetCorrespondingSourceObject: {fileID: 3711774888999376504, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1654454053}
     - targetCorrespondingSourceObject: {fileID: 2286373942653099037, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       insertIndex: -1
@@ -6528,6 +6630,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 7894052878302603949}
+    - targetCorrespondingSourceObject: {fileID: 1225062696768127293, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7894052878302603952}
   m_SourcePrefab: {fileID: 100100000, guid: de8d85715d11ee24394c7cfaefda911e, type: 3}
 --- !u!4 &7894052878302603947 stripped
 Transform:
@@ -6564,6 +6670,78 @@ MonoBehaviour:
   _widthRatio: 0.9
   _shadowThickness: 0.25
   _opacity: 0.6
+--- !u!114 &7894052878302603950 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 732215281463642168, guid: de8d85715d11ee24394c7cfaefda911e,
+    type: 3}
+  m_PrefabInstance: {fileID: 7894052878302603946}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 730451388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe7f87e8aa8a17644aadf822eb802a6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossChargePattern
+--- !u!114 &7894052878302603951 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5040009013939251897, guid: de8d85715d11ee24394c7cfaefda911e,
+    type: 3}
+  m_PrefabInstance: {fileID: 7894052878302603946}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 730451388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 525b6690dfd800e47a1654370d7c1894, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossSpitPattern
+--- !u!114 &7894052878302603952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 730451388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3a980145368439999c495126452197a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossComboController
+  _comboChance: 0.6
+  _combos:
+  - Name: "\uC55E\uBC1C \uD6C4 \uB3C5\uBD84\uC0AC"
+    StartPattern: {fileID: 1847312049}
+    Phases: 3
+    Steps:
+    - Pattern: {fileID: 1654454054}
+      Fallback: {fileID: 0}
+    - Pattern: {fileID: 1455301015}
+      Fallback: {fileID: 7894052878302603951}
+  - Name: "\uAF2C\uB9AC \uD6C4 \uAC70\uB9AC \uD655\uBCF4"
+    StartPattern: {fileID: 1847312050}
+    Phases: 3
+    Steps:
+    - Pattern: {fileID: 1654454054}
+      Fallback: {fileID: 0}
+    - Pattern: {fileID: 7894052878302603951}
+      Fallback: {fileID: 0}
+  - Name: "\uCE68\uBC49\uAE30 \uD6C4 \uB118\uAE30"
+    StartPattern: {fileID: 7894052878302603951}
+    Phases: 3
+    Steps:
+    - Pattern: {fileID: 1847312036}
+      Fallback: {fileID: 0}
+    - Pattern: {fileID: 1847312050}
+      Fallback: {fileID: 0}
+  - Name: "\uD6C4\uD1F4 \uD6C4 \uC7AC\uB3CC\uC785"
+    StartPattern: {fileID: 1654454054}
+    Phases: 2
+    Steps:
+    - Pattern: {fileID: 7894052878302603951}
+      Fallback: {fileID: 0}
+    - Pattern: {fileID: 7894052878302603950}
+      Fallback: {fileID: 0}
+  _activeComboName: 
+  _nextStepIndex: 0
 --- !u!1001 &8179876039420071328
 PrefabInstance:
   m_ObjectHideFlags: 0

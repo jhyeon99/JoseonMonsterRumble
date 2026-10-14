@@ -100,9 +100,10 @@ MonoBehaviour:
   _launchSpeed: 16
   _gimmickDamage: 40
   _nudgeSpeed: 2
-  _nudgeUpSpeed: 3
+  _groundNudgeMultiplier: 1.25
+  _nudgeUpSpeed: 0
   _nudgeDuration: 0.3
-  _knockbackGroundDeceleration: 20
+  _knockbackGroundDeceleration: 12
   _attackKnockbackMultiplier: 0
   _impactShake:
     Duration: 0.2
