@@ -612,7 +612,8 @@ public class PrologueIntroController : MonoBehaviour
         float duration = 0f;
         foreach (AudioClip clip in sound.Clips)
         {
-            if (clip != null) duration = Mathf.Max(duration, clip.length / Mathf.Max(0.01f, sound.PitchMin));
+            if (sound.TryGetStartSample(clip, out int startSample))
+                duration = Mathf.Max(duration, (clip.samples - startSample) / (float)clip.frequency / Mathf.Max(0.01f, sound.PitchMin));
         }
         return binding.EffectiveDelay + duration;
     }

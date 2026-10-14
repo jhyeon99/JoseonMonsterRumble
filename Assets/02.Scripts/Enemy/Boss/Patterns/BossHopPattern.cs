@@ -211,6 +211,7 @@ public class BossHopPattern : BossPattern
             Boss.PlayJumpEnd();
         }
 
+        AudioResult("Boss.Footstep", Boss.Position);
         CameraShake.Shake(_landingShake);
 
         if (!landingDustPlayed)

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using GameAudio;
 using UnityEngine;
@@ -12,6 +13,8 @@ public sealed class BossAudio : ActorAudio
     private ulong _stateExecution;
     private readonly Dictionary<BossPattern, PlayHandle> _chargeLoops = new Dictionary<BossPattern, PlayHandle>();
     private bool _defeated;
+    private Coroutine _frogAmbience;
+    private PlayHandle _frogHandle;
 
     protected override void OnEnable()
     {
@@ -35,6 +38,7 @@ public sealed class BossAudio : ActorAudio
 
     protected override void OnDisable()
     {
+        StopFrogAmbience();
         if (_health != null) _health.OnDamaged -= OnDamaged;
         if (_boss != null) _boss.OnAudioStateChanged -= OnStateChanged;
         Boss.OnDefeated -= OnDefeated;
@@ -59,8 +63,42 @@ public sealed class BossAudio : ActorAudio
     protected override SoundSetSO ResolveSet() => _soundSet != null ? _soundSet : Manager?.Catalog?.Boss;
     private void OnFightStarted(Boss boss)
     {
-        if (boss == _boss && !_defeated && Manager != null) Manager.PlayMusicEvent("Music.Boss", gameObject.scene);
+        if (boss != _boss || _defeated || Manager == null) return;
+        Manager.PlayMusicEvent("Music.Boss", gameObject.scene);
+        if (_frogAmbience == null) _frogAmbience = StartCoroutine(PlayFrogAmbience());
     }
+    private IEnumerator PlayFrogAmbience()
+    {
+        while (!_defeated && Manager != null)
+        {
+            AudioCatalogSO catalog = Manager.Catalog;
+            float first = catalog != null ? catalog.BossFrogMinInterval : 3f;
+            float second = catalog != null ? catalog.BossFrogMaxInterval : 8f;
+            float min = Mathf.Max(0.1f, Mathf.Min(first, second));
+            float max = Mathf.Max(min, Mathf.Max(first, second));
+            yield return new WaitForSeconds(Random.Range(min, max));
+            if (_defeated || Manager == null) break;
+
+            // 클립을 끝까지 재생한 다음 쉬므로 울음끼리 겹치지 않는다.
+            SoundSetSO set = ResolveSet();
+            if (set != null && set.TryGetEvent("Boss.FrogAmbience", out EventBinding binding) && !binding.Loop)
+            {
+                _frogHandle = PlayEntity("Boss.FrogAmbience");
+                while (Manager != null && Manager.IsHandleValid(_frogHandle)) yield return null;
+                _frogHandle = PlayHandle.Empty;
+            }
+        }
+        _frogAmbience = null;
+    }
+
+    private void StopFrogAmbience()
+    {
+        if (_frogAmbience != null) StopCoroutine(_frogAmbience);
+        _frogAmbience = null;
+        if (Manager != null) Manager.StopHandle(_frogHandle);
+        _frogHandle = PlayHandle.Empty;
+    }
+
     private void OnPhaseChanged(int phase)
     {
         if (phase == 2 && !_defeated && Manager != null) Manager.PlayMusicEvent("Music.BossPhase2", gameObject.scene);
@@ -70,6 +108,7 @@ public sealed class BossAudio : ActorAudio
     {
         if (boss != _boss || _defeated) return;
         _defeated = true;
+        StopFrogAmbience();
         PlayResult("Boss.Defeat", transform.position);
         if (Manager != null)
         {
@@ -84,6 +123,7 @@ public sealed class BossAudio : ActorAudio
     private void OnStateChanged(BossState previous, BossState next)
     {
         if (_defeated) return;
+        if (next is BossWaitState || next is BossDefeatedState) StopFrogAmbience();
         bool completed = next is BossIdleState && (previous is BossIntroState || previous is BossPhaseTransitionState);
         EndAction(_stateExecution, completed);
         _stateExecution = 0;
