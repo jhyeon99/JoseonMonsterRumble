@@ -560,10 +560,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e34f270a66f14f9449d441ce020b0af0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMoveArea
-  CenterOffset: {x: 0, y: 0}
-  AreaSize: {x: 13.6, y: 6.11}
+  CenterOffset: {x: 0, y: -2}
+  AreaSize: {x: 14, y: 8}
   _useCustomDetectionArea: 1
-  _detectionAreaSize: {x: 21.8, y: 6.2}
+  _detectionAreaSize: {x: 22, y: 12}
   _chaseReleaseMargin: 2
   AreaColor: {r: 0, g: 1, b: 0, a: 0.3}
 --- !u!114 &-8952448662296909365

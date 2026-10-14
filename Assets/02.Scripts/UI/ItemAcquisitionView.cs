@@ -10,6 +10,7 @@ public sealed class ItemAcquisitionView : MonoBehaviour
     private enum ViewPhase { Hidden, Opening, AwaitingConfirm, Closing }
 
     public static ItemAcquisitionView Instance { get; private set; }
+    public static event System.Action OnItemAcquisitionClosed;
     [SerializeField] private CanvasGroup _group;
     [SerializeField] private Image _icon;
     [SerializeField] private TMP_Text _nameText;
@@ -24,7 +25,11 @@ public sealed class ItemAcquisitionView : MonoBehaviour
     private bool _hasReferences;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetInstance() => Instance = null;
+    private static void ResetInstance()
+    {
+        Instance = null;
+        OnItemAcquisitionClosed = null;
+    }
 
     private void Awake()
     {
@@ -178,6 +183,7 @@ public sealed class ItemAcquisitionView : MonoBehaviour
         {
             PauseController.StopItemModal();
             GameCursorController.SetItemAcquisitionVisible(false);
+            OnItemAcquisitionClosed?.Invoke();
         }
     }
 }

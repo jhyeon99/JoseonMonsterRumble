@@ -42,6 +42,14 @@ public sealed class SceneArrivalFade : MonoBehaviour
         transition._overlay.alpha = 1f;
     }
 
+    public static IEnumerator FadeIn(float duration)
+    {
+        SceneArrivalFade transition = GetOrCreate();
+        transition._duration = Mathf.Max(0.01f, duration);
+        transition.UnlockMovementOnly();
+        yield return transition.Reveal();
+    }
+
     public static void Cancel()
     {
         if (_instance == null) return;
@@ -85,6 +93,8 @@ public sealed class SceneArrivalFade : MonoBehaviour
     {
         if (!_readyToReveal || mode != LoadSceneMode.Single) return;
         _readyToReveal = false;
+        // 도착한 플레이어는 입력만 잠근다. 물리를 멈추면 착지 접촉이 사라진다.
+        if (_lockPlayersDuringFade) LockPlayers(false);
         StartCoroutine(Reveal());
     }
 
@@ -93,7 +103,6 @@ public sealed class SceneArrivalFade : MonoBehaviour
         // Keep the screen black through Start, spawn placement and the first camera LateUpdate.
         yield return null;
         yield return null;
-        if (_lockPlayersDuringFade) LockPlayers();
         float elapsed = 0f;
         while (elapsed < _duration)
         {
@@ -104,7 +113,7 @@ public sealed class SceneArrivalFade : MonoBehaviour
         Complete();
     }
 
-    private void LockPlayers()
+    private void LockPlayers(bool freezeMovement = true)
     {
         Player[] players = FindObjectsByType<Player>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
         foreach (Player player in players)
@@ -123,18 +132,28 @@ public sealed class SceneArrivalFade : MonoBehaviour
                 BodyWasSimulated = body != null && body.simulated
             };
             _playerLocks.Add(playerLock);
-            player.enabled = false;
+            if (freezeMovement) player.enabled = false;
             if (input != null)
             {
                 input.ClearInputState();
                 input.enabled = false;
             }
-            if (body != null)
+            if (freezeMovement && body != null)
             {
                 body.linearVelocity = Vector2.zero;
                 body.angularVelocity = 0f;
                 body.simulated = false;
             }
+        }
+    }
+
+    private void UnlockMovementOnly()
+    {
+        for (int i = 0; i < _playerLocks.Count; i++)
+        {
+            PlayerLock playerLock = _playerLocks[i];
+            if (playerLock.Body != null) playerLock.Body.simulated = playerLock.BodyWasSimulated;
+            if (playerLock.Player != null) playerLock.Player.enabled = playerLock.PlayerWasEnabled;
         }
     }
 

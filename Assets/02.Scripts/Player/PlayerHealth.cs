@@ -55,6 +55,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     public bool IsDead => _isDead;
 
     private bool _isInvincible;
+    private bool _isFinisherInvincible;
 
     // 보스 등장 / 하울링 / 처치 등 연출 중 무적 (피격 후 무적과 별개로 유지)
     private bool _isCinematicInvincible;
@@ -62,7 +63,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     // 가드 / 패링으로 막은 직후 잠깐 무적 (공격의 AttackDefense.BlockInvincibleTime)
     private float _blockInvincibleUntil = float.NegativeInfinity;
-    public bool IsInvincible => _isInvincible || _isCinematicInvincible || _isRespawnProtected;
+    public bool IsInvincible => _isInvincible || _isFinisherInvincible || _isCinematicInvincible || _isRespawnProtected;
 
     public HitData LastFatalHitData { get; private set; }
 
@@ -117,7 +118,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
             return false;
         }
 
-        if (_isInvincible || _isCinematicInvincible)
+        if (_isInvincible || _isFinisherInvincible || _isCinematicInvincible)
         {
             if (_isInvincible && _player != null && _player.StateMachine != null && _player.StateMachine.CurrentState is PlayerDodgeState)
             {
@@ -417,14 +418,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     public void SetInvincible(bool isInvincible, bool showVisual = true)
     {
         _isInvincible = isInvincible;
-
-        int playerLayer = gameObject.layer;
-        int enemyAttackLayer = Constants.Layers.EnemyAttack;
-
-        if (enemyAttackLayer != -1)
-        {
-            Physics2D.IgnoreLayerCollision(playerLayer, enemyAttackLayer, isInvincible);
-        }
+        UpdateAttackCollision();
 
         if (_spriteRenderer != null && (showVisual || !isInvincible))
         {
@@ -436,6 +430,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
 
     private void OnDisable()
     {
+        _isFinisherInvincible = false;
         ClearPoison();
         _isRespawnProtected = false;
         int playerLayer = gameObject.layer;
@@ -445,5 +440,19 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
         {
             Physics2D.IgnoreLayerCollision(playerLayer, enemyAttackLayer, false);
         }
+    }
+
+    /// <summary>패링 마무리 공격의 무적. 일반 피격 무적 타이머와 독립적으로 유지한다.</summary>
+    public void SetFinisherInvincible(bool isInvincible)
+    {
+        _isFinisherInvincible = isInvincible;
+        UpdateAttackCollision();
+    }
+
+    private void UpdateAttackCollision()
+    {
+        int enemyAttackLayer = Constants.Layers.EnemyAttack;
+        if (enemyAttackLayer != -1)
+            Physics2D.IgnoreLayerCollision(gameObject.layer, enemyAttackLayer, _isInvincible || _isFinisherInvincible);
     }
 }

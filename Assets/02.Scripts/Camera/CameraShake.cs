@@ -340,7 +340,7 @@ public class CameraShake : MonoBehaviour
         _kick = default;
         _isZooming = false;
 
-        if (_follow == null)
+        if (_follow == null || !_follow.isActiveAndEnabled)
         {
             transform.position -= _lastOffset;
         }
@@ -351,6 +351,17 @@ public class CameraShake : MonoBehaviour
 
     #endregion
 
+    private void Update()
+    {
+        if (PauseController.IsPaused || _proCamera == null || !_proCamera.isActiveAndEnabled)
+            return;
+
+        // ProCamera2D may skip Move during hit stop. Remove our previous offset
+        // before its LateUpdate so tracking and boundaries never consume it.
+        transform.position -= _lastOffset;
+        _lastOffset = Vector3.zero;
+    }
+
     private void LateUpdate()
     {
         // ProCamera2D also skips movement while paused, so reapplying an offset
@@ -358,7 +369,8 @@ public class CameraShake : MonoBehaviour
         if (PauseController.IsPaused) return;
         _clock += Time.unscaledDeltaTime;
 
-        // 추적 카메라는 매 프레임 기준 위치를 새로 쓰므로 오프셋을 다시 빼지 않는다.
+        // ProCamera2D의 이전 오프셋은 Update에서 제거했다.
+        // CameraFollow만 매 프레임 자체 기준 위치를 새로 쓴다.
         if ((_follow == null || !_follow.isActiveAndEnabled) &&
             (_proCamera == null || !_proCamera.isActiveAndEnabled))
         {
