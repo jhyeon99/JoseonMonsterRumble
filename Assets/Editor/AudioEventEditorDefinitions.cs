@@ -23,6 +23,7 @@ Player.Block|실제 가드 방어 성공
 Player.Parry|실제 패링 성공
 Player.GuardBreak|가드 브레이크 확정
 Player.Finisher|마무리 타격 실행당 1회
+Player.FinisherDisappear|마무리로 날아간 일반 몬스터의 소멸 반짝임 시작
 Player.ChargeStep|부적 슬롯 활성화 성공
 Player.TalismanFire|각 부적 발사부터 명중 또는 소멸까지
 Player.TalismanExplosion|유효 명중으로 부적 폭발 시작
