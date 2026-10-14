@@ -16,7 +16,8 @@ MonoBehaviour:
   - SoundId: Music.Title
     DisplayName: "\uD0C0\uC774\uD2C0 \uC52C \uC9C4\uC785"
     Clips:
-    - {fileID: 8300000, guid: bed421544c357f440bcac3c9964a6fed, type: 3}
+    - {fileID: 8300000, guid: 374177a0513cbb84286021b4692699ec, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -26,6 +27,7 @@ MonoBehaviour:
   - SoundId: Music.Field
     DisplayName: "\uC77C\uBC18 \uD50C\uB808\uC774 \uC52C \uC9C4\uC785"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -36,6 +38,7 @@ MonoBehaviour:
     DisplayName: "\uC2E4\uC81C \uBCF4\uC2A4 \uC804\uD22C \uC2DC\uC791"
     Clips:
     - {fileID: 8300000, guid: ad87b426ff4cbf241aa4f8c83965a331, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -45,6 +48,7 @@ MonoBehaviour:
   - SoundId: Music.BossPhase2
     DisplayName: "2\uD398\uC774\uC988 \uC9C4\uC785 \uD655\uC815"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -53,7 +57,9 @@ MonoBehaviour:
     MaxCount: 1
   - SoundId: Music.Prologue
     DisplayName: "\uD504\uB864\uB85C\uADF8 \uC5F0\uCD9C \uC2DC\uC791"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: 6e8f7dff26bfc1843916a126aacc8a24, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -63,6 +69,7 @@ MonoBehaviour:
   - SoundId: Music.Victory
     DisplayName: "\uBCF4\uC2A4 \uCD5C\uC885 \uCC98\uCE58 \uD655\uC815"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -73,6 +80,7 @@ MonoBehaviour:
     DisplayName: "\uC0AC\uB9DD \uD654\uBA74 \uC9C4\uC785"
     Clips:
     - {fileID: 8300000, guid: 1289cd4c988675541b31b962ed3f68fb, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
