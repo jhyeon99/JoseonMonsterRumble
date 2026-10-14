@@ -44,6 +44,15 @@ public abstract class Enemy : MonoBehaviour, IFinishable
     public float RightAngle => _rightAngle;
     public float LeftAngle => _leftAngle;
 
+    public bool IsSpawnBlocked { get; private set; }
+
+    /// <summary>이번 씬에서 체크포인트 이전 적의 재활성화를 막는다.</summary>
+    public void BlockSpawn()
+    {
+        IsSpawnBlocked = true;
+        gameObject.SetActive(false);
+    }
+
     /// <summary>패링당해 그로기 중인지</summary>
     public bool IsGroggy => _stateMachine.CurrentState is GroggyState;
 
