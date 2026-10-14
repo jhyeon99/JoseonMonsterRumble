@@ -106,9 +106,15 @@ public sealed class EnemyHitFeedback : MonoBehaviour
 
     private void HandleHit(HitData hitData)
     {
-        _activeSettings = hitData.IsTalisman
+        StartFlash(hitData.IsTalisman
             ? _talismanHit
-            : hitData.IsHeavyImpact ? _heavyHit : _lightHit;
+            : hitData.IsHeavyImpact ? _heavyHit : _lightHit);
+    }
+
+    public void StartFlash(EnemyHitFeedbackSettings settings)
+    {
+        if (!isActiveAndEnabled || _sourceRenderer == null || _flashRenderer == null) return;
+        _activeSettings = settings;
         _elapsed = 0f;
         _state = FeedbackState.Reacting;
 

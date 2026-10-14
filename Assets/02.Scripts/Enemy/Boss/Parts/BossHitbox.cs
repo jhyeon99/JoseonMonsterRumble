@@ -107,6 +107,7 @@ public class BossHitbox : MonoBehaviour, IParryable
 
     private void CheckHit()
     {
+        if (_boss != null && !_boss.CanDealPatternDamage) return;
         _results.Clear();
         int count = Physics2D.OverlapCollider(_collider, _filter, _results);
 

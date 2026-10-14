@@ -12,6 +12,7 @@ Shader "Team06/PoisonBeam"
         _EndImpact ("Terrain Contact", Float) = 0
         _MouthBlendLength ("Mouth Connection Length", Float) = 0.22
         _HasMouthConnection ("Attached To Mouth", Float) = 1
+        _EmissionStrength ("Emission Strength", Range(0,8)) = 0
     }
     SubShader
     {
@@ -42,6 +43,7 @@ Shader "Team06/PoisonBeam"
                 float _EndImpact;
                 float _MouthBlendLength;
                 float _HasMouthConnection;
+                float _EmissionStrength;
             CBUFFER_END
             struct Attributes { float4 positionOS : POSITION; float2 uv : TEXCOORD0; float4 color : COLOR; };
             struct Varyings { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; float4 color : COLOR; };
@@ -88,6 +90,8 @@ Shader "Team06/PoisonBeam"
                 float3 color = EvaluatePoisonPaint(flowUV, brush, detail, across,
                     _BodyColor.rgb, _LightColor.rgb, _EdgeColor.rgb);
                 color = lerp(_EdgeColor.rgb * 0.65, color, lerp(1.0, rootBlend, _HasMouthConnection));
+                color += EvaluatePoisonEmission(flowUV, brush, detail, across, _LightColor.rgb, _EmissionStrength) *
+                    lerp(1.0, rootBlend, _HasMouthConnection);
                 return half4(color * input.color.rgb, alpha * _BodyColor.a * input.color.a);
             }
             ENDHLSL

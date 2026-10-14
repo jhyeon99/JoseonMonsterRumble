@@ -226,7 +226,8 @@ PrefabInstance:
     - target: {fileID: 1303, guid: 55362b5a73d5b254fe487717a5eba545, type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -7781934580616552074, guid: 3b1366bdf0fa7da4b8179539b08c9917, type: 2}
+      objectReference: {fileID: -7781934580616552074, guid: 3b1366bdf0fa7da4b8179539b08c9917,
+        type: 2}
     - target: {fileID: 1303, guid: 55362b5a73d5b254fe487717a5eba545, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
@@ -238,7 +239,8 @@ PrefabInstance:
     - target: {fileID: 1403, guid: 55362b5a73d5b254fe487717a5eba545, type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -7781934580616552074, guid: 3b1366bdf0fa7da4b8179539b08c9917, type: 2}
+      objectReference: {fileID: -7781934580616552074, guid: 3b1366bdf0fa7da4b8179539b08c9917,
+        type: 2}
     - target: {fileID: 1403, guid: 55362b5a73d5b254fe487717a5eba545, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
@@ -254,7 +256,8 @@ PrefabInstance:
     - target: {fileID: 1513, guid: 55362b5a73d5b254fe487717a5eba545, type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -7781934580616552074, guid: 3b1366bdf0fa7da4b8179539b08c9917, type: 2}
+      objectReference: {fileID: -7781934580616552074, guid: 3b1366bdf0fa7da4b8179539b08c9917,
+        type: 2}
     - target: {fileID: 1513, guid: 55362b5a73d5b254fe487717a5eba545, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
@@ -3489,6 +3492,78 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da08309af4b54481a1d77b8020542ee7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlatformSelectionRoot
+--- !u!114 &81074000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 540334384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b2f19bf9d3f4f9993c38f5eb959f1ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DokkaebiPlatformWavePreview
+  _rage: {fileID: 540334389}
+  _platformSurface: {fileID: 540334390}
+  _waves:
+  - _enemies:
+    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
+        type: 3}
+      _surfaceOffset: {x: -3.7, y: 0}
+    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
+        type: 3}
+      _surfaceOffset: {x: 3.7, y: 0}
+    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
+        type: 3}
+      _surfaceOffset: {x: -2, y: 0}
+    _minimumRageCount: 1
+  - _enemies:
+    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
+        type: 3}
+      _surfaceOffset: {x: -3.7, y: 0}
+    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
+        type: 3}
+      _surfaceOffset: {x: 3.7, y: 0}
+    - _prefab: {fileID: 2319009342568745602, guid: 3231d6d0194cd944396cd2e8d9186173,
+        type: 3}
+      _surfaceOffset: {x: -3, y: 2}
+    - _prefab: {fileID: 2319009342568745602, guid: 3231d6d0194cd944396cd2e8d9186173,
+        type: 3}
+      _surfaceOffset: {x: 3, y: 2}
+    _minimumRageCount: 2
+  - _enemies:
+    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
+        type: 3}
+      _surfaceOffset: {x: -3.7, y: 0}
+    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
+        type: 3}
+      _surfaceOffset: {x: 3.7, y: 0}
+    - _prefab: {fileID: 2319009342568745602, guid: 3231d6d0194cd944396cd2e8d9186173,
+        type: 3}
+      _surfaceOffset: {x: -3, y: 2}
+    - _prefab: {fileID: 2319009342568745602, guid: 3231d6d0194cd944396cd2e8d9186173,
+        type: 3}
+      _surfaceOffset: {x: 3, y: 2}
+    - _prefab: {fileID: 7004840251579652640, guid: e1509d913becb694880583ae2ea28454,
+        type: 3}
+      _surfaceOffset: {x: 0, y: 3}
+    _minimumRageCount: 2
+  _reserveEnemyPrefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
+    type: 3}
+  _spawnInterval: 0.8
+  _waveInterval: 2
+  _testFallOnStart: 0
+  _stunPause: 0.6
+  _fallTiltAngle: -25
+  _tiltDuration: 0.7
+  _fallHorizontalSpeed: 1
+  _fallGravity: 18
+  _fallDistance: 20
+  _currentWave: 0
+  _aliveEnemyCount: 0
+  _isCompleted: 0
+  _isFalling: 0
 --- !u!1001 &109172764
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3797,65 +3872,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &81074000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 540334384}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b2f19bf9d3f4f9993c38f5eb959f1ea, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::DokkaebiPlatformWavePreview
-  _rage: {fileID: 540334389}
-  _platformSurface: {fileID: 540334390}
-  _waves:
-  - _enemies:
-    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
-      _surfaceOffset: {x: -3.7, y: 0}
-    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
-      _surfaceOffset: {x: 3.7, y: 0}
-    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
-      _surfaceOffset: {x: -2, y: 0}
-    _minimumRageCount: 1
-  - _enemies:
-    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
-      _surfaceOffset: {x: -3.7, y: 0}
-    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
-      _surfaceOffset: {x: 3.7, y: 0}
-    - _prefab: {fileID: 2319009342568745602, guid: 3231d6d0194cd944396cd2e8d9186173, type: 3}
-      _surfaceOffset: {x: -3, y: 2}
-    - _prefab: {fileID: 2319009342568745602, guid: 3231d6d0194cd944396cd2e8d9186173, type: 3}
-      _surfaceOffset: {x: 3, y: 2}
-    _minimumRageCount: 2
-  - _enemies:
-    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
-      _surfaceOffset: {x: -3.7, y: 0}
-    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
-      _surfaceOffset: {x: 3.7, y: 0}
-    - _prefab: {fileID: 2319009342568745602, guid: 3231d6d0194cd944396cd2e8d9186173, type: 3}
-      _surfaceOffset: {x: -3, y: 2}
-    - _prefab: {fileID: 2319009342568745602, guid: 3231d6d0194cd944396cd2e8d9186173, type: 3}
-      _surfaceOffset: {x: 3, y: 2}
-    - _prefab: {fileID: 7004840251579652640, guid: e1509d913becb694880583ae2ea28454, type: 3}
-      _surfaceOffset: {x: 0, y: 3}
-    _minimumRageCount: 2
-  _reserveEnemyPrefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681, type: 3}
-  _spawnInterval: 0.8
-  _waveInterval: 2
-  _testFallOnStart: 0
-  _stunPause: 0.6
-  _fallTiltAngle: -25
-  _tiltDuration: 0.7
-  _fallHorizontalSpeed: 1
-  _fallGravity: 18
-  _fallDistance: 20
-  _currentWave: 0
-  _aliveEnemyCount: 0
-  _isCompleted: 0
-  _isFalling: 0
 --- !u!95 &540334385
 Animator:
   serializedVersion: 7
@@ -3998,6 +4014,7 @@ MonoBehaviour:
   _currentRage: 0
   _rageTimeRemaining: 0
   _phase: 0
+  _rageActivationCount: 0
 --- !u!68 &540334390
 EdgeCollider2D:
   m_ObjectHideFlags: 0

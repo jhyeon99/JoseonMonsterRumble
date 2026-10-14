@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: SO_PlayerAttackData
   m_EditorClassIdentifier: Assembly-CSharp::AttackDataTableSO
   Data:
-  - Damage: 15
+  - Damage: 17
     HitStartRatio: 0.4
     HitEndRatio: 0.9
     KnockbackForce: 3
     HitboxOffset: {x: 0.42, y: 0.54}
-    HitboxSize: {x: 2.88, y: 3.3}
+    HitboxSize: {x: 3.23, y: 3.3}
     ForwardDisplacementCurve:
       serializedVersion: 2
       m_Curve:
@@ -67,7 +67,7 @@ MonoBehaviour:
     HitStartRatio: 0.5
     HitEndRatio: 0.9
     KnockbackForce: 5
-    HitboxOffset: {x: -0.2, y: 0.21}
+    HitboxOffset: {x: 0.01, y: 0.21}
     HitboxSize: {x: 4.06, y: 1}
     ForwardDisplacementCurve:
       serializedVersion: 2
@@ -104,7 +104,7 @@ MonoBehaviour:
       m_RotationOrder: 4
     ComboStartNormalizedTime: 0.9
     ComboEndNormalizedTime: 0.5
-  - Damage: 50
+  - Damage: 55
     HitStartRatio: 0.4
     HitEndRatio: 0.8
     KnockbackForce: 3
@@ -116,24 +116,24 @@ MonoBehaviour:
       - serializedVersion: 3
         time: 0
         value: 0
-        inSlope: 8.81584
-        outSlope: 8.81584
+        inSlope: 4.878237
+        outSlope: 4.878237
         tangentMode: 34
         weightedMode: 0
         inWeight: 0
         outWeight: 0.33333334
       - serializedVersion: 3
-        time: 0.15089454
-        value: 1.3302621
-        inSlope: 8.81584
+        time: 0.14532049
+        value: 0.7089078
+        inSlope: 4.878237
         outSlope: 0.10706267
         tangentMode: 5
         weightedMode: 0
         inWeight: 0.3153464
         outWeight: 0.40427002
       - serializedVersion: 3
-        time: 0.45241886
-        value: 1.619257
+        time: 0.44684482
+        value: 0.9979027
         inSlope: 1.660229
         outSlope: -2.7854261
         tangentMode: 65
@@ -141,8 +141,8 @@ MonoBehaviour:
         inWeight: 0.2771206
         outWeight: 0.33333334
       - serializedVersion: 3
-        time: 0.6688855
-        value: 1.0163051
+        time: 0.6633115
+        value: 0.39495078
         inSlope: -10.075036
         outSlope: -10.075036
         tangentMode: 0
