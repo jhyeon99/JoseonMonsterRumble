@@ -107,8 +107,13 @@ public abstract class BossPattern : MonoBehaviour
     /// </summary>
     protected virtual bool UsesPatternAnimation => true;
 
+    protected virtual bool ShouldWaitForPlatformsBeforePreparation => true;
+
     /// <summary>true면 이 패턴 중 보스가 플레이어의 직접 공격을 받지 않음 (기믹 데미지는 받음)</summary>
     public virtual bool BlocksDirectDamage => false;
+
+    /// <summary>준비와 이동을 포함한 패턴 전체에서 공격과 접촉 피해를 막는지</summary>
+    public virtual bool BlocksOutgoingDamage => false;
 
     /// <summary>이 패턴 중 몸통 접촉 데미지를 끄는지</summary>
     public virtual bool DisablesContactDamage => _disableContactDamage;
@@ -233,10 +238,13 @@ public abstract class BossPattern : MonoBehaviour
         BossPlatformDirector platforms = Boss.Platforms;
         if (platforms != null)
         {
-            float waitUntil = Time.time + platforms.MaxPatternWait;
-            while (!platforms.PrepareFor(this) && Time.time < waitUntil)
+            if (ShouldWaitForPlatformsBeforePreparation)
             {
-                yield return null;
+                foreach (object step in Flatten(WaitForPlatforms(platforms))) yield return step;
+            }
+            else
+            {
+                platforms.PrepareFor(this);
             }
         }
 
@@ -245,6 +253,9 @@ public abstract class BossPattern : MonoBehaviour
         {
             yield return step;
         }
+
+        if (platforms != null && !ShouldWaitForPlatformsBeforePreparation)
+            foreach (object step in Flatten(WaitForPlatforms(platforms))) yield return step;
 
         _startTime = Time.time;
         if (UsesPatternAnimation)
@@ -310,6 +321,12 @@ public abstract class BossPattern : MonoBehaviour
         _executionActive = false;
         OnExecutionEnded?.Invoke(this, true);
         onFinished?.Invoke();
+    }
+
+    private IEnumerator WaitForPlatforms(BossPlatformDirector platforms)
+    {
+        float waitUntil = Time.time + platforms.MaxPatternWait;
+        while (!platforms.PrepareFor(this) && Time.time < waitUntil) yield return null;
     }
 
     /// <summary>

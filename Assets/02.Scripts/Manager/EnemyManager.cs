@@ -101,7 +101,7 @@ public class EnemyManager : MonoBehaviour
         foreach (Enemy enemy in ActiveEnemies)
         {
             if (enemy == null || enemy.Type != EnemyType.Attacker ||
-                !enemy.isActiveAndEnabled || enemy.IsDefeated || enemy.Health == null ||
+                !enemy.isActiveAndEnabled || enemy.IsSpawnBlocked || enemy.IsDefeated || enemy.Health == null ||
                 !enemy.Health.IsAlive || enemy.IsTargetedForBuff)
             {
                 continue;
@@ -138,7 +138,7 @@ public class EnemyManager : MonoBehaviour
         // 비활성화된 적도 유지하는 캐시를 순회하며, 조회 시 배열을 생성하지 않는다.
         foreach (Enemy enemy in _allEnemies)
         {
-            if (enemy != null && enemy.Type == EnemyType.Attacker && !enemy.IsDefeated &&
+            if (enemy != null && enemy.Type == EnemyType.Attacker && !enemy.IsSpawnBlocked && !enemy.IsDefeated &&
                 (enemy.Health == null || enemy.Health.IsAlive))
             {
                 return true;

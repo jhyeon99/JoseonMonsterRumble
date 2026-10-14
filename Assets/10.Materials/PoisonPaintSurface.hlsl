@@ -30,4 +30,13 @@ float3 EvaluatePoisonPaint(float2 uv, float brush, float detail, float across,
     float ink = smoothstep(0.7, 0.94, across) * smoothstep(0.32, 0.64, detail);
     return lerp(color, edgeColor, ink * 0.65);
 }
+float3 EvaluatePoisonEmission(float2 uv, float brush, float detail, float across,
+    float3 lightColor, float strength)
+{
+    [branch] if (strength <= 0.0) return float3(0, 0, 0);
+    float stain = 0.55 * PoisonNoise(uv * float2(0.65, 3.0)) + 0.45 * brush;
+    float light = smoothstep(0.65, 0.81, stain) * smoothstep(0.24, 0.55, detail);
+    float ink = smoothstep(0.7, 0.94, across) * smoothstep(0.32, 0.64, detail);
+    return lightColor * light * (1.0 - ink) * strength;
+}
 #endif

@@ -343,7 +343,7 @@ public class PlayerAttackState : PlayerBaseState
         }
 
         // 회피 캔슬: 1타 / 2타는 준비 / 공격 / Recover 모든 구간에서 바로 회피 가능.
-        // 3타는 회피 캔슬 불가 (Recover가 끝날 때까지 유지)
+        // 3타는 Recover가 시작된 뒤에만 회피 가능.
         if (_currentComboIndex < 2 &&
             _player.IsGrounded &&
             _player.Movement.CanDodge &&
@@ -369,6 +369,18 @@ public class PlayerAttackState : PlayerBaseState
             }
 
             bool isCurrentComboRecover = IsCurrentComboRecoverState(stateInfo);
+            bool isEnteringComboRecover = inTransition && IsCurrentComboRecoverState(nextInfo);
+
+            // 후딜 가드는 다음 콤보 공격 예약보다 먼저 처리한다. 패링 입력은 GuardState에서 소비한다.
+            if ((isCurrentComboRecover || isEnteringComboRecover) &&
+                _inputHandler.IsGuardKey && _player.IsGrounded && _player.Guard.CanStartGuard)
+            {
+                float moveX = _inputHandler.MoveInputX;
+                if (Mathf.Abs(moveX) > 0.01f)
+                    _player.transform.localScale = new Vector3(Mathf.Sign(moveX), 1f, 1f);
+                _stateMachine.ChangeState(_player.GuardState);
+                return;
+            }
 
             // 콤보 공격 입력 감지 시 단일 예약 버퍼 활성화
             if (_currentComboIndex < 2 && _inputHandler.TryUseAttackInput())
@@ -387,8 +399,7 @@ public class PlayerAttackState : PlayerBaseState
                 }
             }
 
-            // Recover 중 방향 전환 (Recover로 넘어가는 전이 중 포함). 회피 캔슬은 위에서 1타 / 2타만 처리
-            bool isEnteringComboRecover = inTransition && IsCurrentComboRecoverState(nextInfo);
+            // Recover 중 방향 전환과 3타 회피 캔슬 (Recover로 넘어가는 전이 중 포함).
             if (isCurrentComboRecover || isEnteringComboRecover)
             {
                 // Recover 중 방향키를 누르면 캐릭터가 즉시 뒤를 돌아봄
@@ -396,6 +407,15 @@ public class PlayerAttackState : PlayerBaseState
                 if (Mathf.Abs(moveX) > 0.01f)
                 {
                     _player.transform.localScale = new Vector3(Mathf.Sign(moveX), 1f, 1f);
+                }
+
+                if (_currentComboIndex == 2 &&
+                    _player.IsGrounded &&
+                    _player.Movement.CanDodge &&
+                    _inputHandler.TryUseDodgeInput())
+                {
+                    _stateMachine.ChangeState(_player.DodgeState);
+                    return;
                 }
             }
 
