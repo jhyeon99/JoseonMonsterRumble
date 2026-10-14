@@ -211,6 +211,20 @@ public class BossDefeatedState : BossState
     private void Finish()
     {
         _isFinished = true;
+
+        // 날려 보냈으면 일반 적(LaunchedState)처럼 마지막 자리에서 사라지는 이펙트
+        if (_launch)
+        {
+            if (EffectManager.Instance != null)
+            {
+                EffectManager.Instance.PlayParryLaunchDisappear(_currentCenter);
+            }
+            else
+            {
+                Debug.LogWarning("보스 처치 소멸 VFX: EffectManager가 없어 재생하지 못했습니다.", _boss);
+            }
+        }
+
         SpawnDeathSouls();
         _boss.NotifyDefeatFinished();
 

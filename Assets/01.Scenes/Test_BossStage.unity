@@ -4606,6 +4606,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 420562276022495096, guid: 4d47b5d7fe17c144ea67c4205a119ed7,
+        type: 3}
+      propertyPath: m_text
+      value: "\uC808\uBD88\uAC00\uC2DD"
+      objectReference: {fileID: 0}
     - target: {fileID: 420562276022884888, guid: 4d47b5d7fe17c144ea67c4205a119ed7,
         type: 3}
       propertyPath: m_Color.b
@@ -6238,6 +6243,11 @@ PrefabInstance:
       objectReference: {fileID: 1234674639}
     - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
+      propertyPath: _bossName
+      value: "\uC808\uBD88\uAC00\uC2DD"
+      objectReference: {fileID: 0}
+    - target: {fileID: 1292548025564639172, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
       propertyPath: _introPoint
       value: 
       objectReference: {fileID: 1942571981}
@@ -6495,11 +6505,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
-      propertyPath: _suctionDistance
-      value: 4.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
-        type: 3}
       propertyPath: _summonPoint
       value: 
       objectReference: {fileID: 626587057}
@@ -6518,6 +6523,11 @@ PrefabInstance:
         type: 3}
       propertyPath: _releaseTrigger
       value: ultimateCancel
+      objectReference: {fileID: 0}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _suctionDistance
+      value: 4.5
       objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
@@ -6825,16 +6835,16 @@ PrefabInstance:
       propertyPath: _offset.y
       value: 2
       objectReference: {fileID: 0}
-    - target: {fileID: 5113649265694187133, guid: 32e10db0df569104491554a680a0f3ff,
-        type: 3}
-      propertyPath: m_Name
-      value: PF_Camera
-      objectReference: {fileID: 0}
     - target: {fileID: 3058435715441207292, guid: 32e10db0df569104491554a680a0f3ff,
         type: 3}
       propertyPath: _cameraViewBounds
       value: 
       objectReference: {fileID: 2075978237}
+    - target: {fileID: 5113649265694187133, guid: 32e10db0df569104491554a680a0f3ff,
+        type: 3}
+      propertyPath: m_Name
+      value: PF_Camera
+      objectReference: {fileID: 0}
     - target: {fileID: 6023677078052103037, guid: 32e10db0df569104491554a680a0f3ff,
         type: 3}
       propertyPath: m_Antialiasing
