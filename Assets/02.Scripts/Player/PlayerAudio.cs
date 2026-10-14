@@ -18,6 +18,13 @@ public sealed class PlayerAudio : ActorAudio
     private bool _groundedInitialized;
     private readonly FootstepClock _footsteps = new FootstepClock();
 
+    // 재생 중인 공격 소리. 회피 캔슬 / 점프 공격 도중 착지로 끊기면 바로 멈춤
+    private PlayHandle _attackHandle;
+    private PlayHandle _interruptedAttackHandle;
+
+    // 사망 소리. 사망 화면을 넘기면(재시작) 바로 멈춤
+    private PlayHandle _deathHandle;
+
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -53,6 +60,8 @@ public sealed class PlayerAudio : ActorAudio
 
     private void OnStateChanged(IState previous, IState next)
     {
+        StopInterruptedAttackSound(previous, next);
+
         bool completed = next == _player.IdleState || next == _player.MoveState;
         EndAction(_movementExecution, completed);
         _movementExecution = 0;
@@ -60,7 +69,6 @@ public sealed class PlayerAudio : ActorAudio
         _movementExecution = BeginAction();
         if (next == _player.JumpState) PlayAction("Player.Jump", _movementExecution);
         else if (next == _player.DodgeState) PlayAction("Player.Dodge", _movementExecution);
-        else if (next == _player.GuardState) PlayAction("Player.GuardEnter", _movementExecution);
     }
 
     private void LateUpdate()
@@ -96,13 +104,40 @@ public sealed class PlayerAudio : ActorAudio
         _attackExecution = BeginAction();
         if (_player != null && _player.StateMachine.CurrentState == _player.FinisherState) return;
         string id = step == 1 ? "Player.Attack1" : step == 2 ? "Player.Attack2" : step == 3 ? "Player.Attack3" : null;
-        if (id != null) PlayAction(id, _attackExecution);
+        _attackHandle = id != null ? PlayAction(id, _attackExecution) : PlayHandle.Empty;
     }
 
     private void OnAttackStepEnded(bool completed)
     {
         EndAction(_attackExecution, completed);
         _attackExecution = 0;
+
+        // 끝까지 못 가고 끊긴 공격: 어떤 상태로 넘어가는지 보고 소리를 끊을지 정함 (OnStateChanged)
+        _interruptedAttackHandle = completed ? PlayHandle.Empty : _attackHandle;
+        _attackHandle = PlayHandle.Empty;
+    }
+
+    /// <summary>
+    /// 끊긴 공격 소리 멈춤: 지상 공격(1 / 2타)을 회피로 캔슬했을 때, 점프 공격 도중 착지 등으로 점프 공격이 끝났을 때.
+    /// 그 외(피격 등)로 끊긴 공격 소리는 기존처럼 끝까지 재생
+    /// </summary>
+    private void StopInterruptedAttackSound(IState previous, IState next)
+    {
+        if (_interruptedAttackHandle.IsEmpty) return;
+        PlayHandle handle = _interruptedAttackHandle;
+        _interruptedAttackHandle = PlayHandle.Empty;
+        if (_player == null || Manager == null) return;
+
+        bool dodgeCancel = previous == _player.AttackState && next == _player.DodgeState;
+        bool airAttackEnded = previous == _player.AirAttackState;
+        if (dodgeCancel || airAttackEnded) Manager.StopHandle(handle);
+    }
+
+    /// <summary>사망 소리 멈춤 (사망 화면을 넘겨 재시작할 때 StageManager가 호출)</summary>
+    public void StopDeathSound()
+    {
+        if (!_deathHandle.IsEmpty && Manager != null) Manager.StopHandle(_deathHandle);
+        _deathHandle = PlayHandle.Empty;
     }
 
     private void OnMeleeImpact(HitData hit) => PlayResult("Player.MeleeImpact", hit.HitPoint);
@@ -121,7 +156,7 @@ public sealed class PlayerAudio : ActorAudio
     {
         if (_died) return;
         _died = true;
-        PlayResult("Player.Death", transform.position);
+        _deathHandle = PlayResult("Player.Death", transform.position);
         RetireOwner();
         _attackExecution = _chargeExecution = 0;
     }

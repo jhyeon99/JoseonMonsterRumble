@@ -18,7 +18,7 @@ MonoBehaviour:
     Clips:
     - {fileID: 8300000, guid: a7e694c76ff29724bb6a1546f68e1d5a, type: 3}
     StartOffset: 0
-    Volume: 1
+    Volume: 0.15
     PitchMin: 1
     PitchMax: 1
     OutputGroup: 0
@@ -29,7 +29,7 @@ MonoBehaviour:
     Clips:
     - {fileID: 8300000, guid: bf761a62ecb5e3749ba4326d3837fcb7, type: 3}
     StartOffset: 0
-    Volume: 1
+    Volume: 0.3
     PitchMin: 1
     PitchMax: 1
     OutputGroup: 0
@@ -47,7 +47,8 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: GroundMelee.MeleeAttack
     DisplayName: "\uADFC\uC811 \uACF5\uACA9 \uC2E4\uD589 \uC2DC\uC791"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: 870444be02154b04eb8b78eef6479a05, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -124,7 +125,7 @@ MonoBehaviour:
     Enabled: 1
     SoundId: GroundMelee.Death
     TriggerDescription: "\uC0AC\uB9DD \uD655\uC815"
-    Delay: 0
+    Delay: 0.95
     TimeMode: 0
     LifetimePolicy: 2
     Loop: 0
@@ -149,7 +150,7 @@ MonoBehaviour:
     Enabled: 1
     SoundId: GroundMelee.MeleeAttack
     TriggerDescription: "\uADFC\uC811 \uACF5\uACA9 \uC2E4\uD589 \uC2DC\uC791"
-    Delay: 0
+    Delay: 0.7
     TimeMode: 0
     LifetimePolicy: 0
     Loop: 0

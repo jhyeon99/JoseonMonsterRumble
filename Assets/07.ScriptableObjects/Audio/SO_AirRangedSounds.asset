@@ -17,7 +17,8 @@ MonoBehaviour:
     DisplayName: "\uBE44\uCE58\uBA85 \uD53C\uD574 \uC801\uC6A9"
     Clips:
     - {fileID: 8300000, guid: e72cc878d62715544b97dbca9220651c, type: 3}
-    Volume: 1
+    StartOffset: 0
+    Volume: 0.1
     PitchMin: 1
     PitchMax: 1
     OutputGroup: 0
@@ -27,7 +28,8 @@ MonoBehaviour:
     DisplayName: "\uC0AC\uB9DD \uD655\uC815"
     Clips:
     - {fileID: 8300000, guid: 55fca27fccdc6a140a0f900bf0d7844a, type: 3}
-    Volume: 1
+    StartOffset: 0
+    Volume: 0.1
     PitchMin: 1
     PitchMax: 1
     OutputGroup: 0
@@ -35,7 +37,9 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: AirRanged.MeleeDash
     DisplayName: "U\uC790 \uB3CC\uC9C4 \uC2E4\uD589 \uC2DC\uC791"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: 413e17eaca1ab3d419ac04c8e71c7611, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -44,7 +48,9 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: AirRanged.RangedFire
     DisplayName: "\uD22C\uC0AC\uCCB4 \uC2E4\uC81C \uC0DD\uC131\xB7\uBC1C\uC0AC"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: 29e20b33ac2ea414bb5ef4b210180d8f, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -54,6 +60,7 @@ MonoBehaviour:
   - SoundId: AirRanged.Flight
     DisplayName: "\uBE44\uD589 \uC774\uB3D9 \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -63,6 +70,7 @@ MonoBehaviour:
   - SoundId: AirRanged.Groggy
     DisplayName: "\uD328\uB9C1 \uD6C4 \uADF8\uB85C\uAE30 \uC9C4\uC785"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -72,6 +80,7 @@ MonoBehaviour:
   - SoundId: AirRanged.AttackReady
     DisplayName: "\uACF5\uACA9 \uC900\uBE44 \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -81,6 +90,7 @@ MonoBehaviour:
   - SoundId: AirRanged.Ambience
     DisplayName: "\uB300\uAE30\xB7\uC21C\uCC30 \uC0C1\uD0DC \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1

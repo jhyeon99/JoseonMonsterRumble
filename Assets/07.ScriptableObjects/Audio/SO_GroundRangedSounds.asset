@@ -17,7 +17,8 @@ MonoBehaviour:
     DisplayName: "\uBE44\uCE58\uBA85 \uD53C\uD574 \uC801\uC6A9"
     Clips:
     - {fileID: 8300000, guid: 544023dfef450484595fd26e32cc2abf, type: 3}
-    Volume: 1
+    StartOffset: 0
+    Volume: 0.06
     PitchMin: 1
     PitchMax: 1
     OutputGroup: 0
@@ -25,8 +26,10 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: GroundRanged.Death
     DisplayName: "\uC0AC\uB9DD \uD655\uC815"
-    Clips: []
-    Volume: 1
+    Clips:
+    - {fileID: 8300000, guid: c916a7584370889439ef53925ea0f08b, type: 3}
+    StartOffset: 0
+    Volume: 0.06
     PitchMin: 1
     PitchMax: 1
     OutputGroup: 0
@@ -35,6 +38,7 @@ MonoBehaviour:
   - SoundId: GroundRanged.Footstep
     DisplayName: "\uC811\uC9C0\xB7\uC774\uB3D9 \uC911 \uBC1C \uB514\uB524 \uB9C8\uCEE4"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -44,6 +48,7 @@ MonoBehaviour:
   - SoundId: GroundRanged.MeleeAttack
     DisplayName: "\uADFC\uC811 \uACF5\uACA9 \uC2E4\uD589 \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -52,7 +57,9 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: GroundRanged.RangedFire
     DisplayName: "\uD22C\uC0AC\uCCB4 \uC2E4\uC81C \uC0DD\uC131\xB7\uBC1C\uC0AC"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: d0e12f88ae7544f48b7ac8b6fa8863ab, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -62,6 +69,7 @@ MonoBehaviour:
   - SoundId: GroundRanged.Groggy
     DisplayName: "\uD328\uB9C1 \uD6C4 \uADF8\uB85C\uAE30 \uC9C4\uC785"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -71,6 +79,7 @@ MonoBehaviour:
   - SoundId: GroundRanged.AttackReady
     DisplayName: "\uACF5\uACA9 \uC900\uBE44 \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -81,6 +90,7 @@ MonoBehaviour:
     DisplayName: "\uB300\uAE30\xB7\uC21C\uCC30\uC5D0\uC11C \uCD94\uC801\uC73C\uB85C
       \uC804\uD658"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -91,6 +101,7 @@ MonoBehaviour:
     DisplayName: "\uB9C8\uBB34\uB9AC \uACF5\uACA9\uC5D0 \uC758\uD55C \uB0A0\uB824
       \uBCF4\uB0B4\uAE30 \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
