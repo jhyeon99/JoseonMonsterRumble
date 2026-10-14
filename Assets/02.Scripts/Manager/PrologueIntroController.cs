@@ -333,11 +333,9 @@ public class PrologueIntroController : MonoBehaviour
         ShowSubtitle(_openingSoundText);
         PlaySound("Prologue.Scream");
         PlaySound("Prologue.Break");
-        // 비명을 끝까지 들은 뒤부터 새 Enter 입력을 받는다.
-        float screamDuration = GetSoundDuration("Prologue.Scream");
-        if (screamDuration > 0f)
-            yield return new WaitForSecondsRealtime(screamDuration);
+        // 비명 도중에도 Enter로 넘길 수 있음. 넘기면 비명 / 부서지는 소리를 바로 끊음
         yield return WaitForAdvance();
+        StopOpeningSounds();
         Phase = "What";
         ShowSubtitle(_openingReactionText);
         yield return WaitForAdvance();
@@ -356,6 +354,7 @@ public class PrologueIntroController : MonoBehaviour
         if (doorRevealDelay > 0f)
             yield return new WaitForSecondsRealtime(doorRevealDelay);
         // Player appears outside the house and can move as soon as the reveal starts.
+        AudioManager.Instance?.PlayMusicEvent("Music.Prologue", gameObject.scene);
         UnlockPlayer();
         _fade.blocksRaycasts = false;
         RestoreGameplayUi();
