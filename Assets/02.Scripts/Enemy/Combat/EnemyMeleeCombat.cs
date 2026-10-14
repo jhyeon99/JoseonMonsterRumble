@@ -38,9 +38,29 @@ public class EnemyMeleeCombat : EnemyCombat, IParryable
     private Collider2D _heightTargetCollider;
     private BoxCollider2D _groundAttackBox;
     private FlyingMeleeAttackController _flyingAttack;
+    private UnityEngine.Object _tutorialParrySuppressionOwner;
     public float CurrentDamage => _currentDamage;
     public FlyingMeleeAttackController FlyingAttack => _flyingAttack;
     public event Action OnAttackHit;
+
+    public void SetTutorialParrySuppressed(UnityEngine.Object owner, bool suppress)
+    {
+        if (suppress && owner != null)
+            _tutorialParrySuppressionOwner = owner;
+        else if (_tutorialParrySuppressionOwner == owner)
+            _tutorialParrySuppressionOwner = null;
+    }
+
+    public override AttackDefense GetEffectiveDefense(AttackDefense baseDefense)
+    {
+        AttackDefense defense = base.GetEffectiveDefense(baseDefense);
+        if (_tutorialParrySuppressionOwner != null)
+        {
+            defense.Parryable = false;
+            defense.FreeBlockOnParryTiming = false;
+        }
+        return defense;
+    }
 
     protected override void Awake()
     {

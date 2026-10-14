@@ -133,6 +133,11 @@ public class PlayerInputHandler : MonoBehaviour
             ClearInputState();
             foreach (KeyCode key in GameplayKeys)
             {
+                if (GetKeyAction(key) == GameplayInputActions.Movement)
+                {
+                    continue;
+                }
+
                 if (Input.GetKey(key))
                 {
                     _suppressedKeys.Add(key);
@@ -159,8 +164,10 @@ public class PlayerInputHandler : MonoBehaviour
     {
         GameplayInputActions action = GetKeyAction(key);
         // A guided hold can continue across its explanation screen. Normal menu inputs stay suppressed.
-        bool guidedHold = _tutorialInputOwner != null &&
-            (action == GameplayInputActions.Guard || action == GameplayInputActions.Attack);
+        // Movement can also continue or be pre-held across tutorial/pause screens for smooth UX.
+        bool guidedHold = action == GameplayInputActions.Movement ||
+            (_tutorialInputOwner != null &&
+            (action == GameplayInputActions.Guard || action == GameplayInputActions.Attack));
         return IsActionAllowed(action) && (guidedHold || !_suppressedKeys.Contains(key)) && Input.GetKey(key);
     }
 

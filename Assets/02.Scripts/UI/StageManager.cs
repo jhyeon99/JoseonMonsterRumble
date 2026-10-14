@@ -200,6 +200,14 @@ public sealed class StageManager : MonoBehaviour
         if (_playerHealth != null)
         {
             _playerHealth.RefillPotions();
+            if (!_playerHealth.IsDead && _playerHealth.CurrentHealth < _playerHealth.MaxHealth)
+            {
+                _playerHealth.Heal(_playerHealth.MaxHealth - _playerHealth.CurrentHealth);
+                if (_playerHealth.TryGetComponent(out PlayerPotionAura recoveryAura))
+                {
+                    recoveryAura.PlayRecoveryPulse();
+                }
+            }
         }
         RefreshCheckpointVisuals(point.gameObject.scene);
         point.PlayActivation();
@@ -213,6 +221,57 @@ public sealed class StageManager : MonoBehaviour
     public void RestartStage()
     {
         TryStartRespawn(false, string.Empty);
+    }
+
+    /// <summary>씬을 다시 불러오지 않고 현재 저장된 장승으로 이동한다.</summary>
+    public bool TryWarpToActiveCheckpoint(float fadeDuration = 0.35f)
+    {
+        Scene scene = SceneManager.GetActiveScene();
+        if (IsRespawning || _isChangingScene || SceneArrivalFade.IsTransitioning ||
+            scene.name != _activeSceneName || _playerHealth == null || _playerHealth.IsDead)
+        {
+            return false;
+        }
+
+        RespawnPoint checkpoint = FindPoint(FindSceneRespawnPoints(scene), _activeCheckpointId);
+        if (checkpoint == null)
+        {
+            Debug.LogWarning($"{scene.name}: 워프할 활성 RespawnPoint '{_activeCheckpointId}'를 찾지 못했습니다.", this);
+            return false;
+        }
+
+        StartCoroutine(WarpToCheckpointRoutine(checkpoint, fadeDuration));
+        return true;
+    }
+
+    private IEnumerator WarpToCheckpointRoutine(RespawnPoint checkpoint, float fadeDuration)
+    {
+        if (_playerHealth.TryGetComponent(out Player player))
+        {
+            player.RangedAttack?.CancelCharge();
+            player.StateMachine.ChangeState(player.IdleState);
+        }
+        if (_playerHealth.TryGetComponent(out PlayerInputHandler input)) input.ClearInputState();
+
+        yield return SceneArrivalFade.FadeOut(fadeDuration);
+
+        MovePlayerTo(checkpoint);
+
+        if (_playerHealth != null)
+        {
+            _playerHealth.ClearPoison();
+            _playerHealth.RefillPotions();
+            if (!_playerHealth.IsDead && _playerHealth.CurrentHealth < _playerHealth.MaxHealth)
+            {
+                _playerHealth.Heal(_playerHealth.MaxHealth - _playerHealth.CurrentHealth);
+            }
+            if (_playerHealth.TryGetComponent(out PlayerPotionAura recoveryAura))
+            {
+                recoveryAura.PlayRecoveryPulse();
+            }
+        }
+
+        yield return SceneArrivalFade.FadeIn(fadeDuration);
     }
 
     /// <summary>지정한 스테이지 씬으로 전환한다. 중복 전환과 리스폰 중 전환은 막는다.</summary>

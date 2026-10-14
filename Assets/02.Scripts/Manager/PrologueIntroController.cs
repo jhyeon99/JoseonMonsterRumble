@@ -77,6 +77,7 @@ public class PrologueIntroController : MonoBehaviour
     private Image _wantedPosterImage;
     private GameObject _wantedPosterPrompt;
     private bool _posterRead;
+    private bool _noticeBoardIntroduced;
     private bool _posterBusy;
     private RectTransform _boardKeyHint;
 
@@ -150,6 +151,8 @@ public class PrologueIntroController : MonoBehaviour
     private bool _uiCaptured;
     private float _transitionDirection;
     private bool _jigeReached;
+    private bool _isLeavingPrologue;
+    private bool _hasWarnedInvalidExit;
     private Text _subtitle;
     private Text _continueHint;
     private GameObject _dialoguePanel;
@@ -292,9 +295,9 @@ public class PrologueIntroController : MonoBehaviour
     private IEnumerator ResumeProgression()
     {
         yield return null;
-        if (IsTransitionComplete)
+        if (IsTransitionComplete || _background2.activeSelf)
         {
-            yield return WaitForNextSceneExit();
+            Phase = "Complete";
             yield break;
         }
 
@@ -426,7 +429,6 @@ public class PrologueIntroController : MonoBehaviour
         _fade.blocksRaycasts = false;
         RestoreGameplayUi();
         Phase = "Complete";
-        yield return WaitForNextSceneExit();
     }
 
     private void TransferToLocation2()
@@ -497,27 +499,50 @@ public class PrologueIntroController : MonoBehaviour
         boundaries.TargetTopBoundary = boundaries.TopBoundary;
     }
 
-    private IEnumerator WaitForNextSceneExit()
+    private void UpdateNextSceneExit()
     {
-        if (_nextSceneExitPoint == null) yield break;
+        if (!_ready || !IsIntroComplete || !_background2.activeSelf || _isLeavingPrologue ||
+            _nextSceneExitPoint == null || PauseController.IsPaused || _player.Health.IsDead ||
+            (StageManager.Instance != null && StageManager.Instance.IsRespawning))
+        {
+            return;
+        }
+
+        if (Vector2.Distance(_player.transform.position, _nextSceneExitPoint.position) > _nextSceneTriggerDistance)
+            return;
         if (string.IsNullOrWhiteSpace(_nextSceneName) || !Application.CanStreamedLevelBeLoaded(_nextSceneName))
         {
-            Debug.LogError($"Prologue: 다음 씬 '{_nextSceneName}'을 Build Settings의 Scene List에 등록하세요.", this);
-            yield break;
+            if (!_hasWarnedInvalidExit)
+            {
+                Debug.LogError($"Prologue: 다음 씬 '{_nextSceneName}'을 Build Settings의 Scene List에 등록하세요.", this);
+                _hasWarnedInvalidExit = true;
+            }
+            return;
         }
 
-        while (_nextSceneExitPoint != null)
-        {
-            bool playerCanExit = !PauseController.IsPaused && !_player.Health.IsDead &&
-                (StageManager.Instance == null || !StageManager.Instance.IsRespawning);
-            float distance = Vector2.Distance(_player.transform.position, _nextSceneExitPoint.position);
-            if (playerCanExit && distance <= _nextSceneTriggerDistance) break;
-            yield return null;
-        }
-        if (_nextSceneExitPoint == null) yield break;
+        _isLeavingPrologue = true;
+        StopAllCoroutines();
+        StartCoroutine(TransitionToNextScene());
+    }
 
-        LockPlayer();
+    private IEnumerator TransitionToNextScene()
+    {
         Phase = "LeavingPrologue";
+        Ep0CombatTutorial tutorial = FindFirstObjectByType<Ep0CombatTutorial>();
+        if (tutorial != null && tutorial.gameObject.scene == gameObject.scene)
+            tutorial.CancelForSceneExit();
+        StopOpeningSounds();
+        _cinematics.Stop();
+        UnlockPlayer();
+        _posterBusy = false;
+        if (_wantedPosterRoot != null) _wantedPosterRoot.SetActive(false);
+        if (_boardKeyHint != null) _boardKeyHint.gameObject.SetActive(false);
+        if (_controlHintRoot != null) _controlHintRoot.gameObject.SetActive(false);
+        _exitChoice.SetActive(false);
+        _continuePrompt.SetActive(false);
+        HitStop.Stop();
+        CameraShake.Stop();
+        LockPlayer();
         ShowSubtitle("");
         // Render a fully black, persistent overlay before any scene loading work.
         yield return SceneArrivalFade.FadeOut(_fadeToBlack);
@@ -532,6 +557,7 @@ public class PrologueIntroController : MonoBehaviour
             UnlockPlayer();
             RestoreGameplayUi();
             Phase = "Complete";
+            _isLeavingPrologue = false;
             yield break;
         }
         yield return loadOperation;
@@ -666,7 +692,7 @@ public class PrologueIntroController : MonoBehaviour
         IsIntroComplete = true;
         IsJigeInspected = true;
         Phase = "Complete";
-        StartCoroutine(WaitForNextSceneExit());
+        _isLeavingPrologue = false;
     }
 #endif
 
@@ -723,6 +749,8 @@ public class PrologueIntroController : MonoBehaviour
 
     private void Update()
     {
+        UpdateNextSceneExit();
+        if (_isLeavingPrologue) return;
         UpdateControlHints();
         UpdatePosterReopen();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -743,8 +771,8 @@ public class PrologueIntroController : MonoBehaviour
 
     private IEnumerator ReadNoticeBoard()
     {
-        if (_posterRead || _noticeBoard == null || _noticeBoardTrigger == null) yield break;
-        float direction = _noticeBoardTrigger.position.x >= _player.transform.position.x ? 1f : -1f;
+        if (_posterRead || _noticeBoardIntroduced || _noticeBoard == null || _noticeBoardTrigger == null) yield break;
+        float direction = _transitionDirection;
         while ((_player.transform.position.x - _noticeBoardTrigger.position.x) * direction < 0f)
             yield return null;
 
@@ -777,9 +805,7 @@ public class PrologueIntroController : MonoBehaviour
         UnlockPlayer();
         _fade.blocksRaycasts = false;
         RestoreGameplayUi();
-        Phase = "ApproachingNoticeBoard";
-        while (!IsNearNoticeBoard() || !(Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))) yield return null;
-        yield return ReadWantedPoster(true);
+        _noticeBoardIntroduced = true;
         Phase = "Gameplay";
     }
 
@@ -818,7 +844,7 @@ public class PrologueIntroController : MonoBehaviour
     {
         bool idle = Phase == "Gameplay" || Phase == "GameplayAfterJige";
         bool available = _ready && !_posterBusy && !PauseController.IsPaused &&
-            (Phase == "ApproachingNoticeBoard" || (_posterRead && idle)) && IsNearNoticeBoard();
+            !_locked && (_noticeBoardIntroduced || _posterRead) && idle && IsNearNoticeBoard();
         if (!available)
         {
             if (_boardKeyHint != null) _boardKeyHint.gameObject.SetActive(false);
@@ -827,9 +853,8 @@ public class PrologueIntroController : MonoBehaviour
 
         if (_boardKeyHint == null) CreateBoardKeyHint();
         _boardKeyHint.gameObject.SetActive(true);
-        // The first read is owned by ReadNoticeBoard; subsequent reads use the same Enter prompt.
-        if (_posterRead && idle && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
-            StartCoroutine(ReadWantedPoster(false));
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+            StartCoroutine(ReadWantedPoster(!_posterRead));
     }
 
     private void UpdateBoardHintPosition()
@@ -1273,6 +1298,7 @@ public class PrologueIntroController : MonoBehaviour
     {
         Canvas.preWillRenderCanvases -= UpdateHintsBeforeRender;
         StopAllCoroutines();
+        _isLeavingPrologue = false;
         StopOpeningSounds();
         if (_cinematics != null)
         {

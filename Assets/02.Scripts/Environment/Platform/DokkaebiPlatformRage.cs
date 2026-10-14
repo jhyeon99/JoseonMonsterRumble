@@ -21,7 +21,7 @@ public sealed class DokkaebiPlatformRage : MonoBehaviour
     [Header("분노게이지")]
     [SerializeField, Min(1f)] private float _maximumRage = 100f;
     [SerializeField, Min(1f)] private float _ragePerHit = 8f;
-    [SerializeField, Min(1f)] private float _rageDuration = 13f;
+    [SerializeField, Min(1f)] private float _rageDuration = 8.32f;
     [Header("뜨거운 발판 피해")]
     [SerializeField, Min(1f)] private float _heatDamage = 8f;
     [SerializeField, Min(0.1f)] private float _heatDamageInterval = 1.1f;
