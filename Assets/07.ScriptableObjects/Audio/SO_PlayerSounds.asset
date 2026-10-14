@@ -160,14 +160,15 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: Player.TalismanFire
-    DisplayName: 부적 비행음
-    Clips: []
-    Volume: 1
+    DisplayName: "\uBD80\uC801 \uBE44\uD589\uC74C"
+    Clips:
+    - {fileID: 8300000, guid: 4f9b9188c2e2dfd469f1d1deaa1529a7, type: 3}
+    Volume: 0.498
     PitchMin: 1
     PitchMax: 1
     OutputGroup: 0
     Priority: 50
-    MaxCount: 5
+    MaxCount: 1
   - SoundId: Player.TalismanExplosion
     DisplayName: "\uC720\uD6A8 \uBA85\uC911\uC73C\uB85C \uBD80\uC801 \uD3ED\uBC1C
       \uC2DC\uC791"
@@ -411,15 +412,17 @@ MonoBehaviour:
   - EventId: Player.TalismanFire
     Enabled: 1
     SoundId: Player.TalismanFire
-    TriggerDescription: 각 부적 발사부터 명중 또는 소멸까지
+    TriggerDescription: "\uAC01 \uBD80\uC801 \uBC1C\uC0AC\uBD80\uD130 \uBA85\uC911
+      \uB610\uB294 \uC18C\uBA78\uAE4C\uC9C0"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 1
-    Loop: 1
+    Loop: 0
     MinInterval: 0
     IntervalScope: 0
     BgmFadeDuration: -1
-    LoopEndRule: 부적 명중, 수명 만료, 풀 반환 또는 씬 종료
+    LoopEndRule: "\uBD80\uC801 \uBA85\uC911, \uC218\uBA85 \uB9CC\uB8CC, \uD480 \uBC18\uD658
+      \uB610\uB294 \uC52C \uC885\uB8CC"
   - EventId: Player.TalismanExplosion
     Enabled: 1
     SoundId: Player.TalismanExplosion
