@@ -99,6 +99,10 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField]
     private LaunchSettings _launchSettings = LaunchSettings.Default;
 
+    [Tooltip("보스만 날려 보내는 높이(Height)에 곱하는 배율. 플레이어 마무리 공격 설정을 그대로 쓸 때도 적용 (일반 적에는 영향 없음)")]
+    [SerializeField, Min(0f)]
+    private float _launchHeightMultiplier = 1.5f;
+
     [Tooltip("처치 연출 뒤 보스 오브젝트를 끔")]
     [SerializeField]
     private bool _disableOnDefeat = true;
@@ -1413,7 +1417,10 @@ public class Boss : MonoBehaviour, IFinishable
             return;
         }
 
-        ChangeState(new BossDefeatedState(this, _overrideLaunchSettings ? _launchSettings : launch));
+        // 구조체 복사본이라 플레이어 / 일반 적 설정에는 영향 없음
+        LaunchSettings settings = _overrideLaunchSettings ? _launchSettings : launch;
+        settings.Height *= _launchHeightMultiplier;
+        ChangeState(new BossDefeatedState(this, settings));
     }
 
     #endregion
