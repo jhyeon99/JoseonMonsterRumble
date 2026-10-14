@@ -20,10 +20,39 @@ public class GamtuWaypointMove2D : MonoBehaviour
     [SerializeField]
     private List<Transform> _waypoints = new List<Transform>();
 
+    [Header("전투 시작 시 소멸 연출")]
+    [Tooltip("도깨비 발판 전투 시작 시 재생할 몬스터 스폰 효과 Prefab입니다.")]
+    [SerializeField] private GameObject _spawnEffectPrefab;
+
     private readonly List<Vector2> _targetPositions = new List<Vector2>();
     private int _currentIndex = 0;
     private bool _isMoving = false;
     private bool _hasFinished = false;
+
+    private void OnEnable()
+    {
+        DokkaebiPlatformWavePreview.OnDokkaebiPlatformBattleStarted += HandleBattleStarted;
+    }
+
+    private void OnDisable()
+    {
+        DokkaebiPlatformWavePreview.OnDokkaebiPlatformBattleStarted -= HandleBattleStarted;
+    }
+
+    private void HandleBattleStarted()
+    {
+        if (!gameObject.activeSelf) return;
+
+        if (_spawnEffectPrefab != null)
+        {
+            GameObject effect = Instantiate(_spawnEffectPrefab, transform.position, Quaternion.identity);
+            SpriteRenderer sr = effect.GetComponent<SpriteRenderer>();
+            if (sr != null) sr.sortingLayerName = "Effect";
+            Destroy(effect, 1.2f);
+        }
+
+        gameObject.SetActive(false);
+    }
 
     private void Start()
     {
