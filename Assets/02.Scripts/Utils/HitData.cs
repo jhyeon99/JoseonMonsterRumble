@@ -32,6 +32,12 @@ public struct HitData
     /// <summary>공격한 대상 (적 / 보스 등). 사망 원인 표시용. 모르면 null</summary>
     public GameObject Attacker;
 
+    /// <summary>타격 소울 충전량 배율 (맞은 쪽이 지정, 예: 보스 3배). 0 이하면 1배</summary>
+    public float SoulAmountMultiplier;
+
+    /// <summary>타격 소울 크기 배율 (맞은 쪽이 지정). 0 이하면 1배</summary>
+    public float SoulScaleMultiplier;
+
     /// <summary>공격한 대상의 표시 이름 (보스는 보스 이름, 그 외는 오브젝트 이름). 모르면 빈 문자열</summary>
     public string AttackerName => GetDisplayName(Attacker);
 
@@ -64,6 +70,8 @@ public struct HitData
         AttackName = attackName;
         Attacker = null;
         PoisonDuration = 0f;
+        SoulAmountMultiplier = 0f;
+        SoulScaleMultiplier = 0f;
     }
 
     /// <summary>오브젝트의 표시 이름. 보스면 보스 이름, 그 외는 (Clone) / PF_ 를 뗀 오브젝트 이름</summary>
