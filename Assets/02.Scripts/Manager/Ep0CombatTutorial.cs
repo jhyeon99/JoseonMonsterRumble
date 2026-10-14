@@ -305,6 +305,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     private void LateUpdate()
     {
         UpdateHintPosition();
+        KeepPlayerBeforeTutorialEnemy();
         if (_running && _player != null && _player.Health.IsDead)
         {
             StopAllCoroutines();
@@ -313,6 +314,38 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
             Phase = "Waiting";
             _enemy.StateMachine.ChangeState(new WaitingState(_enemy));
         }
+    }
+
+    private void KeepPlayerBeforeTutorialEnemy()
+    {
+        if (!_initialized || _attackHitCount >= RequiredAttackHits || _player.Health.IsDead ||
+            !_enemy.gameObject.activeInHierarchy || (_prologue != null && !_prologue.IsIntroComplete))
+        {
+            return;
+        }
+
+        // This horizontal limit also blocks jumping or dodging past the practice enemy.
+        float limitX = _enemy.transform.position.x;
+        Collider2D enemyCollider = _enemy.GetComponent<Collider2D>();
+        Collider2D playerCollider = _player.GetComponent<Collider2D>();
+        if (enemyCollider != null && playerCollider != null)
+        {
+            float playerRightOffset = playerCollider.bounds.max.x - _player.transform.position.x;
+            limitX = enemyCollider.bounds.min.x - playerRightOffset;
+        }
+        if (_player.transform.position.x <= limitX) return;
+
+        Vector3 position = _player.transform.position;
+        position.x = limitX;
+        Rigidbody2D body = _player.GetComponent<Rigidbody2D>();
+        if (body != null)
+        {
+            body.position = new Vector2(position.x, position.y);
+            Vector2 velocity = body.linearVelocity;
+            velocity.x = Mathf.Min(velocity.x, 0f);
+            body.linearVelocity = velocity;
+        }
+        _player.transform.position = position;
     }
 
     private IEnumerator RunTutorial()
