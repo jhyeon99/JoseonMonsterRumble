@@ -26,7 +26,8 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: GroundRanged.Death
     DisplayName: "\uC0AC\uB9DD \uD655\uC815"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: c916a7584370889439ef53925ea0f08b, type: 3}
     StartOffset: 0
     Volume: 0.06
     PitchMin: 1
@@ -56,7 +57,8 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: GroundRanged.RangedFire
     DisplayName: "\uD22C\uC0AC\uCCB4 \uC2E4\uC81C \uC0DD\uC131\xB7\uBC1C\uC0AC"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: d0e12f88ae7544f48b7ac8b6fa8863ab, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1

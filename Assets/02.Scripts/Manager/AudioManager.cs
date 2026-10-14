@@ -311,7 +311,8 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         else if (sceneName.IndexOf("Ep0", StringComparison.OrdinalIgnoreCase) >= 0 ||
                  sceneName.IndexOf("Prologue", StringComparison.OrdinalIgnoreCase) >= 0)
         {
-            PlayMusicEvent("Music.Prologue", scene);
+            // EP0 음악은 문을 열고 나온 시점에 연출 컨트롤러가 시작한다.
+            StopBgm(0f);
         }
         else if (sceneName.StartsWith("EP", StringComparison.OrdinalIgnoreCase) ||
                          sceneName.StartsWith("Test_Ep", StringComparison.OrdinalIgnoreCase) || sceneName == "Test_StageField")
@@ -381,7 +382,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
             float gain = 1f;
             if (_channels.TryGetValue(source, out Request request))
             {
-                gain = request.Volume;
+                gain = request.Volume * request.Envelope;
             }
             source.volume = (_isSfxMuted ? 0f : _sfxVolume) * gain;
         }
@@ -403,6 +404,9 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         public IntervalScope IntervalScope;
         public AudioClip Clip;
         public float Volume, Pitch, Delay, Interval, Fade;
+        public float FullVolumeDuration = -1f;
+        public float EndFadeDuration, PlaybackElapsed;
+        public float Envelope = 1f;
         public int Priority, MaxCount, StartSample;
         public bool Loop, Bgm, Started, Paused;
         public ulong MusicSequence, StartOrder;
@@ -553,6 +557,20 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
     public bool IsHandleValid(PlayHandle handle) => !handle.IsEmpty &&
         _requests.TryGetValue(handle.RequestId, out Request request) && request.Handle == handle;
 
+    public void LimitSfxPlayback(PlayHandle handle, float fullVolumeDuration, float fadeDuration)
+    {
+        if (!IsHandleValid(handle)) return;
+        Request request = _requests[handle.RequestId];
+        if (request.Bgm || float.IsNaN(fullVolumeDuration) || float.IsInfinity(fullVolumeDuration) ||
+            float.IsNaN(fadeDuration) || float.IsInfinity(fadeDuration))
+        {
+            return;
+        }
+
+        request.FullVolumeDuration = Mathf.Max(0f, fullVolumeDuration);
+        request.EndFadeDuration = Mathf.Max(0f, fadeDuration);
+    }
+
     private bool AcceptContext(AudioContext context, LifetimePolicy lifetime)
     {
         if (lifetime != LifetimePolicy.Global)
@@ -657,14 +675,13 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         _lastStarts[IntervalKey(request)] = (Time.timeAsDouble, Time.unscaledTimeAsDouble);
     }
 
-    private bool PrepareTrimmedPlayback(Request request)
+    private bool PreparePlaybackData(Request request)
     {
-        if (request.StartSample == 0) return true;
         AudioClip original = request.Clip;
         if (original.loadState == AudioDataLoadState.Unloaded) original.LoadAudioData();
         if (original.loadState == AudioDataLoadState.Loading)
         {
-            request.Pending = StartCoroutine(WaitForTrimData(request));
+            request.Pending = StartCoroutine(WaitForAudioData(request));
             return false;
         }
         if (original.loadState != AudioDataLoadState.Loaded)
@@ -672,7 +689,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
             StopHandle(request.Handle);
             return false;
         }
-        if (!request.Loop) return true;
+        if (request.StartSample == 0 || !request.Loop) return true;
         (AudioClip original, int StartSample) key = (original, request.StartSample);
         if (!_trimmedLoops.TryGetValue(key, out AudioClip trimmed) || trimmed == null)
         {
@@ -700,7 +717,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         return true;
     }
 
-    private IEnumerator WaitForTrimData(Request request)
+    private IEnumerator WaitForAudioData(Request request)
     {
         while (request.Clip != null && request.Clip.loadState == AudioDataLoadState.Loading)
         {
@@ -723,7 +740,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
             StopHandle(request.Handle);
             return;
         }
-        if (!PrepareTrimmedPlayback(request)) return;
+        if (!PreparePlaybackData(request)) return;
         if (request.Bgm)
         {
             _bgmFadeCoroutine = StartCoroutine(TransitionMusic(request, request.Fade, request.MusicSequence));
@@ -807,11 +824,35 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
                 request.Paused = false;
             }
         }
+        UpdateSfxEnvelopes();
         ReapFinished();
         if (_currentMusic != null && _pendingMusic == null && _bgmFadeCoroutine == null && !_bgmSource.isPlaying)
         {
             _requests.Remove(_currentMusic.Handle.RequestId);
             _currentMusic = null;
+        }
+    }
+
+    private void UpdateSfxEnvelopes()
+    {
+        foreach (Request request in _channels.Values)
+        {
+            if (request.Paused || request.FullVolumeDuration < 0f) continue;
+            // AudioSource의 실제 재생 속도를 따른다. 일시 정지 중에는 진행하지 않는다.
+            request.PlaybackElapsed += Time.unscaledDeltaTime;
+            float fadeElapsed = request.PlaybackElapsed - request.FullVolumeDuration;
+            if (fadeElapsed < 0f) continue;
+            if (request.EndFadeDuration <= 0f || fadeElapsed >= request.EndFadeDuration)
+            {
+                request.Envelope = 0f;
+                request.Source.Stop();
+            }
+            else
+            {
+                float remaining = 1f - fadeElapsed / request.EndFadeDuration;
+                request.Envelope = remaining * remaining;
+            }
+            request.Source.volume = (_isSfxMuted ? 0f : _sfxVolume) * request.Volume * request.Envelope;
         }
     }
 

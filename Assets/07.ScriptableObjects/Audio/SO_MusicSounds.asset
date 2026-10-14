@@ -25,8 +25,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 1
   - SoundId: Music.Field
-    DisplayName: "\uC77C\uBC18 \uD50C\uB808\uC774 \uC52C \uC9C4\uC785"
-    Clips: []
+    DisplayName: "EP1 \uC52C \uC9C4\uC785"
+    Clips:
+    - {fileID: 8300000, guid: 79b74132611ef3e41ab55e6c4bf1e571, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -56,9 +57,9 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 1
   - SoundId: Music.Prologue
-    DisplayName: "\uD504\uB864\uB85C\uADF8 \uC5F0\uCD9C \uC2DC\uC791"
+    DisplayName: "EP0 \uBB38\uC744 \uC5F4\uACE0 \uB098\uC628 \uC9C1\uD6C4"
     Clips:
-    - {fileID: 8300000, guid: 6e8f7dff26bfc1843916a126aacc8a24, type: 3}
+    - {fileID: 8300000, guid: db21c60e7daf8fe4b9449710b3070245, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -104,7 +105,7 @@ MonoBehaviour:
   - EventId: Music.Field
     Enabled: 1
     SoundId: Music.Field
-    TriggerDescription: "\uC77C\uBC18 \uD50C\uB808\uC774 \uC52C \uC9C4\uC785"
+    TriggerDescription: "EP1 \uC52C \uC9C4\uC785"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 3
@@ -143,7 +144,7 @@ MonoBehaviour:
   - EventId: Music.Prologue
     Enabled: 1
     SoundId: Music.Prologue
-    TriggerDescription: "\uD504\uB864\uB85C\uADF8 \uC5F0\uCD9C \uC2DC\uC791"
+    TriggerDescription: "EP0 \uBB38\uC744 \uC5F4\uACE0 \uB098\uC628 \uC9C1\uD6C4"
     Delay: 0
     TimeMode: 1
     LifetimePolicy: 3
