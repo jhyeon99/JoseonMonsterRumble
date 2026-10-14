@@ -61,6 +61,11 @@ public class BossHopPattern : BossPattern
     [SerializeField, Min(0f)]
     private float _edgeMargin = 2f;
 
+    [Header("후퇴")]
+    [Tooltip("플레이어를 바라본 채 반대 방향으로 점프. 벽 때문에 이동할 공간이 없으면 플레이어를 넘어감")]
+    [SerializeField] private bool _retreatFromPlayer;
+    [SerializeField, Min(0f)] private float _minimumRetreatTravel = 4f;
+
     [Tooltip("뛰어오를 때 발밑 먼지 (크기 / 위치는 Boss의 점프 먼지 설정)")]
     [SerializeField]
     private bool _takeoffDust = true;
@@ -86,7 +91,15 @@ public class BossHopPattern : BossPattern
         }
 
         float distance = Mathf.Abs(Boss.Player.position.x - Boss.Position.x);
-        return distance >= _minDistance && distance <= _maxDistance;
+        if (distance < _minDistance || distance > _maxDistance) return false;
+        if (!_retreatFromPlayer) return true;
+        float startX = Boss.Position.x;
+        float targetX = GetTargetX(startX);
+        float toPlayer = Boss.Player.position.x - startX;
+        float direction = Mathf.Abs(toPlayer) > 0.01f ? Mathf.Sign(toPlayer) : Boss.FacingX;
+        bool movesAway = (targetX - startX) * direction < 0f;
+        bool crossesPlayer = (targetX - Boss.Player.position.x) * direction > 0f;
+        return Mathf.Abs(targetX - startX) >= _minimumRetreatTravel && (movesAway || crossesPlayer);
     }
 
     /// <summary>패턴 트리거 / 클립 대신 Boss의 점프 상태(시작 → 공중 → 착지)를 직접 재생</summary>
@@ -265,7 +278,14 @@ public class BossHopPattern : BossPattern
         // 플레이어가 바로 위 / 아래면 보스가 보는 방향으로
         float direction = Mathf.Abs(toPlayer) > 0.01f ? Mathf.Sign(toPlayer) : Boss.FacingX;
 
-        float overshoot = Mathf.Max(0f, _overshootDistance + Random.Range(-_overshootJitter, _overshootJitter));
+        if (_retreatFromPlayer)
+        {
+            float retreatX = startX - direction * _hopDistance;
+            if (Boss.Arena != null) retreatX = Boss.Arena.ClampX(retreatX, _edgeMargin);
+            if (Mathf.Abs(retreatX - startX) >= _minimumRetreatTravel) return retreatX;
+        }
+
+        float overshoot = Mathf.Max(0f, _overshootDistance + (_retreatFromPlayer ? 0f : Random.Range(-_overshootJitter, _overshootJitter)));
         float distance = Mathf.Min(Mathf.Abs(toPlayer) + overshoot, _hopDistance);
         float x = startX + (direction * distance);
         return Boss.Arena != null ? Boss.Arena.ClampX(x, _edgeMargin) : x;
