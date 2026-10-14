@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -30,7 +31,12 @@ public class BossSpitPattern : BossPattern
     [SerializeField]
     private Vector2Int _projectilesPerSpit = new Vector2Int(3, 5);
 
-    [Tooltip("켜면 한 번 뱉을 때 나오는 침 중 무작위로 1개만 패링 가능 (반짝임, 패링하면 보스 쪽으로 반사). 나머지는 막기만 가능")]
+    [Tooltip("켜면 한 번 뱉을 때 나오는 침 중 비행 시간이 가장 긴 침 / 가장 짧은 침 2개만 패링 가능 (반짝임, 패링하면 보스 쪽으로 반사). " +
+             "나머지는 막기만 가능. 침이 1개면 그 1개만 패링 가능")]
+    [SerializeField]
+    private bool _parryLongestAndShortest = true;
+
+    [Tooltip("(위 옵션을 끈 경우) 켜면 한 번 뱉을 때 나오는 침 중 무작위로 1개만 패링 가능")]
     [SerializeField]
     private bool _oneParryablePerSpit = true;
 
@@ -91,6 +97,19 @@ public class BossSpitPattern : BossPattern
     [SerializeField, Min(0f)]
     private float _aimEdgeMargin = 0.5f;
 
+    [Header("겹침 방지 (BossSpit 투사체)")]
+    [Tooltip("비슷한 시점에 떨어지는 침끼리 착지 지점을 최소 이 가로 거리만큼 떨어뜨림 (0이면 사용 안 함)")]
+    [SerializeField, Min(0f)]
+    private float _minLandingSeparation = 1.8f;
+
+    [Tooltip("도착 시각 차이가 이 시간(초) 안인 침끼리만 거리를 둠. 시간 차가 크게 나는 침은 같은 자리에 떨어져도 따로 대처 가능")]
+    [SerializeField, Min(0f)]
+    private float _separationTimeWindow = 0.8f;
+
+    [Tooltip("거리를 만족하는 착지 지점을 찾기 위한 최대 시도 횟수. 못 찾으면 가장 멀리 떨어진 후보 사용")]
+    [SerializeField, Range(1, 32)]
+    private int _landingPickAttempts = 12;
+
     [Header("입 이펙트")]
     [Tooltip("켜면 뱉을 때마다 BossSpit 이펙트 재생 (EffectPool에 BossSpit 등록 필요)")]
     [SerializeField]
@@ -110,6 +129,9 @@ public class BossSpitPattern : BossPattern
 
     private bool _bundleCueSent;
 
+    // 이번 패턴에서 예약된 착지 (x, 도착 시각). 비슷한 시점에 같은 자리에 겹쳐 떨어지지 않도록
+    private readonly List<Vector2> _plannedLandings = new List<Vector2>();
+
     private void Reset()
     {
         SetDefaults("침뱉기", BossPhaseMask.Both, BossFloorMask.Any);
@@ -128,6 +150,7 @@ public class BossSpitPattern : BossPattern
     {
         int shots = PickSpitCount();
         Boss.Log($"{PatternName}: {shots}번 뱉기");
+        _plannedLandings.Clear();
         float nextShotRatio = Mathf.Max(_nextShotRatio, _fireRatio);
 
         for (int shot = 0; shot < shots; shot++)
@@ -160,11 +183,25 @@ public class BossSpitPattern : BossPattern
             int max = Mathf.Max(min, _projectilesPerSpit.y);
             int count = Random.Range(min, max + 1);
 
-            // 이번 뱉기에서 패링 가능한 침 1개를 무작위로 정함
-            int parryableIndex = _oneParryablePerSpit ? Random.Range(0, count) : -1;
+            // 침마다 비행 시간을 미리 정함 (패링 가능 여부를 비행 시간으로 정하기 위해)
+            float[] flightTimes = new float[count];
+            int longestIndex = 0;
+            int shortestIndex = 0;
             for (int i = 0; i < count; i++)
             {
-                Fire(GetSpreadOffset(i, count), i == parryableIndex);
+                flightTimes[i] = Random.Range(_flightTimeRange.x, Mathf.Max(_flightTimeRange.x, _flightTimeRange.y));
+                if (flightTimes[i] > flightTimes[longestIndex]) longestIndex = i;
+                if (flightTimes[i] < flightTimes[shortestIndex]) shortestIndex = i;
+            }
+
+            // 패링 가능: 가장 오래 / 가장 짧게 나는 침 2개 (옵션을 끄면 기존처럼 무작위 1개)
+            int randomParryableIndex = !_parryLongestAndShortest && _oneParryablePerSpit ? Random.Range(0, count) : -1;
+            for (int i = 0; i < count; i++)
+            {
+                bool parryable = _parryLongestAndShortest
+                    ? (i == longestIndex || i == shortestIndex)
+                    : i == randomParryableIndex;
+                Fire(GetSpreadOffset(i, count), parryable, flightTimes[i]);
 
                 if (i < count - 1)
                 {
@@ -239,6 +276,50 @@ public class BossSpitPattern : BossPattern
     /// </summary>
     private Vector2 PickTarget(float flightTime)
     {
+        if (_minLandingSeparation <= 0f)
+        {
+            return PickRawTarget(flightTime);
+        }
+
+        // 비슷한 시점에 떨어지는 다른 침과 가로 거리를 두는 착지 지점을 찾음
+        float arriveTime = Time.time + flightTime;
+        Vector2 best = PickRawTarget(flightTime);
+        float bestDistance = NearestLandingDistance(best.x, arriveTime);
+        for (int attempt = 1; attempt < _landingPickAttempts && bestDistance < _minLandingSeparation; attempt++)
+        {
+            Vector2 candidate = PickRawTarget(flightTime);
+            float distance = NearestLandingDistance(candidate.x, arriveTime);
+            if (distance > bestDistance)
+            {
+                best = candidate;
+                bestDistance = distance;
+            }
+        }
+
+        _plannedLandings.Add(new Vector2(best.x, arriveTime));
+        return best;
+    }
+
+    /// <summary>도착 시각이 Separation Time Window 안인 다른 침의 착지 지점 중 가장 가까운 가로 거리 (없으면 무한대)</summary>
+    private float NearestLandingDistance(float x, float arriveTime)
+    {
+        float nearest = float.PositiveInfinity;
+        foreach (Vector2 landing in _plannedLandings)
+        {
+            if (Mathf.Abs(landing.y - arriveTime) > _separationTimeWindow)
+            {
+                continue;
+            }
+
+            nearest = Mathf.Min(nearest, Mathf.Abs(landing.x - x));
+        }
+
+        return nearest;
+    }
+
+    /// <summary>예측 위치 기준 조준탄 / 견제탄 랜덤 착지 지점 (겹침 고려 전)</summary>
+    private Vector2 PickRawTarget(float flightTime)
+    {
         Vector2 playerPosition = Boss.Player.position;
 
         Vector2 playerVelocity = Vector2.zero;
@@ -274,7 +355,7 @@ public class BossSpitPattern : BossPattern
         return Mathf.Lerp(-_spreadAngle * 0.5f, _spreadAngle * 0.5f, index / (float)(count - 1));
     }
 
-    private void Fire(float angleOffset, bool parryable)
+    private void Fire(float angleOffset, bool parryable, float flightTime)
     {
         if (ProjectilePool.Instance == null || Boss.Player == null)
         {
@@ -299,7 +380,6 @@ public class BossSpitPattern : BossPattern
         if (projectile is BossSpitProjectile spit)
         {
             Vector2 origin = (Vector2)_muzzle.position + (Random.insideUnitCircle * _muzzleJitter);
-            float flightTime = Random.Range(_flightTimeRange.x, Mathf.Max(_flightTimeRange.x, _flightTimeRange.y));
             Vector2 target = PickTarget(flightTime);
 
             spit.transform.position = origin;
