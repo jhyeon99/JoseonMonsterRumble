@@ -75,6 +75,9 @@ public class PlayerMovement : MonoBehaviour
 
     public bool CanJump => !_isJumping && _coyoteTimer > 0f && _landingJumpTimer == 0f;
 
+    /// <summary>이번 점프가 높은 점프로 확정됐는지 (Long Jump Hold Time 이상 누름). 새 점프마다 false로 초기화</summary>
+    public bool IsLongJump { get; private set; }
+
     private readonly ContactPoint2D[] _groundContacts = new ContactPoint2D[8];
     private ContactFilter2D _groundFilter;
     private const float GroundNormalThreshold = 0.7f;
@@ -142,6 +145,10 @@ public class PlayerMovement : MonoBehaviour
             UpdateTwoStepJump(isJumpHeld);
             v = _rigidbody2D.linearVelocity;
         }
+        else
+        {
+            UpdateLongJumpHold(isJumpHeld);
+        }
 
         float multiplier = 1f;
 
@@ -176,6 +183,7 @@ public class PlayerMovement : MonoBehaviour
             if (_jumpHoldTimer >= _longJumpHoldTime)
             {
                 _jumpHeightDecided = true;
+                IsLongJump = true;
             }
 
             return;
@@ -199,6 +207,28 @@ public class PlayerMovement : MonoBehaviour
         {
             v.y = maxVelocity;
             _rigidbody2D.linearVelocity = v;
+        }
+    }
+
+    /// <summary>2단계 점프를 끈 경우에도 IsLongJump를 같은 기준(Long Jump Hold Time)으로 판정</summary>
+    private void UpdateLongJumpHold(bool isJumpHeld)
+    {
+        if (!_isJumping || _jumpHeightDecided)
+        {
+            return;
+        }
+
+        if (!isJumpHeld)
+        {
+            _jumpHeightDecided = true;
+            return;
+        }
+
+        _jumpHoldTimer += Time.fixedDeltaTime;
+        if (_jumpHoldTimer >= _longJumpHoldTime)
+        {
+            _jumpHeightDecided = true;
+            IsLongJump = true;
         }
     }
 
@@ -271,6 +301,7 @@ public class PlayerMovement : MonoBehaviour
         _isJumping = true;
         _jumpHeightDecided = false;
         _jumpHoldTimer = 0f;
+        IsLongJump = false;
         _jumpStartY = _rigidbody2D.position.y;
 
         float gravity = Mathf.Abs(Physics2D.gravity.y) * _baseGravityScale;
