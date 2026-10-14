@@ -18,6 +18,9 @@ namespace GameAudio
         public string DisplayName;
         public string EventPrefix = "Ground";
         public SoundSetSO Sounds;
+        public bool UseCustomLaunchDeathFade;
+        [Min(0f)] public float LaunchDeathFadeStart = 1f;
+        [Min(0f)] public float LaunchDeathFadeDuration = 0.15f;
     }
 
     [CreateAssetMenu(menuName = "Audio/Audio Catalog", fileName = "SO_AudioCatalog")]
@@ -32,6 +35,10 @@ namespace GameAudio
         [Min(0.1f)] public float BossFrogMinInterval = 3f;
         [Tooltip("보스전 개구리 소리가 끝난 뒤 다음 울음까지 쉬는 최대 시간 (초)")]
         [Min(0.1f)] public float BossFrogMaxInterval = 8f;
+        [Tooltip("날아가며 사망한 몬스터의 사망음을 원래 음량으로 재생하는 시간 (초)")]
+        [Min(0f)] public float LaunchDeathSoundDuration = 1f;
+        [Tooltip("위 시간이 지난 뒤 사망음을 빠르게 줄이고 종료하는 시간 (초)")]
+        [Min(0f)] public float LaunchDeathSoundFade = 0.15f;
         public SoundSetSO Music;
         public SoundSetSO Item;
         public SoundSetSO Environment;
@@ -39,6 +46,23 @@ namespace GameAudio
         public SoundSetSO Prologue;
         [Tooltip("본 스테이지 사용이 확정될 때 연결하는 조건부 데이터입니다.")]
         public SoundSetSO Buff;
+
+        public void GetLaunchDeathFade(EnemyData monster, out float start, out float duration)
+        {
+            start = LaunchDeathSoundDuration;
+            duration = LaunchDeathSoundFade;
+            if (monster == null || Monsters == null) return;
+            foreach (MonsterSoundProfile profile in Monsters)
+            {
+                if (profile == null || profile.Monster != monster) continue;
+                if (profile.UseCustomLaunchDeathFade)
+                {
+                    start = profile.LaunchDeathFadeStart;
+                    duration = profile.LaunchDeathFadeDuration;
+                }
+                return;
+            }
+        }
 
         public bool TryGetMonsterSet(EnemyData monster, out SoundSetSO set)
         {

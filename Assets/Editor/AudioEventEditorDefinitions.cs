@@ -79,10 +79,10 @@ Boss.BabyHurt|올챙이 비치명 피해 적용
 Boss.BabyDeath|올챙이 일반 사망 확정
 Boss.GroggyRecover|짧은 그로기 정상 회복
 Music.Title|타이틀 씬 진입
-Music.Field|일반 플레이 씬 진입
+Music.Field|EP1 씬 진입
 Music.Boss|실제 보스 전투 시작
 Music.BossPhase2|2페이즈 진입 확정
-Music.Prologue|프롤로그 연출 시작
+Music.Prologue|EP0 문을 열고 나온 직후
 Music.Victory|보스 최종 처치 확정
 Music.Death|사망 화면 진입
 Item.SoulPickup|소울 수집 성공

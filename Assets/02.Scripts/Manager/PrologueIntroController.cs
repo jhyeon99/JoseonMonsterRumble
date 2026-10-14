@@ -356,6 +356,7 @@ public class PrologueIntroController : MonoBehaviour
         if (doorRevealDelay > 0f)
             yield return new WaitForSecondsRealtime(doorRevealDelay);
         // Player appears outside the house and can move as soon as the reveal starts.
+        AudioManager.Instance?.PlayMusicEvent("Music.Prologue", gameObject.scene);
         UnlockPlayer();
         _fade.blocksRaycasts = false;
         RestoreGameplayUi();
