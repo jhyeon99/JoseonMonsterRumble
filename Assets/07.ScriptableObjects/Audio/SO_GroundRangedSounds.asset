@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameAudio.SoundSetSO
   _sounds:
   - SoundId: GroundRanged.Hurt
-    DisplayName: "비치명 피해 적용"
-    Clips: []
+    DisplayName: "\uBE44\uCE58\uBA85 \uD53C\uD574 \uC801\uC6A9"
+    Clips:
+    - {fileID: 8300000, guid: 544023dfef450484595fd26e32cc2abf, type: 3}
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -23,7 +24,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: GroundRanged.Death
-    DisplayName: "사망 확정"
+    DisplayName: "\uC0AC\uB9DD \uD655\uC815"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -32,7 +33,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: GroundRanged.Footstep
-    DisplayName: "접지·이동 중 발 디딤 마커"
+    DisplayName: "\uC811\uC9C0\xB7\uC774\uB3D9 \uC911 \uBC1C \uB514\uB524 \uB9C8\uCEE4"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -41,7 +42,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: GroundRanged.MeleeAttack
-    DisplayName: "근접 공격 실행 시작"
+    DisplayName: "\uADFC\uC811 \uACF5\uACA9 \uC2E4\uD589 \uC2DC\uC791"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -50,7 +51,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: GroundRanged.RangedFire
-    DisplayName: "투사체 실제 생성·발사"
+    DisplayName: "\uD22C\uC0AC\uCCB4 \uC2E4\uC81C \uC0DD\uC131\xB7\uBC1C\uC0AC"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -59,7 +60,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: GroundRanged.Groggy
-    DisplayName: "패링 후 그로기 진입"
+    DisplayName: "\uD328\uB9C1 \uD6C4 \uADF8\uB85C\uAE30 \uC9C4\uC785"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -68,7 +69,7 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: GroundRanged.AttackReady
-    DisplayName: "공격 준비 시작"
+    DisplayName: "\uACF5\uACA9 \uC900\uBE44 \uC2DC\uC791"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -77,7 +78,8 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: GroundRanged.Detect
-    DisplayName: "대기·순찰에서 추적으로 전환"
+    DisplayName: "\uB300\uAE30\xB7\uC21C\uCC30\uC5D0\uC11C \uCD94\uC801\uC73C\uB85C
+      \uC804\uD658"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -86,7 +88,8 @@ MonoBehaviour:
     Priority: 50
     MaxCount: 4
   - SoundId: GroundRanged.FinisherLaunch
-    DisplayName: "마무리 공격에 의한 날려 보내기 시작"
+    DisplayName: "\uB9C8\uBB34\uB9AC \uACF5\uACA9\uC5D0 \uC758\uD55C \uB0A0\uB824
+      \uBCF4\uB0B4\uAE30 \uC2DC\uC791"
     Clips: []
     Volume: 1
     PitchMin: 1
@@ -98,7 +101,7 @@ MonoBehaviour:
   - EventId: Ground.Hurt
     Enabled: 1
     SoundId: GroundRanged.Hurt
-    TriggerDescription: "비치명 피해 적용"
+    TriggerDescription: "\uBE44\uCE58\uBA85 \uD53C\uD574 \uC801\uC6A9"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -110,7 +113,7 @@ MonoBehaviour:
   - EventId: Ground.Death
     Enabled: 1
     SoundId: GroundRanged.Death
-    TriggerDescription: "사망 확정"
+    TriggerDescription: "\uC0AC\uB9DD \uD655\uC815"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -122,7 +125,8 @@ MonoBehaviour:
   - EventId: Ground.Footstep
     Enabled: 1
     SoundId: GroundRanged.Footstep
-    TriggerDescription: "접지·이동 중 발 디딤 마커"
+    TriggerDescription: "\uC811\uC9C0\xB7\uC774\uB3D9 \uC911 \uBC1C \uB514\uB524
+      \uB9C8\uCEE4"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -134,7 +138,7 @@ MonoBehaviour:
   - EventId: Ground.MeleeAttack
     Enabled: 1
     SoundId: GroundRanged.MeleeAttack
-    TriggerDescription: "근접 공격 실행 시작"
+    TriggerDescription: "\uADFC\uC811 \uACF5\uACA9 \uC2E4\uD589 \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -146,7 +150,7 @@ MonoBehaviour:
   - EventId: Ground.RangedFire
     Enabled: 1
     SoundId: GroundRanged.RangedFire
-    TriggerDescription: "투사체 실제 생성·발사"
+    TriggerDescription: "\uD22C\uC0AC\uCCB4 \uC2E4\uC81C \uC0DD\uC131\xB7\uBC1C\uC0AC"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -158,7 +162,7 @@ MonoBehaviour:
   - EventId: Ground.Groggy
     Enabled: 1
     SoundId: GroundRanged.Groggy
-    TriggerDescription: "패링 후 그로기 진입"
+    TriggerDescription: "\uD328\uB9C1 \uD6C4 \uADF8\uB85C\uAE30 \uC9C4\uC785"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2
@@ -170,7 +174,7 @@ MonoBehaviour:
   - EventId: Ground.AttackReady
     Enabled: 1
     SoundId: GroundRanged.AttackReady
-    TriggerDescription: "공격 준비 시작"
+    TriggerDescription: "\uACF5\uACA9 \uC900\uBE44 \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 0
@@ -182,7 +186,8 @@ MonoBehaviour:
   - EventId: Ground.Detect
     Enabled: 1
     SoundId: GroundRanged.Detect
-    TriggerDescription: "대기·순찰에서 추적으로 전환"
+    TriggerDescription: "\uB300\uAE30\xB7\uC21C\uCC30\uC5D0\uC11C \uCD94\uC801\uC73C\uB85C
+      \uC804\uD658"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 1
@@ -194,7 +199,8 @@ MonoBehaviour:
   - EventId: Ground.FinisherLaunch
     Enabled: 1
     SoundId: GroundRanged.FinisherLaunch
-    TriggerDescription: "마무리 공격에 의한 날려 보내기 시작"
+    TriggerDescription: "\uB9C8\uBB34\uB9AC \uACF5\uACA9\uC5D0 \uC758\uD55C \uB0A0\uB824
+      \uBCF4\uB0B4\uAE30 \uC2DC\uC791"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 2

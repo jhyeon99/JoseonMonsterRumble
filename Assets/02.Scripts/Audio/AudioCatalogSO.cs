@@ -28,6 +28,10 @@ namespace GameAudio
         public EnemySoundSets Ground = new EnemySoundSets();
         public EnemySoundSets Air = new EnemySoundSets();
         public SoundSetSO Boss;
+        [Tooltip("보스전 개구리 소리가 끝난 뒤 다음 울음까지 쉬는 최소 시간 (초)")]
+        [Min(0.1f)] public float BossFrogMinInterval = 3f;
+        [Tooltip("보스전 개구리 소리가 끝난 뒤 다음 울음까지 쉬는 최대 시간 (초)")]
+        [Min(0.1f)] public float BossFrogMaxInterval = 8f;
         public SoundSetSO Music;
         public SoundSetSO Item;
         public SoundSetSO Environment;

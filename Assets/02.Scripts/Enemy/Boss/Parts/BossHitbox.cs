@@ -37,6 +37,7 @@ public class BossHitbox : MonoBehaviour, IParryable
 
     /// <summary>패링당함</summary>
     public event Action OnParriedByPlayer;
+    public event Action<HitData> OnPlayerDamaged;
 
     private readonly List<Collider2D> _results = new List<Collider2D>();
     private Collider2D _collider;
@@ -140,7 +141,11 @@ public class BossHitbox : MonoBehaviour, IParryable
             );
             hitData.Attacker = _boss != null ? _boss.gameObject : gameObject;
 
-            damageable.TakeDamage(hitData);
+            bool damageAccepted = damageable.TakeDamage(hitData);
+            if (damageAccepted && hitData.Damage > 0f)
+            {
+                OnPlayerDamaged?.Invoke(hitData);
+            }
             return;
         }
     }

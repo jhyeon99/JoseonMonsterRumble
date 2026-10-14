@@ -15,7 +15,9 @@ MonoBehaviour:
   _sounds:
   - SoundId: GroundMelee.Hurt
     DisplayName: "\uBE44\uCE58\uBA85 \uD53C\uD574 \uC801\uC6A9"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: a7e694c76ff29724bb6a1546f68e1d5a, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -26,6 +28,7 @@ MonoBehaviour:
     DisplayName: "\uC0AC\uB9DD \uD655\uC815"
     Clips:
     - {fileID: 8300000, guid: bf761a62ecb5e3749ba4326d3837fcb7, type: 3}
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -35,6 +38,7 @@ MonoBehaviour:
   - SoundId: GroundMelee.Footstep
     DisplayName: "\uC811\uC9C0\xB7\uC774\uB3D9 \uC911 \uBC1C \uB514\uB524 \uB9C8\uCEE4"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -44,6 +48,7 @@ MonoBehaviour:
   - SoundId: GroundMelee.MeleeAttack
     DisplayName: "\uADFC\uC811 \uACF5\uACA9 \uC2E4\uD589 \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -53,6 +58,7 @@ MonoBehaviour:
   - SoundId: GroundMelee.RangedFire
     DisplayName: "\uD22C\uC0AC\uCCB4 \uC2E4\uC81C \uC0DD\uC131\xB7\uBC1C\uC0AC"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -62,6 +68,7 @@ MonoBehaviour:
   - SoundId: GroundMelee.Groggy
     DisplayName: "\uD328\uB9C1 \uD6C4 \uADF8\uB85C\uAE30 \uC9C4\uC785"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -71,6 +78,7 @@ MonoBehaviour:
   - SoundId: GroundMelee.AttackReady
     DisplayName: "\uACF5\uACA9 \uC900\uBE44 \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -81,6 +89,7 @@ MonoBehaviour:
     DisplayName: "\uB300\uAE30\xB7\uC21C\uCC30\uC5D0\uC11C \uCD94\uC801\uC73C\uB85C
       \uC804\uD658"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1
@@ -91,6 +100,7 @@ MonoBehaviour:
     DisplayName: "\uB9C8\uBB34\uB9AC \uACF5\uACA9\uC5D0 \uC758\uD55C \uB0A0\uB824
       \uBCF4\uB0B4\uAE30 \uC2DC\uC791"
     Clips: []
+    StartOffset: 0
     Volume: 1
     PitchMin: 1
     PitchMax: 1

@@ -69,6 +69,7 @@ public class BossTonguePattern : BossPattern
     private BoxCollider2D _box;
     private bool _parried;
     private bool _retracted;
+    private bool _tongueHitActive;
     private Vector2 _originalSize;
     private Vector2 _originalOffset;
 
@@ -87,6 +88,7 @@ public class BossTonguePattern : BossPattern
         }
 
         _hitbox.OnParriedByPlayer += HandleParried;
+        _hitbox.OnPlayerDamaged += HandleTongueHit;
 
         _box = _hitbox.GetComponent<BoxCollider2D>();
         if (_box != null)
@@ -136,7 +138,13 @@ public class BossTonguePattern : BossPattern
         if (_hitbox != null)
         {
             _hitbox.OnParriedByPlayer -= HandleParried;
+            _hitbox.OnPlayerDamaged -= HandleTongueHit;
         }
+    }
+
+    private void HandleTongueHit(HitData hit)
+    {
+        if (_tongueHitActive) AudioResult("Boss.TongueImpact", hit.HitPoint);
     }
 
     private void HandleParried()
@@ -169,6 +177,7 @@ public class BossTonguePattern : BossPattern
 
         _parried = false;
         AudioAction("Boss.Tongue");
+        _tongueHitActive = true;
         _hitbox.Activate();
 
         float span = Mathf.Max(0.0001f, HitEndRatio - HitStartRatio);
@@ -183,6 +192,7 @@ public class BossTonguePattern : BossPattern
             yield return null;
         }
 
+        _tongueHitActive = false;
         _hitbox.Deactivate();
         RestoreCollider();
 
@@ -223,6 +233,7 @@ public class BossTonguePattern : BossPattern
 
     protected override void Cleanup()
     {
+        _tongueHitActive = false;
         // 역재생 도중 그로기 / 페이즈 전환으로 끊겨도 애니메이터가 멈춘 채 남지 않도록
         if (Boss != null)
         {
