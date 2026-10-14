@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 internal static class AudioEventEditorDefinitions
@@ -24,7 +24,7 @@ Player.Parry|실제 패링 성공
 Player.GuardBreak|가드 브레이크 확정
 Player.Finisher|마무리 타격 실행당 1회
 Player.ChargeStep|부적 슬롯 활성화 성공
-Player.TalismanFire|실제 부적 발사 묶음당 1회
+Player.TalismanFire|각 부적 발사부터 명중 또는 소멸까지
 Player.TalismanExplosion|유효 명중으로 부적 폭발 시작
 Player.PotionUse|물약 회복·소모 성공
 Player.GuardEnter|가드 자세 진입 성공
@@ -50,13 +50,18 @@ Air.AttackReady|공격 준비 시작
 Air.Ambience|대기·순찰 상태 시작
 Boss.Intro|등장 연출 시작
 Boss.Hurt|직접 공격 피해 적용
+Boss.Footstep|기본 이동·후퇴 점프의 실제 착지마다 1회
+Boss.FrogAmbience|보스전 중 울음이 끝난 뒤 랜덤 휴식 간격으로 1회씩
 Boss.Tongue|각 높이의 혀 뻗기 시작
+Boss.TongueImpact|보스 혀가 플레이어에게 실제 피해를 준 순간
 Boss.Stomp|각 찍기의 실제 착지
 Boss.NeedleFire|좌우 바늘 발사 묶음 생성
 Boss.Spit|각 침뱉기 발사 묶음 생성
+Boss.SpitImpact|보스 침이 플레이어에게 직접 피해를 준 순간
 Boss.ChargeStart|실제 돌진 이동·판정 시작
 Boss.PhaseHowl|1 → 2페이즈 전환 연출 시작
 Boss.SummonStart|독 방울 소환 패턴 진입
+Boss.BubbleHurt|개구리알에 실제 피해가 들어간 타격마다
 Boss.BubblePop|공격에 의한 방울 파열 성공
 Boss.BabyLaunch|3타로 올챙이 날려 보내기 성공
 Boss.BabyHitBoss|올챙이 기믹 피해 적용 성공
