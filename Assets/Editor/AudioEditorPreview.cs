@@ -32,16 +32,20 @@ internal static class AudioEditorPreview
                 null, new[] { typeof(AudioClip), typeof(int), typeof(bool) }, null);
             if (play == null) return "이 Unity 버전의 AudioUtil 미리듣기 API를 찾지 못했습니다.";
             int count = 0;
-            foreach (AudioClip clip in sound.Clips) if (clip != null) count++;
+            foreach (AudioClip clip in sound.Clips) if (sound.TryGetStartSample(clip, out _)) count++;
+            if (count == 0) return "앞부분 건너뛰기 시간이 음원 길이보다 짧아야 합니다.";
             int choice = Random.Next(count);
             AudioClip source = null;
-            foreach (AudioClip clip in sound.Clips) if (clip != null && choice-- == 0) { source = clip; break; }
+            foreach (AudioClip clip in sound.Clips) if (sound.TryGetStartSample(clip, out _) && choice-- == 0) { source = clip; break; }
             if (source.loadState != AudioDataLoadState.Loaded && !source.LoadAudioData()) return "음원 데이터를 로드하지 못했습니다.";
+            if (!sound.TryGetStartSample(source, out int startSample))
+                return "앞부분 건너뛰기 시간은 0 이상이고 음원 길이보다 짧아야 합니다.";
+            int remainingFrames = source.samples - startSample;
             float pitch = Mathf.Lerp(sound.PitchMin, sound.PitchMax, (float)Random.NextDouble());
-            int outputFrames = Mathf.Max(1, Mathf.CeilToInt(Mathf.Min(source.samples / pitch, source.frequency * PreviewSeconds)));
-            int inputFrames = Mathf.CeilToInt(Mathf.Min(source.samples, outputFrames * pitch + 1f));
+            int outputFrames = Mathf.Max(1, Mathf.CeilToInt(Mathf.Min(remainingFrames / pitch, source.frequency * PreviewSeconds)));
+            int inputFrames = Mathf.CeilToInt(Mathf.Min(remainingFrames, outputFrames * pitch + 1f));
             var input = new float[inputFrames * source.channels];
-            if (!source.GetData(input, 0)) return "음원을 읽을 수 없습니다. 미리듣기 시 Import Load Type을 Decompress On Load로 설정하세요.";
+            if (!source.GetData(input, startSample)) return "음원을 읽을 수 없습니다. 미리듣기 시 Import Load Type을 Decompress On Load로 설정하세요.";
             var output = new float[outputFrames * source.channels];
             for (int frame = 0; frame < outputFrames; frame++)
             {
