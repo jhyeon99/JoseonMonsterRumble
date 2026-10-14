@@ -212,7 +212,7 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
     private void LateUpdate()
     {
         if (_crawlManager == null) return;
-        bool crawling = !_isDead && !_isLaunched && _body != null && IsGrounded();
+        bool crawling = !_isDead && !_isLaunched;
         if (!crawling)
         {
             StopCrawl();
