@@ -60,6 +60,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
     private Collider2D _shooterCollider;
     private GameObject _shooter;
     private bool _isReflected;
+    private bool _hasReflectedHit;
     private Vector2 _reflectDirection;
     private float _reflectSpeed;
     public bool IsReflected => _isReflected;
@@ -195,6 +196,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
 
     protected virtual void OnTriggerEnter2D(Collider2D other)
     {
+        if (!isActiveAndEnabled || _hasReflectedHit) return;
         if (_isReflected)
         {
             HandleReflectedHit(other);
@@ -423,6 +425,9 @@ public abstract class Projectile : MonoBehaviour, IParryable
 
     protected void ApplyReflectedHit(IDamageable damageable, Vector2 hitPoint)
     {
+        if (!isActiveAndEnabled || _hasReflectedHit) return;
+        // 피격 이벤트가 다른 충돌 처리를 호출하더라도 같은 투사체는 중복 피해를 주지 않는다.
+        _hasReflectedHit = true;
         var hitData = new HitData(
             _projectileDamage,
             _data.KnockbackForce,
@@ -438,6 +443,10 @@ public abstract class Projectile : MonoBehaviour, IParryable
         {
             gameObject.SetActive(false);
         }
+        else
+        {
+            _hasReflectedHit = false;
+        }
     }
 
     private void ResetReflect()
@@ -448,6 +457,7 @@ public abstract class Projectile : MonoBehaviour, IParryable
         }
 
         _isReflected = false;
+        _hasReflectedHit = false;
         _reflectDirection = Vector2.zero;
     }
 
