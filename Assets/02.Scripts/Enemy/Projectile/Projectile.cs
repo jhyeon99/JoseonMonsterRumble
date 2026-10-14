@@ -240,7 +240,11 @@ public abstract class Projectile : MonoBehaviour, IParryable
             HitDirection, CurrentDefense, this, 0, AttackName);
         hitData.Attacker = _shooter;
         ModifyHitData(ref hitData);
-        damageable.TakeDamage(hitData);
+        bool damageAccepted = damageable.TakeDamage(hitData);
+        if (damageAccepted && damageable is PlayerHealth && hitData.Damage > 0f)
+        {
+            OnPlayerDamaged(hitData);
+        }
         // 무적과 가드에는 소멸하고, 피해 처리 중 패링됐을 때만 반사를 유지한다.
         if (!_isReflected)
         {
@@ -248,7 +252,12 @@ public abstract class Projectile : MonoBehaviour, IParryable
         }
     }
 
-    /// <summary>플레이어에게 맞히기 직전 공격 정보 수정 (독 등 투사체별 추가 효과)</summary>
+    /// <summary>플레이어 직접 피해가 성공한 뒤, 투사체가 풀로 반환되기 전에 호출.</summary>
+    protected virtual void OnPlayerDamaged(HitData hitData)
+    {
+    }
+
+    /// <summary>플레이어에게 맞히기 직전 공격 정보 수정 (독 등 투사체별 추가 효과).</summary>
     protected virtual void ModifyHitData(ref HitData hitData)
     {
     }

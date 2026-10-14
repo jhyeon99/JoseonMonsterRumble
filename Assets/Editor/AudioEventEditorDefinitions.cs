@@ -55,6 +55,7 @@ Boss.TongueImpact|보스 혀가 플레이어에게 실제 피해를 준 순간
 Boss.Stomp|각 찍기의 실제 착지
 Boss.NeedleFire|좌우 바늘 발사 묶음 생성
 Boss.Spit|각 침뱉기 발사 묶음 생성
+Boss.SpitImpact|보스 침이 플레이어에게 직접 피해를 준 순간
 Boss.ChargeStart|실제 돌진 이동·판정 시작
 Boss.PhaseHowl|1 → 2페이즈 전환 연출 시작
 Boss.SummonStart|독 방울 소환 패턴 진입
