@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8678864482595496114}
   - component: {fileID: 1290393893882163491}
+  - component: {fileID: 7517765920081301450}
   m_Layer: 0
   m_Name: PF_BossCinematicDirector
   m_TagString: Untagged
@@ -130,3 +131,48 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   _canvasSortingOrder: 50
+--- !u!114 &7517765920081301450
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2149566786204537046}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17876cfb27af407c99f8c8045d46dacf, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::EndingCreditsController
+  _playEnding: 1
+  _blackoutDuration: 2
+  _creditsDelay: 0.5
+  _canvasSortingOrder: 200
+  _creditsText: "CREDITS\n\n기획\n이름\n\n프로그래밍\n이름\n\n아트\n이름\n\n음악 · 사운드\n이름\n\n\n플레이해 주셔서 감사합니다"
+  _font: {fileID: 11400000, guid: 5645eadd0a91df74aa0b1a4045f316ba, type: 2}
+  _fontSize: 42
+  _textColor: {r: 1, g: 1, b: 1, a: 1}
+  _textWidth: 1300
+  _scrollSpeed: 65
+  _offscreenPadding: 80
+  _buttonDelay: 0.5
+  _backgroundSprite: {fileID: 0}
+  _backgroundOpacity: 0.25
+  _musicPlaylist:
+  - Clip: {fileID: 8300000, guid: db21c60e7daf8fe4b9449710b3070245, type: 3}
+    StartOffset: 0
+    Duration: 60
+    Volume: 1
+    Loop: 1
+    FadeIn: 1
+    FadeOut: 2
+  - Clip: {fileID: 8300000, guid: 374177a0513cbb84286021b4692699ec, type: 3}
+    StartOffset: 0
+    Duration: 0
+    Volume: 1
+    Loop: 0
+    FadeIn: 1
+    FadeOut: 2
+  _repeatMusicPlaylist: 1
+  _previousMusicFadeOut: 1
+  _returnButtonText: "타이틀로 돌아가기"
+  _titleSceneName: Test_TitleScene
