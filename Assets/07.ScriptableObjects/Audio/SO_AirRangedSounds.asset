@@ -37,7 +37,8 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: AirRanged.MeleeDash
     DisplayName: "U\uC790 \uB3CC\uC9C4 \uC2E4\uD589 \uC2DC\uC791"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: 413e17eaca1ab3d419ac04c8e71c7611, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -47,7 +48,8 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: AirRanged.RangedFire
     DisplayName: "\uD22C\uC0AC\uCCB4 \uC2E4\uC81C \uC0DD\uC131\xB7\uBC1C\uC0AC"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: 29e20b33ac2ea414bb5ef4b210180d8f, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1

@@ -23,6 +23,7 @@ Player.Block|실제 가드 방어 성공
 Player.Parry|실제 패링 성공
 Player.GuardBreak|가드 브레이크 확정
 Player.Finisher|마무리 타격 실행당 1회
+Player.FinisherDisappear|마무리로 날아간 일반 몬스터의 소멸 반짝임 시작
 Player.ChargeStep|부적 슬롯 활성화 성공
 Player.TalismanFire|각 부적 발사부터 명중 또는 소멸까지
 Player.TalismanExplosion|유효 명중으로 부적 폭발 시작
@@ -79,10 +80,10 @@ Boss.BabyHurt|올챙이 비치명 피해 적용
 Boss.BabyDeath|올챙이 일반 사망 확정
 Boss.GroggyRecover|짧은 그로기 정상 회복
 Music.Title|타이틀 씬 진입
-Music.Field|일반 플레이 씬 진입
+Music.Field|EP1 씬 진입
 Music.Boss|실제 보스 전투 시작
 Music.BossPhase2|2페이즈 진입 확정
-Music.Prologue|프롤로그 연출 시작
+Music.Prologue|EP0 문을 열고 나온 직후
 Music.Victory|보스 최종 처치 확정
 Music.Death|사망 화면 진입
 Item.SoulPickup|소울 수집 성공

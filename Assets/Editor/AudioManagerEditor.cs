@@ -12,6 +12,7 @@ public sealed class AudioManagerEditor : Editor
     private string _previewError;
     private bool _showWarnings;
     private AudioCatalogSO _catalog;
+    private EnemyData _previewMonster;
 
     private void OnEnable() => Undo.undoRedoPerformed += OnUndoRedo;
     private void OnDisable()
@@ -45,8 +46,10 @@ public sealed class AudioManagerEditor : Editor
         EditorGUILayout.PropertyField(serializedObject.FindProperty("_catalog"), new GUIContent("Audio Catalog"));
         serializedObject.ApplyModifiedProperties();
         _catalog = ((AudioManager)target).Catalog;
-        EnsureBossSound("Boss.Footstep", "보스 이동 착지 발바닥", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
-        EnsureBossSound("Boss.FrogAmbience", "보스전 배경 개구리 울음", LifetimePolicy.Entity, 0.2f, 0.95f, 1.05f, 1, 20);
+        UpdateMusicLabels();
+        EnsureSound(_catalog?.Player, "Player.FinisherDisappear", "날아간 몬스터 소멸 반짝임", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
+        EnsureSound(_catalog?.Boss, "Boss.Footstep", "보스 이동 착지 발바닥", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
+        EnsureSound(_catalog?.Boss, "Boss.FrogAmbience", "보스전 배경 개구리 울음", LifetimePolicy.Entity, 0.2f, 0.95f, 1.05f, 1, 20);
 
         List<string> warnings = AudioCatalogValidation.Validate(_catalog);
         if (warnings.Count > 0)
@@ -74,6 +77,13 @@ public sealed class AudioManagerEditor : Editor
         if (Foldout("Enemy", "몬스터"))
         {
             EditorGUI.indentLevel++;
+            if (Foldout("LaunchDeathAudio", "날아가며 사망할 때 사망음 종료"))
+            {
+                EditorGUILayout.HelpBox("패링 후 마무리 등으로 날아가며 죽는 경우에만 적용합니다. 기존 사망음 연결을 사용하고, 일반 사망은 끝까지 재생합니다.", MessageType.Info);
+                EditorGUILayout.PropertyField(catalogObject.FindProperty("LaunchDeathSoundDuration"), new GUIContent("페이드 시작 시점 (재생 후 초)"));
+                EditorGUILayout.PropertyField(catalogObject.FindProperty("LaunchDeathSoundFade"), new GUIContent("페이드 지속 시간 (초)"));
+                ApplyAssetChanges(catalogObject);
+            }
             DrawMonsterProfiles(catalogObject);
             if (Foldout("EnemyDefaults", "미등록 몬스터의 기본 설정"))
             {
@@ -100,10 +110,33 @@ public sealed class AudioManagerEditor : Editor
         DrawCategory(catalogObject, "Prologue", "프롤로그", "Prologue");
     }
 
-    private void EnsureBossSound(string eventId, string label, LifetimePolicy lifetime,
+    private void UpdateMusicLabels()
+    {
+        SoundSetSO music = _catalog != null ? _catalog.Music : null;
+        if (music == null) return;
+        SerializedObject data = AssetObject(music);
+        // 로드된 에셋의 기존 음원 연결과 재생 설정을 보존하고 표시 문구만 갱신한다.
+        foreach (string arrayName in new[] { "_sounds", "_events" })
+        {
+            SerializedProperty items = data.FindProperty(arrayName);
+            for (int i = 0; i < items.arraySize; i++)
+            {
+                SerializedProperty item = items.GetArrayElementAtIndex(i);
+                string id = item.FindPropertyRelative(arrayName == "_sounds" ? "SoundId" : "EventId").stringValue;
+                string previous = id == "Music.Field" ? "일반 플레이 씬 진입" :
+                    id == "Music.Prologue" ? "프롤로그 연출 시작" : null;
+                if (previous == null) continue;
+                SerializedProperty label = item.FindPropertyRelative(arrayName == "_sounds" ? "DisplayName" : "TriggerDescription");
+                if (label.stringValue == previous || string.IsNullOrEmpty(label.stringValue))
+                    label.stringValue = AudioEventEditorDefinitions.Description(id);
+            }
+        }
+        ApplyAssetChanges(data);
+    }
+
+    private void EnsureSound(SoundSetSO set, string eventId, string label, LifetimePolicy lifetime,
         float volume, float pitchMin, float pitchMax, int maxCount, int priority)
     {
-        SoundSetSO set = _catalog != null ? _catalog.Boss : null;
         if (set == null) return;
         bool hasEvent = set.TryGetEvent(eventId, out EventBinding binding);
         string soundId = hasEvent ? binding.SoundId : eventId;
@@ -162,7 +195,16 @@ public sealed class AudioManagerEditor : Editor
             string name = profile.FindPropertyRelative("DisplayName").stringValue;
             string prefix = profile.FindPropertyRelative("EventPrefix").stringValue;
             string path = "Monsters.Array.data[" + i + "]";
+            _previewMonster = profile.FindPropertyRelative("Monster").objectReferenceValue as EnemyData;
+            EditorGUILayout.PropertyField(profile.FindPropertyRelative("UseCustomLaunchDeathFade"), new GUIContent(name + " 사망음 페이드 개별 설정"));
+            if (profile.FindPropertyRelative("UseCustomLaunchDeathFade").boolValue)
+            {
+                EditorGUILayout.PropertyField(profile.FindPropertyRelative("LaunchDeathFadeStart"), new GUIContent("페이드 시작 시점 (재생 후 초)"));
+                EditorGUILayout.PropertyField(profile.FindPropertyRelative("LaunchDeathFadeDuration"), new GUIContent("페이드 지속 시간 (초)"));
+            }
+            ApplyAssetChanges(catalog);
             DrawCategory(catalog, path + ".Sounds", string.IsNullOrEmpty(name) ? "몬스터 " + (i + 1) : name, prefix);
+            _previewMonster = null;
         }
     }
 
@@ -462,6 +504,17 @@ public sealed class AudioManagerEditor : Editor
                 using (new EditorGUI.DisabledScope(EditorApplication.isPlayingOrWillChangePlaymode))
                     if (GUILayout.Button("미리듣기")) _previewError = AudioEditorPreview.Play(owner.Sounds[index]);
                 if (GUILayout.Button("미리듣기 정지")) { AudioEditorPreview.Stop(); _previewError = null; }
+            }
+            SoundData previewSound = owner.Sounds[index];
+            bool isDeath = (owner.TryGetEvent("Ground.Death", out EventBinding groundDeath) && groundDeath.SoundId == previewSound.SoundId) ||
+                (owner.TryGetEvent("Air.Death", out EventBinding airDeath) && airDeath.SoundId == previewSound.SoundId);
+            if (isDeath)
+            {
+                _catalog.GetLaunchDeathFade(_previewMonster, out float start, out float duration);
+                EditorGUILayout.LabelField($"날아가는 사망음: 재생 후 {start:0.##}초부터 {duration:0.##}초 동안 페이드");
+                using (new EditorGUI.DisabledScope(EditorApplication.isPlayingOrWillChangePlaymode))
+                    if (GUILayout.Button("날아가는 사망음 미리듣기"))
+                        _previewError = AudioEditorPreview.Play(previewSound, start, duration);
             }
         }
     }
