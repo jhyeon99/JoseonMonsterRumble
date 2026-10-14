@@ -16,6 +16,7 @@
         _HoverAmplitude ("Hover Height", Range(0, 0.15)) = 0.04
         _HoverSpeed ("Hover Speed", Range(0, 5)) = 1.6
         _Phase ("Animation Phase", Float) = 0
+        [PerRendererData] _MotionBend ("Movement Bend", Vector) = (0, 0, 0, 0)
         [HideInInspector] _AnimationTime ("Animation Time Override", Float) = -1
     }
     SubShader
@@ -51,6 +52,7 @@
                 float _HoverAmplitude, _HoverSpeed, _Phase;
                 float _WispCurl, _Swirl;
                 float _AnimationTime;
+                float4 _MotionBend;
             CBUFFER_END
 
             float Hash(float2 p)
@@ -115,6 +117,8 @@
                 float clock = _AnimationTime >= 0.0 ? _AnimationTime : _Time.y;
                 float time = clock * _Speed + input.phase;
                 float2 p = float2((uv.x - 0.5) * 2.0, uv.y);
+                float tailHeight = saturate((p.y - 0.33) / 0.57);
+                p -= _MotionBend.xy * tailHeight * tailHeight;
                 float flow = Noise(float2(p.x * 9.0, p.y * 10.0 - time * 1.8));
                 float distance = SpiritDistance(p, time, flow);
                 float edgeSoftness = max(0.012, fwidth(distance) * 1.5);
