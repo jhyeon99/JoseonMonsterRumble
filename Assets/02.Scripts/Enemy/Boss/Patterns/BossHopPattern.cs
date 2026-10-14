@@ -179,6 +179,7 @@ public class BossHopPattern : BossPattern
 
         _airborne = true;
         bool endAnimationPlayed = false;
+        bool footstepPlayed = false;
         float elapsed = 0f;
         while (elapsed < airDuration)
         {
@@ -191,6 +192,7 @@ public class BossHopPattern : BossPattern
 
             // 공중 애니메이션 유지, 착지 직전(Boss의 Jump End Lead Time)부터 착지 애니메이션
             endAnimationPlayed = Boss.UpdateJumpAirAnimation(airDuration - elapsed, endAnimationPlayed);
+            footstepPlayed = PlayLandingFootstep(airDuration - elapsed, footstepPlayed);
 
             // 착지 직전에 미리 (Landing Dust Timing이 음수)
             if (!landingDustPlayed && landingTiming < 0f && airDuration - elapsed <= -landingTiming)
@@ -211,7 +213,7 @@ public class BossHopPattern : BossPattern
             Boss.PlayJumpEnd();
         }
 
-        AudioResult("Boss.Footstep", Boss.Position);
+        PlayLandingFootstep(0f, footstepPlayed);
         CameraShake.Shake(_landingShake);
 
         if (!landingDustPlayed)

@@ -31,6 +31,8 @@ namespace GameAudio
         public EnemySoundSets Ground = new EnemySoundSets();
         public EnemySoundSets Air = new EnemySoundSets();
         public SoundSetSO Boss;
+        [Tooltip("발바닥 소리를 실제 착지보다 먼저 재생하는 시간. 음원 앞부분은 자르지 않습니다.")]
+        [Min(0f)] public float BossFootstepLeadTime = 0.1f;
         [Tooltip("보스전 개구리 소리가 끝난 뒤 다음 울음까지 쉬는 최소 시간 (초)")]
         [Min(0.1f)] public float BossFrogMinInterval = 3f;
         [Tooltip("보스전 개구리 소리가 끝난 뒤 다음 울음까지 쉬는 최대 시간 (초)")]
@@ -39,6 +41,8 @@ namespace GameAudio
         [Min(0f)] public float LaunchDeathSoundDuration = 1f;
         [Tooltip("위 시간이 지난 뒤 사망음을 빠르게 줄이고 종료하는 시간 (초)")]
         [Min(0f)] public float LaunchDeathSoundFade = 0.15f;
+        [Min(0.1f)] public float BabyCrawlMinInterval = 1f;
+        [Min(0.1f)] public float BabyCrawlMaxInterval = 3f;
         public SoundSetSO Music;
         public SoundSetSO Item;
         public SoundSetSO Environment;

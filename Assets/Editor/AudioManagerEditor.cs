@@ -47,7 +47,14 @@ public sealed class AudioManagerEditor : Editor
         serializedObject.ApplyModifiedProperties();
         _catalog = ((AudioManager)target).Catalog;
         UpdateMusicLabels();
+        UpdateBossEggLabels();
+        ConfigureBabyCrawlLoop();
+        EnsureSound(_catalog?.Boss, "Boss.BabyCrawl", "올챙이 바닥 기어다니기", LifetimePolicy.Entity, 0.2f, 0.95f, 1.05f, 3, 20);
         EnsureSound(_catalog?.Player, "Player.FinisherDisappear", "날아간 몬스터 소멸 반짝임", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
+        EnsureSound(_catalog?.Boss, "Boss.Tail", "보스 꼬리 휘두르기", LifetimePolicy.Action, 1f, 1f, 1f, 4, 50);
+        EnsureSound(_catalog?.Boss, "Boss.TailImpact", "보스 꼬리 공격 실제 명중", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
+        EnsureSound(_catalog?.Boss, "Boss.GroggyHurt", "그로기 상태 보스 피격", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
+        EnsureSound(_catalog?.Boss, "Boss.LandingBreak", "보스 착지 무너짐", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
         EnsureSound(_catalog?.Boss, "Boss.Footstep", "보스 이동 착지 발바닥", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
         EnsureSound(_catalog?.Boss, "Boss.FrogAmbience", "보스전 배경 개구리 울음", LifetimePolicy.Entity, 0.2f, 0.95f, 1.05f, 1, 20);
 
@@ -96,6 +103,8 @@ public sealed class AudioManagerEditor : Editor
             EditorGUI.indentLevel--;
         }
         DrawCategory(catalogObject, "Boss", "보스", "Boss");
+        EditorGUILayout.PropertyField(catalogObject.FindProperty("BossFootstepLeadTime"), new GUIContent("착지음 선행 시간 (초)", "발이 바닥에 닿기 전에 음원을 처음부터 재생합니다. 0이면 실제 착지 시점입니다."));
+        ApplyAssetChanges(catalogObject);
         if (Foldout("BossFrogInterval", "보스전 개구리 울음 간격"))
         {
             EditorGUILayout.HelpBox("보스전 시작 후 랜덤 간격으로 한 번씩 울고, 울음이 끝나면 다시 쉽니다. Boss.FrogAmbience에 음원을 넣으세요. 수명은 Entity, 반복 재생은 꺼짐으로 설정합니다.", MessageType.Info);
@@ -103,11 +112,49 @@ public sealed class AudioManagerEditor : Editor
             EditorGUILayout.PropertyField(catalogObject.FindProperty("BossFrogMaxInterval"), new GUIContent("최대 휴식 시간 (초)"));
             ApplyAssetChanges(catalogObject);
         }
+        EditorGUILayout.HelpBox("올챙이 바닥 소리는 Boss.BabyCrawl에 넣습니다. 각 올챙이가 착지하면 목록 중 하나를 랜덤으로 골라 전용 채널로 반복하며, 발사·사망·공중 진입 시 정지합니다. 서 있어도 재생하고 휴식 간격은 적용하지 않습니다.", MessageType.Info);
         DrawCategory(catalogObject, "Music", "BGM", "Music");
         DrawCategory(catalogObject, "Item", "아이템", "Item");
         DrawCategory(catalogObject, "Environment", "환경", "Environment");
         DrawCategory(catalogObject, "UI", "UI", "UI");
         DrawCategory(catalogObject, "Prologue", "프롤로그", "Prologue");
+    }
+
+    private void ConfigureBabyCrawlLoop()
+    {
+        SoundSetSO boss = _catalog != null ? _catalog.Boss : null;
+        if (boss == null) return;
+        SerializedObject data = AssetObject(boss);
+        SerializedProperty events = data.FindProperty("_events");
+        for (int i = 0; i < events.arraySize; i++)
+        {
+            SerializedProperty entry = events.GetArrayElementAtIndex(i);
+            if (entry.FindPropertyRelative("EventId").stringValue != "Boss.BabyCrawl") continue;
+            entry.FindPropertyRelative("Loop").boolValue = true;
+            entry.FindPropertyRelative("LoopEndRule").stringValue = "공중 진입 / 날려 보내기 / 사망 / 비활성화";
+            entry.FindPropertyRelative("TriggerDescription").stringValue = AudioEventEditorDefinitions.Description("Boss.BabyCrawl");
+        }
+        ApplyAssetChanges(data);
+    }
+
+    private void UpdateBossEggLabels()
+    {
+        SoundSetSO boss = _catalog != null ? _catalog.Boss : null;
+        if (boss == null) return;
+        SerializedObject data = AssetObject(boss);
+        // Unity에 로드된 최신 음원 연결을 그대로 유지하며 표시 문구만 바꾼다.
+        foreach (string arrayName in new[] { "_sounds", "_events" })
+        {
+            SerializedProperty entries = data.FindProperty(arrayName);
+            for (int i = 0; i < entries.arraySize; i++)
+            {
+                SerializedProperty entry = entries.GetArrayElementAtIndex(i);
+                SerializedProperty label = entry.FindPropertyRelative(arrayName == "_sounds" ? "DisplayName" : "TriggerDescription");
+                string renamed = label.stringValue.Replace("독 방울", "개구리알").Replace("독방울", "개구리알").Replace("방울", "개구리알");
+                if (renamed != label.stringValue) label.stringValue = renamed;
+            }
+        }
+        ApplyAssetChanges(data);
     }
 
     private void UpdateMusicLabels()
@@ -139,6 +186,19 @@ public sealed class AudioManagerEditor : Editor
     {
         if (set == null) return;
         bool hasEvent = set.TryGetEvent(eventId, out EventBinding binding);
+        if (eventId == "Boss.Footstep" && hasEvent &&
+            binding.TriggerDescription == "기본 이동·후퇴 점프의 실제 착지마다 1회")
+        {
+            SerializedObject existing = AssetObject(set);
+            SerializedProperty events = existing.FindProperty("_events");
+            for (int i = 0; i < events.arraySize; i++)
+            {
+                SerializedProperty entry = events.GetArrayElementAtIndex(i);
+                if (entry.FindPropertyRelative("EventId").stringValue == eventId)
+                    entry.FindPropertyRelative("TriggerDescription").stringValue = AudioEventEditorDefinitions.Description(eventId);
+            }
+            ApplyAssetChanges(existing);
+        }
         string soundId = hasEvent ? binding.SoundId : eventId;
         if (string.IsNullOrWhiteSpace(soundId)) return;
         bool hasSound = set.TryGetSound(soundId, out _);
