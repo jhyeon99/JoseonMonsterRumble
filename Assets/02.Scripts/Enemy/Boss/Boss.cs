@@ -329,7 +329,10 @@ public class Boss : MonoBehaviour, IFinishable
     /// <summary>몸통 접촉 데미지를 줄 수 있는지 (대기 / 패턴 중일 때만, 접촉 데미지를 끄는 패턴 중에는 제외)</summary>
     public bool CanDealContactDamage =>
         CurrentState is BossIdleState ||
-        (CurrentState is BossPatternState patternState && !patternState.Pattern.DisablesContactDamage);
+        (CurrentState is BossPatternState patternState && !patternState.Pattern.DisablesContactDamage && !patternState.Pattern.BlocksOutgoingDamage);
+
+    public bool CanDealPatternDamage =>
+        CurrentState is BossPatternState patternState && !patternState.Pattern.BlocksOutgoingDamage;
 
     /// <summary>지금 상태에서 데미지를 받는지</summary>
     public bool CanTakeDamage => CurrentState != null && CurrentState.CanTakeDamage;

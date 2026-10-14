@@ -99,7 +99,7 @@ public class BossBaby : MonoBehaviour, IDamageable, IHitFeedbackSource
     private float _nudgeSpeed = 2f;
 
     [Tooltip("바닥에서 일반 피격 밀림에 적용할 배율")]
-    [SerializeField, Min(1f)] private float _groundNudgeMultiplier = 1.25f;
+    [SerializeField, Min(1f)] private float _groundNudgeMultiplier = 1.875f;
 
     [Tooltip("맞았을 때 위로 튀어 오르는 속도 (0이면 바닥에서 밀리기만 함)")]
     [SerializeField, Min(0f)]
