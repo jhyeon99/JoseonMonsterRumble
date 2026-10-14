@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -58,9 +59,35 @@ public class BossTailPattern : BossPattern
     private CameraShakeSettings _swingShake = new CameraShakeSettings(0.1f, 0.12f);
 
     private bool _turned;
+    private bool _tailHitActive;
+    private readonly HashSet<BossHitbox> _audioHitboxes = new HashSet<BossHitbox>();
 
     /// <summary>Turn Ratio = 1: 애니메이터가 꼬리 클립을 벗어나는 프레임에 돌아보기 대기 중</summary>
     private bool _turnPending;
+
+    protected override void OnInitialize()
+    {
+        if (_hitboxes == null) return;
+        foreach (BossHitbox hitbox in _hitboxes)
+        {
+            if (hitbox != null && _audioHitboxes.Add(hitbox))
+                hitbox.OnPlayerDamaged += HandleTailHit;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        foreach (BossHitbox hitbox in _audioHitboxes)
+        {
+            if (hitbox != null) hitbox.OnPlayerDamaged -= HandleTailHit;
+        }
+        _audioHitboxes.Clear();
+    }
+
+    private void HandleTailHit(HitData hit)
+    {
+        if (_tailHitActive) AudioResult("Boss.TailImpact", hit.HitPoint);
+    }
 
     private void Reset()
     {
@@ -250,6 +277,7 @@ public class BossTailPattern : BossPattern
 
     private void SetHitboxes(bool active)
     {
+        _tailHitActive = active;
         if (_hitboxes == null)
         {
             return;

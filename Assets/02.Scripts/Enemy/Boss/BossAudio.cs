@@ -103,7 +103,20 @@ public sealed class BossAudio : ActorAudio
     {
         if (phase == 2 && !_defeated && Manager != null) Manager.PlayMusicEvent("Music.BossPhase2", gameObject.scene);
     }
-    private void OnDamaged(HitData hit) { if (!_defeated && hit.Damage > 0f) PlayResult("Boss.Hurt", hit.HitPoint); }
+    private void OnDamaged(HitData hit)
+    {
+        if (_defeated || hit.Damage <= 0f) return;
+        string eventId = "Boss.Hurt";
+        SoundSetSO set = ResolveSet();
+        if (_health.LastDamageWasDuringGroggy && set != null &&
+            set.TryGetEvent("Boss.GroggyHurt", out EventBinding binding) && binding.Enabled)
+        {
+            if (!set.TryGetSound(binding.SoundId, out SoundData sound))
+                Manager?.Catalog?.TryGetSound(binding.SoundId, out sound);
+            if (sound != null && sound.HasValidClip) eventId = "Boss.GroggyHurt";
+        }
+        PlayResult(eventId, hit.HitPoint);
+    }
     private void OnDefeated(Boss boss)
     {
         if (boss != _boss || _defeated) return;

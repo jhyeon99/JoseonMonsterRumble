@@ -294,6 +294,7 @@ public class BossStompPattern : BossPattern
         float landingTiming = Boss.LandingDustTiming;
         bool landingDustPlayed = !_landingDust || _playStompVfx;
 
+        bool footstepPlayed = false;
         // 점프 → 착지 (판정 시작 지점에 착지)
         _airborne = true;
         while (Progress < landRatio)
@@ -313,6 +314,7 @@ public class BossStompPattern : BossPattern
             Boss.MoveTo(new Vector2(x, y));
 
             ShowLandingMarker(progress >= apexRatio, targetX, groundY);
+            footstepPlayed = PlayLandingFootstep((landRatio - progress) * Duration, footstepPlayed);
 
             // 착지 직전에 미리 재생 (Stomp Vfx Lead Time)
             if (!vfxPlayed && (landRatio - progress) * Duration <= _stompVfxLeadTime)
@@ -335,6 +337,7 @@ public class BossStompPattern : BossPattern
         Boss.MoveTo(new Vector2(targetX, groundY));
         Boss.SnapToGround();
         _airborne = false;
+        PlayLandingFootstep(0f, footstepPlayed);
         ShowLandingMarker(false, targetX, groundY);
         CameraShake.Shake(_landingShake);
 

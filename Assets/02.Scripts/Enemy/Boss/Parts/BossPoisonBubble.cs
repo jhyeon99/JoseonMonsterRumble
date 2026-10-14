@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 독 방울 (소환 패턴이 맵 아래에 생성).
+/// 개구리알 (소환 패턴이 맵 아래에 생성).
 /// 처음엔 빠르게 솟아오르고, 이후 천천히 계속 위로 올라가다 끝 높이에 닿으면 그대로 사라짐.
 /// 체력이 0이 되면 터지면서 올챙이(BossBaby)가 나옴.
 /// 레이어는 Enemy (플레이어 공격에 맞도록), Rigidbody2D + 콜라이더 필요 (Rigidbody2D는 자동으로 Kinematic).
@@ -169,7 +169,7 @@ public class BossPoisonBubble : MonoBehaviour, IDamageable, IHitFeedbackSource
         _lifeTimer += Time.fixedDeltaTime;
         if (!_isAbsorbing && (next.y >= _topY || (float.IsPositiveInfinity(_topY) && _lifeTimer >= _fallbackLifeTime)))
         {
-            // 끝까지 올라간 방울은 터지지 않고 그대로 사라짐
+            // 끝까지 올라간 개구리알은 터지지 않고 그대로 사라짐
             Destroy(gameObject);
         }
     }
