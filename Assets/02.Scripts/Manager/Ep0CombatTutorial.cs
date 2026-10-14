@@ -609,6 +609,15 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         if (_panel != null) _panel.SetActive(false);
     }
 
+    public void CancelForSceneExit()
+    {
+        StopAllCoroutines();
+        ReleaseControl();
+        _running = false;
+        if (_initialized && _enemy != null && !_enemy.IsDefeated)
+            _enemy.StateMachine.ChangeState(new WaitingState(_enemy));
+    }
+
     private void OnDisable()
     {
         Canvas.preWillRenderCanvases -= UpdateHintPosition;

@@ -157,7 +157,7 @@ MonoBehaviour:
   _releaseAnimation: {fileID: 7400000, guid: c706da84d7b3fe34a95dd530eab2cf85, type: 2}
   _maximumRage: 100
   _ragePerHit: 8
-  _rageDuration: 13
+  _rageDuration: 8.32
   _heatDamage: 8
   _heatDamageInterval: 1.1
   _platformSurface: {fileID: 3255273579732424102}
@@ -256,48 +256,82 @@ MonoBehaviour:
   _rage: {fileID: 8746880984844338101}
   _platformSurface: {fileID: 3255273579732424102}
   _waves:
-  - _enemies:
-    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
-        type: 3}
-      _surfaceOffset: {x: -3.7, y: 0}
-    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
-        type: 3}
-      _surfaceOffset: {x: 3.7, y: 0}
-    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
-        type: 3}
-      _surfaceOffset: {x: -2, y: 0}
-    _minimumRageCount: 1
-  - _enemies:
-    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
-        type: 3}
-      _surfaceOffset: {x: -3.7, y: 0}
-    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
-        type: 3}
-      _surfaceOffset: {x: 3.7, y: 0}
-    - _prefab: {fileID: 2319009342568745602, guid: 3231d6d0194cd944396cd2e8d9186173,
-        type: 3}
-      _surfaceOffset: {x: -3, y: 2}
-    - _prefab: {fileID: 2319009342568745602, guid: 3231d6d0194cd944396cd2e8d9186173,
-        type: 3}
-      _surfaceOffset: {x: 3, y: 2}
-    _minimumRageCount: 2
-  - _enemies:
-    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
-        type: 3}
-      _surfaceOffset: {x: -3.7, y: 0}
-    - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
-        type: 3}
-      _surfaceOffset: {x: 3.7, y: 0}
-    - _prefab: {fileID: 2319009342568745602, guid: 3231d6d0194cd944396cd2e8d9186173,
-        type: 3}
-      _surfaceOffset: {x: -3, y: 2}
-    - _prefab: {fileID: 2319009342568745602, guid: 3231d6d0194cd944396cd2e8d9186173,
-        type: 3}
-      _surfaceOffset: {x: 3, y: 2}
-    - _prefab: {fileID: 7004840251579652640, guid: e1509d913becb694880583ae2ea28454,
-        type: 3}
-      _surfaceOffset: {x: 0, y: 3}
-    _minimumRageCount: 2
+  - _groups:
+    - _enemies:
+      - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
+          type: 3}
+        _surfaceOffset: {x: -3.5, y: 0}
+    - _enemies:
+      - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
+          type: 3}
+        _surfaceOffset: {x: 3.5, y: 0}
+    - _enemies:
+      - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
+          type: 3}
+        _surfaceOffset: {x: 0, y: 0}
+    _minimumRageCount: 0
+  - _groups:
+    - _enemies:
+      - _prefab: {fileID: 2319009342568745602, guid: 3231d6d0194cd944396cd2e8d9186173,
+          type: 3}
+        _surfaceOffset: {x: -3.8, y: 2.2}
+      - _prefab: {fileID: 7004840251579652640, guid: e1509d913becb694880583ae2ea28454,
+          type: 3}
+        _surfaceOffset: {x: 3.2, y: 3.5}
+      - _prefab: {fileID: 9002607081654718196, guid: 24b8f8b0cfa8c384c8f8ef9a035d72ae,
+          type: 3}
+        _surfaceOffset: {x: -2, y: 3}
+      - _prefab: {fileID: 9002607081654718196, guid: 24b8f8b0cfa8c384c8f8ef9a035d72ae,
+          type: 3}
+        _surfaceOffset: {x: 0, y: 2}
+      - _prefab: {fileID: 9002607081654718196, guid: 24b8f8b0cfa8c384c8f8ef9a035d72ae,
+          type: 3}
+        _surfaceOffset: {x: 2, y: 2.8}
+    - _enemies:
+      - _prefab: {fileID: 7004840251579652640, guid: e1509d913becb694880583ae2ea28454,
+          type: 3}
+        _surfaceOffset: {x: -3.2, y: 3.5}
+      - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
+          type: 3}
+        _surfaceOffset: {x: 3.5, y: 0}
+      - _prefab: {fileID: 9002607081654718196, guid: 24b8f8b0cfa8c384c8f8ef9a035d72ae,
+          type: 3}
+        _surfaceOffset: {x: -1.8, y: 2.4}
+      - _prefab: {fileID: 9002607081654718196, guid: 24b8f8b0cfa8c384c8f8ef9a035d72ae,
+          type: 3}
+        _surfaceOffset: {x: 0, y: 3.2}
+      - _prefab: {fileID: 9002607081654718196, guid: 24b8f8b0cfa8c384c8f8ef9a035d72ae,
+          type: 3}
+        _surfaceOffset: {x: 1.8, y: 2.2}
+    _minimumRageCount: 0
+  - _groups:
+    - _enemies:
+      - _prefab: {fileID: 7004840251579652640, guid: e1509d913becb694880583ae2ea28454,
+          type: 3}
+        _surfaceOffset: {x: -3, y: 3.5}
+      - _prefab: {fileID: 4049497279173087227, guid: b5f45f1d8b5e07e48b3e6c0307c93ed4,
+          type: 3}
+        _surfaceOffset: {x: 3.5, y: 0}
+      - _prefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
+          type: 3}
+        _surfaceOffset: {x: -2.5, y: 0}
+      - _prefab: {fileID: 9002607081654718196, guid: 24b8f8b0cfa8c384c8f8ef9a035d72ae,
+          type: 3}
+        _surfaceOffset: {x: 1.5, y: 2.5}
+    - _enemies:
+      - _prefab: {fileID: 7004840251579652640, guid: e1509d913becb694880583ae2ea28454,
+          type: 3}
+        _surfaceOffset: {x: -3.2, y: 3.6}
+      - _prefab: {fileID: 7004840251579652640, guid: e1509d913becb694880583ae2ea28454,
+          type: 3}
+        _surfaceOffset: {x: 3.2, y: 3.6}
+      - _prefab: {fileID: 9002607081654718196, guid: 24b8f8b0cfa8c384c8f8ef9a035d72ae,
+          type: 3}
+        _surfaceOffset: {x: -1.5, y: 2.4}
+      - _prefab: {fileID: 9002607081654718196, guid: 24b8f8b0cfa8c384c8f8ef9a035d72ae,
+          type: 3}
+        _surfaceOffset: {x: 1.5, y: 2.4}
+    _minimumRageCount: 0
   _reserveEnemyPrefab: {fileID: 9071619103714574906, guid: 90d19ac7f34305341affdaed62c6b681,
     type: 3}
   _spawnInterval: 0.8
@@ -307,7 +341,7 @@ MonoBehaviour:
   _fallTiltAngle: -25
   _tiltDuration: 0.7
   _fallHorizontalSpeed: 1
-  _fallGravity: 18
+  _fallGravity: 32
   _fallDistance: 20
   _currentWave: 0
   _aliveEnemyCount: 0

@@ -1,10 +1,13 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [DisallowMultipleComponent]
 public sealed class GamtuPickupVfx : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer _hatRenderer;
     [SerializeField] private GameObject _flamePrefab;
+    [SerializeField] private AbilityItemData _item;
+    [Tooltip("이 아이템의 획득 UI를 닫으면 현재 저장된 장승으로 이동합니다.")]
+    [SerializeField] private bool _warpToCheckpointOnClose = true;
     [Header("감투 빛 펄스")]
 
     [SerializeField] private Vector2 _pulseInterval = new Vector2(2f, 3f);
@@ -29,6 +32,7 @@ public sealed class GamtuPickupVfx : MonoBehaviour
     private float _nextPulse;
     private float _pulseStart = float.NegativeInfinity;
     private bool _collected;
+    private bool _isWaitingForCheckpointWarp;
 
     private void Awake()
     {
@@ -39,8 +43,30 @@ public sealed class GamtuPickupVfx : MonoBehaviour
 
     private void OnEnable()
     {
+        ItemAcquisitionView.OnItemAcquisitionClosed += HandleItemAcquisitionClosed;
         _nextPulse = Time.time + Random.Range(_pulseInterval.x, _pulseInterval.y);
         _pulseStart = float.NegativeInfinity;
+    }
+
+    private void OnDisable()
+    {
+        ItemAcquisitionView.OnItemAcquisitionClosed -= HandleItemAcquisitionClosed;
+        _isWaitingForCheckpointWarp = false;
+    }
+
+    private void HandleItemAcquisitionClosed()
+    {
+        if (!_isWaitingForCheckpointWarp) return;
+        _isWaitingForCheckpointWarp = false;
+        if (StageManager.Instance != null)
+        {
+            StageManager.Instance.TryWarpToActiveCheckpoint();
+        }
+        else
+        {
+            Debug.LogWarning($"{name}: 장승 워프에 필요한 StageManager가 없습니다.", this);
+        }
+        Destroy(gameObject);
     }
 
     private void Start()
@@ -71,8 +97,29 @@ public sealed class GamtuPickupVfx : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        if (_collected) return;
         if (other.CompareTag(Constants.Tags.Player))
         {
+            Player player = other.GetComponentInParent<Player>();
+            if (player == null || player.Health == null || player.Health.IsDead) return;
+
+            if (_item != null)
+            {
+                if (ItemAcquisitionView.Instance != null)
+                {
+                    if (!ItemAcquisitionView.Instance.TryAcquireItem(_item))
+                    {
+                        return;
+                    }
+                    _isWaitingForCheckpointWarp = _warpToCheckpointOnClose;
+                }
+                else
+                {
+                    AbilityItemProgress.TryAcquireItem(_item);
+                }
+            }
+
+            _collected = true;
             OnItemPickedUp();
         }
     }
@@ -86,7 +133,21 @@ public sealed class GamtuPickupVfx : MonoBehaviour
 
         if (_hatRenderer != null) _hatRenderer.enabled = false;
 
-        Destroy(gameObject, _burstDuration);
+        if (_rimFlames != null)
+        {
+            for (int i = 0; i < _rimFlames.Length; i++)
+            {
+                if (_rimFlames[i] != null)
+                {
+                    _rimFlames[i].enabled = false;
+                }
+            }
+        }
+
+        if (!_isWaitingForCheckpointWarp)
+        {
+            Destroy(gameObject, _burstDuration);
+        }
     }
 
     private void LateUpdate()

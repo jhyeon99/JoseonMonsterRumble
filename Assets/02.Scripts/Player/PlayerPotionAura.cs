@@ -126,6 +126,15 @@ public class PlayerPotionAura : MonoBehaviour
         _phase = AuraPhase.WaitingForSip;
     }
 
+    public void PlayRecoveryPulse(float duration = DefaultDuration)
+    {
+        if (!isActiveAndEnabled) return;
+
+        StopAura();
+        _pulseDuration = Mathf.Max(0.1f, duration);
+        StartRecoveryPulse();
+    }
+
     private void StartRecoveryPulse()
     {
         _phase = AuraPhase.Active;

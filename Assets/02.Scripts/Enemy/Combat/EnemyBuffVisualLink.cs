@@ -201,7 +201,8 @@ public class EnemyBuffVisualLink : MonoBehaviour
 
     private void UpdateTargetAuraPulse()
     {
-        if (!_hasTargetColor || _targetRenderer == null)
+        // 패링 그로기의 깜빡임을 LateUpdate 오라 색으로 덮어쓰지 않는다.
+        if (!_hasTargetColor || _targetRenderer == null || _currentTarget.IsGroggy)
         {
             return;
         }

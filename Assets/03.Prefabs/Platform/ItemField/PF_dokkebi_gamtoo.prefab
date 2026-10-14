@@ -226,6 +226,8 @@ MonoBehaviour:
   _hatRenderer: {fileID: 6794443043391756959}
   _flamePrefab: {fileID: 2057356393512570043, guid: 742ddfad704b4dfdb87fd3631f14d609,
     type: 3}
+  _item: {fileID: 0}
+  _warpToCheckpointOnClose: 0
   _pulseInterval: {x: 2, y: 3}
   _pulseDuration: 0.55
   _rimFlameCount: 4
@@ -249,6 +251,8 @@ MonoBehaviour:
   _playerTransform: {fileID: 0}
   _triggerDistance: 6
   _moveDuration: 1.5
+  _spawnEffectPrefab: {fileID: 2421404354506238967, guid: c45695e4b5f2c8b428454d1e46e60791,
+    type: 3}
   _speedCurve:
     serializedVersion: 2
     m_Curve:

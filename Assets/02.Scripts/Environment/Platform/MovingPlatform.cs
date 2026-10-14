@@ -33,6 +33,8 @@ public class MovingPlatform : MonoBehaviour
     [SerializeField] private MovingPlatformMode _mode = MovingPlatformMode.Loop;
     [SerializeField, Min(0f)] private float _speed = 2f;
     [SerializeField, Min(0f)] private float _waitTime = 0.1f;
+    [SerializeField] private bool _requireItemToMove;
+    [SerializeField] private string _requiredItemId = AbilityItemProgress.DokkaebiGamtuId;
 
     [SerializeField, ReadOnly] private MovementState _state;
 
@@ -67,7 +69,42 @@ public class MovingPlatform : MonoBehaviour
         }
     }
 
-    private void OnDisable() => UpdateAudio(false, false);
+    private void OnEnable()
+    {
+        AbilityItemProgress.OnItemAcquired += HandleItemAcquired;
+        ItemAcquisitionView.OnItemAcquisitionClosed += HandleItemAcquisitionClosed;
+    }
+
+    private void OnDisable()
+    {
+        UpdateAudio(false, false);
+        AbilityItemProgress.OnItemAcquired -= HandleItemAcquired;
+        ItemAcquisitionView.OnItemAcquisitionClosed -= HandleItemAcquisitionClosed;
+    }
+
+    private void HandleItemAcquired(AbilityItemData item)
+    {
+        if (!_requireItemToMove) return;
+        if (item != null && !string.IsNullOrEmpty(_requiredItemId) && item.ItemId != _requiredItemId) return;
+
+        if (_passengerColliders.Count > 0 && _state == MovementState.IdleAtStart && !PauseController.IsGameplayInputBlocked)
+        {
+            StartMovingForward();
+        }
+    }
+
+    private void HandleItemAcquisitionClosed()
+    {
+        if (_requireItemToMove && !AbilityItemProgress.HasItem(_requiredItemId))
+        {
+            return;
+        }
+
+        if (_passengerColliders.Count > 0 && _state == MovementState.IdleAtStart)
+        {
+            StartMovingForward();
+        }
+    }
 
     private readonly HashSet<Collider2D> _passengerColliders =
         new HashSet<Collider2D>();
@@ -136,7 +173,7 @@ public class MovingPlatform : MonoBehaviour
         _waitTimer = 0f;
         _velocity = Vector2.zero;
         _deltaPosition = Vector2.zero;
-        _state = _mode == MovingPlatformMode.Loop
+        _state = (_mode == MovingPlatformMode.Loop && !_requireItemToMove)
             ? MovementState.MovingForward
             : MovementState.IdleAtStart;
     }
@@ -181,6 +218,11 @@ public class MovingPlatform : MonoBehaviour
 
     private void HandlePassengerEntered()
     {
+        if (_requireItemToMove && !AbilityItemProgress.HasItem(_requiredItemId))
+        {
+            return;
+        }
+
         if (_state == MovementState.IdleAtStart &&
             (_mode == MovingPlatformMode.SingleTrip ||
                 _mode == MovingPlatformMode.PassengerControlled))
@@ -285,7 +327,15 @@ public class MovingPlatform : MonoBehaviour
         else if (_mode == MovingPlatformMode.PassengerControlled &&
             _passengerColliders.Count > 0)
         {
-            StartMovingForward();
+            if (!_requireItemToMove || AbilityItemProgress.HasItem(_requiredItemId))
+            {
+                StartMovingForward();
+            }
+            else
+            {
+                _targetIndex = 1;
+                _state = MovementState.IdleAtStart;
+            }
         }
         else
         {

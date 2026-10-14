@@ -16,6 +16,12 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
     [SerializeField, InspectorName("화면 하단 경계")]
     private Transform _bottomEdge;
 
+    [Tooltip("켜면 Scale Y 높이 안에 있는 플레이어에게만 적용합니다. 위아래로 겹친 길을 구분할 때 사용합니다.")]
+    [SerializeField] private bool _useVerticalRange;
+
+    [Tooltip("비워두면 기존 상단 경계를 유지합니다. 윗길에서는 고정된 화면 상단 경계를 연결합니다.")]
+    [SerializeField] private Transform _topEdge;
+
     [Tooltip("다음 구간의 하단 경계로 전환하는 부드러움입니다. 클수록 천천히 이동하며, 0이면 즉시 적용합니다.")]
     [SerializeField, Min(0f), InspectorName("경계 전환 시간")]
     private float _transitionSmoothTime = 0.5f;
@@ -79,6 +85,10 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
         private bool _previousUseBottomBoundary;
         private float _previousBottomBoundary;
         private float _previousTargetBottomBoundary;
+        private bool _ownsTopBoundary;
+        private bool _previousUseTopBoundary;
+        private float _previousTopBoundary;
+        private float _previousTargetTopBoundary;
         private float _currentWorldBottom;
         private float _targetWorldBottom;
         private float _transitionVelocity;
@@ -116,6 +126,11 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
                 float halfWidth = Mathf.Abs(zone.transform.lossyScale.x) * 0.5f;
                 if (Mathf.Abs(zone._player.position.x - zone.transform.position.x) > halfWidth)
                     continue;
+                if (zone._useVerticalRange &&
+                    Mathf.Abs(zone._player.position.y - zone.transform.position.y) > Mathf.Abs(zone.transform.lossyScale.y) * 0.5f)
+                {
+                    continue;
+                }
 
                 insideAnyZone = true;
                 if (highestZone == null || zone._bottomEdge.position.y > worldBottom)
@@ -162,6 +177,23 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
                 worldBottom = Mathf.Max(worldBottom, _previousBottomBoundary + parentY);
 
             _targetWorldBottom = worldBottom;
+            if (highestZone._topEdge != null)
+            {
+                if (!_ownsTopBoundary)
+                {
+                    _previousUseTopBoundary = _boundaries.UseTopBoundary;
+                    _previousTopBoundary = _boundaries.TopBoundary;
+                    _previousTargetTopBoundary = _boundaries.TargetTopBoundary;
+                    _ownsTopBoundary = true;
+                }
+                _boundaries.UseTopBoundary = true;
+                _boundaries.TopBoundary = highestZone._topEdge.position.y - parentY;
+                _boundaries.TargetTopBoundary = _boundaries.TopBoundary;
+            }
+            else
+            {
+                RestoreTopBoundary();
+            }
             ApplyBoundary(deltaTime, snap);
         }
 
@@ -212,11 +244,21 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
                 _boundaries.UseBottomBoundary = _previousUseBottomBoundary;
                 _boundaries.BottomBoundary = _previousBottomBoundary;
                 _boundaries.TargetBottomBoundary = _previousTargetBottomBoundary;
+                RestoreTopBoundary();
             }
 
             _ownsBoundary = false;
             _transitionVelocity = 0f;
             _outsideTime = 0f;
+        }
+
+        private void RestoreTopBoundary()
+        {
+            if (!_ownsTopBoundary) return;
+            _boundaries.UseTopBoundary = _previousUseTopBoundary;
+            _boundaries.TopBoundary = _previousTopBoundary;
+            _boundaries.TargetTopBoundary = _previousTargetTopBoundary;
+            _ownsTopBoundary = false;
         }
     }
 
@@ -245,7 +287,7 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
         Gizmos.color = new Color(0.2f, 1f, 0.45f, 1f);
         Gizmos.DrawWireCube(center, size);
         UnityEditor.Handles.Label(center + Vector3.up * (size.y * 0.5f),
-            "이 X 구간에서 화면 하단 제한 적용");
+            _useVerticalRange ? "이 영역에서 화면 상하단 제한 적용" : "이 X 구간에서 화면 하단 제한 적용");
 
         if (_bottomEdge != null)
         {
@@ -253,6 +295,12 @@ public sealed class CameraBottomBoundaryZone : MonoBehaviour
                 _bottomEdge.position.y, center.z);
             UnityEditor.Handles.Label(left,
                 "화면 하단 한계 Y = " + _bottomEdge.position.y.ToString("0.##"));
+        }
+        if (_topEdge != null)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawLine(new Vector3(center.x - size.x * 0.5f, _topEdge.position.y, center.z),
+                new Vector3(center.x + size.x * 0.5f, _topEdge.position.y, center.z));
         }
     }
 #endif
