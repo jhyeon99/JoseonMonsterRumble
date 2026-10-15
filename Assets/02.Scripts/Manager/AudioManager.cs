@@ -27,6 +27,21 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
     [Header("BGM 채널")]
     [SerializeField] private AudioSource _bgmSource;
 
+    [Header("패링 / 패링 3타 BGM 덕킹")]
+    [UnityEngine.Serialization.FormerlySerializedAs("_enableFinisherBgmDucking")]
+    [SerializeField] private bool _enableCombatBgmDucking = true;
+    [SerializeField, Range(0f, 1f)] private float _parryDuckedVolume = 0.5f;
+    [Tooltip("타격 전 진행도가 이 값에 도달하면 BGM을 낮추기 시작합니다. 1은 타격 순간입니다.")]
+    [SerializeField, Range(0f, 0.99f)] private float _finisherDuckStartProgress = 0.65f;
+    [SerializeField, Range(0f, 1f)] private float _finisherDuckedVolume = 0.2f;
+    [SerializeField, Min(0f)] private float _finisherDuckHoldTime = 0.06f;
+    [SerializeField, Min(0.01f)] private float _finisherDuckRecoveryTime = 0.25f;
+
+    private float _finisherBgmGain = 1f;
+    private float _finisherDuckElapsed;
+    private float _finisherRecoveryStartGain;
+    private bool _isFinisherDuckRecovering;
+
     [Header("UI 오디오 데이터")]
     [SerializeField] private UIAudioDataSO _uiAudioData;
 
@@ -276,6 +291,9 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         UnsubscribeSceneEvents();
         SceneManager.sceneLoaded += OnAudioSceneLoaded;
         SceneManager.activeSceneChanged += OnAudioActiveSceneChanged;
+        GameEvents.OnFinisherAnticipation += HandleFinisherAudioAnticipation;
+        GameEvents.OnFinisherImpact += HandleFinisherAudioImpact;
+        GameEvents.OnFinisherAnticipationCancelled += HandleFinisherAudioCancelled;
     }
 
     private void Start()
@@ -294,7 +312,11 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         }
     }
 
-    private void OnAudioActiveSceneChanged(Scene previous, Scene next) => RequestSceneMusic(next);
+    private void OnAudioActiveSceneChanged(Scene previous, Scene next)
+    {
+        ResetFinisherBgmDucking();
+        RequestSceneMusic(next);
+    }
     private void RequestSceneMusic(Scene scene)
     {
         // A static event may still be dispatching while this component is destroyed.
@@ -379,8 +401,68 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
     {
         if (_bgmSource != null)
         {
-            _bgmSource.volume = (_isBgmMuted ? 0f : _bgmVolume) * _musicVolume * _musicFade;
+            _bgmSource.volume = (_isBgmMuted ? 0f : _bgmVolume) * _musicVolume * _musicFade * _finisherBgmGain;
         }
+    }
+
+    private void HandleFinisherAudioAnticipation(Transform attacker, Transform target, float progress)
+    {
+        if (!_enableCombatBgmDucking || attacker == null || target == null) return;
+        _isFinisherDuckRecovering = false;
+        float blend = Mathf.InverseLerp(_finisherDuckStartProgress, 1f, progress);
+        float gain = Mathf.Lerp(1f, _finisherDuckedVolume, Mathf.SmoothStep(0f, 1f, blend));
+        _finisherBgmGain = Mathf.Min(_finisherBgmGain, gain);
+        ApplyBgmVolume();
+    }
+
+    private void HandleFinisherAudioImpact(Transform attacker, Transform target)
+    {
+        if (!_enableCombatBgmDucking || attacker == null) return;
+        StartCombatBgmDuckRecovery(_finisherDuckedVolume);
+    }
+
+    public void DuckBgmForParry()
+    {
+        if (!_enableCombatBgmDucking || !isActiveAndEnabled) return;
+        StartCombatBgmDuckRecovery(_parryDuckedVolume);
+    }
+
+    private void StartCombatBgmDuckRecovery(float volume)
+    {
+        _finisherBgmGain = Mathf.Min(_finisherBgmGain, volume);
+        _finisherRecoveryStartGain = _finisherBgmGain;
+        _finisherDuckElapsed = -_finisherDuckHoldTime;
+        _isFinisherDuckRecovering = true;
+        ApplyBgmVolume();
+    }
+
+    private void HandleFinisherAudioCancelled()
+    {
+        _finisherRecoveryStartGain = _finisherBgmGain;
+        _finisherDuckElapsed = 0f;
+        _isFinisherDuckRecovering = true;
+    }
+
+    private void UpdateFinisherBgmDucking()
+    {
+        if (!_enableCombatBgmDucking)
+        {
+            if (_finisherBgmGain < 1f || _isFinisherDuckRecovering) ResetFinisherBgmDucking();
+            return;
+        }
+        if (!_isFinisherDuckRecovering || PauseController.IsPaused) return;
+        _finisherDuckElapsed += Time.unscaledDeltaTime;
+        float progress = Mathf.Clamp01(_finisherDuckElapsed / Mathf.Max(0.01f, _finisherDuckRecoveryTime));
+        _finisherBgmGain = Mathf.Lerp(_finisherRecoveryStartGain, 1f, Mathf.SmoothStep(0f, 1f, progress));
+        if (progress >= 1f) _isFinisherDuckRecovering = false;
+        ApplyBgmVolume();
+    }
+
+    private void ResetFinisherBgmDucking()
+    {
+        _finisherBgmGain = 1f;
+        _isFinisherDuckRecovering = false;
+        ApplyBgmVolume();
     }
 
     private void ApplySfxVolume()
@@ -842,6 +924,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
 
     private void Update()
     {
+        UpdateFinisherBgmDucking();
         foreach (Request request in _channels.Values)
         {
             if (request.TimeMode != AudioTimeMode.GameTime)
@@ -1183,6 +1266,10 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
 
     private void OnDisable()
     {
+        GameEvents.OnFinisherAnticipation -= HandleFinisherAudioAnticipation;
+        GameEvents.OnFinisherImpact -= HandleFinisherAudioImpact;
+        GameEvents.OnFinisherAnticipationCancelled -= HandleFinisherAudioCancelled;
+        ResetFinisherBgmDucking();
         UnsubscribeSceneEvents();
         _sceneMusicKey = default;
         StopAllCoroutines();
