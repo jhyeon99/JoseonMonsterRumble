@@ -173,6 +173,7 @@ public class EndingCreditsController : MonoBehaviour
         PauseController.ResumeFromEnding(this);
         GameCursorController.SetEndingVisible(false);
         Time.timeScale = 1f;
+        GameProgressReset.ResetAll();
         SceneManager.LoadScene(_titleSceneName);
     }
 
