@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace GameAudio
@@ -58,10 +58,10 @@ namespace GameAudio
         public AudioContext CreateResultContext(Vector3 position) =>
             new AudioContext(OwnerKey, 0, AudioLifetimeRegistry.ForScene(gameObject.scene), position);
 
-        protected PlayHandle PlayAction(string eventId, ulong execution)
+        protected PlayHandle PlayAction(string eventId, ulong execution, bool dedicatedLoop = false)
         {
             if (_retired || execution == 0) return PlayHandle.Empty;
-            return Request(eventId, LifetimePolicy.Action, CreateActionContext(execution));
+            return Request(eventId, LifetimePolicy.Action, CreateActionContext(execution), dedicatedLoop);
         }
 
         protected PlayHandle PlayResult(string eventId, Vector3 position) =>
@@ -70,7 +70,7 @@ namespace GameAudio
         protected PlayHandle PlayEntity(string eventId) => _retired ? PlayHandle.Empty :
             Request(eventId, LifetimePolicy.Entity, CreateResultContext(transform.position));
 
-        private PlayHandle Request(string eventId, LifetimePolicy expected, AudioContext context)
+        private PlayHandle Request(string eventId, LifetimePolicy expected, AudioContext context, bool dedicatedLoop = false)
         {
             SoundSetSO set = ResolveSet();
             if (Manager == null || set == null || !set.TryGetEvent(eventId, out EventBinding binding) || !binding.Enabled)
@@ -80,7 +80,7 @@ namespace GameAudio
                 if (_warnedPolicies.Add(eventId)) Debug.LogWarning($"{name}: {eventId}의 수명 정책은 {expected}로 설정하세요.", this);
                 return PlayHandle.Empty;
             }
-            return Manager.PlayEvent(set, eventId, context);
+            return dedicatedLoop ? Manager.PlayDedicatedActionLoop(set, eventId, context) : Manager.PlayEvent(set, eventId, context);
         }
     }
 }

@@ -21,7 +21,8 @@ public class PauseController : MonoBehaviour
     private static bool _isMenuPaused;
     private static bool _isItemModalPaused;
     private static Object _tutorialPauseOwner;
-    public static bool IsPaused => _isMenuPaused || _isItemModalPaused || _tutorialPauseOwner != null ||
+    private static Object _endingPauseOwner;
+    public static bool IsPaused => _isMenuPaused || _isItemModalPaused || _tutorialPauseOwner != null || _endingPauseOwner != null ||
                                    (StageManager.Instance != null && StageManager.Instance.IsRespawnWorldFrozen);
     private static int _pauseTransitionFrame = -1;
 
@@ -99,7 +100,7 @@ public class PauseController : MonoBehaviour
 
     private void Update()
     {
-        if (_tutorialPauseOwner != null || _isItemModalPaused)
+        if (_endingPauseOwner != null || _tutorialPauseOwner != null || _isItemModalPaused)
         {
             return;
         }
@@ -228,7 +229,7 @@ public class PauseController : MonoBehaviour
 
     private void SetPaused(bool isPaused)
     {
-        if (_tutorialPauseOwner != null) return;
+        if (_endingPauseOwner != null || _tutorialPauseOwner != null) return;
         if (isPaused && _isItemModalPaused)
         {
             return;
@@ -354,6 +355,7 @@ public class PauseController : MonoBehaviour
         _isMenuPaused = false;
         _isItemModalPaused = false;
         _tutorialPauseOwner = null;
+        _endingPauseOwner = null;
         _pauseTransitionFrame = -1;
     }
 
@@ -373,6 +375,25 @@ public class PauseController : MonoBehaviour
     {
         if (_tutorialPauseOwner != owner || owner == null) return;
         _tutorialPauseOwner = null;
+        _pauseTransitionFrame = Time.frameCount;
+        Time.timeScale = IsPaused ? 0f : 1f;
+    }
+
+    // 엔딩은 월드를 멈추지만 크레딧과 음악은 실제 시간으로 재생한다.
+    public static bool TryPauseForEnding(Object owner)
+    {
+        if (owner == null || IsPaused) return false;
+        HitStop.Stop();
+        _endingPauseOwner = owner;
+        _pauseTransitionFrame = Time.frameCount;
+        Time.timeScale = 0f;
+        return true;
+    }
+
+    public static void ResumeFromEnding(Object owner)
+    {
+        if (owner == null || _endingPauseOwner != owner) return;
+        _endingPauseOwner = null;
         _pauseTransitionFrame = Time.frameCount;
         Time.timeScale = IsPaused ? 0f : 1f;
     }

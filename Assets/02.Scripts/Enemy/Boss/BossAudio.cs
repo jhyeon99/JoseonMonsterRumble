@@ -180,7 +180,7 @@ public sealed class BossAudio : ActorAudio
         }
         else if (_patternExecutions.TryGetValue(pattern, out ulong execution))
         {
-            PlayHandle handle = PlayAction(eventId, execution);
+            PlayHandle handle = PlayAction(eventId, execution, eventId == "Boss.ChargeLoop");
             if (eventId == "Boss.ChargeLoop") _chargeLoops[pattern] = handle;
         }
     }
