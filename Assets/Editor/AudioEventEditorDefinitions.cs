@@ -59,8 +59,9 @@ Boss.Tail|꼬리 휘두르기 판정 시작
 Boss.TailImpact|꼬리가 플레이어에게 실제 피해를 준 순간
 Boss.Tongue|각 높이의 혀 뻗기 시작
 Boss.TongueImpact|보스 혀가 플레이어에게 실제 피해를 준 순간
-Boss.Stomp|각 찍기의 실제 착지
-Boss.NeedleFire|좌우 바늘 발사 묶음 생성
+Boss.Stomp|찍기 착지 전용 무너짐 소리
+Boss.StompFootstep|찍기 착지 전용 발바닥 소리
+Boss.NeedleFire|바닥 가시 또는 궁극기 가시 생성
 Boss.Spit|각 침뱉기 발사 묶음 생성
 Boss.SpitImpact|보스 침이 플레이어에게 직접 피해를 준 순간
 Boss.ChargeStart|실제 돌진 이동·판정 시작
@@ -80,7 +81,7 @@ Boss.ChargeLoop|실제 돌진 시작
 Boss.ChargeEnd|돌진 정상 종료
 Boss.BubbleSpawn|개구리알 웨이브 생성 성공
 Boss.BabySpawn|개구리알 파열에 의한 올챙이 생성 성공
-Boss.BabyCrawl|각 올챙이가 바닥에 있는 동안 랜덤 음원 1개를 계속 반복
+Boss.BabyCrawl|각 올챙이가 생성 직후부터 랜덤 음원 1개를 계속 반복
 Boss.BabyHurt|올챙이 비치명 피해 적용
 Boss.BabyDeath|올챙이 일반 사망 확정
 Boss.GroggyRecover|짧은 그로기 정상 회복

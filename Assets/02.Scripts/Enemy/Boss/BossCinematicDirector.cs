@@ -11,9 +11,10 @@ using UnityEngine.UI;
 ///   (첫 조우 때만. 리스폰으로 씬을 다시 불러오면 생략하고 바로 전투)
 /// - 2페이즈(하울링): 조작 잠금 + 무적, 화면 플래시, 보스 분노 색조 + 화면 색조, 음악 전환
 /// - 처치(마무리 공격 적중 후): 조작 잠금 + 무적, 흰 화면 플래시 + 슬로모션, 레터박스, 음악 페이드 아웃
-///   → 처치 연출이 끝나면 클리어 문구 표시 후 해제 (On Defeat Sequence Finished 이벤트로 스테이지 클리어 연결)
+///   → 처치 연출과 격파 문구가 끝나면 엔딩 크레딧 재생 (엔딩을 끄면 조작 해제)
 /// 레터박스 / 타이틀 / 플래시 / 화면 색조 UI는 실행 시 자동으로 만듦 (따로 만들 필요 없음).
 /// </summary>
+[RequireComponent(typeof(EndingCreditsController))]
 public class BossCinematicDirector : MonoBehaviour
 {
     [Header("참조 (비우면 자동으로 찾음)")]
@@ -247,7 +248,7 @@ public class BossCinematicDirector : MonoBehaviour
     [SerializeField, Min(0.01f)] private float _clearStampFlashDuration = 0.08f;
 
 
-    [Tooltip("처치 연출이 모두 끝나고 조작이 풀릴 때 (스테이지 클리어 / 다음 씬 연결용)")]
+    [Tooltip("처치 연출과 활성화된 크레딧 스크롤이 끝날 때. 엔딩 중에는 조작 잠금 유지")]
     [SerializeField]
     private UnityEvent _onDefeatSequenceFinished;
 
@@ -497,7 +498,17 @@ public class BossCinematicDirector : MonoBehaviour
         }
 
         yield return PlayClearPresentation();
-        UnlockPlayer();
+        EndingCreditsController ending = GetComponent<EndingCreditsController>();
+        if (ending != null && ending.CanPlay)
+        {
+            // 슬로모션이 timeScale을 덮어쓰지 않도록 복귀를 마친 다음 엔딩을 시작한다.
+            while (_isSlowMotion) yield return null;
+            yield return ending.PlayEnding(_titleFont);
+        }
+        else
+        {
+            UnlockPlayer();
+        }
         _defeatRoutine = null;
         _onDefeatSequenceFinished?.Invoke();
     }

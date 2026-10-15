@@ -314,7 +314,7 @@ public class BossStompPattern : BossPattern
             Boss.MoveTo(new Vector2(x, y));
 
             ShowLandingMarker(progress >= apexRatio, targetX, groundY);
-            footstepPlayed = PlayLandingFootstep((landRatio - progress) * Duration, footstepPlayed);
+            footstepPlayed = PlayLandingFootstep((landRatio - progress) * Duration, footstepPlayed, true);
 
             // 착지 직전에 미리 재생 (Stomp Vfx Lead Time)
             if (!vfxPlayed && (landRatio - progress) * Duration <= _stompVfxLeadTime)
@@ -337,7 +337,7 @@ public class BossStompPattern : BossPattern
         Boss.MoveTo(new Vector2(targetX, groundY));
         Boss.SnapToGround();
         _airborne = false;
-        PlayLandingFootstep(0f, footstepPlayed);
+        PlayLandingFootstep(0f, footstepPlayed, true);
         ShowLandingMarker(false, targetX, groundY);
         CameraShake.Shake(_landingShake);
 
@@ -351,7 +351,6 @@ public class BossStompPattern : BossPattern
             Boss.PlayJumpDust(targetX, groundY, landingTiming);
         }
 
-        AudioResult("Boss.Stomp", Boss.transform.position);
         _stompHitbox.Activate();
         yield return WaitUntilProgress(HitEndRatio);
         _stompHitbox.Deactivate();

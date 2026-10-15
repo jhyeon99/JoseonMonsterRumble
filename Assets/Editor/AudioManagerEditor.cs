@@ -54,6 +54,7 @@ public sealed class AudioManagerEditor : Editor
         EnsureSound(_catalog?.Boss, "Boss.Tail", "보스 꼬리 휘두르기", LifetimePolicy.Action, 1f, 1f, 1f, 4, 50);
         EnsureSound(_catalog?.Boss, "Boss.TailImpact", "보스 꼬리 공격 실제 명중", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
         EnsureSound(_catalog?.Boss, "Boss.GroggyHurt", "그로기 상태 보스 피격", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
+        EnsureSound(_catalog?.Boss, "Boss.StompFootstep", "보스 찍기 발바닥", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
         EnsureSound(_catalog?.Boss, "Boss.LandingBreak", "보스 착지 무너짐", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
         EnsureSound(_catalog?.Boss, "Boss.Footstep", "보스 이동 착지 발바닥", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
         EnsureSound(_catalog?.Boss, "Boss.FrogAmbience", "보스전 배경 개구리 울음", LifetimePolicy.Entity, 0.2f, 0.95f, 1.05f, 1, 20);
@@ -112,7 +113,7 @@ public sealed class AudioManagerEditor : Editor
             EditorGUILayout.PropertyField(catalogObject.FindProperty("BossFrogMaxInterval"), new GUIContent("최대 휴식 시간 (초)"));
             ApplyAssetChanges(catalogObject);
         }
-        EditorGUILayout.HelpBox("올챙이 바닥 소리는 Boss.BabyCrawl에 넣습니다. 각 올챙이가 착지하면 목록 중 하나를 랜덤으로 골라 전용 채널로 반복하며, 발사·사망·공중 진입 시 정지합니다. 서 있어도 재생하고 휴식 간격은 적용하지 않습니다.", MessageType.Info);
+        EditorGUILayout.HelpBox("올챙이 바닥 소리는 Boss.BabyCrawl에 넣습니다. 각 올챙이가 생성되면 목록 중 하나를 랜덤으로 골라 전용 채널로 반복하며, 발사·사망·비활성화 시 정지합니다. 낙하 중이거나 서 있어도 재생하고 휴식 간격은 적용하지 않습니다.", MessageType.Info);
         DrawCategory(catalogObject, "Music", "BGM", "Music");
         DrawCategory(catalogObject, "Item", "아이템", "Item");
         DrawCategory(catalogObject, "Environment", "환경", "Environment");
@@ -131,7 +132,7 @@ public sealed class AudioManagerEditor : Editor
             SerializedProperty entry = events.GetArrayElementAtIndex(i);
             if (entry.FindPropertyRelative("EventId").stringValue != "Boss.BabyCrawl") continue;
             entry.FindPropertyRelative("Loop").boolValue = true;
-            entry.FindPropertyRelative("LoopEndRule").stringValue = "공중 진입 / 날려 보내기 / 사망 / 비활성화";
+            entry.FindPropertyRelative("LoopEndRule").stringValue = "날려 보내기 / 사망 / 비활성화";
             entry.FindPropertyRelative("TriggerDescription").stringValue = AudioEventEditorDefinitions.Description("Boss.BabyCrawl");
         }
         ApplyAssetChanges(data);

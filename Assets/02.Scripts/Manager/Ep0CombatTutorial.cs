@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public sealed class Ep0CombatTutorial : MonoBehaviour
 {
     private const int RequiredAttackHits = 3;
+    private const float FleeEndX = 294f;
 
     [Header("Scene references")]
     [SerializeField] private Player _player;
@@ -134,7 +135,23 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
 
         public override void Update() { }
 
-        public override void FixedUpdate() => _enemy.MoveType.Move(Vector2.right * _speedMultiplier);
+        public override void FixedUpdate()
+        {
+            if (_enemy.transform.position.x >= FleeEndX)
+            {
+                _enemy.MoveType.StopMove();
+                Vector3 position = _enemy.transform.position;
+                position.x = FleeEndX;
+                _enemy.EnemyRb.position = new Vector2(position.x, position.y);
+                _enemy.transform.position = position;
+                _enemy.Animation.SetRunning(false);
+                _enemy.Animation.ResetAnimationSpeed();
+                _enemy.gameObject.SetActive(false);
+                return;
+            }
+
+            _enemy.MoveType.Move(Vector2.right * _speedMultiplier);
+        }
 
         public override void Exit()
         {
@@ -288,6 +305,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
     private void LateUpdate()
     {
         UpdateHintPosition();
+        KeepPlayerBeforeTutorialEnemy();
         if (_running && _player != null && _player.Health.IsDead)
         {
             StopAllCoroutines();
@@ -296,6 +314,38 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
             Phase = "Waiting";
             _enemy.StateMachine.ChangeState(new WaitingState(_enemy));
         }
+    }
+
+    private void KeepPlayerBeforeTutorialEnemy()
+    {
+        if (!_initialized || _attackHitCount >= RequiredAttackHits || _player.Health.IsDead ||
+            !_enemy.gameObject.activeInHierarchy || (_prologue != null && !_prologue.IsIntroComplete))
+        {
+            return;
+        }
+
+        // This horizontal limit also blocks jumping or dodging past the practice enemy.
+        float limitX = _enemy.transform.position.x;
+        Collider2D enemyCollider = _enemy.GetComponent<Collider2D>();
+        Collider2D playerCollider = _player.GetComponent<Collider2D>();
+        if (enemyCollider != null && playerCollider != null)
+        {
+            float playerRightOffset = playerCollider.bounds.max.x - _player.transform.position.x;
+            limitX = enemyCollider.bounds.min.x - playerRightOffset;
+        }
+        if (_player.transform.position.x <= limitX) return;
+
+        Vector3 position = _player.transform.position;
+        position.x = limitX;
+        Rigidbody2D body = _player.GetComponent<Rigidbody2D>();
+        if (body != null)
+        {
+            body.position = new Vector2(position.x, position.y);
+            Vector2 velocity = body.linearVelocity;
+            velocity.x = Mathf.Min(velocity.x, 0f);
+            body.linearVelocity = velocity;
+        }
+        _player.transform.position = position;
     }
 
     private IEnumerator RunTutorial()
@@ -389,7 +439,7 @@ public sealed class Ep0CombatTutorial : MonoBehaviour
         {
             float left = area.StartPosition.x + area.CenterOffset.x - area.AreaSize.x * 0.5f;
             float right = Mathf.Max(area.StartPosition.x + area.CenterOffset.x + area.AreaSize.x * 0.5f,
-                _enemy.transform.position.x + _fleeDistance);
+                Mathf.Max(_enemy.transform.position.x + _fleeDistance, FleeEndX + _fleeDistance));
             area.CenterOffset = new Vector2((left + right) * 0.5f - area.StartPosition.x, area.CenterOffset.y);
             area.AreaSize = new Vector2(right - left, area.AreaSize.y);
         }
