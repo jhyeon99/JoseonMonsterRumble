@@ -132,7 +132,7 @@ public class BossStompPattern : BossPattern
 
     [Tooltip("2페이즈에 퍼지는 횟수")]
     [SerializeField, Min(1)]
-    private int _phase2WaveCount = 2;
+    private int _phase2WaveCount = 1;
 
     [Tooltip("파도 사이 간격 (초, 이전 파도가 시작된 뒤 다음 파도가 시작되기까지)")]
     [SerializeField, Min(0f)]
