@@ -53,6 +53,10 @@ public sealed partial class Ep1TutorialManager
         {
             actions = GameplayInputActions.None;
         }
+        else if (_potionStep == PotionStep.Practice || _potionStep == PotionStep.Confirming)
+        {
+            actions = GameplayInputActions.Movement | GameplayInputActions.Potion;
+        }
         else if (_highJumpPracticeActive && IsHighJumpPracticePending)
         {
             actions = GameplayInputActions.Movement | GameplayInputActions.Jump;

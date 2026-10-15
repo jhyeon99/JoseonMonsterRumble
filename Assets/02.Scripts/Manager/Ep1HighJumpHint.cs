@@ -33,7 +33,7 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
         _hintType == Ep1TutorialHintType.TalismanCharge;
     private bool IsRequiredPracticeHint => _hintType == Ep1TutorialHintType.HighJump ||
         _hintType == Ep1TutorialHintType.Parry || _hintType == Ep1TutorialHintType.Guard ||
-        _hintType == Ep1TutorialHintType.Finisher || IsTalismanHint;
+        _hintType == Ep1TutorialHintType.Finisher || _hintType == Ep1TutorialHintType.PotionUse || IsTalismanHint;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Register()
@@ -210,7 +210,9 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
             bool withinRange = _tutorialManager != null ?
                 _tutorialManager.IsWithinHintRange(_hintType, _player.transform.position, transform.position) :
                 Vector2.Distance(_player.transform.position, transform.position) <= distance;
+            // 부적 / 마무리 / 물약 연습 힌트는 매니저가 띄울 때를 정하므로 거리 조건 없음
             if (!IsTalismanHint && _hintType != Ep1TutorialHintType.Finisher &&
+                _hintType != Ep1TutorialHintType.PotionUse &&
                 !(_hintType == Ep1TutorialHintType.Parry && forceParry) &&
                 !(_hintType == Ep1TutorialHintType.HighJump && forceHighJump) &&
                 !withinRange)
@@ -301,7 +303,8 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
         Vector2 textSize = _showJumpKeys ? _tutorialManager.JumpTextSize : _tutorialManager.InfoTextSize;
         _messageText.rectTransform.sizeDelta = textSize;
         Sprite hintKey = _hintType == Ep1TutorialHintType.Guard ? _tutorialManager.GuardKeySprite :
-            IsTalismanHint ? _tutorialManager.TalismanKeySprite : null;
+            IsTalismanHint ? _tutorialManager.TalismanKeySprite :
+            _hintType == Ep1TutorialHintType.PotionUse ? _tutorialManager.PotionKeySprite : null;
         if (hintKey != null)
         {
             if (_cKeyRect == null)
