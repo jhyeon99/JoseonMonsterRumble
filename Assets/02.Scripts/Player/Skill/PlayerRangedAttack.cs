@@ -12,6 +12,14 @@ public class PlayerRangedAttack : MonoBehaviour
         ReadyToFire
     }
 
+    /// <summary>튜토리얼 연습 동안만 쓰는 충전 제한</summary>
+    public enum TutorialChargeMode
+    {
+        None,
+        SingleOnly,   // 충전 안 됨, 항상 한 장만 발사
+        MultipleOnly  // 두 장 이상 충전해야 발사, 한 장에서 떼면 발사 없이 취소
+    }
+
     private const int RequiredSlotCount = 5;
 
     [SerializeField] private Transform _flipTarget;
@@ -46,6 +54,8 @@ public class PlayerRangedAttack : MonoBehaviour
     private ChargeState _chargeState;
     private int _activeCount;
     private float _chargeTimer;
+    private UnityEngine.Object _tutorialChargeOwner;
+    private TutorialChargeMode _tutorialChargeMode;
 
     public bool IsCharging => _chargeState == ChargeState.Charging;
     public bool IsReadyToFire => _chargeState == ChargeState.ReadyToFire;
@@ -61,6 +71,10 @@ public class PlayerRangedAttack : MonoBehaviour
     // 지금 활성화할 수 있는 최대 개수 (슬롯 수와 보유 soul 중 작은 값)
     private int MaxActivatable =>
         Mathf.Min(_slots.Count, Mathf.FloorToInt(_soul.CurrentSoul / _soulCostPerTalisman));
+
+    // 충전으로 늘릴 수 있는 최대 개수 (튜토리얼 단발 연습 중에는 1)
+    private int MaxChargeCount =>
+        _tutorialChargeMode == TutorialChargeMode.SingleOnly ? Mathf.Min(1, MaxActivatable) : MaxActivatable;
 
     private void Awake()
     {
@@ -92,7 +106,7 @@ public class PlayerRangedAttack : MonoBehaviour
 
             _chargeTimer -= currentInterval;
 
-            if (_activeCount >= MaxActivatable)
+            if (_activeCount >= MaxChargeCount)
             {
                 continue;
             }
@@ -161,6 +175,13 @@ public class PlayerRangedAttack : MonoBehaviour
             return false;
         }
 
+        // 튜토리얼 여러 장 연습: 한 장만 충전된 채로 떼면 발사하지 않고 취소
+        if (_tutorialChargeMode == TutorialChargeMode.MultipleOnly && _activeCount < 2)
+        {
+            ResetCharge();
+            return false;
+        }
+
         _chargeState = ChargeState.ReadyToFire;
         _chargeTimer = 0f;
         return true;
@@ -195,6 +216,29 @@ public class PlayerRangedAttack : MonoBehaviour
 
     /// <summary>피격, 사망 등으로 발사 없이 충전을 취소할 때 호출</summary>
     public void CancelCharge() => ResetCharge();
+
+    /// <summary>튜토리얼 연습 동안 충전 방식을 제한. 같은 owner가 Clear할 때까지 유지</summary>
+    public void SetTutorialChargeMode(UnityEngine.Object owner, TutorialChargeMode mode)
+    {
+        if (owner == null)
+        {
+            return;
+        }
+
+        _tutorialChargeOwner = owner;
+        _tutorialChargeMode = mode;
+    }
+
+    public void ClearTutorialChargeMode(UnityEngine.Object owner)
+    {
+        if (_tutorialChargeOwner != owner)
+        {
+            return;
+        }
+
+        _tutorialChargeOwner = null;
+        _tutorialChargeMode = TutorialChargeMode.None;
+    }
 
     /// <summary>버프로 데미지 증가량을 바꿀 때 사용</summary>
     public void SetDamageIncrease(float percent) => _damageIncreasePercent = percent;
