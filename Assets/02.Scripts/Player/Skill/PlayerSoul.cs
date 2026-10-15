@@ -11,6 +11,8 @@ public class PlayerSoul : MonoBehaviour, ISoulSource
 
     public event Action<float, float> OnSoulChanged;
 
+#if UNITY_EDITOR
+    // 디버그: F1로 영혼 1 추가 (에디터에서만)
     private void Update()
     {
         if (PauseController.IsGameplayInputBlocked)
@@ -23,6 +25,7 @@ public class PlayerSoul : MonoBehaviour, ISoulSource
             AddSoul(1f);
         }
     }
+#endif
 
     public void AddSoul(float amount)
     {

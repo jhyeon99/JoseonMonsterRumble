@@ -65,6 +65,122 @@ public class BossFloorSpike : MonoBehaviour
         }
     }
 
+    // 땅 앞면 아래 잘라내기: 잘린 길이를 이 단계로 나눠 미리 만든 스프라이트를 씀 (매 프레임 생성하지 않도록)
+    private const int GroundClipSteps = 32;
+    private static readonly Dictionary<(Sprite, int), Sprite[]> ClippedSpriteCache = new Dictionary<(Sprite, int), Sprite[]>();
+    private SpriteRenderer _clipRenderer;
+    private Sprite _clipSourceSprite;
+    private bool _useGroundClip;
+    private float _groundClipY;
+
+    /// <summary>
+    /// groundEdgeY(월드) 아래로 내려간 부분을 잘라 안 보이게 함. 땅 앞면(흙벽) 뒤에서 윗면을 뚫고 솟는 것처럼 보임.
+    /// 마스크(스텐실)를 쓰지 않고 스프라이트 자체를 잘라서 그림
+    /// </summary>
+    public void UseGroundClip(float groundEdgeY)
+    {
+        _clipRenderer = GetComponentInChildren<SpriteRenderer>(true);
+        if (_clipRenderer == null || _clipRenderer.sprite == null)
+        {
+            return;
+        }
+
+        _clipSourceSprite = _clipRenderer.sprite;
+        _groundClipY = groundEdgeY;
+        _useGroundClip = true;
+        ApplyGroundClip();
+    }
+
+    private void ApplyGroundClip()
+    {
+        if (!_useGroundClip || _clipRenderer == null)
+        {
+            return;
+        }
+
+        // 스프라이트의 로컬 축 중 월드 위쪽을 향하는 축 (세운 가시는 보통 로컬 X)
+        Transform rendererTransform = _clipRenderer.transform;
+        Vector3 localUp = rendererTransform.InverseTransformDirection(Vector3.up);
+        bool alongX = Mathf.Abs(localUp.x) >= Mathf.Abs(localUp.y);
+        int sign = (alongX ? localUp.x : localUp.y) >= 0f ? 1 : -1;
+
+        Sprite source = _clipSourceSprite;
+        float length = alongX ? source.rect.width : source.rect.height;
+        float pivot = alongX ? source.pivot.x : source.pivot.y;
+        float axisScale = Mathf.Abs(alongX ? rendererTransform.lossyScale.x : rendererTransform.lossyScale.y);
+        if (length <= 0f || axisScale <= 0f)
+        {
+            return;
+        }
+
+        // 잘리는 선의 위치 (축 방향 픽셀). sign > 0이면 그보다 큰 쪽, sign < 0이면 작은 쪽이 땅 위
+        float cutPixel = pivot + (sign * (_groundClipY - rendererTransform.position.y) * source.pixelsPerUnit / axisScale);
+        float visiblePixels = sign > 0 ? length - cutPixel : cutPixel;
+        int step = Mathf.Clamp(Mathf.CeilToInt(Mathf.Clamp01(visiblePixels / length) * GroundClipSteps), 0, GroundClipSteps);
+
+        if (step >= GroundClipSteps)
+        {
+            _clipRenderer.sprite = source;
+        }
+        else if (step <= 0)
+        {
+            _clipRenderer.sprite = null;
+        }
+        else
+        {
+            _clipRenderer.sprite = GetClippedSprite(source, alongX, sign, step);
+        }
+    }
+
+    /// <summary>땅 위로 보이는 쪽(위쪽 끝)만 남긴 스프라이트. 기준점은 원본과 같은 자리라 위치가 그대로</summary>
+    private static Sprite GetClippedSprite(Sprite source, bool alongX, int sign, int step)
+    {
+        int key = (alongX ? 2 : 0) + (sign > 0 ? 1 : 0);
+        if (!ClippedSpriteCache.TryGetValue((source, key), out Sprite[] sprites))
+        {
+            sprites = new Sprite[GroundClipSteps];
+            ClippedSpriteCache[(source, key)] = sprites;
+        }
+
+        if (sprites[step] != null)
+        {
+            return sprites[step];
+        }
+
+        Rect rect = source.packed && source.packingMode == SpritePackingMode.Rectangle ? source.textureRect : source.rect;
+        float length = alongX ? rect.width : rect.height;
+        float keep = Mathf.Max(1f, Mathf.Round(length * step / GroundClipSteps));
+        float removed = length - keep;
+        Vector2 pivotPixels = source.pivot;
+
+        if (alongX)
+        {
+            if (sign > 0)
+            {
+                rect.x += removed;
+                pivotPixels.x -= removed;
+            }
+
+            rect.width = keep;
+        }
+        else
+        {
+            if (sign > 0)
+            {
+                rect.y += removed;
+                pivotPixels.y -= removed;
+            }
+
+            rect.height = keep;
+        }
+
+        var pivot = new Vector2(pivotPixels.x / rect.width, pivotPixels.y / rect.height);
+        var clipped = Sprite.Create(source.texture, rect, pivot, source.pixelsPerUnit, 0, SpriteMeshType.FullRect);
+        clipped.name = $"{source.name}_Clip{step}";
+        sprites[step] = clipped;
+        return clipped;
+    }
+
     private void Awake()
     {
         _collider = GetComponent<Collider2D>();
@@ -96,6 +212,7 @@ public class BossFloorSpike : MonoBehaviour
         SetVisible(_elapsed >= 0f);
 
         transform.SetPositionAndRotation(_downPosition, Quaternion.Euler(0f, 0f, _uprightRotation));
+        ApplyGroundClip();
     }
 
     private void Update()
@@ -142,6 +259,7 @@ public class BossFloorSpike : MonoBehaviour
         }
 
         transform.position = Vector3.Lerp(_downPosition, _upPosition, amount);
+        ApplyGroundClip();
 
         if (!_hasHit && amount >= _damageRiseThreshold)
         {

@@ -224,6 +224,7 @@ public class PauseController : MonoBehaviour
         _isPaused = false;
         _isMenuPaused = false;
         RestoreTimeScale();
+        GameProgressReset.ResetAll();
         SceneManager.LoadScene(_titleSceneName);
     }
 

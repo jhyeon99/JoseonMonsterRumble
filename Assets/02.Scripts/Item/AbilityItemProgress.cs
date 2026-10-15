@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 능력 아이템(도깨비 감투 등) 보유 여부. 게임을 실행하는 동안만 기억하고 디스크에 저장하지 않음
+/// (게임을 껐다 켜면 초기화. 씬 이동 / 사망 리스폰에는 유지)
+/// </summary>
 public static class AbilityItemProgress
 {
     public const string DokkaebiGamtuId = "dokkaebi_gamtu";
-    private const string SavePrefix = "AbilityItem.Owned.";
-    private const int OwnedValue = 1;
-    private static readonly Dictionary<string, bool> OwnedItems = new Dictionary<string, bool>();
+    private static readonly HashSet<string> OwnedItems = new HashSet<string>();
 
     public static event Action<AbilityItemData> OnItemAcquired;
     public static event Action OnProgressReset;
@@ -20,18 +22,21 @@ public static class AbilityItemProgress
         OnProgressReset = null;
     }
 
+    /// <summary>새 게임 / 타이틀 복귀 시 모든 능력 아이템 보유 기록 초기화</summary>
+    public static void ResetAll()
+    {
+        OwnedItems.Clear();
+        OnProgressReset?.Invoke();
+    }
+
     public static bool HasItem(string itemId)
     {
         if (string.IsNullOrWhiteSpace(itemId))
         {
             return false;
         }
-        if (!OwnedItems.TryGetValue(itemId, out bool owned))
-        {
-            owned = PlayerPrefs.GetInt(SavePrefix + itemId, 0) == OwnedValue;
-            OwnedItems.Add(itemId, owned);
-        }
-        return owned;
+
+        return OwnedItems.Contains(itemId);
     }
 
     public static bool TryAcquireItem(AbilityItemData item)
@@ -40,9 +45,8 @@ public static class AbilityItemProgress
         {
             return false;
         }
-        OwnedItems[item.ItemId] = true;
-        PlayerPrefs.SetInt(SavePrefix + item.ItemId, OwnedValue);
-        PlayerPrefs.Save();
+
+        OwnedItems.Add(item.ItemId);
         OnItemAcquired?.Invoke(item);
         return true;
     }
@@ -53,15 +57,15 @@ public static class AbilityItemProgress
         {
             return;
         }
+
         for (int i = 0; i < items.Length; i++)
         {
             if (items[i] != null && !string.IsNullOrWhiteSpace(items[i].ItemId))
             {
-                PlayerPrefs.DeleteKey(SavePrefix + items[i].ItemId);
+                OwnedItems.Remove(items[i].ItemId);
             }
         }
-        OwnedItems.Clear();
-        PlayerPrefs.Save();
+
         OnProgressReset?.Invoke();
     }
 }
