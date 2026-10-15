@@ -159,6 +159,10 @@ public class Boss : MonoBehaviour, IFinishable
     [SerializeField, Min(0f)]
     private float _postGroggyContactDelay = 0.5f;
 
+    [Tooltip("2페이즈 전환(하울링)이 끝난 뒤 몸통 접촉 데미지를 다시 허용하기까지의 시간입니다. 첫 패턴(소환)으로 넘어가기 직전 대기 순간에 맞지 않도록 합니다.")]
+    [SerializeField, Min(0f)]
+    private float _postPhaseTransitionContactDelay = 0.5f;
+
     private float _contactDamageResumeTime;
 
     [SerializeField]
@@ -753,6 +757,9 @@ public class Boss : MonoBehaviour, IFinishable
     /// <summary>2페이즈 전환이 끝났을 때 (BossPhaseTransitionState에서 호출). 지정한 첫 패턴 예약</summary>
     public void NotifyPhaseTransitionFinished()
     {
+        // 하울링이 끝나고 첫 패턴이 시작되기 전 대기 순간에는 몸통 접촉 데미지를 주지 않음
+        _contactDamageResumeTime = Mathf.Max(_contactDamageResumeTime, Time.time + _postPhaseTransitionContactDelay);
+
         if (_phase2FirstPattern != null)
         {
             QueuePattern(_phase2FirstPattern);
