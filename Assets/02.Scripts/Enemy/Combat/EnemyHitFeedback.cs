@@ -28,7 +28,7 @@ public sealed class EnemyHitFeedback : MonoBehaviour
     [Tooltip("보스에 쓸 때는 Health 대신 여기에 BossHealth 연결 (둘 중 하나만 있으면 됨)")]
     [SerializeField] private BossHealth _bossHealth;
 
-    // Health / Boss Health가 둘 다 비어 있으면 부모에서 찾는 피격 신호 (올챙이, 독 방울 등)
+    // Health / Boss Health가 둘 다 비어 있으면 부모에서 찾는 피격 신호 (올챙이, 개구리알 등)
     private IHitFeedbackSource _feedbackSource;
     [SerializeField] private SpriteRenderer _sourceRenderer;
     [SerializeField] private SpriteRenderer _flashRenderer;
@@ -106,9 +106,15 @@ public sealed class EnemyHitFeedback : MonoBehaviour
 
     private void HandleHit(HitData hitData)
     {
-        _activeSettings = hitData.IsTalisman
+        StartFlash(hitData.IsTalisman
             ? _talismanHit
-            : hitData.IsHeavyImpact ? _heavyHit : _lightHit;
+            : hitData.IsHeavyImpact ? _heavyHit : _lightHit);
+    }
+
+    public void StartFlash(EnemyHitFeedbackSettings settings)
+    {
+        if (!isActiveAndEnabled || _sourceRenderer == null || _flashRenderer == null) return;
+        _activeSettings = settings;
         _elapsed = 0f;
         _state = FeedbackState.Reacting;
 

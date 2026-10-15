@@ -13,6 +13,13 @@ public class BossHealth : MonoBehaviour, IDamageable
     [SerializeField, Min(1f)] private float _phase1MaxHp = 300f;
     [SerializeField, Min(1f)] private float _phase2MaxHp = 400f;
 
+    [Header("타격 소울")]
+    [Tooltip("보스를 때렸을 때 나오는 소울의 충전량 배율 (개수는 그대로 1개)")]
+    [SerializeField, Min(0f)] private float _hitSoulAmountMultiplier = 3f;
+
+    [Tooltip("보스를 때렸을 때 나오는 소울의 크기 배율 (더 큰 소울을 먹는 느낌)")]
+    [SerializeField, Min(0.1f)] private float _hitSoulScaleMultiplier = 1.25f;
+
     [Header("UI")]
     [Tooltip("비어 있으면 씬에서 자동으로 찾음 (꺼져 있어도 찾음)")]
     [SerializeField]
@@ -36,6 +43,7 @@ public class BossHealth : MonoBehaviour, IDamageable
 
     public float CurrentHp => _currentHp;
     public float MaxHp => _maxHp;
+    public bool LastDamageWasDuringGroggy { get; private set; }
 
     private void Awake()
     {
@@ -97,9 +105,12 @@ public class BossHealth : MonoBehaviour, IDamageable
         }
 
         // 보스는 넉백 없음
+        LastDamageWasDuringGroggy = _boss.CurrentState is BossGroggyState;
         ApplyDamage(hitData.Damage);
 
-        // 일반 적과 같은 피격 공통 반응 (타격 소울, 히트스톱, 카메라 흔들림)
+        // 일반 적과 같은 피격 공통 반응 (타격 소울, 히트스톱, 카메라 흔들림). 보스는 타격 소울만 더 크고 많이 차오름
+        hitData.SoulAmountMultiplier = _hitSoulAmountMultiplier;
+        hitData.SoulScaleMultiplier = _hitSoulScaleMultiplier;
         GameEvents.TriggerEnemyHit(hitData);
         OnDamaged?.Invoke(hitData);
         return true;
@@ -114,6 +125,7 @@ public class BossHealth : MonoBehaviour, IDamageable
         }
 
         _boss.Log($"기믹 데미지 {damage}");
+        LastDamageWasDuringGroggy = _boss.CurrentState is BossGroggyState;
         ApplyDamage(damage);
 
         // 피격 연출용 (올챙이 충돌은 강한 피격으로 취급)

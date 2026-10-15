@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d50193ec9c7f422a98e0aeff6c7f1199, type: 3}
+  m_Name: SO_AudioCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudio.AudioCatalogSO
+  Player: {fileID: 11400000, guid: 4a62ef82a0cb420ea89f649830a29671, type: 2}
+  Monsters:
+  - Monster: {fileID: 11400000, guid: f4217fc77f1358841b50a1d8c7548fd4, type: 2}
+    DisplayName: "\uC9C0\uC0C1 \uADFC\uC811 \uBAAC\uC2A4\uD130"
+    EventPrefix: Ground
+    Sounds: {fileID: 11400000, guid: 25f1b6a7913f4a318a63e0aa1ab0be26, type: 2}
+    UseCustomLaunchDeathFade: 0
+    LaunchDeathFadeStart: 1
+    LaunchDeathFadeDuration: 0.15
+  - Monster: {fileID: 11400000, guid: 96783a2229c6e2542b8f9e15db95f4ef, type: 2}
+    DisplayName: "\uC9C0\uC0C1 \uC6D0\uAC70\uB9AC \uBAAC\uC2A4\uD130"
+    EventPrefix: Ground
+    Sounds: {fileID: 11400000, guid: b54d984e47114c5ca51497d9feda7ecd, type: 2}
+    UseCustomLaunchDeathFade: 0
+    LaunchDeathFadeStart: 1
+    LaunchDeathFadeDuration: 0.15
+  - Monster: {fileID: 11400000, guid: be312a2b163f26e41a8bfcf4f1c01ef4, type: 2}
+    DisplayName: "\uACF5\uC911 \uADFC\uC811 \uBAAC\uC2A4\uD130"
+    EventPrefix: Air
+    Sounds: {fileID: 11400000, guid: a559d5313f7e42148bcb79d42728d426, type: 2}
+    UseCustomLaunchDeathFade: 0
+    LaunchDeathFadeStart: 1
+    LaunchDeathFadeDuration: 0.15
+  - Monster: {fileID: 11400000, guid: aff7ebcefb6489249b9ebd1eb94baae2, type: 2}
+    DisplayName: "\uACF5\uC911 \uC6D0\uAC70\uB9AC \uBAAC\uC2A4\uD130"
+    EventPrefix: Air
+    Sounds: {fileID: 11400000, guid: 86275e5a3bbd4a81817ec06e6073b485, type: 2}
+    UseCustomLaunchDeathFade: 0
+    LaunchDeathFadeStart: 1
+    LaunchDeathFadeDuration: 0.15
+  - Monster: {fileID: 11400000, guid: 2fad875db8129d84e982006d0afedb46, type: 2}
+    DisplayName: "\uBC84\uD504 \uBAAC\uC2A4\uD130"
+    EventPrefix: Buff
+    Sounds: {fileID: 11400000, guid: e12bdc8ab58745d7b1bd7b4e6efad343, type: 2}
+    UseCustomLaunchDeathFade: 0
+    LaunchDeathFadeStart: 1
+    LaunchDeathFadeDuration: 0.15
+  Ground:
+    Melee: {fileID: 11400000, guid: 25f1b6a7913f4a318a63e0aa1ab0be26, type: 2}
+    Ranged: {fileID: 11400000, guid: b54d984e47114c5ca51497d9feda7ecd, type: 2}
+  Air:
+    Melee: {fileID: 11400000, guid: a559d5313f7e42148bcb79d42728d426, type: 2}
+    Ranged: {fileID: 11400000, guid: 86275e5a3bbd4a81817ec06e6073b485, type: 2}
+  Boss: {fileID: 11400000, guid: 3bda48e52b484b079988934a1c2a22cc, type: 2}
+  BossFootstepLeadTime: 0.3
+  BossFrogMinInterval: 3
+  BossFrogMaxInterval: 8
+  LaunchDeathSoundDuration: 1
+  LaunchDeathSoundFade: 0.15
+  BabyCrawlMinInterval: 1
+  BabyCrawlMaxInterval: 3
+  Music: {fileID: 11400000, guid: 79627dfb955f4f91b27e07675bc2e060, type: 2}
+  Item: {fileID: 11400000, guid: 39e417b7b422448c8a093865067d8623, type: 2}
+  Environment: {fileID: 11400000, guid: cace4725aea94b6b800a07b4a821f386, type: 2}
+  UI: {fileID: 11400000, guid: 15390d926ed44f908a7a4e802badda87, type: 2}
+  Prologue: {fileID: 11400000, guid: 11897adbfbb64dee85c8913376083029, type: 2}
+  Buff: {fileID: 11400000, guid: e12bdc8ab58745d7b1bd7b4e6efad343, type: 2}

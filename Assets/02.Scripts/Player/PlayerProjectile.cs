@@ -1,4 +1,5 @@
 using System.Collections;
+using GameAudio;
 using UnityEngine;
 
 public class PlayerProjectile : Projectile
@@ -13,7 +14,7 @@ public class PlayerProjectile : Projectile
     private static readonly Collider2D[] Hits = new Collider2D[16];
 
     [Header("탐색")]
-    [SerializeField] private float _searchRadius = 8f;
+    [SerializeField] private float _searchRadius = 9f;
     [SerializeField] private LayerMask _enemyLayer;
     [SerializeField] private LayerMask _obstacleLayer;
     [SerializeField] private Vector2 _sightOffset = new Vector2(0f, 0.5f);
@@ -50,6 +51,34 @@ public class PlayerProjectile : Projectile
     private Coroutine _explodeRoutine;
     private Transform _explosionTarget;
     private Vector3 _explosionLocalPosition;
+    private AudioManager _flightAudioManager;
+    private AudioOwnerKey _flightAudioOwner;
+
+    private void StartFlightAudio(Transform playerPoint)
+    {
+        _flightAudioManager = AudioManager.Instance;
+        if (_flightAudioManager == null) return;
+        _flightAudioOwner = new AudioOwnerKey(GetInstanceID(), AudioLifetimeRegistry.NextOwnerGeneration());
+        PlayerAudio playerAudio = playerPoint != null ? playerPoint.GetComponent<PlayerAudio>() : null;
+        SoundSetSO set = playerAudio != null ? playerAudio.SoundSet : _flightAudioManager.Catalog?.Player;
+        _flightAudioManager.PlayEntityEvent(set, "Player.TalismanFire", this, _flightAudioOwner);
+    }
+
+    private void StopFlightAudio()
+    {
+        if (_flightAudioManager != null && !_flightAudioOwner.IsEmpty)
+        {
+            // Release also cancels delayed playback before a hit or a pool return.
+            _flightAudioManager.ReleaseOwner(_flightAudioOwner);
+        }
+        _flightAudioOwner = default;
+        _flightAudioManager = null;
+    }
+
+    private void OnDestroy() => StopFlightAudio();
+
+    public float SearchRadius => _searchRadius;
+    public Vector2 SightOffset => _sightOffset;
 
     public void SetFacing(int facing) => _facing = facing >= 0 ? 1 : -1;
 
@@ -64,6 +93,7 @@ public class PlayerProjectile : Projectile
 
     public override void OnSpawn(Transform muzzlePoint, Transform playerPoint, float damageIncreaseValue)
     {
+        StopFlightAudio();
         base.OnSpawn(muzzlePoint, playerPoint, damageIncreaseValue);
 
         transform.position = muzzlePoint.position;
@@ -80,6 +110,7 @@ public class PlayerProjectile : Projectile
             _animator.ResetTrigger(AnimParamFire);
             _animator.SetTrigger(AnimParamFire);
         }
+        StartFlightAudio(playerPoint);
     }
 
     protected override void Fire()
@@ -162,10 +193,12 @@ public class PlayerProjectile : Projectile
 
     private void StartExplosion(Collider2D hitCollider)
     {
+        StopFlightAudio();
         _isExploding = true;
         _isLaunching = false;
 
         SnapToHitTarget(hitCollider);
+        AudioManager.Instance?.PlaySceneEvent("Player.TalismanExplosion", this);
         StopTrackingTarget();
 
         if (_collider2D != null)
@@ -441,6 +474,7 @@ public class PlayerProjectile : Projectile
 
     private void OnDisable()
     {
+        StopFlightAudio();
         if (_explodeRoutine != null)
         {
             StopCoroutine(_explodeRoutine);
@@ -470,4 +504,5 @@ public class PlayerProjectile : Projectile
         }
 
     }
+
 }

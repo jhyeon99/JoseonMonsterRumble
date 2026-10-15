@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8678864482595496114}
   - component: {fileID: 1290393893882163491}
+  - component: {fileID: 7517765920081301450}
   m_Layer: 0
   m_Name: PF_BossCinematicDirector
   m_TagString: Untagged
@@ -46,8 +47,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossCinematicDirector
   _boss: {fileID: 0}
   _cameraFollow: {fileID: 0}
-  _titleFont: {fileID: 0}
+  _titleFont: {fileID: 11400000, guid: 5645eadd0a91df74aa0b1a4045f316ba, type: 2}
   _playIntro: 1
+  _playIntroOnlyOnce: 1
+  _skipIntroHowlOnRespawn: 1
   _introPanSmoothTime: 0.35
   _introFocusDuration: 2.6
   _introReturnSmoothTime: 0.3
@@ -66,6 +69,8 @@ MonoBehaviour:
   _titleHold: 1.3
   _titleFadeOut: 0.4
   _titleFontSize: 84
+  _titleSprite: {fileID: 21300000, guid: 4d381e91a7a1b024b81981c90a5818b0, type: 3}
+  _titleImageSize: {x: 520, y: 390}
   _subtitleFontSize: 34
   _titleHeight: 0.3
   _titleColor: {r: 1, g: 1, b: 1, a: 1}
@@ -73,18 +78,23 @@ MonoBehaviour:
   _letterboxTime: 0.35
   _letterboxOnHowl: 1
   _letterboxOnDefeat: 1
+  _topEdgeBrush: {fileID: 392784170164702462, guid: e93c886ec61f99645a97cab42550a481,
+    type: 3}
+  _bottomEdgeBrush: {fileID: 392784170164702462, guid: e93c886ec61f99645a97cab42550a481,
+    type: 3}
+  _letterboxEdgeHeight: 0.0433
+  _letterboxEdgeProtrusion: 0.75
+  _defeatLetterboxTime: 0.16
+  _titleInkBrush: {fileID: -1974878601031130806, guid: fa74bd294aa066f48a1938af15fe0134,
+    type: 3}
+  _titleInkSize: {x: 620, y: 200}
+  _titleInkOpacity: 0.85
   _flashColor: {r: 1, g: 1, b: 1, a: 1}
   _flashPeakAlpha: 0.85
   _flashDuration: 0.45
   _bossAngerTint: {r: 1, g: 0.72, b: 0.72, a: 1}
-  _screenAngerTint: {r: 0.55, g: 0, b: 0, a: 0.12}
   _tintTransitionTime: 1.2
   _bossTintTargets: []
-  _phase1Bgm: {fileID: 0}
-  _phase2Bgm: {fileID: 0}
-  _bgmFadeTime: 1
-  _stopBgmOnDefeat: 1
-  _defeatBgmFadeTime: 2
   _defeatLockTimeout: 6
   _defeatFlashColor: {r: 1, g: 1, b: 1, a: 1}
   _defeatFlashPeakAlpha: 1
@@ -92,17 +102,90 @@ MonoBehaviour:
   _slowMotionScale: 0.25
   _slowMotionHold: 0.6
   _slowMotionRecover: 0.5
-  _defeatSfx: {fileID: 0}
   _clearText: "\uACA9\uD30C"
   _clearSubtext: 
   _clearFontSize: 110
   _clearColor: {r: 1, g: 0.86, b: 0.45, a: 1}
   _clearHeight: 0.55
-  _clearFadeIn: 0.5
+  _clearFadeIn: 0.16
   _clearHold: 2
   _clearFadeOut: 0.6
-  _clearSfx: {fileID: 0}
+  _clearSprite: {fileID: 21300000, guid: d9f9bc998ccd6f34e93dbac6cf755943,
+    type: 3}
+  _clearInkBrush: {fileID: -5061103755296630950, guid: 08706723ffff83d4aa642ff6ca2df312,
+    type: 3}
+  _clearImageSize: {x: 600, y: 450}
+  _clearInkSize: {x: 820, y: 380}
+  _clearInkOpacity: 0.9
+  _clearInkRevealTime: 0.09
+  _clearStampScale: 1.25
+  _clearStampOffset: 32
+  _clearImpactRatio: 0.65
+  _clearStampLandingScale: 0.96
+  _clearStampShake:
+    Duration: 0.08
+    Magnitude: 0.1
+  _clearStampFlashAlpha: 0.08
+  _clearStampFlashDuration: 0.08
   _onDefeatSequenceFinished:
     m_PersistentCalls:
       m_Calls: []
   _canvasSortingOrder: 50
+--- !u!114 &7517765920081301450
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2149566786204537046}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17876cfb27af407c99f8c8045d46dacf, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::EndingCreditsController
+  _playEnding: 1
+  _blackoutDuration: 2
+  _creditsDelay: 0.5
+  _canvasSortingOrder: 200
+  _creditImages:
+  - {fileID: 2800000, guid: 53f206847b3e483f90a01993fc446384, type: 3}
+  - {fileID: 2800000, guid: bc612cd7309a441a84a36d179651cd8d, type: 3}
+  - {fileID: 2800000, guid: 7ed880242bc64f1c87bb51347b587739, type: 3}
+  - {fileID: 2800000, guid: 3a68f98ab1f64df998f7c9b71cfc23af, type: 3}
+  - {fileID: 2800000, guid: 03d3e8c44e9c482b9294a1d31b89cc9b, type: 3}
+  _imageWidth: 1152
+  _imageSpacing: 160
+  _imageSidePadding: 60
+  _creditsText: "프로젝트 총괄 · 게임 기획\n하지호\n아트 리소스 제작 · 레벨 디자인\n프롤로그 · 스테이지 제작\n튜토리얼 · 사운드 제작\n\n\n플레이어 · 보스 시스템\n송재현\n플레이어 조작 · 콤보 · 패링 · 마무리 공격\n보스 전체 패턴 · 저장 및 리스폰\n\n\nUI · 애니메이션 · 전투 연출\n박욱영\nUI · 캐릭터, 몬스터 애니메이션\nVFX · 피격 피드백 · 환경 기믹\n\n\n몬스터 · 전투 시스템\n김상곤\n몬스터 AI · 공통구조 · 공격 및 피격\n오디오 시스템 · 레벨 배치\n\n\n플레이해 주셔서 감사합니다"
+  _font: {fileID: 11400000, guid: 5645eadd0a91df74aa0b1a4045f316ba, type: 2}
+  _fontSize: 42
+  _textColor: {r: 1, g: 1, b: 1, a: 1}
+  _textWidth: 1300
+  _scrollSpeed: 100
+  _offscreenPadding: 80
+  _buttonDelay: 0.5
+  _backgroundSprite: {fileID: 0}
+  _backgroundOpacity: 0.25
+  _musicPlaylist:
+  - Clip: {fileID: 8300000, guid: db21c60e7daf8fe4b9449710b3070245, type: 3}
+    StartOffset: 0
+    Duration: 60
+    Volume: 1
+    Loop: 1
+    FadeIn: 1
+    FadeOut: 2
+  - Clip: {fileID: 8300000, guid: 374177a0513cbb84286021b4692699ec, type: 3}
+    StartOffset: 0
+    Duration: 0
+    Volume: 1
+    Loop: 0
+    FadeIn: 1
+    FadeOut: 2
+  _repeatMusicPlaylist: 1
+  _previousMusicFadeOut: 1
+  _returnButtonText: "엔터를 눌러 타이틀로 돌아가기"
+  _titleSceneName: Test_TitleScene
+  _returnButtonFont: {fileID: 11400000, guid: 5645eadd0a91df74aa0b1a4045f316ba, type: 2}
+  _returnButtonSize: {x: 1200, y: 180}
+  _returnButtonFontSize: 44
+  _returnButtonFadeIn: 0.6

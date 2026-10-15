@@ -72,6 +72,9 @@ public class EnemyContactDamage : MonoBehaviour
         // 죽는 중 / 날아가는 중 / 그로기 중인 적은 접촉 데미지 없음 (그로기 적 앞에서 마무리 공격을 해야 하므로)
         if (_enemy != null && (_enemy.IsDefeated || _enemy.IsGroggy)) return;
 
+        // 근접 공격을 막았거나(가드) 피한(회피) 직후에는 몸통에 바로 맞지 않도록 잠시 접촉 데미지 없음
+        if (_enemy != null && _enemy.Combat is EnemyMeleeCombat melee && melee.SuppressesContactDamage) return;
+
         // 보스는 대기 / 패턴 중일 때만 (등장, 그로기, 하울링, 완전 그로기, 처치 중에는 없음)
         if (_boss != null && !_boss.CanDealContactDamage) return;
 
@@ -88,6 +91,7 @@ public class EnemyContactDamage : MonoBehaviour
         Vector2 hitPoint = other.ClosestPoint(_zone.bounds.center);
 
         var hitData = new HitData(_damage, _knockbackForce, hitPoint, attackDirection, _defense, null, 0, _attackName);
+        hitData.Attacker = _enemy != null ? _enemy.gameObject : _boss.gameObject;
         damageable.TakeDamage(hitData);
         _nextHitTime = Time.time + _hitInterval;
     }

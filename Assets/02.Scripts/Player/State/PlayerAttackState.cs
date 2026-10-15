@@ -337,7 +337,19 @@ public class PlayerAttackState : PlayerBaseState
 
         if (_elapsedTime >= AttackSafetyTimeout)
         {
+            _player.Attack.StopAttack();
             EndAttack();
+            return;
+        }
+
+        // 회피 캔슬: 1타 / 2타는 준비 / 공격 / Recover 모든 구간에서 바로 회피 가능.
+        // 3타는 Recover가 시작된 뒤에만 회피 가능.
+        if (_currentComboIndex < 2 &&
+            _player.IsGrounded &&
+            _player.Movement.CanDodge &&
+            _inputHandler.TryUseDodgeInput())
+        {
+            _stateMachine.ChangeState(_player.DodgeState);
             return;
         }
 
@@ -357,6 +369,18 @@ public class PlayerAttackState : PlayerBaseState
             }
 
             bool isCurrentComboRecover = IsCurrentComboRecoverState(stateInfo);
+            bool isEnteringComboRecover = inTransition && IsCurrentComboRecoverState(nextInfo);
+
+            // 후딜 가드는 다음 콤보 공격 예약보다 먼저 처리한다. 패링 입력은 GuardState에서 소비한다.
+            if ((isCurrentComboRecover || isEnteringComboRecover) &&
+                _inputHandler.IsGuardKey && _player.IsGrounded && _player.Guard.CanStartGuard)
+            {
+                float moveX = _inputHandler.MoveInputX;
+                if (Mathf.Abs(moveX) > 0.01f)
+                    _player.transform.localScale = new Vector3(Mathf.Sign(moveX), 1f, 1f);
+                _stateMachine.ChangeState(_player.GuardState);
+                return;
+            }
 
             // 콤보 공격 입력 감지 시 단일 예약 버퍼 활성화
             if (_currentComboIndex < 2 && _inputHandler.TryUseAttackInput())
@@ -375,9 +399,7 @@ public class PlayerAttackState : PlayerBaseState
                 }
             }
 
-            // 회피 캔슬: 현재 콤보의 Recover 애니메이션이 시작되면 (Recover로 넘어가는 전이 중 포함) 바로 가능
-            // Recover 시작 직전에 누른 입력도 입력 버퍼(0.1초) 안이면 시작하자마자 회피
-            bool isEnteringComboRecover = inTransition && IsCurrentComboRecoverState(nextInfo);
+            // Recover 중 방향 전환과 3타 회피 캔슬 (Recover로 넘어가는 전이 중 포함).
             if (isCurrentComboRecover || isEnteringComboRecover)
             {
                 // Recover 중 방향키를 누르면 캐릭터가 즉시 뒤를 돌아봄
@@ -387,7 +409,8 @@ public class PlayerAttackState : PlayerBaseState
                     _player.transform.localScale = new Vector3(Mathf.Sign(moveX), 1f, 1f);
                 }
 
-                if (_player.IsGrounded &&
+                if (_currentComboIndex == 2 &&
+                    _player.IsGrounded &&
                     _player.Movement.CanDodge &&
                     _inputHandler.TryUseDodgeInput())
                 {
@@ -453,6 +476,7 @@ public class PlayerAttackState : PlayerBaseState
 
     private void EndAttack()
     {
+        _player.Attack.CompleteAttackStep();
         _stateMachine.ChangeState(_player.IdleState);
     }
 

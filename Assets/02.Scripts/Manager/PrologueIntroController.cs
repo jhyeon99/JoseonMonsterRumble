@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -35,16 +35,15 @@ public class PrologueIntroController : MonoBehaviour
     [Tooltip("다음 씬을 불러온 뒤 검은 화면이 밝아지는 시간입니다.")]
     [SerializeField, Min(0.01f)] private float _nextSceneRevealDuration = 0.75f;
 
-    [Header("Opening sounds (assign later)")]
-    [SerializeField] private AudioClip _screamClip;
-    [Tooltip("검은 화면에서 비명 소리와 동시에 재생할 지게 부서지는 소리입니다.")]
-    [SerializeField] private AudioClip _jigeBreakClip;
-    [SerializeField] private AudioClip _doorClip;
-
     [Header("Movement and jump tutorial")]
-    [Tooltip("동작 완료까지 표시된 시간의 배율입니다. 2면 완료 후 같은 시간만큼 더 표시합니다.")]
-    [SerializeField, Min(1f)] private float _controlHintDurationMultiplier = 2f;
+    [Tooltip("이동 키를 누른 채 실제로 움직인 거리(누적)가 이 값 이상이면 이동을 익힌 것으로 판정")]
+    [SerializeField, Min(0.5f)] private float _moveLearnDistance = 3f;
+    [Tooltip("동작을 완료한 뒤 안내를 더 보여주는 시간 (초). 항상 같은 시간 뒤에 사라짐")]
+    [SerializeField, Min(0f)] private float _controlHintLinger = 0.6f;
+    [Tooltip("안내가 나타나고 사라질 때 페이드 시간 (초)")]
+    [SerializeField, Min(0.01f)] private float _controlHintFadeDuration = 0.25f;
     [SerializeField] private Vector2 _controlHintOffset = new Vector2(0f, 64f);
+    [SerializeField] private Font _controlHintFont;
     [SerializeField] private Sprite _moveLeftKeySprite;
     [SerializeField] private Sprite _moveRightKeySprite;
     [SerializeField] private Sprite _jumpCKeySprite;
@@ -56,16 +55,19 @@ public class PrologueIntroController : MonoBehaviour
     private RectTransform _controlHintRoot;
     private GameObject _moveHintRow;
     private GameObject _jumpHintRow;
+    private CanvasGroup _controlHintGroup;
+    private GameObject _visibleHintRow;
+    private float _controlHintAlpha;
+    private float _controlHintTime;
     private bool _movementStarted;
     private bool _movementLearned;
-    private float _movementStartX;
+    private float _lastPlayerX;
+    private float _movedDistance;
     private bool _jumpHintStarted;
     private bool _jumpAttempted;
     private bool _jumpLearned;
-    private float _movementHintElapsed;
-    private float _jumpHintElapsed;
-    private float _movementHideAt = -1f;
-    private float _jumpHideAt = -1f;
+    private float _movementDoneAt = -1f;
+    private float _jumpDoneAt = -1f;
 
     [Header("Notice board and wanted poster")]
     [SerializeField] private Transform _noticeBoard;
@@ -82,6 +84,7 @@ public class PrologueIntroController : MonoBehaviour
     private Image _wantedPosterImage;
     private GameObject _wantedPosterPrompt;
     private bool _posterRead;
+    private bool _noticeBoardIntroduced;
     private bool _posterBusy;
     private RectTransform _boardKeyHint;
 
@@ -139,7 +142,7 @@ public class PrologueIntroController : MonoBehaviour
     [SerializeField, Min(0.01f)] private float _fadeToBlack = 0.5f;
     [SerializeField, Min(0.01f)] private float _revealLocation2 = 0.75f;
 
-    private readonly List<AudioSource> _openingSoundSources = new List<AudioSource>();
+    private readonly List<GameAudio.PlayHandle> _openingSoundSources = new List<GameAudio.PlayHandle>();
     private PlayerInputHandler _input;
     private Rigidbody2D _body;
     private CanvasGroup _fade;
@@ -155,6 +158,8 @@ public class PrologueIntroController : MonoBehaviour
     private bool _uiCaptured;
     private float _transitionDirection;
     private bool _jigeReached;
+    private bool _isLeavingPrologue;
+    private bool _hasWarnedInvalidExit;
     private Text _subtitle;
     private Text _continueHint;
     private GameObject _dialoguePanel;
@@ -169,6 +174,23 @@ public class PrologueIntroController : MonoBehaviour
     private Transform _jigeFocus;
     private readonly HashSet<ParallaxManager> _destinationParallax =
         new HashSet<ParallaxManager>();
+
+    private void OnEnable()
+    {
+        Canvas.preWillRenderCanvases += UpdateHintsBeforeRender;
+        if (!_ready) return;
+        BindCinematicCallbacks();
+        if (IsIntroComplete && Phase != "LeavingPrologue")
+            StartCoroutine(ResumeProgression());
+    }
+
+    private void BindCinematicCallbacks()
+    {
+        _cinematics.OnCinematicFinished.RemoveListener(HandleCinematicFinished);
+        _cinematics.OnCinematicTargetReached.RemoveListener(HandleJigeReached);
+        _cinematics.OnCinematicFinished.AddListener(HandleCinematicFinished);
+        _cinematics.OnCinematicTargetReached.AddListener(HandleJigeReached);
+    }
 
     private void Awake()
     {
@@ -224,19 +246,7 @@ public class PrologueIntroController : MonoBehaviour
             return;
         }
 
-        // Capture the authored layout before any parallax LateUpdate can move it.
-        foreach (Transform child in _background2.GetComponentsInChildren<Transform>(true))
-            _background2Layout[child] = child.localPosition;
-        // The two background sprites can share a manager on their parent.
-        foreach (ParallaxManager manager in _background2.GetComponentsInParent<ParallaxManager>(true))
-            _destinationParallax.Add(manager);
-        foreach (ParallaxManager manager in _background2.GetComponentsInChildren<ParallaxManager>(true))
-            _destinationParallax.Add(manager);
-        foreach (ParallaxManager manager in _destinationParallax)
-        {
-            foreach (Transform child in manager.GetComponentsInChildren<Transform>(true))
-                _background2Layout[child] = child.localPosition;
-        }
+        CacheDestinationLayout();
 
         _inputWasEnabled = _input.enabled;
         _playerWasEnabled = _player.enabled;
@@ -245,8 +255,7 @@ public class PrologueIntroController : MonoBehaviour
         _input.enabled = false;
         _locked = true;
         Phase = "Preparing";
-        _cinematics.OnCinematicFinished.AddListener(HandleCinematicFinished);
-        _cinematics.OnCinematicTargetReached.AddListener(HandleJigeReached);
+        BindCinematicCallbacks();
 
         if (_gameplayUi != null)
         {
@@ -273,6 +282,50 @@ public class PrologueIntroController : MonoBehaviour
         _ready = true;
     }
 
+    private void CacheDestinationLayout()
+    {
+        // Capture the authored layout before any parallax LateUpdate can move it.
+        foreach (Transform child in _background2.GetComponentsInChildren<Transform>(true))
+            _background2Layout[child] = child.localPosition;
+        // The two background sprites can share a manager on their parent.
+        foreach (ParallaxManager manager in _background2.GetComponentsInParent<ParallaxManager>(true))
+            _destinationParallax.Add(manager);
+        foreach (ParallaxManager manager in _background2.GetComponentsInChildren<ParallaxManager>(true))
+            _destinationParallax.Add(manager);
+        foreach (ParallaxManager manager in _destinationParallax)
+        {
+            foreach (Transform child in manager.GetComponentsInChildren<Transform>(true))
+                _background2Layout[child] = child.localPosition;
+        }
+    }
+
+    private IEnumerator ResumeProgression()
+    {
+        yield return null;
+        if (IsTransitionComplete || _background2.activeSelf)
+        {
+            Phase = "Complete";
+            yield break;
+        }
+
+        // Finish any camera return after rebinding before restarting the interrupted progression.
+        while (_cinematics.IsPlaying) yield return null;
+        if (_background2Layout.Count == 0) CacheDestinationLayout();
+        if (Mathf.Approximately(_transitionDirection, 0f))
+        {
+            Transform origin = _noticeBoard != null ? _noticeBoard : _jige;
+            _transitionDirection = _location2TransitionPoint.position.x >= origin.position.x ? 1f : -1f;
+        }
+        _posterBusy = false;
+        if (_wantedPosterRoot != null) _wantedPosterRoot.SetActive(false);
+        if (_continuePrompt != null) _continuePrompt.SetActive(false);
+        ShowSubtitle("");
+        _fade.alpha = 0f;
+        _fade.blocksRaycasts = false;
+        RestoreGameplayUi();
+        yield return ContinueAfterOpening();
+    }
+
     private IEnumerator Start()
     {
         if (!_ready) yield break;
@@ -288,13 +341,11 @@ public class PrologueIntroController : MonoBehaviour
         _camera.Reset(true, true, true);
         Phase = "Scream";
         ShowSubtitle(_openingSoundText);
-        PlaySound(_screamClip);
-        PlaySound(_jigeBreakClip);
-        // 비명을 끝까지 들은 뒤부터 새 Enter 입력을 받는다.
-        float screamDuration = _screamClip != null ? _screamClip.length : 0f;
-        if (screamDuration > 0f)
-            yield return new WaitForSecondsRealtime(screamDuration);
+        PlaySound("Prologue.Scream");
+        PlaySound("Prologue.Break");
+        // 비명 도중에도 Enter로 넘길 수 있음. 넘기면 비명 / 부서지는 소리를 바로 끊음
         yield return WaitForAdvance();
+        StopOpeningSounds();
         Phase = "What";
         ShowSubtitle(_openingReactionText);
         yield return WaitForAdvance();
@@ -307,12 +358,13 @@ public class PrologueIntroController : MonoBehaviour
         ShowSubtitle("");
         AudioManager.Instance.PlayButtonClick();
         Phase = "DoorOpening";
-        PlaySound(_doorClip, 1.5f);
+        PlaySound("Prologue.Door");
         // Keep the screen black until the last second of the door sound.
-        float doorRevealDelay = _doorClip != null ? Mathf.Max(0f, _doorClip.length - 1f) : 0f;
+        float doorRevealDelay = Mathf.Max(0f, GetSoundDuration("Prologue.Door") - 1f);
         if (doorRevealDelay > 0f)
             yield return new WaitForSecondsRealtime(doorRevealDelay);
         // Player appears outside the house and can move as soon as the reveal starts.
+        AudioManager.Instance?.PlayMusicEvent("Music.Prologue", gameObject.scene);
         UnlockPlayer();
         _fade.blocksRaycasts = false;
         RestoreGameplayUi();
@@ -326,38 +378,41 @@ public class PrologueIntroController : MonoBehaviour
         _openingSoundSources.Clear();
         Phase = "Gameplay";
         yield return ReadNoticeBoard();
-        float approachDirection = _jige.position.x >= _player.transform.position.x ? 1f : -1f;
-        while (_posterBusy ||
-               (_player.transform.position.x - (_jige.position.x - _jigeTriggerDistance * approachDirection)) * approachDirection < 0f)
+        if (!IsJigeInspected)
         {
-            yield return null;
-        }
+            // Use the route direction even if progression resumes after passing the jige.
+            while (_posterBusy ||
+                   (_player.transform.position.x - (_jige.position.x - _jigeTriggerDistance * _transitionDirection)) * _transitionDirection < 0f)
+            {
+                yield return null;
+            }
 
-        ShowSubtitle("");
-        LockPlayer();
-        Phase = "Inspecting";
-        _cinematicFinished = false;
-        _jigeReached = false;
-        _jigeFocus.position = _jige.position;
-        SpriteRenderer jigeRenderer = _jige.GetComponentInChildren<SpriteRenderer>();
-        if (jigeRenderer != null) _jigeFocus.position = jigeRenderer.bounds.center;
-        _cinematics.CinematicTargets = new List<CinematicTarget> {
-            new CinematicTarget { TargetTransform = _jigeFocus, EaseInDuration = _jigePanDuration,
-                HoldDuration = -1f, Zoom = _jigeZoom, EaseType = EaseType.EaseInOut }
-        };
-        _cinematics.Play();
-        while (!_jigeReached) yield return null;
-        Phase = "JigeDialogue";
-        ShowSubtitle(_jigeStoryText);
-        yield return WaitForAdvance();
-        ShowSubtitle("");
-        _cinematics.Stop();
-        Phase = "ReturningToPlayer";
-        while (!_cinematicFinished) yield return null;
-        UnlockPlayer();
-        IsJigeInspected = true;
-        _fade.blocksRaycasts = false;
-        RestoreGameplayUi();
+            ShowSubtitle("");
+            LockPlayer();
+            Phase = "Inspecting";
+            _cinematicFinished = false;
+            _jigeReached = false;
+            _jigeFocus.position = _jige.position;
+            SpriteRenderer jigeRenderer = _jige.GetComponentInChildren<SpriteRenderer>();
+            if (jigeRenderer != null) _jigeFocus.position = jigeRenderer.bounds.center;
+            _cinematics.CinematicTargets = new List<CinematicTarget> {
+                new CinematicTarget { TargetTransform = _jigeFocus, EaseInDuration = _jigePanDuration,
+                    HoldDuration = -1f, Zoom = _jigeZoom, EaseType = EaseType.EaseInOut }
+            };
+            _cinematics.Play();
+            while (!_jigeReached) yield return null;
+            Phase = "JigeDialogue";
+            ShowSubtitle(_jigeStoryText);
+            yield return WaitForAdvance();
+            ShowSubtitle("");
+            _cinematics.Stop();
+            Phase = "ReturningToPlayer";
+            while (!_cinematicFinished) yield return null;
+            UnlockPlayer();
+            IsJigeInspected = true;
+            _fade.blocksRaycasts = false;
+            RestoreGameplayUi();
+        }
         Phase = "GameplayAfterJige";
         while (_posterBusy ||
                (_player.transform.position.x - _location2TransitionPoint.position.x) * _transitionDirection < 0f)
@@ -381,7 +436,6 @@ public class PrologueIntroController : MonoBehaviour
         _fade.blocksRaycasts = false;
         RestoreGameplayUi();
         Phase = "Complete";
-        yield return WaitForNextSceneExit();
     }
 
     private void TransferToLocation2()
@@ -452,28 +506,57 @@ public class PrologueIntroController : MonoBehaviour
         boundaries.TargetTopBoundary = boundaries.TopBoundary;
     }
 
-    private IEnumerator WaitForNextSceneExit()
+    private void UpdateNextSceneExit()
     {
-        if (_nextSceneExitPoint == null) yield break;
+        if (!_ready || !IsIntroComplete || !_background2.activeSelf || _isLeavingPrologue ||
+            _nextSceneExitPoint == null || PauseController.IsPaused || _player.Health.IsDead ||
+            (StageManager.Instance != null && StageManager.Instance.IsRespawning))
+        {
+            return;
+        }
+
+        if (Vector2.Distance(_player.transform.position, _nextSceneExitPoint.position) > _nextSceneTriggerDistance)
+            return;
         if (string.IsNullOrWhiteSpace(_nextSceneName) || !Application.CanStreamedLevelBeLoaded(_nextSceneName))
         {
-            Debug.LogError($"Prologue: 다음 씬 '{_nextSceneName}'을 Build Settings의 Scene List에 등록하세요.", this);
-            yield break;
+            if (!_hasWarnedInvalidExit)
+            {
+                Debug.LogError($"Prologue: 다음 씬 '{_nextSceneName}'을 Build Settings의 Scene List에 등록하세요.", this);
+                _hasWarnedInvalidExit = true;
+            }
+            return;
         }
 
-        while (_nextSceneExitPoint != null)
-        {
-            bool playerCanExit = !PauseController.IsPaused && !_player.Health.IsDead &&
-                (StageManager.Instance == null || !StageManager.Instance.IsRespawning);
-            float distance = Vector2.Distance(_player.transform.position, _nextSceneExitPoint.position);
-            if (playerCanExit && distance <= _nextSceneTriggerDistance) break;
-            yield return null;
-        }
-        if (_nextSceneExitPoint == null) yield break;
+        _isLeavingPrologue = true;
+        StopAllCoroutines();
+        StartCoroutine(TransitionToNextScene());
+    }
 
-        LockPlayer();
+    private IEnumerator TransitionToNextScene()
+    {
         Phase = "LeavingPrologue";
+        Ep0CombatTutorial tutorial = FindFirstObjectByType<Ep0CombatTutorial>();
+        if (tutorial != null && tutorial.gameObject.scene == gameObject.scene)
+            tutorial.CancelForSceneExit();
+        StopOpeningSounds();
+        _cinematics.Stop();
+        UnlockPlayer();
+        _posterBusy = false;
+        if (_wantedPosterRoot != null) _wantedPosterRoot.SetActive(false);
+        if (_boardKeyHint != null) _boardKeyHint.gameObject.SetActive(false);
+        if (_controlHintRoot != null) _controlHintRoot.gameObject.SetActive(false);
+        _exitChoice.SetActive(false);
+        _continuePrompt.SetActive(false);
+        HitStop.Stop();
+        CameraShake.Stop();
+        LockPlayer();
         ShowSubtitle("");
+        // 화면과 함께 음악도 줄여, 소리 재생 중에 씬 로딩이 겹치지 않게 함
+        if (AudioManager.ExistingInstance != null)
+        {
+            AudioManager.ExistingInstance.StopBgm(_fadeToBlack);
+        }
+
         // Render a fully black, persistent overlay before any scene loading work.
         yield return SceneArrivalFade.FadeOut(_fadeToBlack);
         SceneArrivalFade.Prepare(_nextSceneRevealDuration);
@@ -487,6 +570,7 @@ public class PrologueIntroController : MonoBehaviour
             UnlockPlayer();
             RestoreGameplayUi();
             Phase = "Complete";
+            _isLeavingPrologue = false;
             yield break;
         }
         yield return loadOperation;
@@ -553,17 +637,40 @@ public class PrologueIntroController : MonoBehaviour
 
     private void HandleJigeReached(int targetIndex) => _jigeReached = true;
 
-    private void PlaySound(AudioClip clip, float gain = 1f)
+    private float GetSoundDuration(string eventId)
     {
-        if (clip == null) return;
-        AudioSource source = AudioManager.Instance.PlaySfxTracked(clip, gain: gain);
-        if (source != null) _openingSoundSources.Add(source);
+        AudioManager manager = AudioManager.Instance;
+        GameAudio.SoundSetSO set = manager != null ? manager.Catalog?.Prologue : null;
+        if (set == null || !set.TryGetEvent(eventId, out GameAudio.EventBinding binding) || !binding.Enabled ||
+            !set.TryGetSound(binding.SoundId, out GameAudio.SoundData sound) || !sound.HasValidClip)
+        {
+            return 0f;
+        }
+
+        float duration = 0f;
+        foreach (AudioClip clip in sound.Clips)
+        {
+            if (sound.TryGetStartSample(clip, out int startSample))
+                duration = Mathf.Max(duration, (clip.samples - startSample) / (float)clip.frequency / Mathf.Max(0.01f, sound.PitchMin));
+        }
+        return binding.EffectiveDelay + duration;
+    }
+
+    private void PlaySound(string eventId)
+    {
+        var emitter = GameAudio.EventAudio.For(this, "Prologue");
+        GameAudio.PlayHandle handle = emitter.Play(eventId);
+        if (!handle.IsEmpty) _openingSoundSources.Add(handle);
     }
 
     private void StopOpeningSounds()
     {
-        foreach (AudioSource source in _openingSoundSources)
-            if (source != null) source.Stop();
+        AudioManager manager = AudioManager.ExistingInstance;
+        if (manager != null)
+        {
+            foreach (GameAudio.PlayHandle handle in _openingSoundSources) manager.StopHandle(handle);
+        }
+        if (TryGetComponent(out GameAudio.EventAudio emitter)) emitter.Cancel();
         _openingSoundSources.Clear();
     }
 
@@ -598,7 +705,7 @@ public class PrologueIntroController : MonoBehaviour
         IsIntroComplete = true;
         IsJigeInspected = true;
         Phase = "Complete";
-        StartCoroutine(WaitForNextSceneExit());
+        _isLeavingPrologue = false;
     }
 #endif
 
@@ -655,9 +762,12 @@ public class PrologueIntroController : MonoBehaviour
 
     private void Update()
     {
+        UpdateNextSceneExit();
+        if (_isLeavingPrologue) return;
         UpdateControlHints();
         UpdatePosterReopen();
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR
+        // 디버그: 0으로 프롤로그를 건너뜀 (에디터에서만)
         if (_ready && Phase != "Complete" &&
             (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0)))
         {
@@ -675,8 +785,8 @@ public class PrologueIntroController : MonoBehaviour
 
     private IEnumerator ReadNoticeBoard()
     {
-        if (_noticeBoard == null || _noticeBoardTrigger == null) yield break;
-        float direction = _noticeBoardTrigger.position.x >= _player.transform.position.x ? 1f : -1f;
+        if (_posterRead || _noticeBoardIntroduced || _noticeBoard == null || _noticeBoardTrigger == null) yield break;
+        float direction = _transitionDirection;
         while ((_player.transform.position.x - _noticeBoardTrigger.position.x) * direction < 0f)
             yield return null;
 
@@ -709,9 +819,7 @@ public class PrologueIntroController : MonoBehaviour
         UnlockPlayer();
         _fade.blocksRaycasts = false;
         RestoreGameplayUi();
-        Phase = "ApproachingNoticeBoard";
-        while (!IsNearNoticeBoard() || !(Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))) yield return null;
-        yield return ReadWantedPoster(true);
+        _noticeBoardIntroduced = true;
         Phase = "Gameplay";
     }
 
@@ -750,7 +858,7 @@ public class PrologueIntroController : MonoBehaviour
     {
         bool idle = Phase == "Gameplay" || Phase == "GameplayAfterJige";
         bool available = _ready && !_posterBusy && !PauseController.IsPaused &&
-            (Phase == "ApproachingNoticeBoard" || (_posterRead && idle)) && IsNearNoticeBoard();
+            !_locked && (_noticeBoardIntroduced || _posterRead) && idle && IsNearNoticeBoard();
         if (!available)
         {
             if (_boardKeyHint != null) _boardKeyHint.gameObject.SetActive(false);
@@ -759,17 +867,18 @@ public class PrologueIntroController : MonoBehaviour
 
         if (_boardKeyHint == null) CreateBoardKeyHint();
         _boardKeyHint.gameObject.SetActive(true);
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+            StartCoroutine(ReadWantedPoster(!_posterRead));
+    }
+
+    private void UpdateBoardHintPosition()
+    {
+        if (_boardKeyHint == null || !_boardKeyHint.gameObject.activeInHierarchy || _noticeBoard == null) return;
         SpriteRenderer renderer = _noticeBoard.GetComponentInChildren<SpriteRenderer>();
         Vector3 top = renderer != null
             ? new Vector3(renderer.bounds.center.x, renderer.bounds.max.y, _noticeBoard.position.z)
             : _noticeBoard.position + Vector3.up * 2f;
-        Vector3 screen = _camera.GetComponent<Camera>().WorldToScreenPoint(top);
-        RectTransform canvasRect = _boardKeyHint.parent.GetComponent<RectTransform>();
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screen, null, out Vector2 position))
-            _boardKeyHint.anchoredPosition = position + Vector2.up * 48f;
-        // The first read is owned by ReadNoticeBoard; subsequent reads use the same Enter prompt.
-        if (_posterRead && idle && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
-            StartCoroutine(ReadWantedPoster(false));
+        TutorialHintPositioning.Position(_boardKeyHint, _camera.GetComponent<Camera>(), top, Vector2.up * 48f);
     }
 
     private void CreateBoardKeyHint()
@@ -779,6 +888,7 @@ public class PrologueIntroController : MonoBehaviour
         Canvas canvas = canvasObject.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 32765;
+        canvas.pixelPerfect = true;
         CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
@@ -840,49 +950,98 @@ public class PrologueIntroController : MonoBehaviour
         }
 
         if (_controlHintRoot == null) CreateControlHints();
+        _controlHintTime += Time.deltaTime;
+        float playerX = _player.transform.position.x;
         if (!_movementStarted)
         {
             _movementStarted = true;
-            _movementStartX = _player.transform.position.x;
+            _lastPlayerX = playerX;
         }
-        if (!_movementLearned && (!_jumpHintStarted || _jumpLearned))
-            _movementHintElapsed += Time.deltaTime;
-        if (_movementHideAt < 0f && Mathf.Abs(_player.transform.position.x - _movementStartX) >= 3f)
-            _movementHideAt = _movementHintElapsed * _controlHintDurationMultiplier;
-        if (_movementHideAt >= 0f && _movementHintElapsed >= _movementHideAt) _movementLearned = true;
+
+        // 이동: 이동 키를 누른 채 실제로 움직인 거리만 누적 (가만히 서 있던 시간, 밀려난 거리는 제외).
+        // 다 움직이면 항상 같은 시간(_controlHintLinger) 뒤에 사라짐
+        if (!_movementLearned)
+        {
+            if (Mathf.Abs(_input.MoveInputX) > 0.01f)
+            {
+                _movedDistance += Mathf.Abs(playerX - _lastPlayerX);
+            }
+            if (_movementDoneAt < 0f && _movedDistance >= _moveLearnDistance)
+            {
+                _movementDoneAt = _controlHintTime;
+            }
+            if (_movementDoneAt >= 0f && _controlHintTime - _movementDoneAt >= _controlHintLinger)
+            {
+                _movementLearned = true;
+            }
+        }
+        _lastPlayerX = playerX;
+
         bool showJump = false;
         if (_jumpObstacle != null && !_jumpLearned)
         {
             Collider2D obstacle = _jumpObstacle.GetComponent<Collider2D>();
             float edge = obstacle != null ? obstacle.bounds.max.x : _jumpObstacle.position.x;
-            float distance = _jumpObstacle.position.x - _player.transform.position.x;
+            float distance = _jumpObstacle.position.x - playerX;
             if (!_jumpHintStarted && distance >= -0.5f && distance <= _jumpHintDistance)
-                _jumpHintStarted = true;
-            if (_jumpHintStarted) _jumpHintElapsed += Time.deltaTime;
-            if (_jumpHintStarted && _player.StateMachine.CurrentState == _player.JumpState)
-                _jumpAttempted = true;
-            if (_jumpHideAt < 0f && _jumpAttempted && _player.IsGrounded &&
-                _player.transform.position.x > edge + 0.2f)
             {
-                _jumpHideAt = _jumpHintElapsed * _controlHintDurationMultiplier;
+                _jumpHintStarted = true;
+                // 장애물까지 걸어왔으면 이동은 익힌 것. 점프 뒤에 이동 안내가 다시 나오지 않게 함
+                _movementLearned = true;
             }
-
-            if (_jumpHideAt >= 0f && _jumpHintElapsed >= _jumpHideAt) _jumpLearned = true;
+            if (_jumpHintStarted && _player.StateMachine.CurrentState == _player.JumpState)
+            {
+                _jumpAttempted = true;
+            }
+            // 점프: 점프해서 장애물을 넘어 착지하면 완료, 같은 시간 뒤에 사라짐
+            if (_jumpDoneAt < 0f && _jumpAttempted && _player.IsGrounded && playerX > edge + 0.2f)
+            {
+                _jumpDoneAt = _controlHintTime;
+            }
+            if (_jumpDoneAt >= 0f && _controlHintTime - _jumpDoneAt >= _controlHintLinger)
+            {
+                _jumpLearned = true;
+            }
             showJump = _jumpHintStarted && !_jumpLearned;
         }
 
-        _moveHintRow.SetActive(!showJump && !_movementLearned);
-        _jumpHintRow.SetActive(showJump);
-        _controlHintRoot.gameObject.SetActive(showJump || !_movementLearned);
-        Canvas canvas = _controlHintRoot.GetComponentInParent<Canvas>();
-        RectTransform canvasRect = canvas.GetComponent<RectTransform>();
-        Collider2D body = _player.GetComponent<Collider2D>();
-        Vector3 head = body != null
-            ? new Vector3(body.bounds.center.x, body.bounds.max.y, _player.transform.position.z)
-            : _player.transform.position + Vector3.up * 1.5f;
-        Vector3 screen = _camera.GetComponent<Camera>().WorldToScreenPoint(head);
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screen, null, out Vector2 position))
-            _controlHintRoot.anchoredPosition = position + _controlHintOffset;
+        GameObject desiredRow = showJump ? _jumpHintRow : !_movementLearned ? _moveHintRow : null;
+        UpdateControlHintFade(desiredRow);
+    }
+
+    /// <summary>안내 줄 전환과 숨김을 페이드로 처리 (보이던 줄이 다 사라진 뒤 다음 줄이 나타남)</summary>
+    private void UpdateControlHintFade(GameObject desiredRow)
+    {
+        float step = Time.deltaTime / _controlHintFadeDuration;
+        if (_visibleHintRow != desiredRow)
+        {
+            _controlHintAlpha = Mathf.MoveTowards(_controlHintAlpha, 0f, step);
+            if (_controlHintAlpha <= 0f)
+            {
+                _visibleHintRow = desiredRow;
+            }
+        }
+        else if (_visibleHintRow != null)
+        {
+            _controlHintAlpha = Mathf.MoveTowards(_controlHintAlpha, 1f, step);
+        }
+
+        _moveHintRow.SetActive(_visibleHintRow == _moveHintRow);
+        _jumpHintRow.SetActive(_visibleHintRow == _jumpHintRow);
+        _controlHintGroup.alpha = _controlHintAlpha;
+        _controlHintRoot.gameObject.SetActive(_visibleHintRow != null);
+    }
+
+    private void UpdateHintsBeforeRender()
+    {
+        if (!_ready || _camera == null) return;
+        if (_controlHintRoot != null && _controlHintRoot.gameObject.activeInHierarchy && _player != null)
+        {
+            TutorialHintPositioning.Position(_controlHintRoot, _camera.GetComponent<Camera>(),
+                TutorialHintPositioning.GetRenderedPlayerAnchor(_player, true), _controlHintOffset);
+        }
+
+        UpdateBoardHintPosition();
     }
 
     private void CreateControlHints()
@@ -892,13 +1051,18 @@ public class PrologueIntroController : MonoBehaviour
         Canvas canvas = canvasObject.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 32765;
+        canvas.pixelPerfect = true;
         CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.matchWidthOrHeight = 0.5f;
-        var hint = new GameObject("PlayerControlHint", typeof(RectTransform));
+        var hint = new GameObject("PlayerControlHint", typeof(RectTransform), typeof(CanvasGroup));
         hint.transform.SetParent(canvasObject.transform, false);
         _controlHintRoot = hint.GetComponent<RectTransform>();
+        _controlHintGroup = hint.GetComponent<CanvasGroup>();
+        _controlHintGroup.alpha = 0f;
+        _controlHintGroup.interactable = false;
+        _controlHintGroup.blocksRaycasts = false;
         _controlHintRoot.anchorMin = new Vector2(0.5f, 0.5f);
         _controlHintRoot.anchorMax = _controlHintRoot.anchorMin;
         _controlHintRoot.sizeDelta = new Vector2(420f, 64f);
@@ -942,7 +1106,7 @@ public class PrologueIntroController : MonoBehaviour
         rect.sizeDelta = new Vector2(width, 64f);
         Text text = label.GetComponent<Text>();
         text.text = value;
-        text.font = _subtitle.font;
+        text.font = _controlHintFont != null ? _controlHintFont : _subtitle.font;
         text.fontSize = 24;
         text.alignment = TextAnchor.MiddleCenter;
         text.color = Color.black;
@@ -1196,7 +1360,9 @@ public class PrologueIntroController : MonoBehaviour
 
     private void OnDisable()
     {
+        Canvas.preWillRenderCanvases -= UpdateHintsBeforeRender;
         StopAllCoroutines();
+        _isLeavingPrologue = false;
         StopOpeningSounds();
         if (_cinematics != null)
         {

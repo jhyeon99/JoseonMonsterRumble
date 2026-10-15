@@ -81,6 +81,23 @@ public abstract class BossPattern : MonoBehaviour
     private float _startTime;
     private Coroutine _routine;
     private Action _onFinished;
+    private bool _executionActive;
+    public event Action<BossPattern> OnExecutionStarted;
+    public event Action<BossPattern, bool> OnExecutionEnded;
+    public event Action<BossPattern, string, Vector3, bool> OnAudioCue;
+
+    protected void AudioAction(string eventId) => OnAudioCue?.Invoke(this, eventId, transform.position, false);
+    protected void AudioResult(string eventId, Vector3 position) => OnAudioCue?.Invoke(this, eventId, position, true);
+    protected bool PlayLandingFootstep(float remainingTime, bool played, bool stomp = false)
+    {
+        if (played) return true;
+        float lead = AudioManager.Instance?.Catalog?.BossFootstepLeadTime ?? 0f;
+        if (remainingTime > Mathf.Max(0f, lead)) return false;
+        AudioResult(stomp ? "Boss.StompFootstep" : "Boss.Footstep", Boss.Position);
+        AudioResult(stomp ? "Boss.Stomp" : "Boss.LandingBreak", Boss.Position);
+        return true;
+    }
+
     private int _patternStateHash;
 
     protected Boss Boss { get; private set; }
@@ -88,14 +105,28 @@ public abstract class BossPattern : MonoBehaviour
     public string PatternName => string.IsNullOrEmpty(_patternName) ? GetType().Name : _patternName;
     public float Weight => _weight;
 
+    /// <summary>패턴 시작 시 보낼 애니메이터 트리거. 상황에 따라 다른 트리거를 쓰는 패턴은 재정의</summary>
+    protected virtual string AnimationTrigger => _animationTrigger;
+
     /// <summary>true면 CanUse일 때 다른 패턴보다 먼저, 대기 시간 없이 바로 사용 (체력 비율 발동 패턴 등)</summary>
     public virtual bool IsForced => false;
+
+    /// <summary>
+    /// false면 패턴 시작 시 Animation Trigger를 보내지 않고 Animation Clip 재생도 기다리지 않음
+    /// (점프처럼 패턴이 애니메이터 상태를 직접 재생하며 시간을 정하는 경우)
+    /// </summary>
+    protected virtual bool UsesPatternAnimation => true;
+
+    protected virtual bool ShouldWaitForPlatformsBeforePreparation => true;
 
     /// <summary>true면 이 패턴 중 보스가 플레이어의 직접 공격을 받지 않음 (기믹 데미지는 받음)</summary>
     public virtual bool BlocksDirectDamage => false;
 
+    /// <summary>준비와 이동을 포함한 패턴 전체에서 공격과 접촉 피해를 막는지</summary>
+    public virtual bool BlocksOutgoingDamage => false;
+
     /// <summary>이 패턴 중 몸통 접촉 데미지를 끄는지</summary>
-    public bool DisablesContactDamage => _disableContactDamage;
+    public virtual bool DisablesContactDamage => _disableContactDamage;
 
     /// <summary>패턴 전체 길이 (초) = 클립 길이 / 재생 속도</summary>
     public float Duration
@@ -179,12 +210,19 @@ public abstract class BossPattern : MonoBehaviour
 
         _lastUsedTime = Time.time;
         _onFinished = onFinished;
+        _executionActive = true;
+        OnExecutionStarted?.Invoke(this);
         _routine = Boss.StartCoroutine(Run());
     }
 
     /// <summary>패턴 중단 (끝났거나 끊겼을 때). 판정 / 예고 정리</summary>
     public void Stop()
     {
+        if (_executionActive)
+        {
+            _executionActive = false;
+            OnExecutionEnded?.Invoke(this, false);
+        }
         if (_routine != null)
         {
             Boss.StopCoroutine(_routine);
@@ -195,7 +233,7 @@ public abstract class BossPattern : MonoBehaviour
 
         if (Boss != null)
         {
-            Boss.ResetTrigger(_animationTrigger);
+            Boss.ResetTrigger(AnimationTrigger);
         }
 
         Cleanup();
@@ -205,11 +243,39 @@ public abstract class BossPattern : MonoBehaviour
     {
         _startTime = Time.time;
         OnPatternStart();
-        Boss.SetTrigger(_animationTrigger);
+
+        // 보스전 플랫폼이 이 패턴용 배치(찍기 / 소환 / 기본)로 다 바뀔 때까지 대기
+        BossPlatformDirector platforms = Boss.Platforms;
+        if (platforms != null)
+        {
+            if (ShouldWaitForPlatformsBeforePreparation)
+            {
+                foreach (object step in Flatten(WaitForPlatforms(platforms))) yield return step;
+            }
+            else
+            {
+                platforms.PrepareFor(this);
+            }
+        }
+
+        // 애니메이션 전에 할 일 (소환 위치로 점프 등)
+        foreach (object step in Flatten(BeforeAnimation()))
+        {
+            yield return step;
+        }
+
+        if (platforms != null && !ShouldWaitForPlatformsBeforePreparation)
+            foreach (object step in Flatten(WaitForPlatforms(platforms))) yield return step;
+
+        _startTime = Time.time;
+        if (UsesPatternAnimation)
+        {
+            Boss.SetTrigger(AnimationTrigger);
+        }
 
         // 애니메이터가 실제로 이 클립을 재생하기 시작한 순간부터 진행도를 셈
         // (이전 애니메이션이 끝나기를 기다리는 동안 판정 / 발사가 먼저 나가지 않도록)
-        if (_animationClip != null && Boss.HasAnimator)
+        if (UsesPatternAnimation && _animationClip != null && Boss.HasAnimator)
         {
             float waitUntil = Time.time + _animationStartTimeout;
             while (!Boss.IsPlayingClip(_animationClip) && Time.time < waitUntil)
@@ -227,10 +293,60 @@ public abstract class BossPattern : MonoBehaviour
             _startTime = Time.time;
         }
 
-        // 중첩된 IEnumerator(RunHitWindow, WaitUntilProgress 등)까지 이 코루틴 하나에서 직접 돌림.
-        // Unity에 중첩 코루틴으로 넘기면 Stop(그로기 등) 후에도 안쪽이 계속 돌아 판정이 켜질 수 있음
+        foreach (object step in Flatten(Execute()))
+        {
+            yield return step;
+        }
+
+        // 애니메이션이 끝날 때까지 기다림 (패턴이 직접 끝을 판단하면 생략)
+        while (WaitForDurationAfterExecute && Progress < 1f)
+        {
+            yield return null;
+        }
+
+        // 시간이 다 됐어도 애니메이터가 아직 이 패턴 클립을 재생 중이면 끝날 때까지 기다림
+        // (다음 패턴 트리거가 이전 애니메이션 도중에 들어가 두 번째부터 꼬이는 문제 방지)
+        if (UsesPatternAnimation && _animationClip != null && Boss.HasAnimator)
+        {
+            float waitUntil = Time.time + _animationStartTimeout;
+            while (IsPlayingPatternClip() && Time.time < waitUntil)
+            {
+                yield return null;
+            }
+        }
+
+        // 소비되지 않고 남은 트리거가 다음에 엉뚱하게 재생되지 않도록 정리
+        Boss.ResetTrigger(AnimationTrigger);
+
+        if (_afterDelay > 0f)
+        {
+            yield return new WaitForSeconds(_afterDelay);
+        }
+
+        _routine = null;
+        Cleanup();
+
+        Action onFinished = _onFinished;
+        _onFinished = null;
+        _executionActive = false;
+        OnExecutionEnded?.Invoke(this, true);
+        onFinished?.Invoke();
+    }
+
+    private IEnumerator WaitForPlatforms(BossPlatformDirector platforms)
+    {
+        float waitUntil = Time.time + platforms.MaxPatternWait;
+        while (!platforms.PrepareFor(this) && Time.time < waitUntil) yield return null;
+    }
+
+    /// <summary>
+    /// 중첩된 IEnumerator(RunHitWindow, WaitUntilProgress 등)까지 이 코루틴 하나에서 직접 돌림.
+    /// Unity에 중첩 코루틴으로 넘기면 Stop(그로기 등) 후에도 안쪽이 계속 돌아 판정이 켜질 수 있음
+    /// </summary>
+    private static IEnumerable<object> Flatten(IEnumerator root)
+    {
         var stack = new Stack<IEnumerator>();
-        stack.Push(Execute());
+        stack.Push(root);
 
         while (stack.Count > 0)
         {
@@ -249,38 +365,15 @@ public abstract class BossPattern : MonoBehaviour
 
             yield return current.Current;
         }
+    }
 
-        // 애니메이션이 끝날 때까지 기다림 (패턴이 직접 끝을 판단하면 생략)
-        while (WaitForDurationAfterExecute && Progress < 1f)
-        {
-            yield return null;
-        }
-
-        // 시간이 다 됐어도 애니메이터가 아직 이 패턴 클립을 재생 중이면 끝날 때까지 기다림
-        // (다음 패턴 트리거가 이전 애니메이션 도중에 들어가 두 번째부터 꼬이는 문제 방지)
-        if (_animationClip != null && Boss.HasAnimator)
-        {
-            float waitUntil = Time.time + _animationStartTimeout;
-            while (IsPlayingPatternClip() && Time.time < waitUntil)
-            {
-                yield return null;
-            }
-        }
-
-        // 소비되지 않고 남은 트리거가 다음에 엉뚱하게 재생되지 않도록 정리
-        Boss.ResetTrigger(_animationTrigger);
-
-        if (_afterDelay > 0f)
-        {
-            yield return new WaitForSeconds(_afterDelay);
-        }
-
-        _routine = null;
-        Cleanup();
-
-        Action onFinished = _onFinished;
-        _onFinished = null;
-        onFinished?.Invoke();
+    /// <summary>
+    /// 패턴 애니메이션(트리거)을 시작하기 전에 할 일 (특정 위치로 이동 등). 기본은 없음.
+    /// 이 동안은 진행도(Progress)를 세지 않음
+    /// </summary>
+    protected virtual IEnumerator BeforeAnimation()
+    {
+        yield break;
     }
 
     /// <summary>

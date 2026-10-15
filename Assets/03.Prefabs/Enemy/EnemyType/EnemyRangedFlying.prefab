@@ -241,7 +241,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.16341162, y: -0.100000024}
+  m_Offset: {x: -0.033504248, y: -0.1767633}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -251,7 +251,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.7182183, y: 2.2}
+  m_Size: {x: 1.631721, y: 1.4796052}
   m_EdgeRadius: 0
 --- !u!114 &1900000013
 MonoBehaviour:
@@ -274,6 +274,8 @@ MonoBehaviour:
     Unblockable: 0
     ParryWindowOverride: 0
     GuardGaugeCost: 10
+    BlockInvincibleTime: 0
+    FreeBlockOnParryTiming: 0
 --- !u!1 &2673438376458182690
 GameObject:
   m_ObjectHideFlags: 0
@@ -327,6 +329,7 @@ GameObject:
   - component: {fileID: -8952448662296909365}
   - component: {fileID: 1900000006}
   - component: {fileID: 1900000007}
+  - component: {fileID: 8552166208925210243}
   m_Layer: 7
   m_Name: EnemyRangedFlying
   m_TagString: Enemy
@@ -544,6 +547,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 728a422b81f2dc84abbffee7b8ef4ec0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
+  _damageVarianceRatio: 0.1
 --- !u!114 &-4974254676742620378
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -556,10 +560,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e34f270a66f14f9449d441ce020b0af0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMoveArea
-  CenterOffset: {x: 0, y: 0}
-  AreaSize: {x: 13.6, y: 6.11}
+  CenterOffset: {x: 0, y: -2}
+  AreaSize: {x: 14, y: 8}
   _useCustomDetectionArea: 1
-  _detectionAreaSize: {x: 21.8, y: 6.2}
+  _detectionAreaSize: {x: 22, y: 12}
   _chaseReleaseMargin: 2
   AreaColor: {r: 0, g: 1, b: 0, a: 0.3}
 --- !u!114 &-8952448662296909365
@@ -589,6 +593,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHitFeedback
   _health: {fileID: 7463444152510674417}
+  _bossHealth: {fileID: 0}
   _sourceRenderer: {fileID: 6674317764530854967}
   _flashRenderer: {fileID: 1900000005}
   _lightHit:
@@ -618,6 +623,19 @@ MonoBehaviour:
   _obstacleMask:
     serializedVersion: 2
     m_Bits: 2048
+--- !u!114 &8552166208925210243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7004840251579652640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d47f898a35324391bdc05e4fe6b4f0b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAudio
+  _soundSet: {fileID: 0}
 --- !u!1 &9091256499124458043
 GameObject:
   m_ObjectHideFlags: 0

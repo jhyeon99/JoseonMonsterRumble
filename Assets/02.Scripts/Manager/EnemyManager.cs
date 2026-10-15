@@ -93,30 +93,36 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
-    public Enemy GetTargetAttackerForBuff()
+    public Enemy GetTargetAttackerForBuff(Vector2 requesterPosition)
     {
-        Enemy damagedAttacker = ActiveEnemies.Find(e =>
-            e.Type == EnemyType.Attacker &&
-            e.Health.IsAlive &&
-            e.Health.IsDamaged &&
-            !e.IsTargetedForBuff
-        );
+        Enemy closestAttacker = null;
+        float closestDistanceSquared = float.PositiveInfinity;
 
-        if (damagedAttacker != null)
+        foreach (Enemy enemy in ActiveEnemies)
         {
-            return damagedAttacker;
+            if (enemy == null || enemy.Type != EnemyType.Attacker ||
+                !enemy.isActiveAndEnabled || enemy.IsSpawnBlocked || enemy.IsDefeated || enemy.Health == null ||
+                !enemy.Health.IsAlive || enemy.IsTargetedForBuff)
+            {
+                continue;
+            }
+
+            float distanceSquared = ((Vector2)enemy.transform.position - requesterPosition).sqrMagnitude;
+            if (distanceSquared < closestDistanceSquared)
+            {
+                closestDistanceSquared = distanceSquared;
+                closestAttacker = enemy;
+            }
         }
 
-        return ActiveEnemies.Find(e =>
-            e.Type == EnemyType.Attacker &&
-            e.Health.IsAlive &&
-            !e.IsTargetedForBuff
-        );
+        return closestAttacker;
     }
 
     public Enemy GetDamagedAttackerWithoutBuffer()
     {
-        return GetTargetAttackerForBuff();
+        return ActiveEnemies.Find(e =>
+            e != null && e.Type == EnemyType.Attacker && e.Health != null &&
+            e.Health.IsAlive && e.Health.IsDamaged && !e.IsTargetedForBuff);
     }
 
     private void CheckAttackersLive()
@@ -132,7 +138,7 @@ public class EnemyManager : MonoBehaviour
         // 비활성화된 적도 유지하는 캐시를 순회하며, 조회 시 배열을 생성하지 않는다.
         foreach (Enemy enemy in _allEnemies)
         {
-            if (enemy != null && enemy.Type == EnemyType.Attacker && !enemy.IsDefeated &&
+            if (enemy != null && enemy.Type == EnemyType.Attacker && !enemy.IsSpawnBlocked && !enemy.IsDefeated &&
                 (enemy.Health == null || enemy.Health.IsAlive))
             {
                 return true;

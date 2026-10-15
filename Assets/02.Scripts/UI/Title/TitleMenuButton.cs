@@ -49,6 +49,21 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
 
     public UnityEvent OnClickAction => _onClickAction;
 
+    /// <summary>동적으로 생성한 메뉴에도 기존 선택, 누름, 효과음을 적용한다.</summary>
+    public void ConfigureVisuals(TextMeshProUGUI buttonText, GameObject selectionFrame, float fontSize)
+    {
+        _buttonText = buttonText;
+        _selectFrame = selectionFrame;
+        _normalFontSize = fontSize;
+        _selectedFontSize = fontSize * 1.06f;
+        _normalTextColor = new Color(0.78f, 0.78f, 0.78f, 1f);
+        _selectedTextColor = Color.white;
+        _pressedTextColor = new Color(0.55f, 0.55f, 0.55f, 1f);
+        _pressedScaleRatio = 0.96f;
+        if (_onClickAction == null) _onClickAction = new UnityEvent();
+        ApplyHighlight(false);
+    }
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetStaticState()
     {
@@ -92,6 +107,10 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
             return;
         }
 
+        if (!_isSelected && Input.anyKeyDown)
+        {
+            PlayHoverSound();
+        }
         ApplyHighlight(true);
     }
 
@@ -107,6 +126,10 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
             return;
         }
 
+        if (!_isSelected)
+        {
+            PlayHoverSound();
+        }
         ApplyHighlight(true);
 
         if (EventSystem.current != null)
@@ -164,11 +187,6 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
 
     public void ApplyHighlight(bool isSelected)
     {
-        if (!_isSelected && isSelected)
-        {
-            PlayHoverSound();
-        }
-
         _isSelected = isSelected;
 
         if (_selectFrame != null)
@@ -212,7 +230,8 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
 
     private void HandleClick()
     {
-        if (!_isInteractable || _isAnyButtonClicked)
+        // Button.onClick may have closed the panel before this handler runs.
+        if (!isActiveAndEnabled || !_isInteractable || _isAnyButtonClicked)
         {
             return;
         }
@@ -234,59 +253,25 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
         yield return new WaitForSecondsRealtime(_actionDelay);
 
         ApplyPress(false);
-        _onClickAction?.Invoke();
         _isInteractable = true;
         _isAnyButtonClicked = false;
         _clickActionCoroutine = null;
+        // The callback can disable or destroy this button. Finish cleanup first.
+        _onClickAction?.Invoke();
     }
 
     private void PlayClickSound()
     {
-        AudioClip clipToPlay = _clickSound;
-        float volumeToPlay = _clickVolume;
-
-        if (clipToPlay == null && AudioManager.Instance != null)
-        {
-            clipToPlay = AudioManager.Instance.ButtonClickClip;
-        }
-
-        if (clipToPlay == null)
-        {
+        AudioManager manager = AudioManager.Instance;
+        if (manager == null)
             return;
-        }
-
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlaySfx(clipToPlay, volumeToPlay);
-            return;
-        }
-
-        Vector3 position = Camera.main != null ? Camera.main.transform.position : transform.position;
-        AudioSource.PlayClipAtPoint(clipToPlay, position, volumeToPlay);
+        manager.PlayUiEvent("UI.Click", _clickSound != null ? _clickSound : manager.ButtonClickClip, _clickVolume);
     }
-
     private void PlayHoverSound()
     {
-        AudioClip clipToPlay = _hoverSound;
-        float volumeToPlay = _hoverVolume;
-
-        if (clipToPlay == null && AudioManager.Instance != null)
-        {
-            clipToPlay = AudioManager.Instance.ButtonHoverClip;
-        }
-
-        if (clipToPlay == null)
-        {
+        AudioManager manager = AudioManager.Instance;
+        if (manager == null)
             return;
-        }
-
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlaySfx(clipToPlay, volumeToPlay);
-            return;
-        }
-
-        Vector3 position = Camera.main != null ? Camera.main.transform.position : transform.position;
-        AudioSource.PlayClipAtPoint(clipToPlay, position, volumeToPlay);
+        manager.PlayUiEvent("UI.Hover", _hoverSound != null ? _hoverSound : manager.ButtonHoverClip, _hoverVolume);
     }
 }

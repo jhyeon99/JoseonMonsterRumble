@@ -11,6 +11,10 @@ using UnityEngine;
 public class BossHitbox : MonoBehaviour, IParryable
 {
     [Header("데미지")]
+    [Tooltip("공격 이름 (사망 원인 표시용). 비우면 오브젝트 이름 사용")]
+    [SerializeField]
+    private string _attackName = "";
+
     [SerializeField, Min(0f)] private float _damage = 20f;
     [SerializeField, Min(0f)] private float _knockbackForce = 8f;
 
@@ -33,6 +37,7 @@ public class BossHitbox : MonoBehaviour, IParryable
 
     /// <summary>패링당함</summary>
     public event Action OnParriedByPlayer;
+    public event Action<HitData> OnPlayerDamaged;
 
     private readonly List<Collider2D> _results = new List<Collider2D>();
     private Collider2D _collider;
@@ -103,6 +108,7 @@ public class BossHitbox : MonoBehaviour, IParryable
 
     private void CheckHit()
     {
+        if (_boss != null && !_boss.CanDealPatternDamage) return;
         _results.Clear();
         int count = Physics2D.OverlapCollider(_collider, _filter, _results);
 
@@ -130,10 +136,16 @@ public class BossHitbox : MonoBehaviour, IParryable
                 other.ClosestPoint(_collider.bounds.center),
                 direction,
                 _defense,
-                this
+                this,
+                attackName: string.IsNullOrWhiteSpace(_attackName) ? name : _attackName
             );
+            hitData.Attacker = _boss != null ? _boss.gameObject : gameObject;
 
-            damageable.TakeDamage(hitData);
+            bool damageAccepted = damageable.TakeDamage(hitData);
+            if (damageAccepted && hitData.Damage > 0f)
+            {
+                OnPlayerDamaged?.Invoke(hitData);
+            }
             return;
         }
     }

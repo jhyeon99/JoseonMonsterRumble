@@ -22,6 +22,8 @@ public class Player : MonoBehaviour
     public PlayerJumpState JumpState => _jumpState;
     private PlayerAttackState _attackState;
     public PlayerAttackState AttackState => _attackState;
+    private PlayerAirAttackState _airAttackState;
+    public PlayerAirAttackState AirAttackState => _airAttackState;
     private PlayerDodgeState _dodgeState;
     public PlayerDodgeState DodgeState => _dodgeState;
     private PlayerDeadState _deadState;
@@ -34,6 +36,8 @@ public class Player : MonoBehaviour
     public PlayerGuardState GuardState => _guardState;
     private PlayerFinisherState _finisherState;
     public PlayerFinisherState FinisherState => _finisherState;
+    private PlayerPotionState _potionState;
+    public PlayerPotionState PotionState => _potionState;
 
     [Header("Motion Data")]
     [SerializeField] private ActionMotionData _hitMotion = new ActionMotionData();
@@ -43,6 +47,7 @@ public class Player : MonoBehaviour
     public ActionMotionData DodgeMotion => _dodgeMotion;
     [SerializeField] private ActionMotionData _attackMotion = new ActionMotionData();
     public ActionMotionData AttackMotion => _attackMotion;
+
 
     private PlayerInputHandler _inputHandler;
     private PlayerHealth _health;
@@ -59,6 +64,10 @@ public class Player : MonoBehaviour
     public PlayerGuard Guard => _guard;
     private PlayerFinisher _finisher;
     public PlayerFinisher Finisher => _finisher;
+    private PlayerWeaponBuff _weaponBuff;
+    public PlayerWeaponBuff WeaponBuff => _weaponBuff;
+    private PlayerPotionAura _potionAura;
+    public PlayerPotionAura PotionAura => _potionAura;
 
     [SerializeField] private Animator _animator;
     public Animator Animator => _animator;
@@ -81,6 +90,15 @@ public class Player : MonoBehaviour
     private static readonly int FinisherAnimStateHash = Animator.StringToHash(FinisherAnimState);
     private static readonly int FinisherAnimStateFullHash = Animator.StringToHash("Base Layer." + FinisherAnimState);
 
+    private const string PotionAnimState = "Player_Heal";
+    private static readonly int PotionAnimStateHash = Animator.StringToHash(PotionAnimState);
+    private static readonly int PotionAnimStateFullHash = Animator.StringToHash("Base Layer." + PotionAnimState);
+
+    private const string IdleAnimState = "Player_Idle";
+    private const string MissingAirAttackWarning = "공중공격: 공중 상태, Animator 연결 및 공중공격 데이터를 확인하세요.";
+    private static readonly int IdleAnimStateHash = Animator.StringToHash(IdleAnimState);
+    private static readonly int IdleAnimStateFullHash = Animator.StringToHash("Base Layer." + IdleAnimState);
+
     // 가드/패링 모션이 애니메이터에 추가되기 전에도 경고 없이 동작하도록 파라미터 유무를 저장
     private bool _hasGuardingParam;
     private bool _hasGuardStartParam;
@@ -95,6 +113,7 @@ public class Player : MonoBehaviour
     {
         Health.OnDied += HandleDeath;
         Health.OnHit += HandleHit;
+        Health.OnPotionUsed += HandlePotionUsed;
         Guard.OnParried += HandleParried;
         Guard.OnBlocked += HandleBlocked;
     }
@@ -103,6 +122,7 @@ public class Player : MonoBehaviour
     {
         Health.OnDied -= HandleDeath;
         Health.OnHit -= HandleHit;
+        Health.OnPotionUsed -= HandlePotionUsed;
         Guard.OnParried -= HandleParried;
         Guard.OnBlocked -= HandleBlocked;
     }
@@ -131,6 +151,18 @@ public class Player : MonoBehaviour
             _finisher = gameObject.AddComponent<PlayerFinisher>();
         }
 
+        _weaponBuff = GetComponent<PlayerWeaponBuff>();
+        if (_weaponBuff == null)
+        {
+            _weaponBuff = gameObject.AddComponent<PlayerWeaponBuff>();
+        }
+
+        _potionAura = GetComponent<PlayerPotionAura>();
+        if (_potionAura == null)
+        {
+            _potionAura = gameObject.AddComponent<PlayerPotionAura>();
+        }
+
         if (_animator == null)
         {
             _animator = GetComponentInChildren<Animator>();
@@ -143,6 +175,7 @@ public class Player : MonoBehaviour
 
         InitializeStates();
         InitializeMotionData();
+        if (!TryGetComponent<PlayerAudio>(out _)) gameObject.AddComponent<PlayerAudio>();
     }
 
     private void InitializeMotionData()
@@ -175,18 +208,25 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        if (PauseController.IsGameplayInputBlocked)
+        {
+            // 리스폰 로딩 화면이 걷히는 동안에도 착지 애니메이션은 갱신 (공중 포즈로 멈춰 보이지 않게)
+            SetGrounded(IsGrounded);
+            return;
+        }
+
         _stateMachine.Update();
         HandleRangedAttack();
         SetGrounded(IsGrounded);
-
-        if (_inputHandler.IsPotionKeyDown)
-        {
-            _health.TryUsePotion();
-        }
     }
 
     private void FixedUpdate()
     {
+        if (PauseController.IsGameplayInputBlocked)
+        {
+            return;
+        }
+
         _stateMachine.FixedUpdate();
         Movement.ApplyGravity(_inputHandler.IsJumpKey);
         Movement.IntegrateMovement(_stateMachine.CurrentState.PlatformMode);
@@ -199,12 +239,46 @@ public class Player : MonoBehaviour
         _moveState = new PlayerMoveState(this, _stateMachine);
         _jumpState = new PlayerJumpState(this, _stateMachine);
         _attackState = new PlayerAttackState(this, _stateMachine);
+        _airAttackState = new PlayerAirAttackState(this, _stateMachine);
         _dodgeState = new PlayerDodgeState(this, _stateMachine);
         _deadState = new PlayerDeadState(this, _stateMachine);
         _hitState = new PlayerHitState(this, _stateMachine);
         _spellState = new PlayerSpellState(this, _stateMachine);
         _guardState = new PlayerGuardState(this, _stateMachine);
         _finisherState = new PlayerFinisherState(this, _stateMachine);
+        _potionState = new PlayerPotionState(this, _stateMachine);
+    }
+
+    public bool CanEnterAirAttack()
+    {
+        return !IsGrounded && _animator != null && _attack != null &&
+            (_animator.HasState(0, PlayerAirAttackState.AnimationStateHash) ||
+             _animator.HasState(0, PlayerAirAttackState.FullAnimationStateHash)) &&
+            _attack.TryGetAirAttackData(out _);
+    }
+
+    public bool TryEnterAirAttack()
+    {
+        if (!CanEnterAirAttack())
+        {
+            Debug.LogWarning(MissingAirAttackWarning, this);
+            return false;
+        }
+        _stateMachine.ChangeState(_airAttackState);
+        return true;
+    }
+
+    /// <summary>물약 사용 가능 시 제자리 복용 상태로 전이. 전이했으면 true</summary>
+    public bool TryEnterPotion()
+    {
+        if (!IsGrounded || !_health.CanUsePotion)
+        {
+            if (!_health.CanUsePotion) GetComponent<PlayerAudio>()?.PlayUnavailable();
+            return false;
+        }
+
+        _stateMachine.ChangeState(_potionState);
+        return true;
     }
 
     /// <summary>앞에 그로기 적이 있으면 마무리 공격 시작. 시작했으면 true</summary>
@@ -325,6 +399,51 @@ public class Player : MonoBehaviour
         }
     }
 
+    public void TriggerPotion()
+    {
+        if (_animator == null)
+        {
+            return;
+        }
+
+        if (_animator.HasState(0, PotionAnimStateHash) || _animator.HasState(0, PotionAnimStateFullHash))
+        {
+            _animator.Play(PotionAnimStateHash, 0, 0f);
+            return;
+        }
+
+        Debug.LogWarning($"{name}: 애니메이터에 {PotionAnimState} 상태가 없습니다.", this);
+    }
+
+    public void PrepareForRespawn(Collider2D groundCollider)
+    {
+        _movement.PrepareForRespawn(groundCollider);
+        SetRunning(false);
+        SetGrounded(groundCollider != null);
+        if (groundCollider != null)
+        {
+            PlayIdleAnimation();
+            if (_animator != null && _animator.isActiveAndEnabled)
+            {
+                // 시간 정지 중에도 대기 자세를 먼저 적용한 뒤 로딩 화면을 걷는다.
+                _animator.Update(0f);
+            }
+        }
+    }
+
+    public void PlayIdleAnimation()
+    {
+        if (_animator == null)
+        {
+            return;
+        }
+
+        if (_animator.HasState(0, IdleAnimStateHash) || _animator.HasState(0, IdleAnimStateFullHash))
+        {
+            _animator.Play(IdleAnimStateHash, 0, 0f);
+        }
+    }
+
     public void PlayFinisherAnimation()
     {
         if (_animator == null)
@@ -438,5 +557,13 @@ public class Player : MonoBehaviour
     {
         _rangedAttack?.CancelCharge();
         StateMachine.ChangeState(DeadState);
+    }
+
+    private void HandlePotionUsed()
+    {
+        if (_potionAura != null)
+        {
+            _potionAura.PlayAura();
+        }
     }
 }

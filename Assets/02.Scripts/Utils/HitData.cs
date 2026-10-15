@@ -24,6 +24,23 @@ public struct HitData
 
     public bool IsTalisman;
 
+    public bool IsBuffed;
+
+    /// <summary>맞으면 걸리는 독 지속 시간 (초). 0이면 독 없음. 실제로 피해를 입었을 때만 걸림 (가드 / 회피 / 무적이면 안 걸림)</summary>
+    public float PoisonDuration;
+
+    /// <summary>공격한 대상 (적 / 보스 등). 사망 원인 표시용. 모르면 null</summary>
+    public GameObject Attacker;
+
+    /// <summary>타격 소울 충전량 배율 (맞은 쪽이 지정, 예: 보스 3배). 0 이하면 1배</summary>
+    public float SoulAmountMultiplier;
+
+    /// <summary>타격 소울 크기 배율 (맞은 쪽이 지정). 0 이하면 1배</summary>
+    public float SoulScaleMultiplier;
+
+    /// <summary>공격한 대상의 표시 이름 (보스는 보스 이름, 그 외는 오브젝트 이름). 모르면 빈 문자열</summary>
+    public string AttackerName => GetDisplayName(Attacker);
+
     public bool IsHeavyImpact => ComboStep == HeavyComboStep || IsReflectedProjectile;
 
     public HitData(
@@ -36,7 +53,8 @@ public struct HitData
         int comboStep = 0,
         string attackName = "",
         bool isReflectedProjectile = false,
-        bool isTalisman = false
+        bool isTalisman = false,
+        bool isBuffed = false
     )
     {
         Damage = damage;
@@ -48,6 +66,29 @@ public struct HitData
         ComboStep = comboStep;
         IsReflectedProjectile = isReflectedProjectile;
         IsTalisman = isTalisman;
+        IsBuffed = isBuffed;
         AttackName = attackName;
+        Attacker = null;
+        PoisonDuration = 0f;
+        SoulAmountMultiplier = 0f;
+        SoulScaleMultiplier = 0f;
+    }
+
+    /// <summary>오브젝트의 표시 이름. 보스면 보스 이름, 그 외는 (Clone) / PF_ 를 뗀 오브젝트 이름</summary>
+    public static string GetDisplayName(GameObject target)
+    {
+        if (target == null)
+        {
+            return string.Empty;
+        }
+
+        Boss boss = target.GetComponentInParent<Boss>();
+        if (boss != null && !string.IsNullOrWhiteSpace(boss.BossName))
+        {
+            return boss.BossName;
+        }
+
+        string name = target.name.Replace("(Clone)", string.Empty).Trim();
+        return name.StartsWith("PF_") ? name.Substring(3) : name;
     }
 }

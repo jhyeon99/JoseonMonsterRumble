@@ -62,7 +62,7 @@ public class HitStop : MonoBehaviour
 
     [Header("마무리 공격")]
     [SerializeField]
-    private HitStopSettings _finisher = new HitStopSettings(0.18f, 0.02f);
+    private HitStopSettings _finisher = new HitStopSettings(0.32f, 0.02f);
 
     private bool _isActive;
     private float _endTime;

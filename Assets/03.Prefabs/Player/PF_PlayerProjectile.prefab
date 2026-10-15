@@ -79,7 +79,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1918527705
-  m_SortingLayer: 5
+  m_SortingLayer: 6
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 3a5556ad57dbaf641820bce7bedf6386, type: 3}
@@ -196,7 +196,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1918527705
-  m_SortingLayer: 5
+  m_SortingLayer: 6
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b,
@@ -223,10 +223,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerProjectile
   _data: {fileID: 11400000, guid: acd1a4408dc2b4c439b80e54383494a4, type: 2}
+  _attackName: 
   _type: 2
-  _curveHeight: 0
   _returnPoolTimer: 5
-  _searchRadius: 8
+  _offscreenMargin: 2
+  _offscreenTopExtra: 5
+  _defense:
+    Parryable: 1
+    Unblockable: 0
+    ParryWindowOverride: 0
+    GuardGaugeCost: 25
+    BlockInvincibleTime: 0
+    FreeBlockOnParryTiming: 0
+  _reflectToShooter: 1
+  _ignoreGroundWhenReturning: 1
+  _searchRadius: 10
   _enemyLayer:
     serializedVersion: 2
     m_Bits: 128
