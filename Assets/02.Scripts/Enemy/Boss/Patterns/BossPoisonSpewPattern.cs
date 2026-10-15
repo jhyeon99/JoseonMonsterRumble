@@ -24,6 +24,10 @@ public sealed class BossPoisonSpewPattern : BossPattern
     [SerializeField] private Vector2 _endLipOffset = Vector2.zero;
     [Tooltip("시작 → 끝 보정이 다 바뀌는 클립 시간 (초). 프리뷰 클립 기준 2.3125")]
     [SerializeField, Min(0.01f)] private float _offsetBlendEndTime = 2.3125f;
+
+    [Header("사용 조건")]
+    [Tooltip("플레이어와 가로 거리가 이 값 이상일 때만 사용 (월드). 가까우면 후보에서 빠지고, 콤보에서는 대체 패턴(Fallback)으로 넘어감. 0이면 거리 무시")]
+    [SerializeField, Min(0f)] private float _minPlayerDistance = 5f;
     private GameObject _vfxInstance;
     private BossPoisonBeam _beam;
     // 정상 종료면 남은 방울 / 파편은 VFX가 혼자 마무리하도록 끄지 않음 (끊겼을 때만 즉시 끔)
@@ -52,7 +56,24 @@ public sealed class BossPoisonSpewPattern : BossPattern
         _vfxInstance.SetActive(true);
     }
 
-    public override bool CanUse() => base.CanUse() && _beam != null && _beam.IsReady;
+    public override bool CanUse() => base.CanUse() && _beam != null && _beam.IsReady && IsPlayerFarEnough();
+
+    /// <summary>플레이어가 Min Player Distance 이상 떨어져 있는지 (가로 거리 기준)</summary>
+    private bool IsPlayerFarEnough()
+    {
+        if (_minPlayerDistance <= 0f)
+        {
+            return true;
+        }
+
+        Transform player = Boss.Player;
+        if (player == null)
+        {
+            return false;
+        }
+
+        return Mathf.Abs(player.position.x - Boss.Position.x) >= _minPlayerDistance;
+    }
 
     protected override IEnumerator Execute()
     {

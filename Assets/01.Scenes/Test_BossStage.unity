@@ -3594,7 +3594,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 652bf59256ba41ada32513db8c3fdac5, type: 3}
       propertyPath: _weight
-      value: 1.5
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 652bf59256ba41ada32513db8c3fdac5, type: 3}
       propertyPath: _cooldown
@@ -3616,6 +3616,10 @@ PrefabInstance:
     - target: {fileID: 11400000, guid: 652bf59256ba41ada32513db8c3fdac5, type: 3}
       propertyPath: _animationTrigger
       value: poisonSpew
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 652bf59256ba41ada32513db8c3fdac5, type: 3}
+      propertyPath: _minPlayerDistance
+      value: 15
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -6603,6 +6607,11 @@ PrefabInstance:
       propertyPath: _hitClip
       value: 
       objectReference: {fileID: 7400000, guid: efa43d4278994e74fa25cf0aec476790, type: 2}
+    - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8388170717131268229, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
       propertyPath: _jumpSpeed
