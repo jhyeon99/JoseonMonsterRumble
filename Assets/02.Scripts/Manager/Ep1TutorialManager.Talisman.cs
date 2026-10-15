@@ -326,6 +326,28 @@ public sealed partial class Ep1TutorialManager
             Ep1TutorialHintType.TalismanTap : Ep1TutorialHintType.TalismanCharge);
     }
 
+    /// <summary>단발 연습 중에는 충전 불가(항상 한 장), 여러 장 연습 중에는 한 장 발사를 취소. 연습이 아니면 해제</summary>
+    private void UpdateTalismanChargeRestriction()
+    {
+        if (_talismanAttack == null)
+        {
+            return;
+        }
+
+        if (IsTalismanTapPractice)
+        {
+            _talismanAttack.SetTutorialChargeMode(this, PlayerRangedAttack.TutorialChargeMode.SingleOnly);
+        }
+        else if (IsTalismanChargePractice)
+        {
+            _talismanAttack.SetTutorialChargeMode(this, PlayerRangedAttack.TutorialChargeMode.MultipleOnly);
+        }
+        else
+        {
+            _talismanAttack.ClearTutorialChargeMode(this);
+        }
+    }
+
     private void EnsureTalismanPracticeSouls(int count)
     {
         if (!_refillTalismanPracticeSouls || _combatPlayer == null || _talismanAttack == null) return;
@@ -367,6 +389,7 @@ public sealed partial class Ep1TutorialManager
             PauseController.ResumeFromTutorial(this);
         }
         _talismanStep = _talismanExplained ? TalismanStep.Complete : TalismanStep.WaitingForEnemies;
+        UpdateTalismanChargeRestriction();
         _pendingTalismanShotCount = 0;
         _talismanVisibleElapsed = 0f;
         if (_talismanHeadHint != null)
