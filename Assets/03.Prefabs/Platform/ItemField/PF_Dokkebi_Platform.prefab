@@ -157,7 +157,8 @@ MonoBehaviour:
   _releaseAnimation: {fileID: 7400000, guid: c706da84d7b3fe34a95dd530eab2cf85, type: 2}
   _maximumRage: 100
   _ragePerHit: 8
-  _rageDuration: 8.32
+  _passiveRagePercentPerSecond: 1
+  _rageDuration: 6
   _heatDamage: 8
   _heatDamageInterval: 1.1
   _platformSurface: {fileID: 3255273579732424102}

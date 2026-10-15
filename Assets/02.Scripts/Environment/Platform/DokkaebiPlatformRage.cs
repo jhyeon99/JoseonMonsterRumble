@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>발판 위의 적중으로 분노를 채우고, 분노 중에만 게이지를 소모한다.</summary>
+/// <summary>시간과 발판 위의 적중으로 분노를 채우고, 분노 중에만 게이지를 소모한다.</summary>
 [DisallowMultipleComponent]
 public sealed class DokkaebiPlatformRage : MonoBehaviour
 {
@@ -21,7 +21,9 @@ public sealed class DokkaebiPlatformRage : MonoBehaviour
     [Header("분노게이지")]
     [SerializeField, Min(1f)] private float _maximumRage = 100f;
     [SerializeField, Min(1f)] private float _ragePerHit = 8f;
-    [SerializeField, Min(1f)] private float _rageDuration = 8.32f;
+    [Tooltip("평상시 초당 채워지는 최대 게이지의 비율입니다. 1이면 초당 1%입니다.")]
+    [SerializeField, Min(0f)] private float _passiveRagePercentPerSecond = 1f;
+    [SerializeField, Min(1f)] private float _rageDuration = 6f;
     [Header("뜨거운 발판 피해")]
     [SerializeField, Min(1f)] private float _heatDamage = 8f;
     [SerializeField, Min(0.1f)] private float _heatDamageInterval = 1.1f;
@@ -93,6 +95,13 @@ public sealed class DokkaebiPlatformRage : MonoBehaviour
 
     private void Update()
     {
+        if (_phase == RagePhase.Idle)
+        {
+            _currentRage = Mathf.Min(_maximumRage,
+                _currentRage + _maximumRage * _passiveRagePercentPerSecond * 0.01f * Time.deltaTime);
+            if (_currentRage >= _maximumRage) StartHeating();
+            return;
+        }
         if (_phase != RagePhase.Angry && _phase != RagePhase.Releasing) return;
         _rageTimeRemaining = Mathf.Max(0f, _rageEndTime - Time.time);
         _currentRage = _maximumRage * Mathf.Clamp01(_rageTimeRemaining / _rageDuration);
