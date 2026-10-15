@@ -4626,6 +4626,16 @@ PrefabInstance:
       propertyPath: m_text
       value: "\uC808\uBD88\uAC00\uC2DD"
       objectReference: {fileID: 0}
+    - target: {fileID: 420562276022495096, guid: 4d47b5d7fe17c144ea67c4205a119ed7,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 36
+      objectReference: {fileID: 0}
+    - target: {fileID: 420562276022495096, guid: 4d47b5d7fe17c144ea67c4205a119ed7,
+        type: 3}
+      propertyPath: m_fontSizeBase
+      value: 36
+      objectReference: {fileID: 0}
     - target: {fileID: 420562276022884888, guid: 4d47b5d7fe17c144ea67c4205a119ed7,
         type: 3}
       propertyPath: m_Color.b
@@ -6399,6 +6409,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
+      propertyPath: _weight
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
       propertyPath: _spikeFloor
       value: 
       objectReference: {fileID: 117914723}
@@ -6452,6 +6467,11 @@ PrefabInstance:
         type: 3}
       propertyPath: _stompVfxOffset.y
       value: -1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4884170672072706667, guid: de8d85715d11ee24394c7cfaefda911e,
+        type: 3}
+      propertyPath: _spikeGroundEdgeOffset
+      value: -0.3
       objectReference: {fileID: 0}
     - target: {fileID: 5040009013939251897, guid: de8d85715d11ee24394c7cfaefda911e,
         type: 3}
