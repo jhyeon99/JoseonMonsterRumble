@@ -1014,6 +1014,24 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         _cleanup.Clear();
     }
 
+    public void FinishLoop(PlayHandle handle)
+    {
+        if (!IsHandleValid(handle))
+            return;
+        Request request = _requests[handle.RequestId];
+        if (request.Bgm)
+            return;
+        if (!request.Started || request.Source == null)
+        {
+            StopHandle(handle);
+            return;
+        }
+        // 현재 회차는 끝까지 재생하고, 소유자 해제 후에도 자연스럽게 마무리한다.
+        request.Loop = false;
+        request.Source.loop = false;
+        request.Lifetime = LifetimePolicy.Result;
+    }
+
     public void StopHandle(PlayHandle handle)
     {
         if (!IsHandleValid(handle))

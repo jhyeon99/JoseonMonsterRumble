@@ -12389,7 +12389,9 @@ MonoBehaviour:
   _nextSceneName: Test_Ep1
   _nextSceneTriggerDistance: 1.5
   _nextSceneRevealDuration: 0.75
-  _controlHintDurationMultiplier: 2
+  _moveLearnDistance: 3
+  _controlHintLinger: 0.6
+  _controlHintFadeDuration: 0.25
   _controlHintOffset: {x: 0, y: 64}
   _controlHintFont: {fileID: 12800000, guid: 0975dedf52304458a79f6f10c64f0682, type: 3}
   _moveLeftKeySprite: {fileID: 21300000, guid: 8ce7e7c466d746ed81978a9de9c5f59d, type: 3}
@@ -14338,7 +14340,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2100900201
 Transform:
   m_ObjectHideFlags: 0

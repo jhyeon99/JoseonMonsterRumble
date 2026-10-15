@@ -845,7 +845,7 @@ public sealed class BossPoisonBeam : MonoBehaviour
     {
         if (_contactAudio != null)
         {
-            _contactAudio.StopHandle(_contactLoop);
+            _contactAudio.FinishLoop(_contactLoop);
             if (!_contactOwner.IsEmpty) _contactAudio.ReleaseOwner(_contactOwner);
         }
         _contactLoop = PlayHandle.Empty;
