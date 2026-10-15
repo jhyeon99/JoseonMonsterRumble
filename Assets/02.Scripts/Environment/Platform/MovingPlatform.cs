@@ -36,6 +36,12 @@ public class MovingPlatform : MonoBehaviour
     [SerializeField] private bool _requireItemToMove;
     [SerializeField] private string _requiredItemId = AbilityItemProgress.DokkaebiGamtuId;
 
+    [Header("Passenger 하차 판정")]
+    [Tooltip("접촉 종료 직후 남아 있는 착지 판정을 무시하는 시간입니다. 점프 전체의 제한 시간이 아닙니다.")]
+    [SerializeField, Min(0f)] private float _passengerExitGraceTime = 0.15f;
+    [Tooltip("플레이어 발이 발판 윗면보다 이만큼 아래로 내려가면 떨어진 것으로 판단합니다.")]
+    [SerializeField, Min(0f)] private float _passengerDropTolerance = 0.25f;
+
     [SerializeField, ReadOnly] private MovementState _state;
 
     private Vector2 _velocity;
@@ -49,6 +55,11 @@ public class MovingPlatform : MonoBehaviour
     private bool _isValid;
     private GameAudio.EventAudio _audio;
     private bool _audioMoving;
+    private Player _passenger;
+    private Collider2D _platformCollider;
+    private float _passengerFootOffset;
+    private float _passengerExitTimer;
+    private bool _isCheckingPassengerExit;
 
     private void UpdateAudio(bool moving, bool completed)
     {
@@ -77,6 +88,7 @@ public class MovingPlatform : MonoBehaviour
 
     private void OnDisable()
     {
+        ResetPassengerTracking();
         UpdateAudio(false, false);
         AbilityItemProgress.OnItemAcquired -= HandleItemAcquired;
         ItemAcquisitionView.OnItemAcquisitionClosed -= HandleItemAcquisitionClosed;
@@ -115,6 +127,7 @@ public class MovingPlatform : MonoBehaviour
 
         if (!_isValid) return;
 
+        _platformCollider = _platformBody.GetComponent<Collider2D>();
         ResetPlatform();
     }
 
@@ -122,6 +135,8 @@ public class MovingPlatform : MonoBehaviour
     {
         _velocity = Vector2.zero;
         _deltaPosition = Vector2.zero;
+
+        if (_isValid) UpdatePassengerExit();
 
         if (!_isValid || !IsMovingState())
         {
@@ -167,6 +182,7 @@ public class MovingPlatform : MonoBehaviour
     {
         if (!_isValid) return;
 
+        ResetPassengerTracking();
         UpdateAudio(false, false);
         _platformBody.position = _points[0].position;
         _targetIndex = 1;
@@ -187,6 +203,9 @@ public class MovingPlatform : MonoBehaviour
         }
 
         player.Movement.SetMovingPlatform(this);
+        _passenger = player;
+        _passengerFootOffset = collision.collider.bounds.min.y - player.transform.position.y;
+        _isCheckingPassengerExit = false;
 
         if (_passengerColliders.Add(collision.collider) &&
             _passengerColliders.Count == 1)
@@ -208,7 +227,7 @@ public class MovingPlatform : MonoBehaviour
         }
 
         Player player = collision.collider.GetComponentInParent<Player>();
-        if (player != null)
+        if (player != null && player.Movement.CurrentPlatform == this)
         {
             player.Movement.SetMovingPlatform(null);
         }
@@ -229,6 +248,13 @@ public class MovingPlatform : MonoBehaviour
         {
             StartMovingForward();
         }
+        else if (_mode == MovingPlatformMode.PassengerControlled && _state == MovementState.MovingBackward)
+        {
+            // 현재 돌아오던 구간을 반대로 진행한다. 출발점으로 순간 이동하지 않는다.
+            _targetIndex = Mathf.Min(_points.Length - 1, _targetIndex + 1);
+            _waitTimer = 0f;
+            _state = MovementState.MovingForward;
+        }
     }
 
     private void HandlePassengerExited()
@@ -238,14 +264,41 @@ public class MovingPlatform : MonoBehaviour
             return;
         }
 
-        if (_state == MovementState.MovingForward)
+        _isCheckingPassengerExit = _state == MovementState.MovingForward ||
+            _state == MovementState.WaitingAtDestination;
+        _passengerExitTimer = _passengerExitGraceTime;
+    }
+
+    private void UpdatePassengerExit()
+    {
+        if (!_isCheckingPassengerExit || _passengerColliders.Count > 0) return;
+        _passengerExitTimer -= Time.fixedDeltaTime;
+        if (_passengerExitTimer > 0f) return;
+
+        bool hasLeft = _passenger == null || !_passenger.isActiveAndEnabled || _passenger.Health.IsDead;
+        if (!hasLeft)
         {
-            StartReturningFromCurrentSegment();
+            bool landedElsewhere = _passenger.IsGrounded && _passenger.Movement.CurrentPlatform != this;
+            float platformTop = _platformCollider != null ? _platformCollider.bounds.max.y : _platformBody.position.y;
+            float passengerFeet = _passenger.transform.position.y + _passengerFootOffset;
+            hasLeft = landedElsewhere || passengerFeet < platformTop - _passengerDropTolerance;
         }
-        else if (_state == MovementState.WaitingAtDestination)
-        {
-            StartMovingBackward();
-        }
+        if (!hasLeft) return;
+
+        _isCheckingPassengerExit = false;
+        _passenger = null;
+        if (_state == MovementState.MovingForward) StartReturningFromCurrentSegment();
+        else if (_state == MovementState.WaitingAtDestination) StartMovingBackward();
+    }
+
+    private void ResetPassengerTracking()
+    {
+        if (_passenger != null && _passenger.Movement.CurrentPlatform == this)
+            _passenger.Movement.SetMovingPlatform(null);
+        _passenger = null;
+        _passengerColliders.Clear();
+        _isCheckingPassengerExit = false;
+        _passengerExitTimer = 0f;
     }
 
     private void MoveToTarget()
