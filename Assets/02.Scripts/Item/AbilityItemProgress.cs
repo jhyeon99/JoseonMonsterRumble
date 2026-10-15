@@ -22,6 +22,13 @@ public static class AbilityItemProgress
         OnProgressReset = null;
     }
 
+    /// <summary>새 게임 / 타이틀 복귀 시 모든 능력 아이템 보유 기록 초기화</summary>
+    public static void ResetAll()
+    {
+        OwnedItems.Clear();
+        OnProgressReset?.Invoke();
+    }
+
     public static bool HasItem(string itemId)
     {
         if (string.IsNullOrWhiteSpace(itemId))

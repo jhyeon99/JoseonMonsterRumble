@@ -64,8 +64,9 @@ public class BossCinematicDirector : MonoBehaviour
     }
 
     // 에디터에서 도메인 리로드를 끄고 플레이해도 플레이할 때마다 초기화
+    // 새 게임 / 타이틀 복귀 시에도 초기화 (GameProgressReset)
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetSeenIntros()
+    internal static void ResetSeenIntros()
     {
         SeenIntros.Clear();
     }
