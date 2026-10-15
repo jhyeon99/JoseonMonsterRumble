@@ -955,9 +955,18 @@ public class PrologueIntroController : MonoBehaviour
         // 다 움직이면 항상 같은 시간(_controlHintLinger) 뒤에 사라짐
         if (!_movementLearned)
         {
-            if (Mathf.Abs(_input.MoveInputX) > 0.01f) _movedDistance += Mathf.Abs(playerX - _lastPlayerX);
-            if (_movementDoneAt < 0f && _movedDistance >= _moveLearnDistance) _movementDoneAt = _controlHintTime;
-            if (_movementDoneAt >= 0f && _controlHintTime - _movementDoneAt >= _controlHintLinger) _movementLearned = true;
+            if (Mathf.Abs(_input.MoveInputX) > 0.01f)
+            {
+                _movedDistance += Mathf.Abs(playerX - _lastPlayerX);
+            }
+            if (_movementDoneAt < 0f && _movedDistance >= _moveLearnDistance)
+            {
+                _movementDoneAt = _controlHintTime;
+            }
+            if (_movementDoneAt >= 0f && _controlHintTime - _movementDoneAt >= _controlHintLinger)
+            {
+                _movementLearned = true;
+            }
         }
         _lastPlayerX = playerX;
 
@@ -974,11 +983,18 @@ public class PrologueIntroController : MonoBehaviour
                 _movementLearned = true;
             }
             if (_jumpHintStarted && _player.StateMachine.CurrentState == _player.JumpState)
+            {
                 _jumpAttempted = true;
+            }
             // 점프: 점프해서 장애물을 넘어 착지하면 완료, 같은 시간 뒤에 사라짐
             if (_jumpDoneAt < 0f && _jumpAttempted && _player.IsGrounded && playerX > edge + 0.2f)
+            {
                 _jumpDoneAt = _controlHintTime;
-            if (_jumpDoneAt >= 0f && _controlHintTime - _jumpDoneAt >= _controlHintLinger) _jumpLearned = true;
+            }
+            if (_jumpDoneAt >= 0f && _controlHintTime - _jumpDoneAt >= _controlHintLinger)
+            {
+                _jumpLearned = true;
+            }
             showJump = _jumpHintStarted && !_jumpLearned;
         }
 
@@ -993,7 +1009,10 @@ public class PrologueIntroController : MonoBehaviour
         if (_visibleHintRow != desiredRow)
         {
             _controlHintAlpha = Mathf.MoveTowards(_controlHintAlpha, 0f, step);
-            if (_controlHintAlpha <= 0f) _visibleHintRow = desiredRow;
+            if (_controlHintAlpha <= 0f)
+            {
+                _visibleHintRow = desiredRow;
+            }
         }
         else if (_visibleHintRow != null)
         {

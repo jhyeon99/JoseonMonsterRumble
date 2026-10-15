@@ -184,7 +184,10 @@ public sealed partial class Ep1TutorialManager
         if (_combatPlayer == null || _combatPlayer.StateMachine.CurrentState != _combatPlayer.FinisherState)
             _heldPracticeGroggy?.Release();
         _heldPracticeGroggy = null;
-        if (_finisherPracticeHint != null) Destroy(_finisherPracticeHint.gameObject);
+        if (_finisherPracticeHint != null)
+        {
+            _finisherPracticeHint.FadeOutAndDestroy();
+        }
         _finisherPracticeHint = null;
         if (_boundPrerequisites != null)
         {
