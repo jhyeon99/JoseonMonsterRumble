@@ -65,7 +65,7 @@ internal static class AudioEditorPreview
                 int right = Mathf.Min(left + 1, inputFrames - 1);
                 for (int channel = 0; channel < source.channels; channel++)
                     output[frame * source.channels + channel] = Mathf.Lerp(input[left * source.channels + channel],
-                        input[right * source.channels + channel], position - left) * Mathf.Clamp01(sound.Volume) * envelope;
+                        input[right * source.channels + channel], position - left) * Mathf.Clamp01(sound.Volume) * Mathf.Clamp(sound.Gain, 0f, 3f) * envelope;
             }
             // AudioUtil에는 항목 볼륨/피치 인자가 없으므로 임시 PCM에만 적용한다. 원본 에셋은 수정하지 않는다.
             _previewClip = AudioClip.Create("Audio Inspector Preview", outputFrames, source.channels, source.frequency, false);

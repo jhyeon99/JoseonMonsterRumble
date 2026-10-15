@@ -6875,15 +6875,15 @@ PrefabInstance:
       propertyPath: m_RenderPostProcessing
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 8809101005342838770, guid: 32e10db0df569104491554a680a0f3ff,
-        type: 3}
-      propertyPath: orthographic size
-      value: 10
-      objectReference: {fileID: 0}
     - target: {fileID: 7028000000000000101, guid: 32e10db0df569104491554a680a0f3ff,
         type: 3}
       propertyPath: _shockwaveSize
       value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8809101005342838770, guid: 32e10db0df569104491554a680a0f3ff,
+        type: 3}
+      propertyPath: orthographic size
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
