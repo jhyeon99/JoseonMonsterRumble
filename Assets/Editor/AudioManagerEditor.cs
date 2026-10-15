@@ -48,6 +48,7 @@ public sealed class AudioManagerEditor : Editor
         _catalog = ((AudioManager)target).Catalog;
         UpdateMusicLabels();
         UpdateBossEggLabels();
+        EnsureSound(_catalog?.Boss, "Boss.PoisonContact", "분출 독 플레이어 접촉 반복음", LifetimePolicy.Entity, 1f, 1f, 1f, 1, 50, "Boss.SpitImpact");
         ConfigureBabyCrawlLoop();
         EnsureSound(_catalog?.Boss, "Boss.BabyCrawl", "올챙이 바닥 기어다니기", LifetimePolicy.Entity, 0.2f, 0.95f, 1.05f, 3, 20);
         EnsureSound(_catalog?.Player, "Player.FinisherDisappear", "날아간 몬스터 소멸 반짝임", LifetimePolicy.Result, 1f, 1f, 1f, 4, 50);
@@ -130,10 +131,12 @@ public sealed class AudioManagerEditor : Editor
         for (int i = 0; i < events.arraySize; i++)
         {
             SerializedProperty entry = events.GetArrayElementAtIndex(i);
-            if (entry.FindPropertyRelative("EventId").stringValue != "Boss.BabyCrawl") continue;
+            string eventId = entry.FindPropertyRelative("EventId").stringValue;
+            if (eventId != "Boss.BabyCrawl" && eventId != "Boss.PoisonContact") continue;
             entry.FindPropertyRelative("Loop").boolValue = true;
-            entry.FindPropertyRelative("LoopEndRule").stringValue = "날려 보내기 / 사망 / 비활성화";
-            entry.FindPropertyRelative("TriggerDescription").stringValue = AudioEventEditorDefinitions.Description("Boss.BabyCrawl");
+            entry.FindPropertyRelative("LoopEndRule").stringValue = eventId == "Boss.BabyCrawl"
+                ? "날려 보내기 / 사망 / 비활성화" : "플레이어 접촉 종료 / 독분사 종료 / 비활성화";
+            entry.FindPropertyRelative("TriggerDescription").stringValue = AudioEventEditorDefinitions.Description(eventId);
         }
         ApplyAssetChanges(data);
     }
@@ -183,7 +186,7 @@ public sealed class AudioManagerEditor : Editor
     }
 
     private void EnsureSound(SoundSetSO set, string eventId, string label, LifetimePolicy lifetime,
-        float volume, float pitchMin, float pitchMax, int maxCount, int priority)
+        float volume, float pitchMin, float pitchMax, int maxCount, int priority, string sharedSoundId = null)
     {
         if (set == null) return;
         bool hasEvent = set.TryGetEvent(eventId, out EventBinding binding);
@@ -200,7 +203,7 @@ public sealed class AudioManagerEditor : Editor
             }
             ApplyAssetChanges(existing);
         }
-        string soundId = hasEvent ? binding.SoundId : eventId;
+        string soundId = hasEvent ? binding.SoundId : sharedSoundId ?? eventId;
         if (string.IsNullOrWhiteSpace(soundId)) return;
         bool hasSound = set.TryGetSound(soundId, out _);
         if (hasEvent && hasSound) return;
@@ -218,6 +221,7 @@ public sealed class AudioManagerEditor : Editor
             sound.FindPropertyRelative("Clips").ClearArray();
             sound.FindPropertyRelative("StartOffset").floatValue = 0f;
             sound.FindPropertyRelative("Volume").floatValue = volume;
+            sound.FindPropertyRelative("Gain").floatValue = 1f;
             sound.FindPropertyRelative("PitchMin").floatValue = pitchMin;
             sound.FindPropertyRelative("PitchMax").floatValue = pitchMax;
             sound.FindPropertyRelative("OutputGroup").enumValueIndex = (int)AudioOutputGroup.Sfx;
@@ -558,6 +562,7 @@ public sealed class AudioManagerEditor : Editor
             Property(sound, "PitchMax", "피치 최대");
             Property(sound, "OutputGroup", "출력 그룹");
             Property(sound, "MaxCount", "최대 동시 재생 수");
+            Property(sound, "Gain", "음원 증폭 배율");
             Property(sound, "Priority", "우선순위 (클수록 중요)");
             ApplyAssetChanges(data);
             using (new EditorGUILayout.HorizontalScope())
@@ -606,6 +611,7 @@ public sealed class AudioManagerEditor : Editor
         sound.FindPropertyRelative("Clips").ClearArray();
         sound.FindPropertyRelative("StartOffset").floatValue = 0f;
         sound.FindPropertyRelative("Volume").floatValue = 1f;
+        sound.FindPropertyRelative("Gain").floatValue = 1f;
         sound.FindPropertyRelative("PitchMin").floatValue = 1f;
         sound.FindPropertyRelative("PitchMax").floatValue = 1f;
         sound.FindPropertyRelative("OutputGroup").enumValueIndex = prefix == "Music" ? 1 : 0;

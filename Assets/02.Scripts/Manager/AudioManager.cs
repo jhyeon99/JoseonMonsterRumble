@@ -525,6 +525,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
         public float FullVolumeDuration = -1f;
         public float EndFadeDuration, PlaybackElapsed;
         public float Envelope = 1f;
+        public float Gain = 1f;
         public int Priority, MaxCount, StartSample;
         public bool Loop, Bgm, Started, Paused, DedicatedChannel;
         public ulong MusicSequence, StartOrder;
@@ -649,6 +650,7 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
             IntervalScope = binding.IntervalScope,
             Clip = selected,
             Volume = Mathf.Clamp01(sound.Volume),
+            Gain = sound.Gain,
             Pitch = UnityEngine.Random.Range(sound.PitchMin, sound.PitchMax),
             Delay = binding.EffectiveDelay,
             Interval = binding.EffectiveMinInterval,
@@ -924,6 +926,9 @@ public class AudioManager : MonoBehaviour, GameAudio.IAudioEventPlayer
             channel = victim.Source;
             StopHandle(victim.Handle);
         }
+        AudioSampleGain sampleGain = channel.GetComponent<AudioSampleGain>();
+        if (sampleGain == null) sampleGain = channel.gameObject.AddComponent<AudioSampleGain>();
+        sampleGain.SetGain(request.Gain);
         request.Source = channel;
         _channels[channel] = request;
         channel.clip = request.Clip;
