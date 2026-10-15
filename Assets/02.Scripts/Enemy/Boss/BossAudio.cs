@@ -143,10 +143,23 @@ public sealed class BossAudio : ActorAudio
         if (next is BossDefeatedState) return;
         _stateExecution = BeginAction();
         if (previous is BossGroggyState && next is BossIdleState) PlayResult("Boss.GroggyRecover", transform.position);
-        if (next is BossIntroState) PlayAction("Boss.Intro", _stateExecution);
-        else if (next is BossPhaseTransitionState) PlayAction("Boss.PhaseHowl", _stateExecution);
-        else if (next is BossGroggyState) PlayResult("Boss.Groggy", transform.position);
-        else if (next is BossFinalGroggyState) PlayResult("Boss.FinalGroggy", transform.position);
+        if (next is BossIntroState)
+        {
+            PlayAction("Boss.Intro", _stateExecution);
+        }
+        else if (next is BossPhaseTransitionState)
+        {
+            PlayAction("Boss.PhaseHowl", _stateExecution);
+        }
+        else if (next is BossGroggyState)
+        {
+            PlayResult("Boss.Groggy", transform.position);
+        }
+        else if (next is BossFinalGroggyState)
+        {
+            PlayResult("Boss.FinalGroggy", transform.position);
+            PlayResult("Boss.Stomp", transform.position);
+        }
     }
 
     private void OnPatternStarted(BossPattern pattern)

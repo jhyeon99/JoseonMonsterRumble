@@ -2341,6 +2341,81 @@ PrefabInstance:
       propertyPath: m_Name
       value: PF_BossCinematicDirector
       objectReference: {fileID: 0}
+    - target: {fileID: 7517765920081301450, guid: 21a6f1c06573d8f42a5ae5bf9b94e00c,
+        type: 3}
+      propertyPath: _creditsText
+      value: "<size=60><color=#E8CF9A>\uD568\uAED8 \uB9CC\uB4E0 \uC0AC\uB78C\uB4E4</color></size>\n\n\n<size=30><color=#E8CF9A>\uD504\uB85C\uC81D\uD2B8
+        \uCD1D\uAD04 \xB7 \uAC8C\uC784 \uAE30\uD68D</color></size>\n\uD558\uC9C0\uD638\n<size=30>\uC544\uD2B8
+        \uB9AC\uC18C\uC2A4 \uC81C\uC791 \xB7 \uB808\uBCA8 \uB514\uC790\uC778\n\uD504\uB864\uB85C\uADF8
+        \xB7 \uC2A4\uD14C\uC774\uC9C0 \uC81C\uC791 \uD29C\uD1A0\uB9AC\uC5BC \xB7
+        \uC0AC\uC6B4\uB4DC \uC81C\uC791</size>\n\n\n<size=30><color=#E8CF9A>\uD50C\uB808\uC774\uC5B4
+        \xB7 \uBCF4\uC2A4 \uC2DC\uC2A4\uD15C</color></size>\n\uC1A1\uC7AC\uD604\n<size=30>\uD50C\uB808\uC774\uC5B4
+        \uC870\uC791 \xB7 \uCF64\uBCF4 \xB7 \uD328\uB9C1 \xB7 \uB9C8\uBB34\uB9AC
+        \uACF5\uACA9\n\uBCF4\uC2A4 \uC804\uCCB4 \uD328\uD134 \xB7 \uC800\uC7A5 \uBC0F
+        \uB9AC\uC2A4\uD3F0</size>\n\n\n<size=30><color=#E8CF9A>UI \xB7 \uC560\uB2C8\uBA54\uC774\uC158
+        \xB7 \uC804\uD22C \uC5F0\uCD9C</color></size>\n\uBC15\uC6B1\uC601\n<size=30>UI
+        \xB7 \uCE90\uB9AD\uD130, \uBAAC\uC2A4\uD130 \uC560\uB2C8\uBA54\uC774\uC158\nVFX
+        \xB7 \uD53C\uACA9 \uD53C\uB4DC\uBC31 \xB7 \uD658\uACBD \uAE30\uBBF9</size>\n\n\n<size=30><color=#E8CF9A>\uBAAC\uC2A4\uD130
+        \xB7 \uC804\uD22C \uC2DC\uC2A4\uD15C</color></size>\n\uAE40\uC0C1\uACE4\n<size=30>\uBAAC\uC2A4\uD130
+        AI \xB7 \uACF5\uD1B5\uAD6C\uC870 \xB7 \uACF5\uACA9 \uBC0F \uD53C\uACA9\n\uC624\uB514\uC624
+        \uC2DC\uC2A4\uD15C \xB7 \uB808\uBCA8 \uBC30\uCE58</size>\n\n\n\n\n<size=48><color=#E8CF9A>\uD50C\uB808\uC774\uD574
+        \uC8FC\uC154\uC11C \uAC10\uC0AC\uD569\uB2C8\uB2E4</color></size>"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7517765920081301450, guid: 21a6f1c06573d8f42a5ae5bf9b94e00c,
+        type: 3}
+      propertyPath: _musicPlaylist.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7517765920081301450, guid: 21a6f1c06573d8f42a5ae5bf9b94e00c,
+        type: 3}
+      propertyPath: _musicPlaylist.Array.data[0].Clip
+      value: 
+      objectReference: {fileID: 8300000, guid: ad87b426ff4cbf241aa4f8c83965a331, type: 3}
+    - target: {fileID: 7517765920081301450, guid: 21a6f1c06573d8f42a5ae5bf9b94e00c,
+        type: 3}
+      propertyPath: _musicPlaylist.Array.data[2].Clip
+      value: 
+      objectReference: {fileID: 8300000, guid: 374177a0513cbb84286021b4692699ec, type: 3}
+    - target: {fileID: 7517765920081301450, guid: 21a6f1c06573d8f42a5ae5bf9b94e00c,
+        type: 3}
+      propertyPath: _musicPlaylist.Array.data[3].Clip
+      value: 
+      objectReference: {fileID: 8300000, guid: 374177a0513cbb84286021b4692699ec, type: 3}
+    - target: {fileID: 7517765920081301450, guid: 21a6f1c06573d8f42a5ae5bf9b94e00c,
+        type: 3}
+      propertyPath: _musicPlaylist.Array.data[2].FadeIn
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7517765920081301450, guid: 21a6f1c06573d8f42a5ae5bf9b94e00c,
+        type: 3}
+      propertyPath: _musicPlaylist.Array.data[2].Volume
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7517765920081301450, guid: 21a6f1c06573d8f42a5ae5bf9b94e00c,
+        type: 3}
+      propertyPath: _musicPlaylist.Array.data[3].FadeIn
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7517765920081301450, guid: 21a6f1c06573d8f42a5ae5bf9b94e00c,
+        type: 3}
+      propertyPath: _musicPlaylist.Array.data[3].Volume
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7517765920081301450, guid: 21a6f1c06573d8f42a5ae5bf9b94e00c,
+        type: 3}
+      propertyPath: _musicPlaylist.Array.data[2].FadeOut
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7517765920081301450, guid: 21a6f1c06573d8f42a5ae5bf9b94e00c,
+        type: 3}
+      propertyPath: _musicPlaylist.Array.data[3].FadeOut
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7517765920081301450, guid: 21a6f1c06573d8f42a5ae5bf9b94e00c,
+        type: 3}
+      propertyPath: _musicPlaylist.Array.data[0].Duration
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8678864482595496114, guid: 21a6f1c06573d8f42a5ae5bf9b94e00c,
         type: 3}
       propertyPath: m_LocalPosition.x

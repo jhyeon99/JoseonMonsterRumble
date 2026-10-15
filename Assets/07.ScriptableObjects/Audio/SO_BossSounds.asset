@@ -15,7 +15,8 @@ MonoBehaviour:
   _sounds:
   - SoundId: Boss.Intro
     DisplayName: "\uB4F1\uC7A5 \uC5F0\uCD9C \uC2DC\uC791"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: 1377846fb3cf37741b1f7bbbb1c1a925, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -90,7 +91,8 @@ MonoBehaviour:
     MaxCount: 4
   - SoundId: Boss.PhaseHowl
     DisplayName: "1 \u2192 2\uD398\uC774\uC988 \uC804\uD658 \uC5F0\uCD9C \uC2DC\uC791"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: 1377846fb3cf37741b1f7bbbb1c1a925, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
@@ -156,7 +158,8 @@ MonoBehaviour:
   - SoundId: Boss.FinalGroggy
     DisplayName: "2\uD398\uC774\uC988 \uCCB4\uB825 \uC18C\uC9C4 \uD6C4 \uB9C8\uBB34\uB9AC
       \uB300\uAE30 \uC9C4\uC785"
-    Clips: []
+    Clips:
+    - {fileID: 8300000, guid: de2ad7dc8e911ed409decd956156f9fd, type: 3}
     StartOffset: 0
     Volume: 1
     PitchMin: 1
