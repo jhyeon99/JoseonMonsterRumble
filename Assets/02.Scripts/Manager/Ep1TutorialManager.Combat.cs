@@ -90,6 +90,7 @@ public sealed partial class Ep1TutorialManager
         ResolveFocusReferences();
         InitializeTalismanTutorial();
         InitializeCheckpointTutorial();
+        InitializePotionTutorial();
         _combatStep = _guardGaugeExplained ? GetPostGuardStep() :
             _regularGuardSucceeded ? CombatStep.WaitingForRegularGuard : CombatStep.WaitingForHint;
         _startParryHint = _combatStep == CombatStep.WaitingForParryHint;
@@ -108,6 +109,7 @@ public sealed partial class Ep1TutorialManager
     {
         if (_guard != null) BindCombatEvents();
         if (_talismanAttack != null || _boundPrerequisites != null) BindTalismanEvents();
+        BindPotionEvents();
     }
 
     private void BindCombatEvents()
@@ -129,6 +131,8 @@ public sealed partial class Ep1TutorialManager
     internal bool CanShowHint(Ep1TutorialHintType type)
     {
         if (IsSkippedForTesting) return false;
+        if (type == Ep1TutorialHintType.PotionUse) return IsPotionPractice;
+        if (IsPotionTutorialActive) return false;
         if (type == Ep1TutorialHintType.Finisher) return IsFinisherPractice && !IsParryTutorialPending;
         if (type == Ep1TutorialHintType.Respawn) return false;
         if (IsParryTutorialPending || IsCheckpointCinematicActive || IsCheckpointIntroductionPending ||
@@ -184,12 +188,14 @@ public sealed partial class Ep1TutorialManager
             CancelCheckpointTutorial();
             CancelParryTutorial();
             CancelTalismanTutorial();
+            CancelPotionTutorial();
             CancelCombatPage();
             ReleaseRequiredPractice();
             return;
         }
         UpdateRequiredPractice(true);
         if (UpdateCheckpointTutorial() || IsCheckpointTutorialPending) return;
+        if (UpdatePotionTutorial()) return;
         if (UpdateParryTutorial()) return;
         if (UpdateTalismanTutorial()) return;
         if (_combatStep == CombatStep.WaitingForFirstEnemy && _prerequisiteDefeated[0])
@@ -255,6 +261,11 @@ public sealed partial class Ep1TutorialManager
         if (IsCheckpointCinematicActive)
         {
             RefreshCheckpointPage();
+            return;
+        }
+        if (_potionStep == PotionStep.Explanation)
+        {
+            RefreshPotionPage();
             return;
         }
         RefreshTalismanPage();
@@ -489,6 +500,7 @@ public sealed partial class Ep1TutorialManager
         CancelCheckpointTutorial();
         CancelParryTutorial();
         UnbindTalismanEvents();
+        UnbindPotionEvents();
         if (_guard != null) _guard.OnBlocked -= HandleRegularGuard;
         if (_guard != null) _guard.OnParried -= HandleTutorialParry;
         ItemPool.OnDeathSoulsSpawned -= HandleDeathSouls;

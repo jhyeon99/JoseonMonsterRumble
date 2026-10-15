@@ -214,6 +214,16 @@ public class PlayerHealth : MonoBehaviour, IDamageable, IKillable
     }
 
 
+    /// <summary>튜토리얼 연습용: 피격 연출 없이 체력을 지정 값으로 낮춤 (현재보다 높이지는 않음, 0으로 만들지 않음)</summary>
+    public void SetHealthForTutorial(float health)
+    {
+        if (_isDead) return;
+        float next = Mathf.Clamp(health, 1f, _maxHealth);
+        if (next >= _currentHealth) return;
+        _currentHealth = next;
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+    }
+
     public void AddPotion()
     {
         _potionCount = Mathf.Min(_potionCount + 1, _maxPotionCount);

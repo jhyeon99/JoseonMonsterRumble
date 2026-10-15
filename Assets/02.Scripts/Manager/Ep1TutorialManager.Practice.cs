@@ -53,6 +53,10 @@ public sealed partial class Ep1TutorialManager
         {
             actions = GameplayInputActions.None;
         }
+        else if (_potionStep == PotionStep.Practice || _potionStep == PotionStep.Confirming)
+        {
+            actions = GameplayInputActions.Movement | GameplayInputActions.Potion;
+        }
         else if (_highJumpPracticeActive && IsHighJumpPracticePending)
         {
             actions = GameplayInputActions.Movement | GameplayInputActions.Jump;
@@ -180,7 +184,10 @@ public sealed partial class Ep1TutorialManager
         if (_combatPlayer == null || _combatPlayer.StateMachine.CurrentState != _combatPlayer.FinisherState)
             _heldPracticeGroggy?.Release();
         _heldPracticeGroggy = null;
-        if (_finisherPracticeHint != null) Destroy(_finisherPracticeHint.gameObject);
+        if (_finisherPracticeHint != null)
+        {
+            _finisherPracticeHint.FadeOutAndDestroy();
+        }
         _finisherPracticeHint = null;
         if (_boundPrerequisites != null)
         {

@@ -36,8 +36,12 @@ public class PrologueIntroController : MonoBehaviour
     [SerializeField, Min(0.01f)] private float _nextSceneRevealDuration = 0.75f;
 
     [Header("Movement and jump tutorial")]
-    [Tooltip("동작 완료까지 표시된 시간의 배율입니다. 2면 완료 후 같은 시간만큼 더 표시합니다.")]
-    [SerializeField, Min(1f)] private float _controlHintDurationMultiplier = 2f;
+    [Tooltip("이동 키를 누른 채 실제로 움직인 거리(누적)가 이 값 이상이면 이동을 익힌 것으로 판정")]
+    [SerializeField, Min(0.5f)] private float _moveLearnDistance = 3f;
+    [Tooltip("동작을 완료한 뒤 안내를 더 보여주는 시간 (초). 항상 같은 시간 뒤에 사라짐")]
+    [SerializeField, Min(0f)] private float _controlHintLinger = 0.6f;
+    [Tooltip("안내가 나타나고 사라질 때 페이드 시간 (초)")]
+    [SerializeField, Min(0.01f)] private float _controlHintFadeDuration = 0.25f;
     [SerializeField] private Vector2 _controlHintOffset = new Vector2(0f, 64f);
     [SerializeField] private Font _controlHintFont;
     [SerializeField] private Sprite _moveLeftKeySprite;
@@ -51,16 +55,19 @@ public class PrologueIntroController : MonoBehaviour
     private RectTransform _controlHintRoot;
     private GameObject _moveHintRow;
     private GameObject _jumpHintRow;
+    private CanvasGroup _controlHintGroup;
+    private GameObject _visibleHintRow;
+    private float _controlHintAlpha;
+    private float _controlHintTime;
     private bool _movementStarted;
     private bool _movementLearned;
-    private float _movementStartX;
+    private float _lastPlayerX;
+    private float _movedDistance;
     private bool _jumpHintStarted;
     private bool _jumpAttempted;
     private bool _jumpLearned;
-    private float _movementHintElapsed;
-    private float _jumpHintElapsed;
-    private float _movementHideAt = -1f;
-    private float _jumpHideAt = -1f;
+    private float _movementDoneAt = -1f;
+    private float _jumpDoneAt = -1f;
 
     [Header("Notice board and wanted poster")]
     [SerializeField] private Transform _noticeBoard;
@@ -936,40 +943,86 @@ public class PrologueIntroController : MonoBehaviour
         }
 
         if (_controlHintRoot == null) CreateControlHints();
+        _controlHintTime += Time.deltaTime;
+        float playerX = _player.transform.position.x;
         if (!_movementStarted)
         {
             _movementStarted = true;
-            _movementStartX = _player.transform.position.x;
+            _lastPlayerX = playerX;
         }
-        if (!_movementLearned && (!_jumpHintStarted || _jumpLearned))
-            _movementHintElapsed += Time.deltaTime;
-        if (_movementHideAt < 0f && Mathf.Abs(_player.transform.position.x - _movementStartX) >= 3f)
-            _movementHideAt = _movementHintElapsed * _controlHintDurationMultiplier;
-        if (_movementHideAt >= 0f && _movementHintElapsed >= _movementHideAt) _movementLearned = true;
+
+        // 이동: 이동 키를 누른 채 실제로 움직인 거리만 누적 (가만히 서 있던 시간, 밀려난 거리는 제외).
+        // 다 움직이면 항상 같은 시간(_controlHintLinger) 뒤에 사라짐
+        if (!_movementLearned)
+        {
+            if (Mathf.Abs(_input.MoveInputX) > 0.01f)
+            {
+                _movedDistance += Mathf.Abs(playerX - _lastPlayerX);
+            }
+            if (_movementDoneAt < 0f && _movedDistance >= _moveLearnDistance)
+            {
+                _movementDoneAt = _controlHintTime;
+            }
+            if (_movementDoneAt >= 0f && _controlHintTime - _movementDoneAt >= _controlHintLinger)
+            {
+                _movementLearned = true;
+            }
+        }
+        _lastPlayerX = playerX;
+
         bool showJump = false;
         if (_jumpObstacle != null && !_jumpLearned)
         {
             Collider2D obstacle = _jumpObstacle.GetComponent<Collider2D>();
             float edge = obstacle != null ? obstacle.bounds.max.x : _jumpObstacle.position.x;
-            float distance = _jumpObstacle.position.x - _player.transform.position.x;
+            float distance = _jumpObstacle.position.x - playerX;
             if (!_jumpHintStarted && distance >= -0.5f && distance <= _jumpHintDistance)
-                _jumpHintStarted = true;
-            if (_jumpHintStarted) _jumpHintElapsed += Time.deltaTime;
-            if (_jumpHintStarted && _player.StateMachine.CurrentState == _player.JumpState)
-                _jumpAttempted = true;
-            if (_jumpHideAt < 0f && _jumpAttempted && _player.IsGrounded &&
-                _player.transform.position.x > edge + 0.2f)
             {
-                _jumpHideAt = _jumpHintElapsed * _controlHintDurationMultiplier;
+                _jumpHintStarted = true;
+                // 장애물까지 걸어왔으면 이동은 익힌 것. 점프 뒤에 이동 안내가 다시 나오지 않게 함
+                _movementLearned = true;
             }
-
-            if (_jumpHideAt >= 0f && _jumpHintElapsed >= _jumpHideAt) _jumpLearned = true;
+            if (_jumpHintStarted && _player.StateMachine.CurrentState == _player.JumpState)
+            {
+                _jumpAttempted = true;
+            }
+            // 점프: 점프해서 장애물을 넘어 착지하면 완료, 같은 시간 뒤에 사라짐
+            if (_jumpDoneAt < 0f && _jumpAttempted && _player.IsGrounded && playerX > edge + 0.2f)
+            {
+                _jumpDoneAt = _controlHintTime;
+            }
+            if (_jumpDoneAt >= 0f && _controlHintTime - _jumpDoneAt >= _controlHintLinger)
+            {
+                _jumpLearned = true;
+            }
             showJump = _jumpHintStarted && !_jumpLearned;
         }
 
-        _moveHintRow.SetActive(!showJump && !_movementLearned);
-        _jumpHintRow.SetActive(showJump);
-        _controlHintRoot.gameObject.SetActive(showJump || !_movementLearned);
+        GameObject desiredRow = showJump ? _jumpHintRow : !_movementLearned ? _moveHintRow : null;
+        UpdateControlHintFade(desiredRow);
+    }
+
+    /// <summary>안내 줄 전환과 숨김을 페이드로 처리 (보이던 줄이 다 사라진 뒤 다음 줄이 나타남)</summary>
+    private void UpdateControlHintFade(GameObject desiredRow)
+    {
+        float step = Time.deltaTime / _controlHintFadeDuration;
+        if (_visibleHintRow != desiredRow)
+        {
+            _controlHintAlpha = Mathf.MoveTowards(_controlHintAlpha, 0f, step);
+            if (_controlHintAlpha <= 0f)
+            {
+                _visibleHintRow = desiredRow;
+            }
+        }
+        else if (_visibleHintRow != null)
+        {
+            _controlHintAlpha = Mathf.MoveTowards(_controlHintAlpha, 1f, step);
+        }
+
+        _moveHintRow.SetActive(_visibleHintRow == _moveHintRow);
+        _jumpHintRow.SetActive(_visibleHintRow == _jumpHintRow);
+        _controlHintGroup.alpha = _controlHintAlpha;
+        _controlHintRoot.gameObject.SetActive(_visibleHintRow != null);
     }
 
     private void UpdateHintsBeforeRender()
@@ -996,9 +1049,13 @@ public class PrologueIntroController : MonoBehaviour
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.matchWidthOrHeight = 0.5f;
-        var hint = new GameObject("PlayerControlHint", typeof(RectTransform));
+        var hint = new GameObject("PlayerControlHint", typeof(RectTransform), typeof(CanvasGroup));
         hint.transform.SetParent(canvasObject.transform, false);
         _controlHintRoot = hint.GetComponent<RectTransform>();
+        _controlHintGroup = hint.GetComponent<CanvasGroup>();
+        _controlHintGroup.alpha = 0f;
+        _controlHintGroup.interactable = false;
+        _controlHintGroup.blocksRaycasts = false;
         _controlHintRoot.anchorMin = new Vector2(0.5f, 0.5f);
         _controlHintRoot.anchorMax = _controlHintRoot.anchorMin;
         _controlHintRoot.sizeDelta = new Vector2(420f, 64f);

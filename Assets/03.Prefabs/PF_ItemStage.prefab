@@ -129,6 +129,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4633022181110473904}
+  - component: {fileID: 910100520}
   m_Layer: 0
   m_Name: PF_ItemStage
   m_TagString: Untagged
@@ -136,6 +137,19 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &910100520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1588463519702932866}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 431ba2d8ed994f9aaa182cf71d71c052, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ItemStageIllusionCleanup
+  _grave: {fileID: 4889035831162237193}
 --- !u!4 &4633022181110473904
 Transform:
   m_ObjectHideFlags: 0
