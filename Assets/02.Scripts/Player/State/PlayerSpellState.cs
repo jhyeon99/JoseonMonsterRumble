@@ -80,6 +80,13 @@ public class PlayerSpellState : PlayerBaseState
                 EndSpell();
                 return;
             }
+
+            // 회피 캔슬: 원거리 공격을 발사한 이후에는 남은 모션을 끊고 바로 회피 가능
+            if (_hasFired && _player.IsGrounded && _player.Movement.CanDodge && _inputHandler.TryUseDodgeInput())
+            {
+                _stateMachine.ChangeState(_player.DodgeState);
+                return;
+            }
         }
 
         if (_elapsedTime >= SpellStateSafetyTimeout)

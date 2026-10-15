@@ -12,6 +12,18 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public sealed class StageManager : MonoBehaviour
 {
+    private const float SceneReadyProgress = 0.9f;
+    private const float DefaultMinLoadingDuration = 3f;
+
+    private enum RespawnPhase
+    {
+        Idle,
+        DeathAnimation,
+        DeathScreen,
+        Loading,
+        Revealing
+    }
+
     public static StageManager Instance { get; private set; }
 
     [Header("사망 / 재시작 연출")]
@@ -20,11 +32,19 @@ public sealed class StageManager : MonoBehaviour
 
     [Tooltip("사망 후 화면이 어두워지기 시작할 때까지 대기 (사망 모션을 보여주는 시간)")]
     [SerializeField, Min(0f)]
-    private float _deathDelay = 0.8f;
+    private float _deathDelay = 1.0f;
 
     [Tooltip("화면이 완전히 어두워진 뒤 씬을 다시 로드하기 전까지 유지하는 시간")]
     [SerializeField, Min(0f)]
     private float _displayDuration = 0.8f;
+
+    [Tooltip("로딩 화면이 완전히 사라진 뒤 유지하는 리스폰 보호 시간")]
+    [SerializeField, Min(0f)]
+    private float _respawnProtectionDuration = 1.5f;
+    [Header("디버그")]
+    [Tooltip("끄면 사망해도 씬을 다시 로드하지 않음 (사망 원인 로그만 출력, 테스트용)")]
+    [SerializeField]
+    private bool _reloadOnDeath = true;
 
     [Header("디버그 (에디터 전용)")]
 
@@ -40,12 +60,38 @@ public sealed class StageManager : MonoBehaviour
     private float _enemyClearOffsetX = 0f;
 
     private PlayerHealth _playerHealth;
+
+    [Header("리스폰 위치 보정")]
+    [Tooltip("리스폰 시 지점 아래 땅을 찾아 발을 붙임. 지점보다 이만큼 위에서부터 찾음 (발판에 살짝 묻힌 경우용)")]
+    [SerializeField, Min(0f)]
+    private float _spawnGroundProbeUp = 0.5f;
+
+    [Tooltip("지점 아래로 땅을 찾는 최대 거리. 이 안에 땅이 없으면 지점 위치 그대로 생성")]
+    [SerializeField, Min(0f)]
+    private float _spawnGroundProbeDown = 3f;
+
+    [Header("보스전 리스폰")]
+    [Tooltip("켜면 등장 연출을 이미 본 보스 씬에서 리스폰할 때 최소 로딩 시간 없이 씬이 준비되는 대로 바로 시작")]
+    [SerializeField]
+    private bool _skipLoadingWaitAfterBossIntro = true;
+
+    // 표면에 딱 붙이면 콜라이더가 겹쳐 일방 발판을 통과할 수 있어 아주 살짝 띄움
+    private const float SpawnSkin = 0.02f;
     private string _activeSceneName;
     private string _activeCheckpointId;
-    private bool _isRespawning;
+    [SerializeField, ReadOnly] private RespawnPhase _respawnPhase;
+    private Coroutine _respawnProtectionCoroutine;
     private bool _isChangingScene;
 
-    public bool IsRespawning => _isRespawning;
+    public bool IsRespawning => _respawnPhase != RespawnPhase.Idle;
+    public bool IsRespawnWorldFrozen => _respawnPhase == RespawnPhase.DeathScreen ||
+                                       _respawnPhase == RespawnPhase.Loading ||
+                                       _respawnPhase == RespawnPhase.Revealing;
+
+    /// <summary>지정한 장승이 현재 씬의 실제 저장된 체크포인트인지 확인한다.</summary>
+    public bool IsCheckpointActive(RespawnPoint point) => point != null &&
+        !string.IsNullOrWhiteSpace(point.CheckpointId) &&
+        point.gameObject.scene.name == _activeSceneName && point.CheckpointId == _activeCheckpointId;
 
     private void Awake()
     {
@@ -56,6 +102,7 @@ public sealed class StageManager : MonoBehaviour
         }
 
         Instance = this;
+        _respawnPhase = RespawnPhase.Idle;
         DontDestroyOnLoad(gameObject);
         SceneManager.sceneLoaded += HandleSceneLoaded;
 
@@ -75,6 +122,8 @@ public sealed class StageManager : MonoBehaviour
         InitializeScene(SceneManager.GetActiveScene(), false);
     }
 
+#if UNITY_EDITOR
+    // 디버그 키는 에디터에서만 (빌드에서는 동작하지 않음)
     private void Update()
     {
         // TODO: 테스트용 임시 코드.
@@ -84,11 +133,13 @@ public sealed class StageManager : MonoBehaviour
             RestartStage();
         }
 
+        // F12: 보스 테스트 씬으로 이동
         if (Input.GetKeyDown(KeyCode.F12))
         {
             TryLoadStageScene("Test_Boss");
         }
     }
+#endif
 
     private void OnDestroy()
     {
@@ -102,6 +153,26 @@ public sealed class StageManager : MonoBehaviour
         Instance = null;
     }
 
+    private void OnDisable()
+    {
+        if (Instance != this)
+        {
+            return;
+        }
+        StopAllCoroutines();
+        StopRespawnProtection();
+        ResetRespawnTransition();
+    }
+
+    private void LateUpdate()
+    {
+        // Scene initialization and cinematic scripts may restore time during loading.
+        if (IsRespawnWorldFrozen && !Mathf.Approximately(Time.timeScale, 0f))
+        {
+            Time.timeScale = 0f;
+        }
+    }
+
     /// <summary>
     /// 체크포인트 활성화. 새로 세이브된 경우에만 true (세이브 연출 여부 판단용).
     /// </summary>
@@ -112,7 +183,7 @@ public sealed class StageManager : MonoBehaviour
             return false;
         }
 
-        if (_isRespawning || _isChangingScene)
+        if (IsRespawning || _isChangingScene)
         {
             return false;
         }
@@ -129,7 +200,22 @@ public sealed class StageManager : MonoBehaviour
         }
 
         _activeCheckpointId = point.CheckpointId;
+        ClearEnemiesBehind(point.gameObject.scene, point);
+        if (_playerHealth != null)
+        {
+            _playerHealth.RefillPotions();
+            if (!_playerHealth.IsDead && _playerHealth.CurrentHealth < _playerHealth.MaxHealth)
+            {
+                _playerHealth.Heal(_playerHealth.MaxHealth - _playerHealth.CurrentHealth);
+                if (_playerHealth.TryGetComponent(out PlayerPotionAura recoveryAura))
+                {
+                    recoveryAura.PlayRecoveryPulse();
+                }
+            }
+        }
         RefreshCheckpointVisuals(point.gameObject.scene);
+        point.PlayActivation();
+        AudioManager.Instance?.PlaySceneEvent("Environment.Checkpoint", point);
         return true;
     }
 
@@ -141,10 +227,61 @@ public sealed class StageManager : MonoBehaviour
         TryStartRespawn(false, string.Empty);
     }
 
+    /// <summary>씬을 다시 불러오지 않고 현재 저장된 장승으로 이동한다.</summary>
+    public bool TryWarpToActiveCheckpoint(float fadeDuration = 0.35f)
+    {
+        Scene scene = SceneManager.GetActiveScene();
+        if (IsRespawning || _isChangingScene || SceneArrivalFade.IsTransitioning ||
+            scene.name != _activeSceneName || _playerHealth == null || _playerHealth.IsDead)
+        {
+            return false;
+        }
+
+        RespawnPoint checkpoint = FindPoint(FindSceneRespawnPoints(scene), _activeCheckpointId);
+        if (checkpoint == null)
+        {
+            Debug.LogWarning($"{scene.name}: 워프할 활성 RespawnPoint '{_activeCheckpointId}'를 찾지 못했습니다.", this);
+            return false;
+        }
+
+        StartCoroutine(WarpToCheckpointRoutine(checkpoint, fadeDuration));
+        return true;
+    }
+
+    private IEnumerator WarpToCheckpointRoutine(RespawnPoint checkpoint, float fadeDuration)
+    {
+        if (_playerHealth.TryGetComponent(out Player player))
+        {
+            player.RangedAttack?.CancelCharge();
+            player.StateMachine.ChangeState(player.IdleState);
+        }
+        if (_playerHealth.TryGetComponent(out PlayerInputHandler input)) input.ClearInputState();
+
+        yield return SceneArrivalFade.FadeOut(fadeDuration);
+
+        MovePlayerTo(checkpoint);
+
+        if (_playerHealth != null)
+        {
+            _playerHealth.ClearPoison();
+            _playerHealth.RefillPotions();
+            if (!_playerHealth.IsDead && _playerHealth.CurrentHealth < _playerHealth.MaxHealth)
+            {
+                _playerHealth.Heal(_playerHealth.MaxHealth - _playerHealth.CurrentHealth);
+            }
+            if (_playerHealth.TryGetComponent(out PlayerPotionAura recoveryAura))
+            {
+                recoveryAura.PlayRecoveryPulse();
+            }
+        }
+
+        yield return SceneArrivalFade.FadeIn(fadeDuration);
+    }
+
     /// <summary>지정한 스테이지 씬으로 전환한다. 중복 전환과 리스폰 중 전환은 막는다.</summary>
     public bool TryLoadStageScene(string sceneName, float fadeOutDuration = 0.5f, float fadeInDuration = 0.75f)
     {
-        if (_isRespawning || _isChangingScene || SceneArrivalFade.IsTransitioning || string.IsNullOrWhiteSpace(sceneName))
+        if (IsRespawning || _isChangingScene || SceneArrivalFade.IsTransitioning || string.IsNullOrWhiteSpace(sceneName))
             return false;
 
         if (SceneManager.GetActiveScene().name == sceneName)
@@ -165,6 +302,12 @@ public sealed class StageManager : MonoBehaviour
         _isChangingScene = true;
         CameraShake.Stop();
         Time.timeScale = 1f;
+        // 화면과 함께 음악도 줄여, 소리 재생 중에 씬 로딩이 겹치지 않게 함
+        if (AudioManager.ExistingInstance != null)
+        {
+            AudioManager.ExistingInstance.StopBgm(Mathf.Max(0f, fadeOutDuration));
+        }
+
         yield return SceneArrivalFade.FadeOut(Mathf.Max(0f, fadeOutDuration));
         SceneArrivalFade.Prepare(fadeInDuration);
         UnbindPlayerHealth();
@@ -190,7 +333,15 @@ public sealed class StageManager : MonoBehaviour
 
     private void HandlePlayerDied()
     {
-        string causeOfDeath = _playerHealth != null ? _playerHealth.LastFatalHitData.AttackName : string.Empty;
+        HitData fatalHit = _playerHealth != null ? _playerHealth.LastFatalHitData : default;
+        Debug.Log($"[사망] {BuildDeathLog(fatalHit)}", _playerHealth);
+
+        if (!_reloadOnDeath)
+        {
+            return;
+        }
+
+        string causeOfDeath = fatalHit.AttackName;
         if (string.IsNullOrWhiteSpace(causeOfDeath))
         {
             causeOfDeath = "알 수 없는 원인";
@@ -199,9 +350,37 @@ public sealed class StageManager : MonoBehaviour
         TryStartRespawn(true, causeOfDeath);
     }
 
+    /// <summary>누구에게 무엇을 맞아 죽었는지 (공격자를 모르면 공격 이름만)</summary>
+    [Tooltip("사망 화면을 넘길 때 사망 음악이 사라지는 시간 (초)")]
+    [SerializeField, Min(0f)]
+    private float _deathMusicStopFade = 0.15f;
+
+    private void StopDeathSounds()
+    {
+        if (_playerHealth != null && _playerHealth.TryGetComponent(out PlayerAudio playerAudio))
+        {
+            playerAudio.StopDeathSound();
+        }
+
+        if (AudioManager.ExistingInstance != null)
+        {
+            AudioManager.ExistingInstance.StopBgm(_deathMusicStopFade);
+        }
+    }
+
+    private static string BuildDeathLog(HitData hit)
+    {
+        string attackName = string.IsNullOrWhiteSpace(hit.AttackName) ? "알 수 없는 공격" : hit.AttackName;
+        string attacker = hit.AttackerName;
+
+        return string.IsNullOrEmpty(attacker)
+            ? $"'{attackName}'(으)로 사망 (데미지 {hit.Damage:0.#})"
+            : $"{attacker}의 '{attackName}'에 맞아 사망 (데미지 {hit.Damage:0.#})";
+    }
+
     private void TryStartRespawn(bool waitForDeath, string causeOfDeath = "")
     {
-        if (_isRespawning || _isChangingScene)
+        if (IsRespawning || _isChangingScene)
         {
             return;
         }
@@ -221,61 +400,135 @@ public sealed class StageManager : MonoBehaviour
 
     private IEnumerator RespawnRoutine(string sceneName, bool waitForDeath, string causeOfDeath)
     {
-        _isRespawning = true;
-
-        if (waitForDeath)
+        StopRespawnProtection();
+        _respawnPhase = RespawnPhase.DeathAnimation;
+        Coroutine loadingAnimCoroutine = null;
+        bool completed = false;
+        try
         {
-            yield return new WaitForSecondsRealtime(_deathDelay);
+            if (waitForDeath)
+            {
+                yield return new WaitForSecondsRealtime(_deathDelay);
+            }
+
+            _respawnPhase = RespawnPhase.DeathScreen;
+            HitStop.Stop();
+            CameraShake.Stop();
+            PauseController pauseController = FindFirstObjectByType<PauseController>();
+            if (pauseController != null)
+            {
+                pauseController.ResumeGame();
+            }
+            Time.timeScale = 0f;
+            if (_playerHealth != null)
+            {
+                _playerHealth.SetRespawnProtected(true);
+            }
+
+            if (_deathScreen == null)
+            {
+                _deathScreen = FindFirstObjectByType<DeathScreenView>(FindObjectsInactive.Include);
+            }
+            if (_deathScreen != null && waitForDeath)
+            {
+                _deathScreen.SetCauseOfDeath(causeOfDeath);
+                yield return _deathScreen.FadeIn();
+                yield return _deathScreen.WaitForRestartInput();
+
+                // 사망 화면을 넘기면 사망 소리 / 사망 음악을 바로 끊음
+                StopDeathSounds();
+            }
+            else if (waitForDeath)
+            {
+                yield return new WaitForSecondsRealtime(_displayDuration);
+            }
+
+            _respawnPhase = RespawnPhase.Loading;
+            UnbindPlayerHealth();
+            if (_deathScreen != null)
+            {
+                loadingAnimCoroutine = StartCoroutine(_deathScreen.PlayLoadingRoutine());
+            }
+            float minLoadingTime = _deathScreen != null
+                ? _deathScreen.MinLoadingDuration : DefaultMinLoadingDuration;
+            if (_skipLoadingWaitAfterBossIntro && BossCinematicDirector.HasSeenIntroInScene(sceneName))
+            {
+                minLoadingTime = 0f;
+            }
+            float loadingStartTime = Time.realtimeSinceStartup;
+            AsyncOperation loadOperation = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
+            if (loadOperation == null)
+            {
+                Debug.LogWarning($"{sceneName}: 씬 재로딩을 시작하지 못했습니다.", this);
+                BindPlayerHealth(SceneManager.GetActiveScene());
+                yield break;
+            }
+            loadOperation.allowSceneActivation = false;
+            bool skipLoadingWait = false;
+            bool waitingForEnterRelease = Input.GetKey(KeyCode.Return) || Input.GetKey(KeyCode.KeypadEnter);
+            while (loadOperation.progress < SceneReadyProgress ||
+                   (!skipLoadingWait && Time.realtimeSinceStartup - loadingStartTime < minLoadingTime))
+            {
+                // 도망가기 선택에 사용한 Enter는 소비하고 새 입력으로만 연출을 건너뛴다.
+                if (waitingForEnterRelease)
+                {
+                    waitingForEnterRelease = Input.GetKey(KeyCode.Return) || Input.GetKey(KeyCode.KeypadEnter);
+                }
+                else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+                {
+                    skipLoadingWait = true;
+                }
+                yield return null;
+            }
+            loadOperation.allowSceneActivation = true;
+            yield return loadOperation;
+            // sceneLoaded applies protection and position before Start; let startup finish
+            // beneath the loading screen without advancing physics or AI timers.
+            yield return null;
+
+            _respawnPhase = RespawnPhase.Revealing;
+            if (loadingAnimCoroutine != null)
+            {
+                StopCoroutine(loadingAnimCoroutine);
+                loadingAnimCoroutine = null;
+            }
+            if (_deathScreen != null)
+            {
+                yield return _deathScreen.FadeOutLoading();
+            }
+            completed = true;
         }
-
-        if (_deathScreen == null)
+        finally
         {
-            _deathScreen = FindFirstObjectByType<DeathScreenView>(FindObjectsInactive.Include);
-        }
-
-        if (_deathScreen != null)
-        {
-            _deathScreen.SetCauseOfDeath($"{causeOfDeath}에 의해 사망");
-            yield return _deathScreen.FadeIn();
-        }
-
-        yield return new WaitForSecondsRealtime(_displayDuration);
-
-        UnbindPlayerHealth();
-
-        // 일시정지 / 히트스톱 중에 재시작해도 정상 속도로 시작
-        Time.timeScale = 1f;
-
-        AsyncOperation loadOperation = SceneManager.LoadSceneAsync(
-            sceneName,
-            LoadSceneMode.Single
-        );
-
-        if (loadOperation == null)
-        {
-            Debug.LogWarning(
-                $"{sceneName}: 씬 재로딩을 시작하지 못했습니다.",
-                this
-            );
+            if (loadingAnimCoroutine != null)
+            {
+                StopCoroutine(loadingAnimCoroutine);
+            }
             _deathScreen?.HideImmediate();
-            _isRespawning = false;
-            yield break;
+            ResetRespawnTransition();
+            if (!completed)
+            {
+                StopRespawnProtection();
+            }
         }
 
-        yield return loadOperation;
-
-        if (_deathScreen != null)
+        if (_playerHealth != null)
         {
-            yield return _deathScreen.FadeOut();
+            if (_respawnProtectionDuration > 0f)
+            {
+                _respawnProtectionCoroutine = StartCoroutine(ReleaseRespawnProtectionRoutine(_playerHealth));
+            }
+            else
+            {
+                _playerHealth.SetRespawnProtected(false);
+            }
         }
-
-        _isRespawning = false;
     }
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode loadMode)
     {
         bool preserveCheckpoint =
-            _isRespawning && scene.name == _activeSceneName;
+            IsRespawning && scene.name == _activeSceneName;
         InitializeScene(scene, preserveCheckpoint);
     }
 
@@ -335,13 +588,13 @@ public sealed class StageManager : MonoBehaviour
         }
     }
 
-    // 씬 로드 직후(적의 Start 전)에 호출되어야 EnemyManager에 등록되기 전에 꺼짐
+    // 체크포인트 저장 직후와 해당 체크포인트에서 부활할 때 뒤쪽 적의 스폰을 차단한다.
     private void ClearEnemiesBehind(Scene scene, RespawnPoint point)
     {
         float limitX = point.Position.x + _enemyClearOffsetX;
 
         Enemy[] enemies = FindObjectsByType<Enemy>(
-            FindObjectsInactive.Exclude,
+            FindObjectsInactive.Include,
             FindObjectsSortMode.None
         );
 
@@ -355,8 +608,8 @@ public sealed class StageManager : MonoBehaviour
 
             if (enemy.transform.position.x < limitX)
             {
-                // Destroy나 사망 처리 대신 비활성화 (아이템 드롭 등 사망 로직이 돌지 않도록)
-                enemy.gameObject.SetActive(false);
+                // 사망 처리 없이 스폰을 차단하여 카메라가 가까워져도 다시 켜지지 않게 한다.
+                enemy.BlockSpawn();
             }
         }
     }
@@ -478,10 +731,16 @@ public sealed class StageManager : MonoBehaviour
         }
 
         _playerHealth.OnDied += HandlePlayerDied;
+        _playerHealth.RefillPotions();
+        if (IsRespawning)
+        {
+            _playerHealth.SetRespawnProtected(true);
+        }
     }
 
     private void UnbindPlayerHealth()
     {
+        StopRespawnProtection();
         if (_playerHealth == null)
         {
             return;
@@ -491,6 +750,101 @@ public sealed class StageManager : MonoBehaviour
         _playerHealth = null;
     }
 
+    private IEnumerator ReleaseRespawnProtectionRoutine(PlayerHealth playerHealth)
+    {
+        yield return new WaitForSeconds(_respawnProtectionDuration);
+        if (playerHealth != null)
+        {
+            playerHealth.SetRespawnProtected(false);
+        }
+        _respawnProtectionCoroutine = null;
+    }
+
+    private void StopRespawnProtection()
+    {
+        if (_respawnProtectionCoroutine != null)
+        {
+            StopCoroutine(_respawnProtectionCoroutine);
+            _respawnProtectionCoroutine = null;
+        }
+        if (_playerHealth != null)
+        {
+            _playerHealth.SetRespawnProtected(false);
+        }
+    }
+
+    private void ResetRespawnTransition()
+    {
+        bool wasFrozen = IsRespawnWorldFrozen;
+        _respawnPhase = RespawnPhase.Idle;
+        if (wasFrozen)
+        {
+            HitStop.Stop();
+            Time.timeScale = PauseController.IsPaused ? 0f : 1f;
+        }
+    }
+
+    /// <summary>
+    /// 리스폰 지점 바로 아래 땅(일방 발판 포함)에 발이 닿는 위치.
+    /// 지점이 공중에 떠 있거나 발판에 살짝 묻혀 있어도 발바닥을 표면에 맞춤. 땅을 못 찾으면 지점 그대로
+    /// </summary>
+    private Vector2 GetGroundedSpawnPosition(Vector2 point, out Collider2D groundCollider)
+    {
+        groundCollider = null;
+        Collider2D playerCollider = FindPlayerBodyCollider();
+        if (playerCollider == null)
+        {
+            return point;
+        }
+
+        // 지점 기준 발바닥 높이 (콜라이더 아래 끝 - 피벗)
+        float footOffset = playerCollider.bounds.min.y - _playerHealth.transform.position.y;
+
+        // 발판에 살짝 묻혀 있어도 윗면을 찾도록 조금 위에서 아래로 쏨
+        Vector2 origin = point + Vector2.up * _spawnGroundProbeUp;
+        RaycastHit2D[] hits = Physics2D.RaycastAll(
+            origin,
+            Vector2.down,
+            _spawnGroundProbeUp + _spawnGroundProbeDown,
+            Constants.Layers.GroundAllMask
+        );
+
+        for (int i = 0; i < hits.Length; i++)
+        {
+            RaycastHit2D hit = hits[i];
+            // 트리거 / 플레이어 자신 / 시작점이 콜라이더 안이라 위를 향하지 않는 결과는 제외
+            if (hit.collider == null || hit.collider.isTrigger || hit.normal.y < 0.7f || hit.distance <= 0f)
+            {
+                continue;
+            }
+
+            if (hit.collider.attachedRigidbody != null
+                && hit.collider.attachedRigidbody.gameObject == _playerHealth.gameObject)
+            {
+                continue;
+            }
+
+            groundCollider = hit.collider;
+            return new Vector2(point.x, hit.point.y - footOffset + SpawnSkin);
+        }
+
+        return point;
+    }
+
+    private Collider2D FindPlayerBodyCollider()
+    {
+        Collider2D[] colliders = _playerHealth.GetComponents<Collider2D>();
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            if (colliders[i] != null && colliders[i].enabled && !colliders[i].isTrigger)
+            {
+                return colliders[i];
+            }
+        }
+
+        return null;
+    }
+
     private void MovePlayerTo(RespawnPoint point)
     {
         if (_playerHealth == null || point == null)
@@ -498,15 +852,28 @@ public sealed class StageManager : MonoBehaviour
             return;
         }
 
+        Physics2D.SyncTransforms();
+        Vector2 spawnPosition = GetGroundedSpawnPosition(point.Position, out Collider2D groundCollider);
+
         // Rigidbody 위치는 다음 물리 스텝에 Transform에 반영되므로 Transform도 같이 옮김 (카메라 스냅용)
-        _playerHealth.transform.position = point.Position;
+        _playerHealth.transform.position = spawnPosition;
 
         Rigidbody2D playerBody = _playerHealth.GetComponent<Rigidbody2D>();
         if (playerBody != null)
         {
             playerBody.linearVelocity = Vector2.zero;
             playerBody.angularVelocity = 0f;
-            playerBody.position = point.Position;
+            playerBody.position = spawnPosition;
+        }
+
+        Physics2D.SyncTransforms();
+        if (_playerHealth.TryGetComponent(out Player player))
+        {
+            player.PrepareForRespawn(groundCollider);
+        }
+        else if (_playerHealth.TryGetComponent(out PlayerMovement movement))
+        {
+            movement.PrepareForRespawn(groundCollider);
         }
 
         // 카메라가 시작 위치에서 미끄러져 오지 않도록 바로 붙임

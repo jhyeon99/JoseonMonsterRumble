@@ -12,12 +12,24 @@ public class PlayerRangedAttack : MonoBehaviour
         ReadyToFire
     }
 
+    /// <summary>튜토리얼 연습 동안만 쓰는 충전 제한</summary>
+    public enum TutorialChargeMode
+    {
+        None,
+        SingleOnly,   // 충전 안 됨, 항상 한 장만 발사
+        MultipleOnly  // 두 장 이상 충전해야 발사, 한 장에서 떼면 발사 없이 취소
+    }
+
     private const int RequiredSlotCount = 5;
 
     [SerializeField] private Transform _flipTarget;
 
     [Header("부적 배치")]
     [SerializeField] private Transform _slotRoot;
+
+    [Header("발사 범위 미리보기")]
+    [SerializeField] private PlayerProjectile _rangePreviewProjectile;
+    [SerializeField] private bool _showFireRange = true;
 
     [Header("충전")]
     [SerializeField, Min(0.01f)] private float _chargeInterval = 0.22f; // 누르고 있을 때 부적이 하나씩 추가되는 간격
@@ -42,17 +54,27 @@ public class PlayerRangedAttack : MonoBehaviour
     private ChargeState _chargeState;
     private int _activeCount;
     private float _chargeTimer;
+    private UnityEngine.Object _tutorialChargeOwner;
+    private TutorialChargeMode _tutorialChargeMode;
 
     public bool IsCharging => _chargeState == ChargeState.Charging;
     public bool IsReadyToFire => _chargeState == ChargeState.ReadyToFire;
     public int ActiveCount => _activeCount;
+    public int SlotCount => _slots.Count;
+    public float SoulCostPerTalisman => _soulCostPerTalisman;
 
     /// <summary>발사 시 호출. 인자 = 실제로 발사된 부적 개수 (사운드, 이펙트 연결용)</summary>
     public event Action<int> OnFired;
+    public event Action<int> OnChargeStep;
+    public event Action OnChargeEnded;
 
     // 지금 활성화할 수 있는 최대 개수 (슬롯 수와 보유 soul 중 작은 값)
     private int MaxActivatable =>
         Mathf.Min(_slots.Count, Mathf.FloorToInt(_soul.CurrentSoul / _soulCostPerTalisman));
+
+    // 충전으로 늘릴 수 있는 최대 개수 (튜토리얼 단발 연습 중에는 1)
+    private int MaxChargeCount =>
+        _tutorialChargeMode == TutorialChargeMode.SingleOnly ? Mathf.Min(1, MaxActivatable) : MaxActivatable;
 
     private void Awake()
     {
@@ -84,13 +106,13 @@ public class PlayerRangedAttack : MonoBehaviour
 
             _chargeTimer -= currentInterval;
 
-            if (_activeCount >= MaxActivatable)
+            if (_activeCount >= MaxChargeCount)
             {
                 continue;
             }
 
-            ActivateSlot(_activeCount);
             _activeCount++;
+            ActivateSlot(_activeCount - 1);
         }
     }
 
@@ -136,6 +158,7 @@ public class PlayerRangedAttack : MonoBehaviour
 
         if (MaxActivatable < 1)
         {
+            GetComponent<PlayerAudio>()?.PlayUnavailable();
             return;
         }
 
@@ -149,6 +172,13 @@ public class PlayerRangedAttack : MonoBehaviour
     {
         if (_chargeState != ChargeState.Charging)
         {
+            return false;
+        }
+
+        // 튜토리얼 여러 장 연습: 한 장만 충전된 채로 떼면 발사하지 않고 취소
+        if (_tutorialChargeMode == TutorialChargeMode.MultipleOnly && _activeCount < 2)
+        {
+            ResetCharge();
             return false;
         }
 
@@ -186,6 +216,29 @@ public class PlayerRangedAttack : MonoBehaviour
 
     /// <summary>피격, 사망 등으로 발사 없이 충전을 취소할 때 호출</summary>
     public void CancelCharge() => ResetCharge();
+
+    /// <summary>튜토리얼 연습 동안 충전 방식을 제한. 같은 owner가 Clear할 때까지 유지</summary>
+    public void SetTutorialChargeMode(UnityEngine.Object owner, TutorialChargeMode mode)
+    {
+        if (owner == null)
+        {
+            return;
+        }
+
+        _tutorialChargeOwner = owner;
+        _tutorialChargeMode = mode;
+    }
+
+    public void ClearTutorialChargeMode(UnityEngine.Object owner)
+    {
+        if (_tutorialChargeOwner != owner)
+        {
+            return;
+        }
+
+        _tutorialChargeOwner = null;
+        _tutorialChargeMode = TutorialChargeMode.None;
+    }
 
     /// <summary>버프로 데미지 증가량을 바꿀 때 사용</summary>
     public void SetDamageIncrease(float percent) => _damageIncreasePercent = percent;
@@ -248,6 +301,7 @@ public class PlayerRangedAttack : MonoBehaviour
             }
 
             _slotFeedbacks[slotIndex]?.PlayActivation();
+            OnChargeStep?.Invoke(slotIndex + 1);
         }
     }
 
@@ -268,6 +322,7 @@ public class PlayerRangedAttack : MonoBehaviour
 
     private void ResetCharge()
     {
+        if (_chargeState != ChargeState.Idle) OnChargeEnded?.Invoke();
         if (_chargeState != ChargeState.Idle && _activeCount > 0)
         {
             CancelAllActiveSlots();
@@ -380,4 +435,26 @@ public class PlayerRangedAttack : MonoBehaviour
 
     // scale.x가 음수면 왼쪽, 아니면 오른쪽
     private int GetFacing() => _flipTarget.localScale.x < 0f ? -1 : 1;
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        if (!_showFireRange || _rangePreviewProjectile == null)
+        {
+            return;
+        }
+        GameObject selected = UnityEditor.Selection.activeGameObject;
+        if (selected == null || (selected != gameObject && !selected.transform.IsChildOf(transform)))
+        {
+            return;
+        }
+
+        // 실제 투사체의 탐색 설정을 읽어 표시와 발사 범위가 따로 바뀌지 않게 한다.
+        Vector3 center = transform.position + (Vector3)_rangePreviewProjectile.SightOffset;
+        Color previousColor = UnityEditor.Handles.color;
+        UnityEditor.Handles.color = Color.cyan;
+        UnityEditor.Handles.DrawWireDisc(center, Vector3.forward, _rangePreviewProjectile.SearchRadius);
+        UnityEditor.Handles.color = previousColor;
+    }
+#endif
 }

@@ -2,7 +2,21 @@ using UnityEngine;
 
 public class EnemyBuffMove : EnemyMoveType
 {
+    public enum OrbitCenterType
+    {
+        Center = 0,
+        AboveHead = 1,
+    }
+
+    [Header("공전 기준 위치")]
+
+    [SerializeField] private OrbitCenterType _orbitCenterType = OrbitCenterType.Center;
+    [Tooltip("머리 위 모드에서 대상의 상단으로부터 공전 중심까지의 높이입니다.")]
+    [SerializeField, Min(0f)]
+    private float _aboveHeadOffset = 0f;
+
     [Header("동적 공전 마진 및 제한")]
+
     [SerializeField] private float _orbitMarginX = 0.85f;
     [SerializeField] private float _orbitMarginY = 0.55f;
     [SerializeField] private float _minOrbitRadiusX = 1.8f;
@@ -11,6 +25,7 @@ public class EnemyBuffMove : EnemyMoveType
     [SerializeField] private float _maxOrbitRadiusY = 1.6f;
 
     [Header("공전 물리 파라미터")]
+
     [SerializeField] private float _orbitSpeed = 100f;
     [SerializeField] private float _floatAmplitude = 0.25f;
     [SerializeField] private float _floatFrequency = 2.5f;
@@ -19,6 +34,7 @@ public class EnemyBuffMove : EnemyMoveType
     [SerializeField] private float _arrivalDistance = 0.45f;
 
     [Header("배회 물리 파라미터")]
+
     [SerializeField] private float _wanderRadius = 2.5f;
     [SerializeField] private float _wanderSpeed = 1.6f;
     [SerializeField] private float _wanderHoverAmplitude = 0.3f;
@@ -82,11 +98,30 @@ public class EnemyBuffMove : EnemyMoveType
 
     private Vector2 GetTargetCenter(Enemy target)
     {
+        if (target == null)
+        {
+            return Vector2.zero;
+        }
+
         CacheTargetComponents(target);
 
         if (_cachedTargetRenderer != null && _cachedTargetRenderer.sprite != null)
         {
-            return _cachedTargetRenderer.bounds.center;
+            Bounds bounds = _cachedTargetRenderer.bounds;
+            return _orbitCenterType == OrbitCenterType.AboveHead
+                ? new Vector2(bounds.center.x, bounds.max.y + _aboveHeadOffset)
+                : (Vector2)bounds.center;
+        }
+
+        if (_orbitCenterType == OrbitCenterType.AboveHead)
+        {
+            if (_cachedTargetCollider != null)
+            {
+                Bounds bounds = _cachedTargetCollider.bounds;
+                return new Vector2(bounds.center.x, bounds.max.y + _aboveHeadOffset);
+            }
+
+            return (Vector2)target.GetEnemyCenterPosition() + Vector2.up * _aboveHeadOffset;
         }
 
         return target.GetEnemyCenterPosition();
@@ -141,7 +176,8 @@ public class EnemyBuffMove : EnemyMoveType
         Vector2 dynamicRadius = CalculateDynamicOrbitRadius(target);
 
         Vector2 diff = Rigidbody.position - center;
-        float angleRad = Mathf.Atan2(diff.y / Mathf.Max(0.1f, dynamicRadius.y), diff.x / Mathf.Max(0.1f, dynamicRadius.x));
+        float angleRad = Mathf.Atan2(diff.y / Mathf.Max(0.1f, dynamicRadius.y),
+            diff.x / Mathf.Max(0.1f, dynamicRadius.x));
         _orbitAngle = angleRad * Mathf.Rad2Deg;
         if (_orbitAngle < 0f)
         {
@@ -229,7 +265,8 @@ public class EnemyBuffMove : EnemyMoveType
         }
 
         float hoverY = Mathf.Sin(Time.time * _wanderHoverFrequency) * _wanderHoverAmplitude;
-        var wanderVelocity = new Vector2(_wanderDirection.x * _wanderSpeed, (_wanderDirection.y * _wanderSpeed) + hoverY);
+        var wanderVelocity =
+            new Vector2(_wanderDirection.x * _wanderSpeed, (_wanderDirection.y * _wanderSpeed) + hoverY);
 
         Rigidbody.linearVelocity = wanderVelocity;
         Flip(_wanderDirection.x);

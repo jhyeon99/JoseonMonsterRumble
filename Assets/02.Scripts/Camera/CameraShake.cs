@@ -23,6 +23,10 @@ public class CameraShake : MonoBehaviour
     [SerializeField, Min(0f)]
     private float _damageMultiplier = 0.02f;
 
+    [Tooltip("피격 시 카메라 밀림 설정 (밀리는 거리, 총 시간, 최고점 도달 비율)")]
+    [SerializeField]
+    private CameraKickSettings _playerHitKick = new CameraKickSettings(0.18f, 0.12f, 0.25f);
+
     [Header("적 피격")]
     [SerializeField]
     private CameraShakeSettings _enemyLightHitShake = new CameraShakeSettings(0.092f, 0.046f);
@@ -43,15 +47,15 @@ public class CameraShake : MonoBehaviour
     [Header("마무리 공격")]
     [Tooltip("타격 순간 타격 지점 쪽으로 줌 인")]
     [SerializeField]
-    private CameraZoomSettings _finisherZoom = new CameraZoomSettings(0.15f, 0.05f, 0.2f, 0.55f, 0.35f, 2.5f);
+    private CameraZoomSettings _finisherZoom = new CameraZoomSettings(0.15f, 0.035f, 0.14f, 0.32f, 0.35f, 2.5f);
 
     [Tooltip("적이 날아가는 방향으로 카메라가 밀림")]
     [SerializeField]
-    private CameraKickSettings _finisherKick = new CameraKickSettings(0.5f, 0.5f, 0.2f);
+    private CameraKickSettings _finisherKick = new CameraKickSettings(0.35f, 0.32f, 0.18f);
 
     [Tooltip("타격감용 약한 흔들림")]
     [SerializeField]
-    private CameraShakeSettings _finisherShake = new CameraShakeSettings(0.15f, 0.08f);
+    private CameraShakeSettings _finisherShake = new CameraShakeSettings(0.12f, 0.09f);
 
     [Header("공통")]
     [Tooltip("세로 흔들림 비율 (멀미 방지)")]
@@ -191,8 +195,41 @@ public class CameraShake : MonoBehaviour
 
     private void HandlePlayerHit(HitData hitData)
     {
-        float magnitude = Mathf.Min(hitData.Damage * _damageMultiplier, _playerHitShake.Magnitude);
-        StartShake(new CameraShakeSettings(_playerHitShake.Duration, magnitude));
+        float damageScaled = hitData.Damage * _damageMultiplier;
+        float baseMagnitude = _playerHitShake.Magnitude > 0f ? _playerHitShake.Magnitude : 0.5f;
+        float magnitude = Mathf.Max(0.35f, Mathf.Min(damageScaled, baseMagnitude));
+        float duration = _playerHitShake.Duration > 0f ? _playerHitShake.Duration : 0.18f;
+
+        StartShake(new CameraShakeSettings(duration, magnitude), ignoreTimeScale: true);
+
+        float directionX = 0f;
+        if (Mathf.Abs(hitData.AttackDirection.x) > 0.01f)
+        {
+            directionX = Mathf.Sign(hitData.AttackDirection.x);
+        }
+        else
+        {
+            Transform player = _follow != null ? _follow.Target : null;
+            if (player != null)
+            {
+                float diff = player.position.x - hitData.HitPoint.x;
+                directionX = Mathf.Abs(diff) > 0.01f ? Mathf.Sign(diff) : -Mathf.Sign(player.localScale.x);
+            }
+        }
+
+        CameraKickSettings kickSettings = _playerHitKick;
+        if (kickSettings.Distance <= 0.001f)
+        {
+            kickSettings = new CameraKickSettings(0.55f, 0.16f, 0.22f);
+        }
+
+        if (Mathf.Abs(directionX) > 0.01f && kickSettings.Distance > 0f)
+        {
+            StartKick(new Vector2(directionX, 0f), kickSettings);
+        }
+
+        // 타격 지점 방향 순간 줌인 펀치로 타격감 극대화
+        StartZoom(new CameraZoomSettings(0.05f, 0.02f, 0.04f, 0.12f, 0.15f, 1.2f), hitData.HitPoint);
     }
 
     private void HandleEnemyHit(HitData hitData)
@@ -213,7 +250,7 @@ public class CameraShake : MonoBehaviour
     private void HandleFinisher(Vector2 point)
     {
         StartZoom(_finisherZoom, point);
-        StartShake(_finisherShake);
+        StartShake(_finisherShake, ignoreTimeScale: true);
 
         // 날아가는 방향 = 플레이어 → 타격 지점
         float directionX = 1f;
@@ -303,7 +340,7 @@ public class CameraShake : MonoBehaviour
         _kick = default;
         _isZooming = false;
 
-        if (_follow == null)
+        if (_follow == null || !_follow.isActiveAndEnabled)
         {
             transform.position -= _lastOffset;
         }
@@ -314,14 +351,26 @@ public class CameraShake : MonoBehaviour
 
     #endregion
 
+    private void Update()
+    {
+        if (PauseController.IsPaused || _proCamera == null || !_proCamera.isActiveAndEnabled)
+            return;
+
+        // ProCamera2D may skip Move during hit stop. Remove our previous offset
+        // before its LateUpdate so tracking and boundaries never consume it.
+        transform.position -= _lastOffset;
+        _lastOffset = Vector3.zero;
+    }
+
     private void LateUpdate()
     {
-        if (!PauseController.IsPaused)
-        {
-            _clock += Time.unscaledDeltaTime;
-        }
+        // ProCamera2D also skips movement while paused, so reapplying an offset
+        // here would accumulate it and move the camera away from frozen souls.
+        if (PauseController.IsPaused) return;
+        _clock += Time.unscaledDeltaTime;
 
-        // 추적 카메라는 매 프레임 기준 위치를 새로 쓰므로 오프셋을 다시 빼지 않는다.
+        // ProCamera2D의 이전 오프셋은 Update에서 제거했다.
+        // CameraFollow만 매 프레임 자체 기준 위치를 새로 쓴다.
         if ((_follow == null || !_follow.isActiveAndEnabled) &&
             (_proCamera == null || !_proCamera.isActiveAndEnabled))
         {
@@ -331,10 +380,12 @@ public class CameraShake : MonoBehaviour
         float zoomWeight = GetZoomWeight();
         Vector3 offset = GetShakeOffset() + GetKickOffset() + (Vector3)(_focusVector * zoomWeight);
 
-        transform.position += offset;
-        _lastOffset = offset;
-
         ApplyZoom(zoomWeight);
+        Vector3 basePosition = transform.position;
+        transform.position = _follow != null && _follow.isActiveAndEnabled
+            ? _follow.ConstrainCameraEffectPosition(basePosition, offset, _camera)
+            : basePosition + offset;
+        _lastOffset = transform.position - basePosition;
     }
 
     #region 계산

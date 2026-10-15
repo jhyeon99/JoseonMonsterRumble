@@ -151,12 +151,20 @@ public class PauseAudioSettingsView : MonoBehaviour
     {
         _bgmVolume = Mathf.Clamp01(value);
         _bgmVolumeChanged.Invoke(_bgmVolume);
+        if (_isReady && _boundAudioManager != null)
+        {
+            _boundAudioManager.PlaySlider();
+        }
     }
 
     private void HandleSfxVolumeChanged(float value)
     {
         _sfxVolume = Mathf.Clamp01(value);
         _sfxVolumeChanged.Invoke(_sfxVolume);
+        if (_isReady && _boundAudioManager != null)
+        {
+            _boundAudioManager.PlaySlider();
+        }
     }
 
     private void RefreshView()
@@ -250,44 +258,43 @@ public class PauseAudioSettingsView : MonoBehaviour
         return hasRequiredReferences;
     }
 
+    private AudioManager _boundAudioManager;
+
     private void BindAudioManager()
     {
-        if (AudioManager.Instance == null)
-        {
+        UnbindAudioManager();
+        _boundAudioManager = AudioManager.Instance;
+        if (_boundAudioManager == null)
             return;
-        }
 
-        _bgmVolumeChanged.AddListener(AudioManager.Instance.SetBgmVolume);
-        _sfxVolumeChanged.AddListener(AudioManager.Instance.SetSfxVolume);
-        _bgmMuteChanged.AddListener(AudioManager.Instance.SetBgmMute);
-        _sfxMuteChanged.AddListener(AudioManager.Instance.SetSfxMute);
-
+        _bgmVolumeChanged.AddListener(_boundAudioManager.SetBgmVolume);
+        _sfxVolumeChanged.AddListener(_boundAudioManager.SetSfxVolume);
+        _bgmMuteChanged.AddListener(_boundAudioManager.SetBgmMute);
+        _sfxMuteChanged.AddListener(_boundAudioManager.SetSfxMute);
         SyncFromAudioManager();
     }
 
     private void UnbindAudioManager()
     {
-        if (AudioManager.Instance == null)
-        {
+        // Delegate removal needs the original managed reference, even after Unity destroys it.
+        if (ReferenceEquals(_boundAudioManager, null))
             return;
-        }
 
-        _bgmVolumeChanged.RemoveListener(AudioManager.Instance.SetBgmVolume);
-        _sfxVolumeChanged.RemoveListener(AudioManager.Instance.SetSfxVolume);
-        _bgmMuteChanged.RemoveListener(AudioManager.Instance.SetBgmMute);
-        _sfxMuteChanged.RemoveListener(AudioManager.Instance.SetSfxMute);
+        _bgmVolumeChanged.RemoveListener(_boundAudioManager.SetBgmVolume);
+        _sfxVolumeChanged.RemoveListener(_boundAudioManager.SetSfxVolume);
+        _bgmMuteChanged.RemoveListener(_boundAudioManager.SetBgmMute);
+        _sfxMuteChanged.RemoveListener(_boundAudioManager.SetSfxMute);
+        _boundAudioManager = null;
     }
 
     private void SyncFromAudioManager()
     {
-        if (AudioManager.Instance == null)
-        {
+        if (_boundAudioManager == null)
             return;
-        }
 
-        _bgmVolume = AudioManager.Instance.GetBgmVolume();
-        _sfxVolume = AudioManager.Instance.GetSfxVolume();
-        _isBgmMuted = AudioManager.Instance.IsBgmMuted();
-        _isSfxMuted = AudioManager.Instance.IsSfxMuted();
+        _bgmVolume = _boundAudioManager.GetBgmVolume();
+        _sfxVolume = _boundAudioManager.GetSfxVolume();
+        _isBgmMuted = _boundAudioManager.IsBgmMuted();
+        _isSfxMuted = _boundAudioManager.IsSfxMuted();
     }
 }

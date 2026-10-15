@@ -130,12 +130,20 @@ public static class PrologueIntroSetupEditor
             EditorSceneManager.MarkSceneDirty(scene);
             if (!EditorSceneManager.SaveScene(scene)) throw new IOException("Could not save the configured scene.");
             Selection.activeGameObject = controller.gameObject;
-            Write("setup-report.json", new SetupReport {
-                success = true, scene = scene.path, jige = jige.position,
-                player = player.transform.position, destination = spawn.position, transition = transition.position,
-                background1 = bg1.name, background2 = bg2.name, ui = ui != null ? ui.name : "",
+            Write("setup-report.json", new SetupReport
+            {
+                success = true,
+                scene = scene.path,
+                jige = jige.position,
+                player = player.transform.position,
+                destination = spawn.position,
+                transition = transition.position,
+                background1 = bg1.name,
+                background2 = bg2.name,
+                ui = ui != null ? ui.name : "",
                 targetCount = cinematic.CinematicTargets.Count,
-                sourceBackground = SpriteBounds(bg1), destinationBackground = SpriteBounds(bg2)
+                sourceBackground = SpriteBounds(bg1),
+                destinationBackground = SpriteBounds(bg2)
             });
             Debug.Log("Prologue setup complete: camera targets, fade, destination and shared parallax reset are configured.");
         }
@@ -306,19 +314,29 @@ public static class PrologueIntroSetupEditor
         var overlay = controller.GetComponentInChildren<CanvasGroup>();
         var errorList = Errors.ToList();
         if (timeout != null) errorList.Add(timeout);
-        var report = new ProbeReport {
-            complete = controller.IsTransitionComplete, phase = controller.Phase,
-            sourceHidden = !bg1.activeSelf, destinationVisible = bg2.activeInHierarchy,
+        var report = new ProbeReport
+        {
+            complete = controller.IsTransitionComplete,
+            phase = controller.Phase,
+            sourceHidden = !bg1.activeSelf,
+            destinationVisible = bg2.activeInHierarchy,
             controlsEnabled = player.enabled && input.enabled && body.simulated,
-            physicsStayedEnabled = _physicsStayedEnabled, groundedDuringIntro = _groundedDuringIntro,
+            physicsStayedEnabled = _physicsStayedEnabled,
+            groundedDuringIntro = _groundedDuringIntro,
             groundedAfterTransition = player.IsGrounded,
-            waitsForTransitionPoint = _waitsForTransitionPoint, cameraFollowWorks = _followWorks, followError = _followError,
+            waitsForTransitionPoint = _waitsForTransitionPoint,
+            cameraFollowWorks = _followWorks,
+            followError = _followError,
             inspectionWorks = _inspectionWorks,
-            backgroundCoversCamera = covers, arrivalError = _arrivalError,
-            playerPosition = player.transform.position, cameraPosition = center, backgroundBounds = bounds,
+            backgroundCoversCamera = covers,
+            arrivalError = _arrivalError,
+            playerPosition = player.transform.position,
+            cameraPosition = center,
+            backgroundBounds = bounds,
             cameraError = Vector2.Distance(center, player.transform.position + new Vector3(core.OffsetX, core.OffsetY, 0)),
             fadeAlpha = overlay != null ? overlay.alpha : -1f,
-            phases = Phases.ToArray(), errors = errorList.ToArray()
+            phases = Phases.ToArray(),
+            errors = errorList.ToArray()
         };
         report.success = report.complete && report.sourceHidden && report.destinationVisible && report.controlsEnabled &&
             report.backgroundCoversCamera && report.arrivalError < 0.1f && report.fadeAlpha == 0 &&
@@ -334,14 +352,16 @@ public static class PrologueIntroSetupEditor
         File.WriteAllText(Path.Combine(ReportDirectory, filename), JsonUtility.ToJson(report, true));
     }
 
-    [Serializable] private class SetupReport
+    [Serializable]
+    private class SetupReport
     {
         public string configurationVersion = "story-v2";
         public bool success; public string error, scene, background1, background2, ui;
         public Vector3 player, destination, transition, jige;
         public int targetCount; public Bounds sourceBackground, destinationBackground;
     }
-    [Serializable] private class ProbeReport
+    [Serializable]
+    private class ProbeReport
     {
         public bool success, complete, sourceHidden, destinationVisible, controlsEnabled, backgroundCoversCamera;
         public bool physicsStayedEnabled, groundedDuringIntro, groundedAfterTransition;

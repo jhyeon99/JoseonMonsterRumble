@@ -1,0 +1,197 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 216dd2e5960f4b5c830aa01ce2661746, type: 3}
+  m_Name: SO_AirRangedSounds
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudio.SoundSetSO
+  _sounds:
+  - SoundId: AirRanged.Hurt
+    DisplayName: "\uBE44\uCE58\uBA85 \uD53C\uD574 \uC801\uC6A9"
+    Clips:
+    - {fileID: 8300000, guid: e72cc878d62715544b97dbca9220651c, type: 3}
+    StartOffset: 0
+    Volume: 0.1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: AirRanged.Death
+    DisplayName: "\uC0AC\uB9DD \uD655\uC815"
+    Clips:
+    - {fileID: 8300000, guid: 55fca27fccdc6a140a0f900bf0d7844a, type: 3}
+    StartOffset: 0
+    Volume: 0.1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: AirRanged.MeleeDash
+    DisplayName: "U\uC790 \uB3CC\uC9C4 \uC2E4\uD589 \uC2DC\uC791"
+    Clips: []
+    StartOffset: 0
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: AirRanged.RangedFire
+    DisplayName: "\uD22C\uC0AC\uCCB4 \uC2E4\uC81C \uC0DD\uC131\xB7\uBC1C\uC0AC"
+    Clips:
+    - {fileID: 8300000, guid: 29e20b33ac2ea414bb5ef4b210180d8f, type: 3}
+    StartOffset: 0
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: AirRanged.Flight
+    DisplayName: "\uBE44\uD589 \uC774\uB3D9 \uC2DC\uC791"
+    Clips: []
+    StartOffset: 0
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 1
+  - SoundId: AirRanged.Groggy
+    DisplayName: "\uD328\uB9C1 \uD6C4 \uADF8\uB85C\uAE30 \uC9C4\uC785"
+    Clips: []
+    StartOffset: 0
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: AirRanged.AttackReady
+    DisplayName: "\uACF5\uACA9 \uC900\uBE44 \uC2DC\uC791"
+    Clips: []
+    StartOffset: 0
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 4
+  - SoundId: AirRanged.Ambience
+    DisplayName: "\uB300\uAE30\xB7\uC21C\uCC30 \uC0C1\uD0DC \uC2DC\uC791"
+    Clips: []
+    StartOffset: 0
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    OutputGroup: 0
+    Priority: 50
+    MaxCount: 1
+  _events:
+  - EventId: Air.Hurt
+    Enabled: 1
+    SoundId: AirRanged.Hurt
+    TriggerDescription: "\uBE44\uCE58\uBA85 \uD53C\uD574 \uC801\uC6A9"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Air.Death
+    Enabled: 1
+    SoundId: AirRanged.Death
+    TriggerDescription: "\uC0AC\uB9DD \uD655\uC815"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Air.MeleeDash
+    Enabled: 1
+    SoundId: AirRanged.MeleeDash
+    TriggerDescription: "U\uC790 \uB3CC\uC9C4 \uC2E4\uD589 \uC2DC\uC791"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Air.RangedFire
+    Enabled: 1
+    SoundId: AirRanged.RangedFire
+    TriggerDescription: "\uD22C\uC0AC\uCCB4 \uC2E4\uC81C \uC0DD\uC131\xB7\uBC1C\uC0AC"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Air.Flight
+    Enabled: 1
+    SoundId: AirRanged.Flight
+    TriggerDescription: "\uBE44\uD589 \uC774\uB3D9 \uC2DC\uC791"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 1
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: "\uD589\uB3D9 \uC885\uB8CC\xB7\uCDE8\uC18C, \uBE44\uD65C\uC131\uD654
+      \uB610\uB294 \uC52C \uC885\uB8CC"
+  - EventId: Air.Groggy
+    Enabled: 1
+    SoundId: AirRanged.Groggy
+    TriggerDescription: "\uD328\uB9C1 \uD6C4 \uADF8\uB85C\uAE30 \uC9C4\uC785"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 2
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Air.AttackReady
+    Enabled: 1
+    SoundId: AirRanged.AttackReady
+    TriggerDescription: "\uACF5\uACA9 \uC900\uBE44 \uC2DC\uC791"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 0
+    Loop: 0
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: 
+  - EventId: Air.Ambience
+    Enabled: 1
+    SoundId: AirRanged.Ambience
+    TriggerDescription: "\uB300\uAE30\xB7\uC21C\uCC30 \uC0C1\uD0DC \uC2DC\uC791"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 1
+    Loop: 1
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: "\uD589\uB3D9 \uC885\uB8CC\xB7\uCDE8\uC18C, \uBE44\uD65C\uC131\uD654
+      \uB610\uB294 \uC52C \uC885\uB8CC"
