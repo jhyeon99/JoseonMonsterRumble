@@ -551,6 +551,12 @@ public class PrologueIntroController : MonoBehaviour
         CameraShake.Stop();
         LockPlayer();
         ShowSubtitle("");
+        // 화면과 함께 음악도 줄여, 소리 재생 중에 씬 로딩이 겹치지 않게 함
+        if (AudioManager.ExistingInstance != null)
+        {
+            AudioManager.ExistingInstance.StopBgm(_fadeToBlack);
+        }
+
         // Render a fully black, persistent overlay before any scene loading work.
         yield return SceneArrivalFade.FadeOut(_fadeToBlack);
         SceneArrivalFade.Prepare(_nextSceneRevealDuration);
