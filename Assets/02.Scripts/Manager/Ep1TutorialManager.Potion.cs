@@ -48,7 +48,10 @@ public sealed partial class Ep1TutorialManager
 
     private void UnbindPotionEvents()
     {
-        if (_potionHealth != null) _potionHealth.OnPotionUsed -= HandleTutorialPotionUsed;
+        if (_potionHealth != null)
+        {
+            _potionHealth.OnPotionUsed -= HandleTutorialPotionUsed;
+        }
         CancelPotionTutorial();
     }
 
@@ -79,7 +82,10 @@ public sealed partial class Ep1TutorialManager
                 return false;
             }
             _potionWaitElapsed += Time.deltaTime;
-            if (_potionWaitElapsed >= _potionTutorialDelay) OpenPotionPage();
+            if (_potionWaitElapsed >= _potionTutorialDelay)
+            {
+                OpenPotionPage();
+            }
             return _potionStep != PotionStep.WaitingForSave;
         }
 
@@ -120,11 +126,16 @@ public sealed partial class Ep1TutorialManager
     {
         ResolvePotionFocus();
         if (_potionFocus == null)
+        {
             Debug.LogWarning($"{name}: 물약 UI 연결이 없어 안내를 화면 중앙에 표시합니다.", this);
+        }
         if (!PauseController.TryPauseForTutorial(this)) return;
         _potionStep = PotionStep.Explanation;
         _pageOpenedAt = Time.unscaledTime;
-        if (_focusOverlay == null) _focusOverlay = new Ep1TutorialFocusOverlay(transform);
+        if (_focusOverlay == null)
+        {
+            _focusOverlay = new Ep1TutorialFocusOverlay(transform);
+        }
         RefreshPotionPage();
     }
 
@@ -139,7 +150,10 @@ public sealed partial class Ep1TutorialManager
 
     private void AdvancePotionPage()
     {
-        if (_focusOverlay != null) _focusOverlay.Hide();
+        if (_focusOverlay != null)
+        {
+            _focusOverlay.Hide();
+        }
         PauseController.ResumeFromTutorial(this);
         BeginPotionPractice();
     }
@@ -153,23 +167,37 @@ public sealed partial class Ep1TutorialManager
         {
             GameObject prefab = Resources.Load<GameObject>("Ep1RespawnHint");
             if (prefab != null)
+            {
                 _potionHeadHint = Instantiate(prefab, transform, false).GetComponent<Ep1HighJumpHint>();
+            }
         }
-        if (_potionHeadHint != null) _potionHeadHint.Configure(this, Ep1TutorialHintType.PotionUse);
+        if (_potionHeadHint != null)
+        {
+            _potionHeadHint.Configure(this, Ep1TutorialHintType.PotionUse);
+        }
     }
 
     /// <summary>세이브하면 체력이 가득 차서 물약을 못 마시므로, 연습 동안 체력을 깎아 두고 물약을 채워 둠</summary>
     private void EnsurePotionPracticeState()
     {
         if (_potionHealth.IsDead) return;
-        if (_potionHealth.PotionCount <= 0) _potionHealth.RefillPotions();
+        if (_potionHealth.PotionCount <= 0)
+        {
+            _potionHealth.RefillPotions();
+        }
         float target = _potionHealth.MaxHealth * _potionPracticeHealthRatio;
-        if (_potionHealth.CurrentHealth > target) _potionHealth.SetHealthForTutorial(target);
+        if (_potionHealth.CurrentHealth > target)
+        {
+            _potionHealth.SetHealthForTutorial(target);
+        }
     }
 
     private void HandleTutorialPotionUsed()
     {
-        if (_potionStep == PotionStep.Practice) _potionUsedInPractice = true;
+        if (_potionStep == PotionStep.Practice)
+        {
+            _potionUsedInPractice = true;
+        }
     }
 
     private void CompletePotionTutorial()
@@ -178,8 +206,14 @@ public sealed partial class Ep1TutorialManager
         TryMarkHintShown(Ep1TutorialHintType.PotionUse);
         _potionStep = PotionStep.Complete;
         // 연습으로 쓴 물약은 돌려줌 (세이브 직후 상태 그대로)
-        if (!_potionHealth.IsDead) _potionHealth.RefillPotions();
-        if (_potionHeadHint != null) Destroy(_potionHeadHint.gameObject);
+        if (!_potionHealth.IsDead)
+        {
+            _potionHealth.RefillPotions();
+        }
+        if (_potionHeadHint != null)
+        {
+            _potionHeadHint.FadeOutAndDestroy();
+        }
         _potionHeadHint = null;
     }
 
@@ -187,14 +221,23 @@ public sealed partial class Ep1TutorialManager
     {
         if (_potionStep == PotionStep.Explanation)
         {
-            if (_focusOverlay != null) _focusOverlay.Hide();
+            if (_focusOverlay != null)
+            {
+                _focusOverlay.Hide();
+            }
             PauseController.ResumeFromTutorial(this);
         }
-        if (_potionHeadHint != null) Destroy(_potionHeadHint.gameObject);
+        if (_potionHeadHint != null)
+        {
+            _potionHeadHint.FadeOutAndDestroy();
+        }
         _potionHeadHint = null;
         _potionUsedInPractice = false;
         _potionWaitElapsed = 0f;
-        if (_potionStep != PotionStep.Complete) _potionStep = PotionStep.WaitingForSave;
+        if (_potionStep != PotionStep.Complete)
+        {
+            _potionStep = PotionStep.WaitingForSave;
+        }
     }
 
     private void ResolvePotionFocus()

@@ -369,7 +369,10 @@ public sealed partial class Ep1TutorialManager
         _talismanStep = _talismanExplained ? TalismanStep.Complete : TalismanStep.WaitingForEnemies;
         _pendingTalismanShotCount = 0;
         _talismanVisibleElapsed = 0f;
-        if (_talismanHeadHint != null) Destroy(_talismanHeadHint.gameObject);
+        if (_talismanHeadHint != null)
+        {
+            _talismanHeadHint.FadeOutAndDestroy();
+        }
         _talismanHeadHint = null;
     }
 

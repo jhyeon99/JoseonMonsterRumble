@@ -12,6 +12,8 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
     [SerializeField] private Sprite _spaceKey;
     [SerializeField, Min(0.1f)] private float _triggerDistance = 3f;
     [SerializeField] private Vector2 _headOffset = new Vector2(0f, 95f);
+    [Tooltip("힌트가 나타나고 사라질 때 페이드 시간 (초)")]
+    [SerializeField, Min(0.01f)] private float _fadeDuration = 0.25f;
     private Ep1TutorialManager _tutorialManager;
     private Ep1TutorialHintType _hintType;
     private Text _messageText;
@@ -29,6 +31,11 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
     private bool _jumpStarted;
     private bool _heldLongEnough;
     private float _displayElapsed;
+    private CanvasGroup _hintGroup;
+    private float _hintAlpha;
+    private bool _hintVisible;
+    private bool _finishing;
+    private bool _destroyWhenHidden;
     private bool IsTalismanHint => _hintType == Ep1TutorialHintType.TalismanTap ||
         _hintType == Ep1TutorialHintType.TalismanCharge;
     private bool IsRequiredPracticeHint => _hintType == Ep1TutorialHintType.HighJump ||
@@ -159,6 +166,10 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
             _spaceKeyRect = AddKey(_spaceKey, new Vector2(79f, -22f), 110f);
         }
         ApplyPresentation();
+        _hintGroup = _hint.gameObject.AddComponent<CanvasGroup>();
+        _hintGroup.alpha = 0f;
+        _hintGroup.interactable = false;
+        _hintGroup.blocksRaycasts = false;
         _hint.gameObject.SetActive(false);
     }
 
@@ -170,13 +181,24 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
             return;
         }
 
+        UpdateHintFade();
+        if (_finishing)
+        {
+            // 완료 / 제거 요청 후에는 다 사라질 때까지 페이드만 진행
+            if (_hint == null || !_hint.gameObject.activeSelf)
+            {
+                CompleteFinish();
+            }
+            return;
+        }
+
         if (_hint == null || _player == null || _input == null) return;
         bool respawning = StageManager.Instance != null && StageManager.Instance.IsRespawning;
         if (_shown && (_player.Health.IsDead || respawning))
         {
             if (IsRequiredPracticeHint)
             {
-                _hint.gameObject.SetActive(false);
+                SetHintVisible(false);
                 _shown = false;
                 _jumpStarted = false;
                 _heldLongEnough = false;
@@ -189,12 +211,13 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
             !respawning && !_player.Health.IsDead && _input.enabled;
         if (!available)
         {
-            _hint.gameObject.SetActive(false);
+            // 일시정지 / 튜토리얼 카드 위에 힌트가 남아 보이지 않도록 바로 숨김 (돌아오면 다시 페이드 인)
+            HideHintImmediately();
             return;
         }
         if (_tutorialManager != null && !_tutorialManager.CanShowHint(_hintType))
         {
-            _hint.gameObject.SetActive(false);
+            SetHintVisible(false);
             return;
         }
         if (!IsTalismanHint && _hintType != Ep1TutorialHintType.Parry && Ep1TutorialManager.HasCompletedHint(_hintType))
@@ -224,7 +247,7 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
             _shown = true;
             if (_tutorialManager != null) _tutorialManager.NotifyHintDisplayed(_hintType);
         }
-        _hint.gameObject.SetActive(true);
+        SetHintVisible(true);
         if (IsRequiredPracticeHint && !_showJumpKeys) return;
         if (!_showJumpKeys)
         {
@@ -259,10 +282,76 @@ public sealed class Ep1HighJumpHint : MonoBehaviour
         }
     }
 
+    /// <summary>힌트를 페이드 아웃한 뒤 끔. 이미 안 보이면 바로 끔</summary>
     private void FinishHint()
     {
-        if (_hint != null) _hint.gameObject.SetActive(false);
+        if (_hint == null || !_hint.gameObject.activeSelf)
+        {
+            CompleteFinish();
+            return;
+        }
+        _finishing = true;
+        _hintVisible = false;
+    }
+
+    /// <summary>매니저가 연습 힌트를 치울 때: 페이드 아웃 후 오브젝트 제거</summary>
+    internal void FadeOutAndDestroy()
+    {
+        _destroyWhenHidden = true;
+        if (!enabled || _hint == null || !_hint.gameObject.activeSelf)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        FinishHint();
+    }
+
+    private void CompleteFinish()
+    {
+        if (_hint != null)
+        {
+            _hint.gameObject.SetActive(false);
+        }
         enabled = false;
+        if (_destroyWhenHidden)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private void SetHintVisible(bool visible)
+    {
+        _hintVisible = visible;
+        if (visible && _hint != null && !_hint.gameObject.activeSelf)
+        {
+            _hint.gameObject.SetActive(true);
+        }
+    }
+
+    private void HideHintImmediately()
+    {
+        _hintVisible = false;
+        _hintAlpha = 0f;
+        if (_hintGroup != null)
+        {
+            _hintGroup.alpha = 0f;
+        }
+        if (_hint != null)
+        {
+            _hint.gameObject.SetActive(false);
+        }
+    }
+
+    private void UpdateHintFade()
+    {
+        if (_hint == null || _hintGroup == null) return;
+        // 튜토리얼 일시정지 중에도 자연스럽게 끝나도록 실제 시간 기준
+        _hintAlpha = Mathf.MoveTowards(_hintAlpha, _hintVisible ? 1f : 0f, Time.unscaledDeltaTime / _fadeDuration);
+        _hintGroup.alpha = _hintAlpha;
+        if (!_hintVisible && _hintAlpha <= 0f && _hint.gameObject.activeSelf)
+        {
+            _hint.gameObject.SetActive(false);
+        }
     }
 
     private void LateUpdate()
