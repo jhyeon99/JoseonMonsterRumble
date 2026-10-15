@@ -122,6 +122,8 @@ public sealed class StageManager : MonoBehaviour
         InitializeScene(SceneManager.GetActiveScene(), false);
     }
 
+#if UNITY_EDITOR
+    // 디버그 키는 에디터에서만 (빌드에서는 동작하지 않음)
     private void Update()
     {
         // TODO: 테스트용 임시 코드.
@@ -131,11 +133,13 @@ public sealed class StageManager : MonoBehaviour
             RestartStage();
         }
 
+        // F12: 보스 테스트 씬으로 이동
         if (Input.GetKeyDown(KeyCode.F12))
         {
             TryLoadStageScene("Test_Boss");
         }
     }
+#endif
 
     private void OnDestroy()
     {
