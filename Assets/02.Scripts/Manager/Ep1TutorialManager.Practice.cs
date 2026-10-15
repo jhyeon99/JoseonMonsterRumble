@@ -36,6 +36,7 @@ public sealed partial class Ep1TutorialManager
 
     private void UpdateRequiredPractice(bool advanceHold = false)
     {
+        UpdateTalismanChargeRestriction();
         if (!_requirePracticeInput)
         {
             ReleaseRequiredPractice();

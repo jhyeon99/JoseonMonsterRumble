@@ -7963,10 +7963,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1668654442}
     m_Modifications:
-    - target: {fileID: 337719204, guid: d38419f24ef446d5967b4dd55e920f2c, type: 3}
-      propertyPath: _requireItemToMove
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 3985736029720153624, guid: 17b0045789ee8c4408a582682d1c2b25,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -8107,6 +8103,10 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.y
       value: 6.563203
+      objectReference: {fileID: 0}
+    - target: {fileID: 337719204, guid: d38419f24ef446d5967b4dd55e920f2c, type: 3}
+      propertyPath: _requireItemToMove
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -8599,10 +8599,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1668654442}
     m_Modifications:
-    - target: {fileID: 337719204, guid: d38419f24ef446d5967b4dd55e920f2c, type: 3}
-      propertyPath: _requireItemToMove
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 3985736029720153624, guid: 17b0045789ee8c4408a582682d1c2b25,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -8743,6 +8739,10 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.y
       value: 6.563203
+      objectReference: {fileID: 0}
+    - target: {fileID: 337719204, guid: d38419f24ef446d5967b4dd55e920f2c, type: 3}
+      propertyPath: _requireItemToMove
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -11631,6 +11631,16 @@ MonoBehaviour:
   _parryZoomDuration: 0.5
   _parryReturnDuration: 0.4
   _parryLetterboxAmount: 0.08
+  _enablePotionTutorial: 1
+  _potionFocus: {fileID: 0}
+  _potionKeySprite: {fileID: 0}
+  _potionExplanation: "1\uD0A4\uB97C \uB20C\uB7EC \uBB3C\uC57D\uC744 \uB9C8\uC2DC\uBA74
+    \uCCB4\uB825\uC744 \uD68C\uBCF5\uD569\uB2C8\uB2E4.\n\uB0A8\uC740 \uBB3C\uC57D\uC740
+    \uC774\uACF3\uC5D0\uC11C \uD655\uC778\uD560 \uC218 \uC788\uACE0,\n\uC7A5\uC2B9\uC5D0\uC11C
+    \uB2E4\uC2DC \uCC44\uC6CC\uC9D1\uB2C8\uB2E4."
+  _potionPracticeMessage: "1\uD0A4\uB97C \uB20C\uB7EC\n\uBB3C\uC57D\uC744 \uB9C8\uC154\uBCF4\uC138\uC694."
+  _potionTutorialDelay: 0.6
+  _potionPracticeHealthRatio: 0.5
   _requirePracticeInput: 1
   _enableTalismanTutorial: 1
   _talismanPrerequisiteEnemies:
@@ -17144,6 +17154,19 @@ MonoBehaviour:
   blendDistance: 0
   weight: 1
   sharedProfile: {fileID: 11400000, guid: a822d14cdae74d3dada09293948575d6, type: 2}
+--- !u!114 &910100520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1668654441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 431ba2d8ed994f9aaa182cf71d71c052, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemStageIllusionCleanup
+  _grave: {fileID: 1893499411}
 --- !u!1 &911451434
 GameObject:
   m_ObjectHideFlags: 0
@@ -25491,10 +25514,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1668654442}
     m_Modifications:
-    - target: {fileID: 337719204, guid: d38419f24ef446d5967b4dd55e920f2c, type: 3}
-      propertyPath: _requireItemToMove
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 3985736029720153624, guid: 17b0045789ee8c4408a582682d1c2b25,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -25635,6 +25654,10 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.y
       value: 6.563203
+      objectReference: {fileID: 0}
+    - target: {fileID: 337719204, guid: d38419f24ef446d5967b4dd55e920f2c, type: 3}
+      propertyPath: _requireItemToMove
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -29139,19 +29162,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &910100520
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1668654441}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 431ba2d8ed994f9aaa182cf71d71c052, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::ItemStageIllusionCleanup
-  _grave: {fileID: 1893499411}
 --- !u!4 &1668654442
 Transform:
   m_ObjectHideFlags: 0
@@ -31458,10 +31468,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1668654442}
     m_Modifications:
-    - target: {fileID: 337719204, guid: d38419f24ef446d5967b4dd55e920f2c, type: 3}
-      propertyPath: _requireItemToMove
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 3985736029720153624, guid: 17b0045789ee8c4408a582682d1c2b25,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -31602,6 +31608,10 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.y
       value: 6.563203
+      objectReference: {fileID: 0}
+    - target: {fileID: 337719204, guid: d38419f24ef446d5967b4dd55e920f2c, type: 3}
+      propertyPath: _requireItemToMove
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -46119,8 +46129,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 21200000, guid: 0e8f68de28894b32b314cead84aaf6f3, type: 3}
+      propertyPath: m_SortingLayer
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 21200000, guid: 0e8f68de28894b32b314cead84aaf6f3, type: 3}
       propertyPath: m_SortingOrder
       value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 21200000, guid: 0e8f68de28894b32b314cead84aaf6f3, type: 3}
+      propertyPath: m_SortingLayerID
+      value: -230917723
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
