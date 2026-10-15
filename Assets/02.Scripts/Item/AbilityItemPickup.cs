@@ -158,7 +158,8 @@ public sealed class AbilityItemPickup : MonoBehaviour
         _isWaitingForCheckpointWarp = false;
         if (StageManager.Instance != null)
         {
-            StageManager.Instance.TryWarpToActiveCheckpoint();
+            if (StageManager.Instance.TryWarpToActiveCheckpoint())
+                GetComponentInParent<ItemStageIllusionCleanup>()?.HideIllusions();
         }
         gameObject.SetActive(false);
     }

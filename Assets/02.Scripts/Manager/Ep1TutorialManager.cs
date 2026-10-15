@@ -10,7 +10,8 @@ public enum Ep1TutorialHintType
     Guard,
     TalismanTap,
     TalismanCharge,
-    Finisher
+    Finisher,
+    PotionUse
 }
 
 [DisallowMultipleComponent]
@@ -63,6 +64,7 @@ public sealed partial class Ep1TutorialManager : MonoBehaviour
         _checkpointStep = CheckpointStep.Complete;
         _parryFocusStep = ParryFocusStep.Complete;
         _talismanStep = TalismanStep.Complete;
+        _potionStep = PotionStep.Complete;
         _startParryHint = false;
     }
 #endif
@@ -207,6 +209,7 @@ public sealed partial class Ep1TutorialManager : MonoBehaviour
             case Ep1TutorialHintType.TalismanTap: return _talismanTapMessage;
             case Ep1TutorialHintType.TalismanCharge: return _talismanChargeMessage;
             case Ep1TutorialHintType.Finisher: return "노랗게 반짝이는 적에게 다가가\nX를 누르고 있어보세요.";
+            case Ep1TutorialHintType.PotionUse: return _potionPracticeMessage;
             default: return _highJumpMessage;
         }
     }
@@ -238,6 +241,7 @@ public sealed partial class Ep1TutorialManager : MonoBehaviour
         ValidateCombatSettings();
         ValidateCheckpointSettings();
         ValidateTalismanSettings();
+        ValidatePotionSettings();
         PresentationVersion++;
     }
 }
