@@ -36,6 +36,9 @@ public sealed class DokkaebiPlatformRage : MonoBehaviour
     [SerializeField, ReadOnly] private float _rageTimeRemaining;
     [SerializeField, ReadOnly] private RagePhase _phase;
     [SerializeField, ReadOnly] private int _rageActivationCount;
+    [SerializeField, ReadOnly] private bool _hasPlayerBoarded;
+
+    private readonly ContactPoint2D[] _boardingContacts = new ContactPoint2D[8];
 
     private float _rageEndTime;
     private float _releaseCoolingTime;
@@ -97,6 +100,7 @@ public sealed class DokkaebiPlatformRage : MonoBehaviour
     {
         if (_phase == RagePhase.Idle)
         {
+            if (!_hasPlayerBoarded) return;
             _currentRage = Mathf.Min(_maximumRage,
                 _currentRage + _maximumRage * _passiveRagePercentPerSecond * 0.01f * Time.deltaTime);
             if (_currentRage >= _maximumRage) StartHeating();
@@ -133,6 +137,7 @@ public sealed class DokkaebiPlatformRage : MonoBehaviour
 
     private void FixedUpdate()
     {
+        UpdateFirstBoarding();
         if (!_isConfigured || !_heatVisual.IsHot || _playerHealth == null || _playerBody == null ||
             _playerHealth.IsDead || _playerHealth.IsInvincible || Time.time < _nextHeatDamageTime ||
             !_playerBody.IsTouching(_platformSurface))
@@ -150,6 +155,27 @@ public sealed class DokkaebiPlatformRage : MonoBehaviour
         }
     }
 
+    private void UpdateFirstBoarding()
+    {
+        if (_hasPlayerBoarded || !_isConfigured || _playerBody == null ||
+            _playerHealth == null || _playerHealth.IsDead || !_playerBody.IsTouching(_platformSurface))
+        {
+            return;
+        }
+
+        int count = _playerBody.GetContacts(_boardingContacts);
+        for (int i = 0; i < count; i++)
+        {
+            ContactPoint2D contact = _boardingContacts[i];
+            if ((contact.collider == _platformSurface || contact.otherCollider == _platformSurface) &&
+                contact.normal.y > 0.5f)
+            {
+                _hasPlayerBoarded = true;
+                return;
+            }
+        }
+    }
+
     private void HandleAttackHit(HitData hitData)
     {
         AddRageAtHitPoint(hitData.HitPoint);
@@ -162,6 +188,7 @@ public sealed class DokkaebiPlatformRage : MonoBehaviour
 
     private void AddRageAtHitPoint(Vector2 hitPoint)
     {
+        if (!_hasPlayerBoarded) return;
         if (_phase != RagePhase.Idle && _phase != RagePhase.Cooling) return;
         Bounds surface = _platformSurface.bounds;
         float battleHeight = Mathf.Max(0.1f, _battleHeight) * Mathf.Abs(transform.lossyScale.y);
@@ -240,6 +267,7 @@ public sealed class DokkaebiPlatformRage : MonoBehaviour
 
     private void ResetRageCycle()
     {
+        _hasPlayerBoarded = false;
         _rageActivationCount = 0;
         _phase = RagePhase.Idle;
         _currentRage = 0f;
