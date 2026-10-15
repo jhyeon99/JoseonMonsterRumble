@@ -302,6 +302,12 @@ public sealed class StageManager : MonoBehaviour
         _isChangingScene = true;
         CameraShake.Stop();
         Time.timeScale = 1f;
+        // 화면과 함께 음악도 줄여, 소리 재생 중에 씬 로딩이 겹치지 않게 함
+        if (AudioManager.ExistingInstance != null)
+        {
+            AudioManager.ExistingInstance.StopBgm(Mathf.Max(0f, fadeOutDuration));
+        }
+
         yield return SceneArrivalFade.FadeOut(Mathf.Max(0f, fadeOutDuration));
         SceneArrivalFade.Prepare(fadeInDuration);
         UnbindPlayerHealth();
