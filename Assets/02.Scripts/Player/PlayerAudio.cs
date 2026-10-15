@@ -162,7 +162,11 @@ public sealed class PlayerAudio : ActorAudio
     }
 
     private void OnBlocked(HitData hit) => PlayResult("Player.Block", hit.HitPoint);
-    private void OnParried(HitData hit) => PlayResult("Player.Parry", hit.HitPoint);
+    private void OnParried(HitData hit)
+    {
+        Manager?.DuckBgmForParry();
+        PlayResult("Player.Parry", hit.HitPoint);
+    }
     private void OnGuardBroken() => PlayResult("Player.GuardBreak", transform.position);
     private void OnPotionUsed() => PlayResult("Player.PotionUse", transform.position);
     private void OnFired(int count)
