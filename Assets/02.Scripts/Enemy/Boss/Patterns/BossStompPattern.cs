@@ -132,7 +132,7 @@ public class BossStompPattern : BossPattern
 
     [Tooltip("2페이즈에 퍼지는 횟수")]
     [SerializeField, Min(1)]
-    private int _phase2WaveCount = 2;
+    private int _phase2WaveCount = 1;
 
     [Tooltip("파도 사이 간격 (초, 이전 파도가 시작된 뒤 다음 파도가 시작되기까지)")]
     [SerializeField, Min(0f)]
@@ -141,6 +141,15 @@ public class BossStompPattern : BossPattern
     [Tooltip("두 번째 파도부터 시작 전에 바닥 예고를 다시 보여줌 (Needle Warning Lead와 파도 간격 중 짧은 시간)")]
     [SerializeField]
     private bool _warnBeforeNextWave = true;
+
+    [Tooltip("땅 앞면(흙벽) 아래로는 가시를 가려, 땅 윗면을 뚫고 솟아오르는 것처럼 보이게 함")]
+    [SerializeField]
+    private bool _hideSpikesBelowGroundEdge = true;
+
+    [Tooltip("가시를 가리기 시작하는 높이 (Spike Floor 기준 오프셋, 월드). 땅 이미지에서 윗면이 끝나고 앞면이 시작되는 선에 맞추기")]
+    [SerializeField]
+    private float _spikeGroundEdgeOffset = -0.72f;
+
 
     [Header("가시 예고 (마지막 찍기, 바닥 전체가 빨갛게 빛남)")]
     [Tooltip("가시가 솟기 몇 초 전에 예고할지 (0이면 예고 없음)")]
@@ -457,6 +466,11 @@ public class BossStompPattern : BossPattern
         {
             var upPosition = new Vector2(count > 1 ? left + (step * i) : (left + right) * 0.5f, upY);
             BossFloorSpike spike = Instantiate(_floorSpikePrefab, upPosition, Quaternion.identity);
+            if (_hideSpikesBelowGroundEdge)
+            {
+                spike.UseGroundClip(GetSpikeFloorY() + _spikeGroundEdgeOffset);
+            }
+
             // 착지 지점에서 멀수록 늦게 솟음 (속도 0이면 동시에)
             float delay = _spikeWaveSpeed > 0f ? Mathf.Abs(upPosition.x - originX) / _spikeWaveSpeed : 0f;
             spike.Begin(Boss, upPosition, _spikeRiseHeight, _spikeRiseTime, _spikeHoldTime, _spikeSinkTime, delay);
@@ -629,6 +643,16 @@ public class BossStompPattern : BossPattern
 
     private void CreateNeedleWarningLine()
     {
+        // 보스 자식으로 두면 보스 좌우 반전 / 날려 보내기에 같이 움직이므로 따로 둠
+        var lineObject = new GameObject($"{name}_NeedleWarning");
+        _needleWarningLine = lineObject.AddComponent<SpriteRenderer>();
+        _needleWarningLine.sprite = GetWhiteSprite();
+        lineObject.SetActive(false);
+    }
+
+    /// <summary>1 x 1 (월드) 흰색 스프라이트 (예고 줄)</summary>
+    private static Sprite GetWhiteSprite()
+    {
         if (_warningSprite == null)
         {
             var texture = new Texture2D(1, 1) { filterMode = FilterMode.Point };
@@ -637,11 +661,7 @@ public class BossStompPattern : BossPattern
             _warningSprite = Sprite.Create(texture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
         }
 
-        // 보스 자식으로 두면 보스 좌우 반전 / 날려 보내기에 같이 움직이므로 따로 둠
-        var lineObject = new GameObject($"{name}_NeedleWarning");
-        _needleWarningLine = lineObject.AddComponent<SpriteRenderer>();
-        _needleWarningLine.sprite = _warningSprite;
-        lineObject.SetActive(false);
+        return _warningSprite;
     }
 
     private void OnDestroy()
