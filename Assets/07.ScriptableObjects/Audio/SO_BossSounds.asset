@@ -211,6 +211,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 28aaa737248b57e489f0781e5de3a837, type: 3}
     StartOffset: 0
     Volume: 1
+    Gain: 1.5
     PitchMin: 1
     PitchMax: 1
     OutputGroup: 0
@@ -821,8 +822,8 @@ MonoBehaviour:
   - EventId: Boss.BabyCrawl
     Enabled: 1
     SoundId: Boss.BabyCrawl
-    TriggerDescription: "\uAC01 \uC62C\uCC59\uC774\uAC00 \uBC14\uB2E5\uC5D0 \uC788\uB294
-      \uB3D9\uC548 \uB79C\uB364 \uC74C\uC6D0 1\uAC1C\uB97C \uACC4\uC18D \uBC18\uBCF5"
+    TriggerDescription: "\uAC01 \uC62C\uCC59\uC774\uAC00 \uC0DD\uC131 \uC9C1\uD6C4\uBD80\uD130
+      \uB79C\uB364 \uC74C\uC6D0 1\uAC1C\uB97C \uACC4\uC18D \uBC18\uBCF5"
     Delay: 0
     TimeMode: 0
     LifetimePolicy: 1
@@ -830,8 +831,7 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 0
     BgmFadeDuration: -1
-    LoopEndRule: "\uACF5\uC911 \uC9C4\uC785 / \uB0A0\uB824 \uBCF4\uB0B4\uAE30 / \uC0AC\uB9DD
-      / \uBE44\uD65C\uC131\uD654"
+    LoopEndRule: "\uB0A0\uB824 \uBCF4\uB0B4\uAE30 / \uC0AC\uB9DD / \uBE44\uD65C\uC131\uD654"
   - EventId: Boss.LandingBreak
     Enabled: 1
     SoundId: Boss.LandingBreak
@@ -844,7 +844,7 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 0
     BgmFadeDuration: -1
-    LoopEndRule:
+    LoopEndRule: 
   - EventId: Boss.StompFootstep
     Enabled: 1
     SoundId: Boss.StompFootstep
@@ -857,4 +857,18 @@ MonoBehaviour:
     MinInterval: 0
     IntervalScope: 0
     BgmFadeDuration: -1
-    LoopEndRule:
+    LoopEndRule: 
+  - EventId: Boss.PoisonContact
+    Enabled: 1
+    SoundId: Boss.SpitImpact
+    TriggerDescription: "\uBD84\uCD9C \uB3C5\uC5D0 \uC2E4\uC81C \uD53C\uACA9\uB41C
+      \uB4A4 \uC811\uCD09\uC774 \uC774\uC5B4\uC9C0\uB294 \uB3D9\uC548 \uBC18\uBCF5"
+    Delay: 0
+    TimeMode: 0
+    LifetimePolicy: 1
+    Loop: 1
+    MinInterval: 0
+    IntervalScope: 0
+    BgmFadeDuration: -1
+    LoopEndRule: "\uD50C\uB808\uC774\uC5B4 \uC811\uCD09 \uC885\uB8CC / \uB3C5\uBD84\uC0AC
+      \uC885\uB8CC / \uBE44\uD65C\uC131\uD654"

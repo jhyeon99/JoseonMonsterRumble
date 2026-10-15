@@ -12,6 +12,8 @@ namespace GameAudio
         [Tooltip("음원 앞부분을 이 시간만큼 건너뛰고 재생합니다. 원본 파일은 변경하지 않습니다.")]
         [Min(0f)] public float StartOffset;
         [Range(0f, 1f)] public float Volume = 1f;
+        [Tooltip("음원 샘플 증폭 배율. 1이면 원래 크기입니다.")]
+        [Range(0f, 3f)] public float Gain = 1f;
         [Min(0.01f)] public float PitchMin = 1f;
         [Min(0.01f)] public float PitchMax = 1f;
         public AudioOutputGroup OutputGroup = AudioOutputGroup.Sfx;
