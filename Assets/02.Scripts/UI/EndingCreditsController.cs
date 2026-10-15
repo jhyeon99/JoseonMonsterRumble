@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -30,9 +29,16 @@ public class EndingCreditsController : MonoBehaviour
     [SerializeField, Min(0f)] private float _creditsDelay = 0.5f;
     [SerializeField] private int _canvasSortingOrder = 200;
 
-    [Header("크레딧 문구")]
+    [Header("크레딧 이미지 (위에서 아래 순서)")]
+    [Tooltip("등록된 이미지를 원본 비율로 나란히 이어서 스크롤합니다. 비우면 아래 문구를 사용합니다.")]
+    [SerializeField] private Texture2D[] _creditImages = Array.Empty<Texture2D>();
+    [SerializeField, Min(1f)] private float _imageWidth = 1152f;
+    [SerializeField, Min(0f)] private float _imageSpacing = 160f;
+    [SerializeField, Min(0f)] private float _imageSidePadding = 60f;
+
+    [Header("대체 크레딧 문구 (이미지가 없을 때)")]
     [SerializeField, TextArea(10, 30)]
-    private string _creditsText = "CREDITS\n\n기획\n이름\n\n프로그래밍\n이름\n\n아트\n이름\n\n음악 · 사운드\n이름\n\n\n플레이해 주셔서 감사합니다";
+    private string _creditsText = "프로젝트 총괄 · 게임 기획\n하지호\n아트 리소스 제작 · 레벨 디자인\n프롤로그 · 스테이지 제작\n튜토리얼 · 사운드 제작\n\n\n플레이어 · 보스 시스템\n송재현\n플레이어 조작 · 콤보 · 패링 · 마무리 공격\n보스 전체 패턴 · 저장 및 리스폰\n\n\nUI · 애니메이션 · 전투 연출\n박욱영\nUI · 캐릭터, 몬스터 애니메이션\nVFX · 피격 피드백 · 환경 기믹\n\n\n몬스터 · 전투 시스템\n김상곤\n몬스터 AI · 공통구조 · 공격 및 피격\n오디오 시스템 · 레벨 배치\n\n\n플레이해 주셔서 감사합니다";
     [Tooltip("비우면 보스 연출의 글꼴 사용")]
     [SerializeField] private TMP_FontAsset _font;
     [SerializeField, Min(1f)] private float _fontSize = 42f;
@@ -54,15 +60,21 @@ public class EndingCreditsController : MonoBehaviour
     [SerializeField, Min(0f)] private float _previousMusicFadeOut = 1f;
 
     [Header("타이틀 복귀")]
-    [SerializeField] private string _returnButtonText = "타이틀로 돌아가기";
+    [SerializeField] private string _returnButtonText = "엔터를 눌러 타이틀로 돌아가기";
     [SerializeField] private string _titleSceneName = "Test_TitleScene";
+    [SerializeField] private TMP_FontAsset _returnButtonFont;
+    [SerializeField] private Vector2 _returnButtonSize = new Vector2(1200f, 180f);
+    [SerializeField, Min(1f)] private float _returnButtonFontSize = 44f;
+    [SerializeField, Min(0f)] private float _returnButtonFadeIn = 0.6f;
 
     private GameObject _canvasObject;
     private RectTransform _viewport;
-    private TMP_Text _credits;
+    private RectTransform _creditsContent;
+    private TMP_FontAsset _resolvedFont;
     private Image _blackout;
     private Image _background;
-    private Button _returnButton;
+    private GameObject _returnPrompt;
+    private CanvasGroup _returnPromptGroup;
     private AudioSource _musicSource;
     private bool _isPlaying;
     private bool _creditsFinished;
@@ -71,6 +83,15 @@ public class EndingCreditsController : MonoBehaviour
     private CursorLockMode _previousCursorLock;
 
     public bool CanPlay => _playEnding && isActiveAndEnabled;
+
+    private void Update()
+    {
+        if (!_creditsFinished || _isReturning) return;
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
+            ReturnToTitle();
+        }
+    }
 
     public IEnumerator PlayEnding(TMP_FontAsset fallbackFont)
     {
@@ -100,27 +121,22 @@ public class EndingCreditsController : MonoBehaviour
         yield return new WaitForSecondsRealtime(_creditsDelay);
 
         Canvas.ForceUpdateCanvases();
-        float width = Mathf.Max(1f, Mathf.Min(_textWidth, _viewport.rect.width - 80f));
-        float height = Mathf.Max(_fontSize, _credits.GetPreferredValues(_creditsText, width, Mathf.Infinity).y);
-        _credits.rectTransform.sizeDelta = new Vector2(width, height);
+        float height = BuildCreditsContent();
         float position = -_offscreenPadding;
-        _credits.rectTransform.anchoredPosition = new Vector2(0f, position);
-        _credits.gameObject.SetActive(true);
-        _credits.ForceMeshUpdate();
+        _creditsContent.anchoredPosition = new Vector2(0f, position);
+        _creditsContent.gameObject.SetActive(true);
         while (position < _viewport.rect.height + height + _offscreenPadding)
         {
             position += Mathf.Max(1f, _scrollSpeed) * Time.unscaledDeltaTime;
-            _credits.rectTransform.anchoredPosition = new Vector2(0f, position);
+            _creditsContent.anchoredPosition = new Vector2(0f, position);
             yield return null;
         }
 
-        _credits.gameObject.SetActive(false);
+        _creditsContent.gameObject.SetActive(false);
         yield return new WaitForSecondsRealtime(_buttonDelay);
+        _returnPrompt.SetActive(true);
+        yield return FadeInReturnPrompt();
         _creditsFinished = true;
-        _returnButton.gameObject.SetActive(true);
-        GameCursorController.SetEndingVisible(true);
-        Cursor.lockState = CursorLockMode.None;
-        if (EventSystem.current != null) EventSystem.current.SetSelectedGameObject(_returnButton.gameObject);
     }
 
     private IEnumerator PlayMusicPlaylist()
@@ -168,7 +184,7 @@ public class EndingCreditsController : MonoBehaviour
             return;
         }
         _isReturning = true;
-        _returnButton.interactable = false;
+        _returnPrompt.SetActive(false);
         if (AudioManager.Instance != null) AudioManager.Instance.PlayButtonClick();
         PauseController.ResumeFromEnding(this);
         GameCursorController.SetEndingVisible(false);
@@ -203,28 +219,92 @@ public class EndingCreditsController : MonoBehaviour
         viewportObject.transform.SetParent(_canvasObject.transform, false);
         _viewport = (RectTransform)viewportObject.transform;
         Stretch(_viewport);
-        _credits = CreateText("Credits", _viewport, font, _creditsText, _fontSize);
-        _credits.alignment = TextAlignmentOptions.Top;
-        _credits.rectTransform.anchorMin = _credits.rectTransform.anchorMax = new Vector2(0.5f, 0f);
-        _credits.rectTransform.pivot = new Vector2(0.5f, 1f);
-        _credits.gameObject.SetActive(false);
+        _resolvedFont = font;
+        var contentObject = new GameObject("CreditsContent", typeof(RectTransform));
+        contentObject.transform.SetParent(_viewport, false);
+        _creditsContent = (RectTransform)contentObject.transform;
+        _creditsContent.anchorMin = _creditsContent.anchorMax = new Vector2(0.5f, 0f);
+        _creditsContent.pivot = new Vector2(0.5f, 1f);
+        _creditsContent.gameObject.SetActive(false);
 
-        Image buttonImage = CreateImage("ReturnToTitle", _canvasObject.transform, new Color(0.15f, 0.15f, 0.15f, 1f));
-        buttonImage.raycastTarget = true;
-        RectTransform buttonRect = buttonImage.rectTransform;
-        buttonRect.anchorMin = buttonRect.anchorMax = new Vector2(0.5f, 0.35f);
-        buttonRect.sizeDelta = new Vector2(480f, 90f);
-        _returnButton = buttonImage.gameObject.AddComponent<Button>();
-        _returnButton.targetGraphic = buttonImage;
-        _returnButton.onClick.AddListener(ReturnToTitle);
-        TMP_Text label = CreateText("Label", buttonRect, font, _returnButtonText, 34f);
+        _returnPrompt = new GameObject("ReturnToTitlePrompt", typeof(RectTransform), typeof(CanvasGroup));
+        _returnPrompt.transform.SetParent(_canvasObject.transform, false);
+        var promptRect = (RectTransform)_returnPrompt.transform;
+        promptRect.anchorMin = promptRect.anchorMax = new Vector2(0.5f, 0.5f);
+        promptRect.sizeDelta = _returnButtonSize;
+        _returnPromptGroup = _returnPrompt.GetComponent<CanvasGroup>();
+        _returnPromptGroup.alpha = 0f;
+        _returnPromptGroup.interactable = false;
+        _returnPromptGroup.blocksRaycasts = false;
+        TMP_Text label = CreateText("Label", promptRect, _returnButtonFont != null ? _returnButtonFont : font,
+            _returnButtonText, _returnButtonFontSize);
         Stretch(label.rectTransform);
-        _returnButton.gameObject.SetActive(false);
-        if (EventSystem.current == null)
+        label.rectTransform.offsetMin = new Vector2(50f, 25f);
+        label.rectTransform.offsetMax = new Vector2(-50f, -25f);
+        label.color = Color.white;
+        label.enableAutoSizing = true;
+        label.fontSizeMin = _returnButtonFontSize * 0.65f;
+        label.fontSizeMax = _returnButtonFontSize * 1.06f;
+        _returnPrompt.SetActive(false);
+    }
+
+    private IEnumerator FadeInReturnPrompt()
+    {
+        float elapsed = 0f;
+        while (elapsed < _returnButtonFadeIn)
         {
-            var eventSystemObject = new GameObject("EndingEventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
-            eventSystemObject.transform.SetParent(_canvasObject.transform, false);
+            elapsed += Time.unscaledDeltaTime;
+            _returnPromptGroup.alpha = Mathf.SmoothStep(0f, 1f, elapsed / _returnButtonFadeIn);
+            yield return null;
         }
+        _returnPromptGroup.alpha = 1f;
+    }
+
+    private float BuildCreditsContent()
+    {
+        float availableWidth = Mathf.Max(1f, _viewport.rect.width - _imageSidePadding * 2f);
+        float totalHeight = 0f;
+        float contentWidth = 0f;
+        int imageCount = 0;
+        if (_creditImages != null)
+        {
+            foreach (Texture2D texture in _creditImages)
+            {
+                if (texture == null) continue;
+
+                if (imageCount > 0) totalHeight += _imageSpacing;
+                float aspect = (float)texture.width / Mathf.Max(1, texture.height);
+                // 작은 화면에서도 카드 전체가 보이도록 높이도 화면의 90% 이내로 제한한다.
+                float width = Mathf.Min(_imageWidth, availableWidth, _viewport.rect.height * 0.9f * aspect);
+                float height = width / aspect;
+                var imageObject = new GameObject($"CreditImage_{imageCount + 1}", typeof(RectTransform), typeof(RawImage));
+                imageObject.transform.SetParent(_creditsContent, false);
+                RawImage image = imageObject.GetComponent<RawImage>();
+                image.texture = texture;
+                image.color = Color.white;
+                image.raycastTarget = false;
+                RectTransform rect = image.rectTransform;
+                rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 1f);
+                rect.pivot = new Vector2(0.5f, 1f);
+                rect.sizeDelta = new Vector2(width, height);
+                rect.anchoredPosition = new Vector2(0f, -totalHeight);
+                totalHeight += height;
+                contentWidth = Mathf.Max(contentWidth, width);
+                imageCount++;
+            }
+        }
+
+        if (imageCount == 0)
+        {
+            contentWidth = Mathf.Max(1f, Mathf.Min(_textWidth, _viewport.rect.width - 80f));
+            TMP_Text credits = CreateText("CreditsText", _creditsContent, _resolvedFont, _creditsText, _fontSize);
+            credits.alignment = TextAlignmentOptions.Top;
+            totalHeight = Mathf.Max(_fontSize, credits.GetPreferredValues(_creditsText, contentWidth, Mathf.Infinity).y);
+            Stretch(credits.rectTransform);
+        }
+
+        _creditsContent.sizeDelta = new Vector2(contentWidth, totalHeight);
+        return totalHeight;
     }
 
     private TMP_Text CreateText(string objectName, Transform parent, TMP_FontAsset font, string text, float size)

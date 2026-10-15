@@ -218,6 +218,7 @@ public class BossDefeatedState : BossState
             if (EffectManager.Instance != null)
             {
                 EffectManager.Instance.PlayParryLaunchDisappear(_currentCenter);
+                AudioManager.Instance?.PlaySceneEvent("Player.FinisherDisappear", _boss);
             }
             else
             {

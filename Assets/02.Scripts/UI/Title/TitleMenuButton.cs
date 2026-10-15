@@ -49,6 +49,21 @@ public class TitleMenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, 
 
     public UnityEvent OnClickAction => _onClickAction;
 
+    /// <summary>동적으로 생성한 메뉴에도 기존 선택, 누름, 효과음을 적용한다.</summary>
+    public void ConfigureVisuals(TextMeshProUGUI buttonText, GameObject selectionFrame, float fontSize)
+    {
+        _buttonText = buttonText;
+        _selectFrame = selectionFrame;
+        _normalFontSize = fontSize;
+        _selectedFontSize = fontSize * 1.06f;
+        _normalTextColor = new Color(0.78f, 0.78f, 0.78f, 1f);
+        _selectedTextColor = Color.white;
+        _pressedTextColor = new Color(0.55f, 0.55f, 0.55f, 1f);
+        _pressedScaleRatio = 0.96f;
+        if (_onClickAction == null) _onClickAction = new UnityEvent();
+        ApplyHighlight(false);
+    }
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetStaticState()
     {

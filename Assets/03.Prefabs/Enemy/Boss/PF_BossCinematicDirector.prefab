@@ -147,12 +147,21 @@ MonoBehaviour:
   _blackoutDuration: 2
   _creditsDelay: 0.5
   _canvasSortingOrder: 200
-  _creditsText: "CREDITS\n\n기획\n이름\n\n프로그래밍\n이름\n\n아트\n이름\n\n음악 · 사운드\n이름\n\n\n플레이해 주셔서 감사합니다"
+  _creditImages:
+  - {fileID: 2800000, guid: 53f206847b3e483f90a01993fc446384, type: 3}
+  - {fileID: 2800000, guid: bc612cd7309a441a84a36d179651cd8d, type: 3}
+  - {fileID: 2800000, guid: 7ed880242bc64f1c87bb51347b587739, type: 3}
+  - {fileID: 2800000, guid: 3a68f98ab1f64df998f7c9b71cfc23af, type: 3}
+  - {fileID: 2800000, guid: 03d3e8c44e9c482b9294a1d31b89cc9b, type: 3}
+  _imageWidth: 1152
+  _imageSpacing: 160
+  _imageSidePadding: 60
+  _creditsText: "프로젝트 총괄 · 게임 기획\n하지호\n아트 리소스 제작 · 레벨 디자인\n프롤로그 · 스테이지 제작\n튜토리얼 · 사운드 제작\n\n\n플레이어 · 보스 시스템\n송재현\n플레이어 조작 · 콤보 · 패링 · 마무리 공격\n보스 전체 패턴 · 저장 및 리스폰\n\n\nUI · 애니메이션 · 전투 연출\n박욱영\nUI · 캐릭터, 몬스터 애니메이션\nVFX · 피격 피드백 · 환경 기믹\n\n\n몬스터 · 전투 시스템\n김상곤\n몬스터 AI · 공통구조 · 공격 및 피격\n오디오 시스템 · 레벨 배치\n\n\n플레이해 주셔서 감사합니다"
   _font: {fileID: 11400000, guid: 5645eadd0a91df74aa0b1a4045f316ba, type: 2}
   _fontSize: 42
   _textColor: {r: 1, g: 1, b: 1, a: 1}
   _textWidth: 1300
-  _scrollSpeed: 65
+  _scrollSpeed: 100
   _offscreenPadding: 80
   _buttonDelay: 0.5
   _backgroundSprite: {fileID: 0}
@@ -174,5 +183,9 @@ MonoBehaviour:
     FadeOut: 2
   _repeatMusicPlaylist: 1
   _previousMusicFadeOut: 1
-  _returnButtonText: "타이틀로 돌아가기"
+  _returnButtonText: "엔터를 눌러 타이틀로 돌아가기"
   _titleSceneName: Test_TitleScene
+  _returnButtonFont: {fileID: 11400000, guid: 5645eadd0a91df74aa0b1a4045f316ba, type: 2}
+  _returnButtonSize: {x: 1200, y: 180}
+  _returnButtonFontSize: 44
+  _returnButtonFadeIn: 0.6
