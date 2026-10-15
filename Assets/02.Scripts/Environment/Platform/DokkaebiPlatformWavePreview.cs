@@ -75,10 +75,6 @@ public sealed class DokkaebiPlatformWavePreview : MonoBehaviour
     [SerializeField] private float _fallHorizontalSpeed = 1f;
     [SerializeField, Min(0.1f)] private float _fallGravity = 18f;
     [SerializeField, Min(1f)] private float _fallDistance = 20f;
-    [Header("주변 환영 발판 소멸")]
-    [SerializeField] private Transform _surroundingPlatformsRoot;
-    [SerializeField] private GameObject[] _surroundingPlatforms;
-    [SerializeField, Min(0.1f)] private float _platformDissolveDuration = 0.8f;
     [SerializeField, ReadOnly] private int _currentWave;
     [SerializeField, ReadOnly] private int _aliveEnemyCount;
     [SerializeField, ReadOnly] private bool _isCompleted;
@@ -290,7 +286,6 @@ public sealed class DokkaebiPlatformWavePreview : MonoBehaviour
         if (stunPause > 0f) yield return new WaitForSeconds(stunPause);
         _isFalling = true;
         _platformSurface.enabled = false;
-        StartCoroutine(DissolveSurroundingPlatforms());
         Vector3 startPosition = transform.position;
         Quaternion startRotation = transform.rotation;
         float elapsed = 0f;
@@ -308,96 +303,6 @@ public sealed class DokkaebiPlatformWavePreview : MonoBehaviour
 
         _isFalling = false;
         gameObject.SetActive(false);
-    }
-
-    private IEnumerator DissolveSurroundingPlatforms()
-    {
-        List<GameObject> targets = GetSurroundingPlatforms();
-        if (targets.Count == 0) yield break;
-
-        var renderers = new List<SpriteRenderer>();
-        var initialAlphas = new List<float>();
-        foreach (GameObject platform in targets)
-        {
-            if (platform == null) continue;
-            foreach (Collider2D col in platform.GetComponentsInChildren<Collider2D>(true))
-            {
-                col.enabled = false;
-            }
-            foreach (PlatformEffector2D effector in platform.GetComponentsInChildren<PlatformEffector2D>(true))
-            {
-                effector.enabled = false;
-            }
-            foreach (SpriteRenderer sr in platform.GetComponentsInChildren<SpriteRenderer>(true))
-            {
-                renderers.Add(sr);
-                initialAlphas.Add(sr.color.a);
-            }
-        }
-
-        float elapsed = 0f;
-        while (elapsed < _platformDissolveDuration)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / _platformDissolveDuration);
-            float alphaFactor = 1f - Mathf.SmoothStep(0f, 1f, t);
-            for (int i = 0; i < renderers.Count; i++)
-            {
-                if (renderers[i] != null)
-                {
-                    Color c = renderers[i].color;
-                    c.a = initialAlphas[i] * alphaFactor;
-                    renderers[i].color = c;
-                }
-            }
-            yield return null;
-        }
-
-        foreach (GameObject platform in targets)
-        {
-            if (platform != null)
-            {
-                platform.SetActive(false);
-            }
-        }
-    }
-
-    private List<GameObject> GetSurroundingPlatforms()
-    {
-        var result = new List<GameObject>();
-        if (_surroundingPlatforms != null && _surroundingPlatforms.Length > 0)
-        {
-            foreach (GameObject platform in _surroundingPlatforms)
-            {
-                if (platform != null && !result.Contains(platform))
-                    result.Add(platform);
-            }
-            return result;
-        }
-
-        Transform root = _surroundingPlatformsRoot;
-        if (root == null)
-        {
-            var puzzle = GameObject.Find("Test_TimedPlatformPuzzle");
-            if (puzzle != null) root = puzzle.transform;
-            else if (transform.parent != null) root = transform.parent;
-        }
-
-        if (root != null)
-        {
-            foreach (Transform child in root)
-            {
-                if (child == transform) continue;
-                if (child.name.Contains("MovingPlatform") || child.name.Contains("gamtoo") || child.name.Contains("Gamtu")) continue;
-                if (child.name.Contains("SafetyFloor") || child.localPosition.y < 0f || child.position.y <= -20f) continue;
-                if (child.name.Contains("Platform") || child.name.Contains("Safe"))
-                {
-                    result.Add(child.gameObject);
-                }
-            }
-        }
-
-        return result;
     }
 
     private void SpawnEnemy(GameObject prefab, Vector2 surfaceOffset)
