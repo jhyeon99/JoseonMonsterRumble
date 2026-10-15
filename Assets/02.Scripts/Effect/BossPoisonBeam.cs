@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using GameAudio;
 
 /// <summary>방출된 독액의 속도를 보존하고 중력으로 이동시키는 연결형 물줄기.</summary>
 [DisallowMultipleComponent]
@@ -133,6 +134,10 @@ public sealed class BossPoisonBeam : MonoBehaviour
     private bool _isDepressurizing;
     private ParticleSystemRenderer _impactCloudRenderer;
 
+    private AudioManager _contactAudio;
+    private AudioOwnerKey _contactOwner;
+    private PlayHandle _contactLoop;
+    private bool _contactDamaged;
     public bool IsFiring => _isFiring;
     public bool IsReady => _isInitialized && isActiveAndEnabled;
 
@@ -369,6 +374,7 @@ public sealed class BossPoisonBeam : MonoBehaviour
             ApplyBeamDamage();
             elapsed += Time.fixedDeltaTime;
         }
+        StopContactAudio();
         _isDepressurizing = true;
         _mouthParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         _headParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
@@ -762,7 +768,12 @@ public sealed class BossPoisonBeam : MonoBehaviour
 
     private void ApplyBeamDamage()
     {
-        if (!_line.enabled || _damage <= 0f || _renderCount < 2) return;
+        if (!_line.enabled || _damage <= 0f || _renderCount < 2)
+        {
+            StopContactAudio();
+            return;
+        }
+        bool touchingPlayer = false;
         // 세부 판정은 유지한다. 전체 줄기 주변에 대상이 없을 때만 건너뛴다.
         Vector2 minimum = _positions[0];
         Vector2 maximum = minimum;
@@ -777,7 +788,11 @@ public sealed class BossPoisonBeam : MonoBehaviour
         Physics2D.OverlapBox((minimum + maximum) * 0.5f,
             maximum - minimum + Vector2.one * (maximumWidth * _beamWidth + _collisionSkin * 2f),
             0f, _targetFilter, _targetHits);
-        if (_targetHits.Count == 0) return;
+        if (_targetHits.Count == 0)
+        {
+            StopContactAudio();
+            return;
+        }
         _checkedTargets.Clear();
         for (int segment = 1; segment < _renderCount; segment++)
         {
@@ -795,19 +810,52 @@ public sealed class BossPoisonBeam : MonoBehaviour
                 if (collider == null || !_checkedTargets.Add(collider)) continue;
                 IDamageable receiver = collider.GetComponentInParent<IDamageable>();
                 if (receiver == null || (_attacker != null && collider.transform.IsChildOf(_attacker.transform))) continue;
+                var player = receiver as PlayerHealth;
+                if (player != null && !player.IsDead) touchingPlayer = true;
                 if (_nextHitTimes.TryGetValue(receiver, out float nextHitTime) && Time.time < nextHitTime) continue;
                 _nextHitTimes[receiver] = Time.time + _hitInterval;
                 var hit = new HitData(_damage, _knockbackForce, collider.ClosestPoint(center), displacement.normalized,
                     _defense, attackName: _attackName);
                 hit.Attacker = _attacker != null ? _attacker : gameObject;
                 hit.PoisonDuration = _poisonDuration;
-                receiver.TakeDamage(hit);
+                bool accepted = receiver.TakeDamage(hit);
+                if (player != null && !player.IsDead && accepted && hit.Damage > 0f) _contactDamaged = true;
             }
         }
+        UpdateContactAudio(touchingPlayer);
+    }
+
+    private void UpdateContactAudio(bool touchingPlayer)
+    {
+        if (!touchingPlayer)
+        {
+            StopContactAudio();
+            return;
+        }
+        if (!_contactDamaged) return;
+        if (_contactAudio == null) _contactAudio = AudioManager.Instance;
+        if (_contactAudio == null || _contactAudio.IsHandleValid(_contactLoop)) return;
+        if (_contactOwner.IsEmpty)
+            _contactOwner = new AudioOwnerKey(GetInstanceID(), AudioLifetimeRegistry.NextOwnerGeneration());
+        _contactLoop = _contactAudio.PlayEntityLoop(_contactAudio.Catalog?.Boss,
+            "Boss.PoisonContact", this, _contactOwner);
+    }
+
+    private void StopContactAudio()
+    {
+        if (_contactAudio != null)
+        {
+            _contactAudio.StopHandle(_contactLoop);
+            if (!_contactOwner.IsEmpty) _contactAudio.ReleaseOwner(_contactOwner);
+        }
+        _contactLoop = PlayHandle.Empty;
+        _contactOwner = default;
+        _contactDamaged = false;
     }
 
     private void ResetBeam()
     {
+        StopContactAudio();
         _isFiring = false;
         _isEmitting = false;
         _isFollowingThrough = false;

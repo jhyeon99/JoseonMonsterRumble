@@ -64,6 +64,7 @@ Boss.StompFootstep|찍기 착지 전용 발바닥 소리
 Boss.NeedleFire|바닥 가시 또는 궁극기 가시 생성
 Boss.Spit|각 침뱉기 발사 묶음 생성
 Boss.SpitImpact|보스 침이 플레이어에게 직접 피해를 준 순간
+Boss.PoisonContact|분출 독에 실제 피격된 뒤 접촉이 이어지는 동안 반복
 Boss.ChargeStart|실제 돌진 이동·판정 시작
 Boss.PhaseHowl|1 → 2페이즈 전환 연출 시작
 Boss.SummonStart|개구리알 소환 패턴 진입
