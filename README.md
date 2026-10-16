@@ -5,7 +5,7 @@
 한국 설화 속 요괴를 소재로 한 2D 횡스크롤 보스 액션 게임입니다.
 가드와 패링, 회피, 부적 원거리 공격을 조합해 요괴들을 물리치고 마지막 보스에 도전합니다.
 
-- **플레이:** [itch.io에서 플레이하기](https://github.com/jhyeon99/JoseonMonsterRumble))
+- **플레이:** [itch.io에서 플레이하기](https://ccwcs.itch.io/joseonmonsterrumble)
 - **팀:** 제6볶음
 - **엔진:** Unity 6 (6000.3.22f1), URP 2D
 
